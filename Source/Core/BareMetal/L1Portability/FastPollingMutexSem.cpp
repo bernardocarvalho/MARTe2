@@ -2,7 +2,7 @@
  * @file FastPollingMutexSem.cpp
  * @brief Source file for class FastPollingMutexSem
  * @date 22/07/2015
- * @author Giuseppe Ferr�
+ * @author Giuseppe Ferr���
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -104,3 +104,4 @@ void FastPollingMutexSem::FastUnLock() {
 }
 
 }
+

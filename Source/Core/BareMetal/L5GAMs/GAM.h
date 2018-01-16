@@ -2,7 +2,7 @@
  * @file GAM.h
  * @brief Header file for class GAM
  * @date 07/04/2016
- * @author Giuseppe Ferrò
+ * @author Giuseppe Ferr��
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
