@@ -2,7 +2,7 @@
  * @file GeneralDefinition.h
  * @brief Header file for class GeneralDefinitions
  * @date 31/07/2015
- * @author Andr�� Neto
+ * @author Andre Neto
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -28,9 +28,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 #include "CompilerTypes.h"
-#include "FreeRTOS.h"
-#include "task.h"
-
+#include <stdio.h>
 #ifndef NULL
 #define NULL 0
 #endif
@@ -44,7 +42,7 @@ namespace MARTe{
 /**
  * Thread identifier in FreeRTOS
  */
-typedef TaskHandle_t ThreadIdentifier;
+typedef int ThreadIdentifier;
 static const ThreadIdentifier InvalidThreadIdentifier = static_cast<ThreadIdentifier>(0);
 
 /** This is just to avoid an exception to Rule 3-9-2 of MISRA, given that many Linux operating system calls require a long as an input
@@ -76,7 +74,7 @@ typedef int32 Handle;
 #endif
 
 /** Defines the default stack size for a thread. */
-#define THREADS_DEFAULT_STACKSIZE configMINIMAL_STACK_SIZE * 2
+#define THREADS_DEFAULT_STACKSIZE 0
 
 /** Defines the maximum number of elements in the memory database */
 #define MAX_NO_OF_MEMORY_MONITORS 8

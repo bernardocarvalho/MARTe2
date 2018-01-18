@@ -104,7 +104,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	$(OBJCOPY) -S -o binary $< $@ 
 
 $(BUILD_DIR)/%.elf: $(OBJS) 
-	$(COMPILER) -T $(LINKER_LD_FILE) $(LFLAGS) $(OBJS) $(LIBRARIES_STATIC) -o $@ 	
+	$(COMPILER) -T $(LINKER_LD_FILE) $(LFLAGS) -o $@ $(OBJS) $(LIBRARIES_STATIC) $(SPEC_LIBS) 	
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf
 	$(OBJCOPY) -Oihex  $< $@

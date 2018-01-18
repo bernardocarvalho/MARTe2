@@ -27,8 +27,8 @@
 BUILD_DIR=$(ROOT_DIR)/Build/$(TARGET)/$(PACKAGE)/$(lastword $(subst /,\ ,$(CURDIR)))
 
 TARGET_BASE=gcc
-ENVIRONMENT=FreeRTOS
-ARCHITECTURE=armv7m_gcc
+ENVIRONMENT=RedPitayaBM
+ARCHITECTURE=zynq7010_gcc
 EXEEXT=.bin
 DLLEXT=.so
 LIBEXT=.a
@@ -61,17 +61,23 @@ NM = $(COMPILER_BASE)-nm
 MAKE     = make
 
 DEBUG = -g 
-OPTIM = -Os
-FREE_RTOS_DIRECTORY=$(STM_CUBE_FW_DIR)/Middlewares/Third_Party/FreeRTOS
-PORT_MACRO_H_DIRECTORY=$(STM_CUBE_FW_DIR)/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1
-CMSIS_DIRECTORY=$(STM_CUBE_FW_DIR)/Drivers/CMSIS/Include/
+OPTIM = -O0
 
 #You have to give in YOUR environment variables the location of the FreeRTOSConfig.h and set it FREE_RTOS_CONFIG_DIRECTORY
-INCLUDES=-I$(FREE_RTOS_DIRECTORY)/Source/include -I$(PORT_MACRO_H_DIRECTORY) -I$(FREE_RTOS_CONFIG_DIRECTORY) -I$(CMSIS_DIRECTORY)
-LFLAGS = $(ARM_LFLAGS)
-CFLAGS = -MD -MP -g -Wall $(ARM_CFLAGS) 
+INCLUDES=
+ 
+LFLAGS = $(ARM_LFLAGS) 
+CFLAGS = -MD -MP -g -Wall $(ARM_CFLAGS)  
 CPPFLAGS = $(CFLAGS) 
 CFLAGSPEC= -DARCHITECTURE=$(ARCHITECTURE) -DENVIRONMENT=$(ENVIRONMENT) $(SPEC_DEFS)
   
+  
 .SUFFIXES:   .c  .cpp  .o .a .exe .ex .ex_ .so .gam
 
+
+#-mlittle-endian -mthumb -mthumb-interwork -fno-builtin -ffunction-sections -fdata-sections
+#-mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -falign-functions=16 -lm -lgcc -lc -lnosys -specs=nosys.specs -Wl,--gc-section -g 
+
+
+#	arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"$@" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -I../../ex1_app_bsp/ps7_cortexa9_0/include -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+#	arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -L../../ex1_app_bsp/ps7_cortexa9_0/lib -o "ex1_app.elf" $(OBJS) $(USER_OBJS) $(LIBS)
