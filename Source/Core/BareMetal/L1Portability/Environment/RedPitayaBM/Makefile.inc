@@ -30,7 +30,7 @@ OBJSX=  BasicConsole.x \
         ErrorManagement_Gen.x \
     LoadableLibrary.x  \
     MemoryCheck_Gen.x  \
-    MemoryOperationsHelper_CLIB_Gen.x \
+    MemoryOperationsHelper.x \
 	Sleep.x\
 	StandardHeap.x \
     StringHelperExtras_Gen.x \

@@ -61,7 +61,7 @@ NM = $(COMPILER_BASE)-nm
 MAKE     = make
 
 DEBUG = -g 
-OPTIM = -O0
+OPTIM = -O2
 
 #You have to give in YOUR environment variables the location of the FreeRTOSConfig.h and set it FREE_RTOS_CONFIG_DIRECTORY
 INCLUDES=
