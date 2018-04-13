@@ -173,6 +173,8 @@ MemoryMapBrokerDataSourceTestHelper    ();
 
     virtual bool AllocateMemory();
 
+    virtual uint32 GetCurrentBuffer();
+
     virtual uint32 GetNumberOfMemoryBuffers();
 
     virtual bool GetSignalMemoryBuffer(const uint32 signalIdx,
@@ -210,6 +212,11 @@ MemoryMapBrokerDataSourceTestHelper::MemoryMapBrokerDataSourceTestHelper() :
     offsets = NULL_PTR(uint32 *);
     samples = 10;
 }
+
+uint32 MemoryMapBrokerDataSourceTestHelper::GetCurrentBuffer(){
+    return 0;
+}
+
 
 MemoryMapBrokerDataSourceTestHelper::~MemoryMapBrokerDataSourceTestHelper() {
     if (signalMemory != NULL_PTR(void *)) {

@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapStatefulInputBroker.cpp
- * @brief Source file for class MemoryMapStatefulInputBroker
- * @date 18/07/2016
- * @author Andre Neto
+ * @file MemoryMapSyncUnrelatedInputBroker.cpp
+ * @brief Source file for class MemoryMapSyncUnrelatedInputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -17,11 +17,9 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapStatefulInputBroker (public, protected, and private). Be aware that some
+ * the class MemoryMapSyncUnrelatedInputBroker (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
-
-#define DLL_API
 
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
@@ -30,7 +28,11 @@
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
-#include "MemoryMapStatefulInputBroker.h"
+
+#include "MemoryMapSyncUnrelatedInputBroker.h"
+#include "MemoryOperationsHelper.h"
+#include "Endianity.h"
+#include "AdvancedErrorManagement.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -40,30 +42,37 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 namespace MARTe {
-MemoryMapStatefulInputBroker::MemoryMapStatefulInputBroker() :
-        MemoryMapStatefulBroker() {
+
+MemoryMapSyncUnrelatedInputBroker::MemoryMapSyncUnrelatedInputBroker() :
+        MemoryMapUnrelatedInputBroker() {
+    // Auto-generated constructor stub for MemoryMapSyncUnrelatedInputBroker
+    // TODO Verify if manual additions are needed
 
 }
 
-MemoryMapStatefulInputBroker::~MemoryMapStatefulInputBroker() {
+MemoryMapSyncUnrelatedInputBroker::~MemoryMapSyncUnrelatedInputBroker() {
+    // Auto-generated constructor stub for MemoryMapSyncUnrelatedInputBroker
+    // TODO Verify if manual additions are needed
 
 }
 
-bool MemoryMapStatefulInputBroker::Execute() {
+bool MemoryMapSyncUnrelatedInputBroker::Execute() {
     uint32 n;
-    bool ret = true;
-    char8 *dataSourceSignalPointer;
-    for (n = 0u; (n < numberOfCopies) && (ret); n++) {
-        if (copyTable != NULL_PTR(MemoryMapStatefulBrokerCopyTableEntry *)) {
-            //lint -e{9025}  [MISRA C++ Rule 5-0-19]. Justification: two pointer indirection required to access the address of the variable that holds the final address of the double buffer
-            dataSourceSignalPointer = reinterpret_cast<char8 *>(*(copyTable[n].dataSourcePointer[RealTimeApplication::GetIndex()]));
-            dataSourceSignalPointer = &dataSourceSignalPointer[copyTable[n].dataSourceOffset];
-            ret = MemoryOperationsHelper::Copy(copyTable[n].gamPointer, dataSourceSignalPointer, copyTable[n].copySize);
+    /*lint -e{613} null pointer checked before.*/
+    uint32 i = dataSource->GetCurrentBuffer();
+    dataSourceCust->Synchronise();
+    for (n = 0u; (n < numberOfCopies); n++) {
+        //REPORT_ERROR(ErrorManagement::Warning, "Executing...");
+        if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
+            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 0);
+            if (offset >= 0) {
+                uint32 dataSourceIndex = ((i * numberOfCopies) + n);
+                MemoryOperationsHelper::Copy(copyTable[n].gamPointer, &(((uint8 *) (copyTable[dataSourceIndex].dataSourcePointer))[offset]), copyTable[n].copySize);
+                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset));
+            }
         }
     }
-    return ret;
+    return true;
 }
-
-CLASS_REGISTER(MemoryMapStatefulInputBroker, "1.0")
+CLASS_REGISTER(MemoryMapSyncUnrelatedInputBroker, "1.0")
 }
-

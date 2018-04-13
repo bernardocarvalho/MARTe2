@@ -64,6 +64,12 @@ public:
      */
     bool TestExecute_Samples();
 
+    /**
+     * @brief Tests the Execute method with a signal with multi buffer.
+     */
+    bool TestExecute_MultiBuffer();
+
+
 };
 
 /*---------------------------------------------------------------------------*/

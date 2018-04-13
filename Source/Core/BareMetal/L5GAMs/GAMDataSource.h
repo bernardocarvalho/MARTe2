@@ -85,6 +85,12 @@ public:
     virtual uint32 GetNumberOfMemoryBuffers();
 
     /**
+     * @brief See DataSourceI::GetCurrentBuffer()
+     * @return This method always returns 0 (single buffer).
+     */
+    virtual uint32 GetCurrentBuffer();
+
+    /**
      * @brief See DataSourceI::GetSignalMemoryBuffer().
      * @details This method returns the address of the variable containing the requested signal.
      * @param[in] signalIdx the index of the signal.

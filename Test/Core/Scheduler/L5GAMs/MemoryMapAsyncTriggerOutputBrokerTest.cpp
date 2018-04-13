@@ -155,6 +155,10 @@ public:
         broker = NULL;
     }
 
+    virtual MARTe::uint32 GetCurrentBuffer(){
+        return 0;
+    }
+
     virtual ~MemoryMapAsyncTriggerOutputBrokerDataSourceTestHelper() {
         using namespace MARTe;
         if (signalMemory != NULL_PTR(void *)) {

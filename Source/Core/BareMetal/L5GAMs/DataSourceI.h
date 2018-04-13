@@ -565,6 +565,13 @@ public:
     virtual uint32 GetNumberOfMemoryBuffers() = 0;
 
     /**
+     * @brief Gets the current available buffer index.
+     * @details This information can be used by a Broker to communicate with a multi-buffer DataSource
+     * @return the index of the current buffer that this DataSource makes available.
+     */
+    virtual uint32 GetCurrentBuffer();
+
+    /**
      * @brief Gets the memory address for the signal at index \a signalIdx.
      * @param[in] signalIdx the index of the signal.
      * @param[in] bufferIdx the index of the buffer (see GetNumberOfMemoryBuffers()).

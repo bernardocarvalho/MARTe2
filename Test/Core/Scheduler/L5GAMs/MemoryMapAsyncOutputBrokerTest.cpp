@@ -130,6 +130,10 @@ MemoryMapAsyncOutputBrokerDataSourceTestHelper    () {
         memoryOK = true;
     }
 
+    virtual MARTe::uint32 GetCurrentBuffer(){
+        return 0;
+    }
+
     virtual ~MemoryMapAsyncOutputBrokerDataSourceTestHelper() {
         using namespace MARTe;
         if (signalMemory != NULL_PTR(void *)) {

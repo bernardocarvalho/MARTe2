@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapStatefulOutputBroker.cpp
- * @brief Source file for class MemoryMapStatefulOutputBroker
- * @date 18/07/2016
- * @author Andre Neto
+ * @file MemoryMapSyncUnrelatedOutputBroker.cpp
+ * @brief Source file for class MemoryMapSyncUnrelatedOutputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -17,11 +17,9 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapStatefulOutputBroker (public, protected, and private). Be aware that some
+ * the class MemoryMapSyncUnrelatedOutputBroker (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
-
-#define DLL_API
 
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
@@ -30,7 +28,11 @@
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
-#include "MemoryMapStatefulOutputBroker.h"
+
+#include "MemoryMapSyncUnrelatedOutputBroker.h"
+#include "MemoryOperationsHelper.h"
+#include "Endianity.h"
+#include "AdvancedErrorManagement.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -40,30 +42,39 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 namespace MARTe {
-MemoryMapStatefulOutputBroker::MemoryMapStatefulOutputBroker() :
-        MemoryMapStatefulBroker() {
+
+MemoryMapSyncUnrelatedOutputBroker::MemoryMapSyncUnrelatedOutputBroker() :
+        MemoryMapUnrelatedOutputBroker() {
+// Auto-generated constructor stub for MemoryMapSyncUnrelatedOutputBroker
+// TODO Verify if manual additions are needed
 
 }
 
-MemoryMapStatefulOutputBroker::~MemoryMapStatefulOutputBroker() {
+MemoryMapSyncUnrelatedOutputBroker::~MemoryMapSyncUnrelatedOutputBroker() {
+// Auto-generated constructor stub for MemoryMapSyncUnrelatedOutputBroker
+// TODO Verify if manual additions are needed
 
 }
 
-bool MemoryMapStatefulOutputBroker::Execute() {
+bool MemoryMapSyncUnrelatedOutputBroker::Execute() {
     uint32 n;
-    bool ret = true;
-    char8 *dataSourceSignalPointer;
-    for (n = 0u; (n < numberOfCopies) && (ret); n++) {
-        if (copyTable != NULL_PTR(MemoryMapStatefulBrokerCopyTableEntry *)) {
-            //lint -e{9025}  [MISRA C++ Rule 5-0-19]. Justification: two pointer indirection required to access the address of the variable that holds the final address of the double buffer
-            dataSourceSignalPointer = reinterpret_cast<char8 *>(*(copyTable[n].dataSourcePointer[RealTimeApplication::GetIndex()]));
-            dataSourceSignalPointer = &dataSourceSignalPointer[copyTable[n].dataSourceOffset];
-            ret = MemoryOperationsHelper::Copy(dataSourceSignalPointer, copyTable[n].gamPointer, copyTable[n].copySize);
+    uint32 i = dataSource->GetCurrentBuffer();
+
+//REPORT_ERROR(ErrorManagement::Information, "Calling Sync");
+    for (n = 0u; (n < numberOfCopies); n++) {
+//REPORT_ERROR(ErrorManagement::Warning, "Executing...");
+        if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
+            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 1);
+            if (offset >= 0) {
+                uint32 dataSourceIndex = ((i * numberOfCopies) + n);
+                MemoryOperationsHelper::Copy(&(((uint8 *) (copyTable[dataSourceIndex].dataSourcePointer))[offset]), copyTable[n].gamPointer, copyTable[n].copySize);
+//REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "Calling Package %d", offset);
+                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset));
+            }
         }
     }
-    return ret;
+    dataSourceCust->Synchronise();
+    return true;
 }
-
-CLASS_REGISTER(MemoryMapStatefulOutputBroker, "1.0")
+CLASS_REGISTER(MemoryMapSyncUnrelatedOutputBroker, "1.0")
 }
-

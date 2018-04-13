@@ -270,6 +270,8 @@ DS1    ();
 
     virtual ~DS1();
 
+    virtual uint32 GetCurrentBuffer();
+
     virtual bool Initialise(StructuredDataI & data);
 
     virtual uint32 GetCurrentBufferIndex();
@@ -312,6 +314,8 @@ CLASS_REGISTER_DECLARATION()
 Driver1();
 
 virtual ~Driver1();
+
+virtual uint32 GetCurrentBuffer();
 
 virtual bool Initialise(StructuredDataI & data);
 

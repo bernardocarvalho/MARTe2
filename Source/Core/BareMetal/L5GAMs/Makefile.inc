@@ -35,16 +35,19 @@ OBJSX=BrokerI.x \
     MemoryMapInterpolatedInputBroker.x \
     MemoryMapInputBroker.x \
     MemoryMapOutputBroker.x \
-    MemoryMapStatefulBroker.x \
-    MemoryMapStatefulInputBroker.x \
-    MemoryMapStatefulOutputBroker.x \
     MemoryMapSynchronisedInputBroker.x \
     MemoryMapSynchronisedOutputBroker.x \
     RealTimeApplication.x \
     RealTimeApplicationConfigurationBuilder.x \
     RealTimeState.x \
     RealTimeThread.x \
-    TimingDataSource.x
+    TimingDataSource.x \
+    MemoryMapUnrelatedInputBroker.x \
+    MemoryMapUnrelatedOutputBroker.x \
+    MemoryMapSyncUnrelatedInputBroker.x \
+    MemoryMapSyncUnrelatedOutputBroker.x \
+    MultiBufferUnrelatedDataSource.x 
+    
 
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

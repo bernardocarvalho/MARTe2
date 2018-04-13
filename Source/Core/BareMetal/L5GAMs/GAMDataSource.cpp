@@ -92,7 +92,13 @@ uint32 GAMDataSource::GetNumberOfMemoryBuffers() {
     return 1u;
 }
 
-bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) {
+uint32 GAMDataSource::GetCurrentBuffer() {
+    return 0u;
+}
+
+bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx,
+                                          const uint32 bufferIdx,
+                                          void *&signalAddress) {
     bool ret = (bufferIdx < 1u);
     uint32 nOfSignals = GetNumberOfSignals();
     if (ret) {
@@ -152,7 +158,8 @@ bool GAMDataSource::AllocateMemory() {
     return ret;
 }
 
-const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data, const SignalDirection direction) {
+const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data,
+                                          const SignalDirection direction) {
     const char8* brokerName = NULL_PTR(const char8 *);
 
     float32 freq;
@@ -177,7 +184,8 @@ const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data, const SignalDir
 }
 
 /*lint -e{715} this implementation of the StatefulI interface does not need to know about the nextStateName*/
-bool GAMDataSource::PrepareNextState(const char8 * const currentStateName, const char8 * const nextStateName) {
+bool GAMDataSource::PrepareNextState(const char8 * const currentStateName,
+                                     const char8 * const nextStateName) {
 //Set the default value for all the input signals
     uint32 numberOfFunctions = GetNumberOfFunctions();
     bool ret = true;
@@ -281,9 +289,11 @@ bool GAMDataSource::PrepareNextState(const char8 * const currentStateName, const
     return ret;
 }
 
-bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers, const char8* const functionName, void * const gamMemPtr) {
+bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers,
+                                    const char8* const functionName,
+                                    void * const gamMemPtr) {
 //generally a loop for each supported broker
-    ReferenceT<MemoryMapInputBroker> broker("MemoryMapInputBroker");
+    ReferenceT < MemoryMapInputBroker > broker("MemoryMapInputBroker");
     bool ret = broker.IsValid();
     if (ret) {
         ret = broker->Init(InputSignals, *this, functionName, gamMemPtr);
@@ -296,8 +306,10 @@ bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers, const char
     return ret;
 }
 
-bool GAMDataSource::GetOutputBrokers(ReferenceContainer &outputBrokers, const char8* const functionName, void * const gamMemPtr) {
-    ReferenceT<MemoryMapOutputBroker> broker("MemoryMapOutputBroker");
+bool GAMDataSource::GetOutputBrokers(ReferenceContainer &outputBrokers,
+                                     const char8* const functionName,
+                                     void * const gamMemPtr) {
+    ReferenceT < MemoryMapOutputBroker > broker("MemoryMapOutputBroker");
     bool ret = broker.IsValid();
     if (ret) {
         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
@@ -323,9 +335,10 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
                 nStates = 0u;
             }
             if (nStates == 0u) {
-                REPORT_ERROR(ErrorManagement::Information,
-                                            "In GAMDataSource %s, signal %s will never be produced nor consumed because there is no GAM with this signal being executed in any state.", GetName(),
-                                            signalName.Buffer());
+                REPORT_ERROR(
+                        ErrorManagement::Information,
+                        "In GAMDataSource %s, signal %s will never be produced nor consumed because there is no GAM with this signal being executed in any state.",
+                        GetName(), signalName.Buffer());
             }
         }
         uint32 s;
@@ -340,8 +353,9 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
                 ret = (nProducers > 0u);
             }
             if (!ret) {
-                REPORT_ERROR(ErrorManagement::FatalError, "In GAMDataSource %s, state %s, signal %s has an invalid number of producers. Should be > 0 but is %d", GetName(),
-                                            stateName.Buffer(), signalName.Buffer(), nProducers);
+                REPORT_ERROR(ErrorManagement::FatalError,
+                             "In GAMDataSource %s, state %s, signal %s has an invalid number of producers. Should be > 0 but is %d", GetName(),
+                             stateName.Buffer(), signalName.Buffer(), nProducers);
             }
         }
     }

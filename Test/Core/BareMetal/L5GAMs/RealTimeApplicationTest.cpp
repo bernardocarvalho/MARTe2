@@ -114,6 +114,11 @@ DataSourceIRealTimeApplicationTestHelper1    () {
 
     }
 
+    virtual uint32 GetCurrentBuffer(){
+        return 0;
+    }
+
+
     virtual bool AllocateMemory() {
         return true;
     }
@@ -190,7 +195,9 @@ DataSourceIRealTimeApplicationTestHelper2    () {
     virtual ~DataSourceIRealTimeApplicationTestHelper2() {
 
     }
-
+    virtual uint32 GetCurrentBuffer(){
+        return 0;
+    }
     virtual bool AllocateMemory() {
         return false;
     }
@@ -263,7 +270,9 @@ DataSourceIRealTimeApplicationTestHelper3    () {
     virtual ~DataSourceIRealTimeApplicationTestHelper3() {
 
     }
-
+    virtual uint32 GetCurrentBuffer(){
+        return 0;
+    }
     virtual bool AllocateMemory() {
         return true;
     }

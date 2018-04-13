@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapOutputBrokerTest.h
- * @brief Header file for class MemoryMapOutputBrokerTest
- * @date 28/07/2016
- * @author Andre Neto
+ * @file MemoryMapUnrelatedOutputBroker.h
+ * @brief Header file for class MemoryMapUnrelatedOutputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MemoryMapOutputBrokerTest
+ * @details This header file contains the declaration of the class MemoryMapUnrelatedOutputBroker
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MEMORYMAPOUTPUTROKERTEST_H_
-#define MEMORYMAPOUTPUTROKERTEST_H_
+#ifndef MEMORYMAPUNRELATEDOUTPUTBROKER_H_
+#define MEMORYMAPUNRELATEDOUTPUTBROKER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,49 +31,36 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MemoryMapOutputBroker.h"
-
+#include "MemoryMapBroker.h"
+#include "FastPollingMutexSem.h"
+#include "MultiBufferUnrelatedDataSource.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-using namespace MARTe;
+namespace MARTe {
 
-/**
- * @brief Tests the MemoryMapOutputBroker public methods.
- */
-class MemoryMapOutputBrokerTest {
+class MemoryMapUnrelatedOutputBroker: public MemoryMapBroker {
 public:
-    /**
-     * @brief Tests the default constructor.
-     */
-    bool TestConstructor();
+    CLASS_REGISTER_DECLARATION()
+    MemoryMapUnrelatedOutputBroker();
+    virtual ~MemoryMapUnrelatedOutputBroker();
+    virtual bool Execute();
+    virtual bool Init(const SignalDirection direction,
+                      DataSourceI &dataSourceIn,
+                      const char8 * const functionName,
+                      void * const gamMemoryAddress);
 
-    /**
-     * @brief Tests the Execute method.
-     */
-    bool TestExecute();
+protected:
 
-    /**
-     * @brief Tests the Execute method with a signal with ranges.
-     */
-    bool TestExecute_Ranges();
-
-    /**
-     * @brief Tests the Execute method with a signal with samples.
-     */
-    bool TestExecute_Samples();
-
-    /**
-     * @brief Tests the Execute method with a signal with multi buffer.
-     */
-    bool TestExecute_MultiBuffer();
-
+    MultiBufferUnrelatedDataSource *dataSourceCust;
+    uint32 *signalIdxArr;
 };
+}
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MEMORYMAPOUTPUTROKERTEST_H_ */
+#endif /* MEMORYMAPUNRELATEDOUTPUTBROKER_H_ */
 

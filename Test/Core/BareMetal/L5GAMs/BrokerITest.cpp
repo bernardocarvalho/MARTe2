@@ -68,10 +68,9 @@ MARTe::ErrorManagement::ErrorType BrokerITestScheduler1::StopCurrentStateExecuti
     return ErrorManagement::NoError;
 }
 
-void BrokerITestScheduler1::CustomPrepareNextState(){
+void BrokerITestScheduler1::CustomPrepareNextState() {
 
 }
-
 
 CLASS_REGISTER(BrokerITestScheduler1, "1.0")
 
@@ -154,6 +153,8 @@ BrokerIDataSourceTestHelper    ();
 
     virtual bool Synchronise();
 
+    virtual uint32 GetCurrentBuffer();
+
 };
 
 BrokerIDataSourceTestHelper::BrokerIDataSourceTestHelper() :
@@ -222,6 +223,10 @@ bool BrokerIDataSourceTestHelper::GetOutputBrokers(ReferenceContainer &outputBro
 
 bool BrokerIDataSourceTestHelper::Synchronise() {
     return false;
+}
+
+uint32 BrokerIDataSourceTestHelper::GetCurrentBuffer() {
+    return 0u;
 }
 
 CLASS_REGISTER(BrokerIDataSourceTestHelper, "1.0");

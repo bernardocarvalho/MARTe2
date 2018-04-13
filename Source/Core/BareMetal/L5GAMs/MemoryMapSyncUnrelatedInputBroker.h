@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapOutputBrokerTest.h
- * @brief Header file for class MemoryMapOutputBrokerTest
- * @date 28/07/2016
- * @author Andre Neto
+ * @file MemoryMapSyncUnrelatedInputBroker.h
+ * @brief Header file for class MemoryMapSyncUnrelatedInputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MemoryMapOutputBrokerTest
+ * @details This header file contains the declaration of the class MemoryMapSyncUnrelatedInputBroker
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MEMORYMAPOUTPUTROKERTEST_H_
-#define MEMORYMAPOUTPUTROKERTEST_H_
+#ifndef MEMORYMAPSYNCUNRELATEDINPUTBROKER_H_
+#define MEMORYMAPSYNCUNRELATEDINPUTBROKER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,49 +31,26 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MemoryMapOutputBroker.h"
 
+#include "MemoryMapUnrelatedInputBroker.h"
+#include "FastPollingMutexSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-using namespace MARTe;
-
-/**
- * @brief Tests the MemoryMapOutputBroker public methods.
- */
-class MemoryMapOutputBrokerTest {
+namespace MARTe {
+class MemoryMapSyncUnrelatedInputBroker: public MemoryMapUnrelatedInputBroker {
 public:
-    /**
-     * @brief Tests the default constructor.
-     */
-    bool TestConstructor();
-
-    /**
-     * @brief Tests the Execute method.
-     */
-    bool TestExecute();
-
-    /**
-     * @brief Tests the Execute method with a signal with ranges.
-     */
-    bool TestExecute_Ranges();
-
-    /**
-     * @brief Tests the Execute method with a signal with samples.
-     */
-    bool TestExecute_Samples();
-
-    /**
-     * @brief Tests the Execute method with a signal with multi buffer.
-     */
-    bool TestExecute_MultiBuffer();
+    CLASS_REGISTER_DECLARATION()MemoryMapSyncUnrelatedInputBroker();
+    virtual ~MemoryMapSyncUnrelatedInputBroker();
+    virtual bool Execute();
 
 };
+}
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MEMORYMAPOUTPUTROKERTEST_H_ */
+#endif /* SOURCE_CORE_BAREMETAL_L5GAMS_MEMORYMAPSYNCUNRELATEDINPUTBROKER_H_ */
 

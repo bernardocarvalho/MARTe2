@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapStatefulInputBrokerTest.h
- * @brief Header file for class MemoryMapStatefulInputBrokerTest
- * @date 28/07/2016
- * @author Andre Neto
+ * @file MemoryMapUnrelatedInputBroker.h
+ * @brief Header file for class MemoryMapUnrelatedInputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MemoryMapStatefulInputBrokerTest
+ * @details This header file contains the declaration of the class MemoryMapUnrelatedInputBroker
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MEMORYMAPSTATEFULINPUTBROKERTEST_H_
-#define MEMORYMAPSTATEFULINPUTBROKERTEST_H_
+#ifndef MEMORYMAPUNRELATEDINPUTBROKER_H_
+#define MEMORYMAPUNRELATEDINPUTBROKER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,74 +31,35 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
+#include "FastPollingMutexSem.h"
+#include "MultiBufferUnrelatedDataSource.h"
 #include "MemoryMapInputBroker.h"
-
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-using namespace MARTe;
+namespace MARTe {
 
-/**
- * @brief Tests the MemoryMapStatefulInputBrokerTest public methods.
- */
-class MemoryMapStatefulInputBrokerTest {
+class MemoryMapUnrelatedInputBroker: public MemoryMapBroker {
 public:
-    /**
-     * @brief Tests the default constructor.
-     */
-    bool TestConstructor();
+    CLASS_REGISTER_DECLARATION()
+    MemoryMapUnrelatedInputBroker();
+    virtual ~MemoryMapUnrelatedInputBroker();
+    virtual bool Execute();
+    virtual bool Init(const SignalDirection direction,
+                      DataSourceI &dataSourceIn,
+                      const char8 * const functionName,
+                      void * const gamMemoryAddress);
 
-    /**
-     * @brief Tests the Execute method for RealTimeApplication::index = 0
-     */
-    bool TestExecute_0();
+protected:
 
-    /**
-     * @brief Tests the Execute method for RealTimeApplication::index = 1
-     */
-    bool TestExecute_1();
-
-    /**
-     * @brief Tests the Execute method after changing state
-     */
-    bool TestExecute_ChangeState();
-
-    /**
-     * @brief Tests the Execute method with a signal with ranges for RealTimeApplication::index = 0
-     */
-    bool TestExecute_Ranges_0();
-
-    /**
-     * @brief Tests the Execute method with a signal with ranges for RealTimeApplication::index = 1
-     */
-    bool TestExecute_Ranges_1();
-
-    /**
-     * @brief Tests the Execute method after changing state with a signal with ranges
-     */
-    bool TestExecute_Ranges_ChangeState();
-
-    /**
-     * @brief Tests the Execute method with a signal with samples for RealTimeApplication::index = 0
-     */
-    bool TestExecute_Samples_0();
-
-    /**
-     * @brief Tests the Execute method with a signal with samples for RealTimeApplication::index = 1
-     */
-    bool TestExecute_Samples_1();
-
-    /**
-     * @brief Tests the Execute method after changing state with a signal with samples
-     */
-    bool TestExecute_Samples_ChangeState();
-
+    MultiBufferUnrelatedDataSource *dataSourceCust;
+    uint32 *signalIdxArr;
 };
-
+}
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MEMORYMAPSTATEFULINPUTBROKERTEST_H_ */
+#endif /* MEMORYMAPUNRELATEDINPUTBROKER_H_ */
 

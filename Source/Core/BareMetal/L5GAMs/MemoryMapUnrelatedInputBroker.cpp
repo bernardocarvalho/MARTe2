@@ -1,8 +1,8 @@
 /**
- * @file MemoryMapBroker.cpp
- * @brief Source file for class MemoryMapBroker
- * @date 11/04/2016
- * @author Giuseppe Ferrò
+ * @file MemoryMapUnrelatedInputBroker.cpp
+ * @brief Source file for class MemoryMapUnrelatedInputBroker
+ * @date Apr 12, 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapBroker (public, protected, and private). Be aware that some
+ * the class MemoryMapUnrelatedInputBroker (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -25,13 +25,13 @@
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
 
-#define DLL_API
-
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "MemoryMapBroker.h"
+#include "MemoryMapUnrelatedInputBroker.h"
+#include "MemoryOperationsHelper.h"
+#include "AdvancedErrorManagement.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -43,24 +43,46 @@
 
 namespace MARTe {
 
-MemoryMapBroker::MemoryMapBroker() :
-        BrokerI() {
-    copyTable = NULL_PTR(MemoryMapBrokerCopyTableEntry *);
-    dataSource = NULL_PTR(DataSourceI*);
-    numberOfCopies = 0u;
+MemoryMapUnrelatedInputBroker::MemoryMapUnrelatedInputBroker() :
+        MemoryMapBroker() {
+
+    dataSourceCust = NULL_PTR(MultiBufferUnrelatedDataSource *);
+    signalIdxArr = NULL_PTR(uint32 *);
 }
 
-MemoryMapBroker::~MemoryMapBroker() {
-    if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
-        delete[] copyTable;
+MemoryMapUnrelatedInputBroker::~MemoryMapUnrelatedInputBroker() {
+    if (signalIdxArr != NULL_PTR(uint32 *)) {
+        delete[] signalIdxArr;
+        signalIdxArr = NULL_PTR(uint32 *);
     }
-    /*lint -e{1740} dataSource contains a copy of a pointer. No need to be freed.*/
+    dataSourceCust = NULL_PTR(MultiBufferUnrelatedDataSource *);
 }
 
-bool MemoryMapBroker::Init(const SignalDirection direction,
-                           DataSourceI &dataSourceIn,
-                           const char8 * const functionName,
-                           void * const gamMemoryAddress) {
+bool MemoryMapUnrelatedInputBroker::Execute() {
+    uint32 n;
+    /*lint -e{613} null pointer checked before.*/
+    uint32 i = dataSource->GetCurrentBuffer();
+    if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
+        for (n = 0u; (n < numberOfCopies); n++) {
+            /*lint -e{613} null pointer checked before.*/
+            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 0);
+            if (offset >= 0) {
+                uint32 dataSourceIndex = ((i * numberOfCopies) + n);
+                (void) MemoryOperationsHelper::Copy(copyTable[n].gamPointer,
+                                                    &((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]),
+                                                    copyTable[n].copySize);
+                /*lint -e{613} null pointer checked before.*/
+                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset));
+            }
+        }
+    }
+    return true;
+}
+
+bool MemoryMapUnrelatedInputBroker::Init(const SignalDirection direction,
+                                         DataSourceI &dataSourceIn,
+                                         const char8 * const functionName,
+                                         void * const gamMemoryAddress) {
     dataSource = &dataSourceIn;
 
     bool ret = InitFunctionPointers(direction, dataSourceIn, functionName, gamMemoryAddress);
@@ -81,7 +103,13 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
     uint32 numberOfBuffers = dataSource->GetNumberOfMemoryBuffers();
     if (ret) {
         uint32 totalNumberOfElements = (numberOfCopies * numberOfBuffers);
+        /*lint -e{423} copyTable is freed in MemoryMapBroker destructor.*/
         copyTable = new MemoryMapBrokerCopyTableEntry[totalNumberOfElements];
+        ret = (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry*));
+        if (ret) {
+            signalIdxArr = new uint32[numberOfCopies];
+            ret = (signalIdxArr != NULL_PTR(uint32*));
+        }
     }
     uint32 functionIdx = 0u;
     if (ret) {
@@ -115,11 +143,12 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                 uint32 bo;
                 for (bo = 0u; (bo < numberOfByteOffsets) && (ret); bo++) {
                     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
-                        copyTable[c].copySize = GetCopyByteSize(c%(numberOfCopies));
-                        copyTable[c].gamPointer = GetFunctionPointer(c%(numberOfCopies));
+                        copyTable[c].copySize = GetCopyByteSize(c % (numberOfCopies));
+                        copyTable[c].gamPointer = GetFunctionPointer(c % (numberOfCopies));
                         copyTable[c].type = signalType;
-                        uint32 dataSourceOffset = GetCopyOffset(c%(numberOfCopies));
-
+                        uint32 dataSourceOffset = GetCopyOffset(c % (numberOfCopies));
+                        /*lint -e{613} null pointer checked before.*/
+                        signalIdxArr[c % (numberOfCopies)] = signalIdx;
                         void *dataSourceSignalAddress;
                         ret = dataSource->GetSignalMemoryBuffer(signalIdx, c0, dataSourceSignalAddress);
                         char8 *dataSourceSignalAddressChar = reinterpret_cast<char8 *>(dataSourceSignalAddress);
@@ -133,7 +162,14 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
             }
         }
     }
+
+    if (ret) {
+        dataSourceCust = dynamic_cast<MultiBufferUnrelatedDataSource *>(dataSource);
+        ret = (dataSourceCust != NULL_PTR(MultiBufferUnrelatedDataSource *));
+    }
     return ret;
 }
+
+CLASS_REGISTER(MemoryMapUnrelatedInputBroker, "1.0")
 
 }

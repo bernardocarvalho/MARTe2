@@ -118,6 +118,8 @@ DataSourceIGAMTest1    ();
 
     virtual bool Synchronise();
 
+    virtual uint32 GetCurrentBuffer();
+
 };
 
 DataSourceIGAMTest1::DataSourceIGAMTest1() :
@@ -181,6 +183,11 @@ bool DataSourceIGAMTest1::GetOutputBrokers(ReferenceContainer &outputBrokers,
 bool DataSourceIGAMTest1::Synchronise() {
     return false;
 }
+
+uint32 DataSourceIGAMTest1::GetCurrentBuffer() {
+    return 0u;
+}
+
 CLASS_REGISTER(DataSourceIGAMTest1, "1.0");
 
 /**

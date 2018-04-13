@@ -179,6 +179,10 @@ DS1::DS1() :
 
 }
 
+uint32 DS1::GetCurrentBuffer() {
+    return 0u;
+}
+
 DS1::~DS1() {
 
 }
@@ -292,6 +296,10 @@ CLASS_REGISTER(DS1, "1.0");
 Driver1::Driver1() :
         DataSourceI() {
 
+}
+
+uint32 Driver1::GetCurrentBuffer() {
+    return 0u;
 }
 
 Driver1::~Driver1() {

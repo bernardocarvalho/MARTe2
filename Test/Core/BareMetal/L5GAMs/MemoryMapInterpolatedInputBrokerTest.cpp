@@ -143,6 +143,8 @@ MemoryMapInterpolatedInputBrokerDataSourceTestHelper    ();
 
     virtual ~ MemoryMapInterpolatedInputBrokerDataSourceTestHelper();
 
+    virtual uint32 GetCurrentBuffer();
+
     virtual bool AllocateMemory();
 
     virtual bool Initialise(StructuredDataI & data);
@@ -206,6 +208,11 @@ MemoryMapInterpolatedInputBrokerDataSourceTestHelper::MemoryMapInterpolatedInput
     initialIntValue = 0;
     initialFloatValue = 0;
 }
+
+uint32 MemoryMapInterpolatedInputBrokerDataSourceTestHelper::GetCurrentBuffer(){
+    return 0;
+}
+
 
 MemoryMapInterpolatedInputBrokerDataSourceTestHelper::~MemoryMapInterpolatedInputBrokerDataSourceTestHelper() {
     if (signalMemory != NULL_PTR(void *)) {

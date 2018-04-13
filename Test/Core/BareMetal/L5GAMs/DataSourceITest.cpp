@@ -129,6 +129,7 @@ DataSourceITestHelper    ();
             void * const gamMemPtr);
 
     virtual bool Synchronise();
+    virtual uint32 GetCurrentBuffer();
 
 };
 
@@ -193,6 +194,11 @@ bool DataSourceITestHelper::GetOutputBrokers(ReferenceContainer &outputBrokers,
 bool DataSourceITestHelper::Synchronise() {
     return false;
 }
+
+uint32 DataSourceITestHelper::GetCurrentBuffer() {
+    return 0u;
+}
+
 
 CLASS_REGISTER(DataSourceITestHelper, "1.0");
 

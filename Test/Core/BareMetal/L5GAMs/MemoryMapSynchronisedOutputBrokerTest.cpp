@@ -165,6 +165,8 @@ MemoryMapSynchronisedOutputBrokerDataSourceTestHelper    ();
 
     virtual bool AllocateMemory();
 
+    virtual uint32 GetCurrentBuffer();
+
     virtual uint32 GetNumberOfMemoryBuffers();
 
     virtual bool GetSignalMemoryBuffer(const uint32 signalIdx,
@@ -207,6 +209,10 @@ MemoryMapSynchronisedOutputBrokerDataSourceTestHelper::MemoryMapSynchronisedOutp
     samples = 10;
     synchCalled = false;
     synchReturn = true;
+}
+
+uint32 MemoryMapSynchronisedOutputBrokerDataSourceTestHelper::GetCurrentBuffer(){
+    return 0;
 }
 
 MemoryMapSynchronisedOutputBrokerDataSourceTestHelper::~MemoryMapSynchronisedOutputBrokerDataSourceTestHelper() {
