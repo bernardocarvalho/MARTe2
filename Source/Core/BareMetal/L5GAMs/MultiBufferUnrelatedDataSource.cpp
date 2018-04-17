@@ -34,7 +34,6 @@
 #include "StreamString.h"
 #include "MemoryMapUnrelatedInputBroker.h"
 #include "MemoryMapUnrelatedOutputBroker.h"
-
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -95,20 +94,14 @@ bool MultiBufferUnrelatedDataSource::Initialise(StructuredDataI &data) {
             REPORT_ERROR(ErrorManagement::InitialisationError, "NumberOfBuffers was not specified");
         }
     }
-    if (ret) {
-        //the number of packets that arrives to the DS at each cycle
-        ret = data.Read("TriggerAfterNPackets", triggerAfterNPackets);
-        if (!ret) {
-            REPORT_ERROR(ErrorManagement::InitialisationError, "TriggerAfterNPackets not specified");
-        }
-    }
+
     if (ret) {
         StreamString heapName;
         if (data.Read("HeapName", heapName)) {
             memoryHeap = HeapManager::FindHeap(heapName.Buffer());
             if (memoryHeap == NULL_PTR(HeapI *)) {
-                REPORT_ERROR(ErrorManagement::FatalError, "Could not instantiate an memoryHeap with the name: %s", heapName.Buffer());
                 ret = false;
+                REPORT_ERROR(ErrorManagement::FatalError, "Could not instantiate an memoryHeap with the name: %s", heapName.Buffer());
             }
         }
         else {
@@ -121,26 +114,72 @@ bool MultiBufferUnrelatedDataSource::Initialise(StructuredDataI &data) {
 bool MultiBufferUnrelatedDataSource::AllocateMemory() {
 
     uint32 nOfSignals = GetNumberOfSignals();
-    bool ret = (nOfSignals > 0u);
+    bool ret = (mem == NULL_PTR(uint8 *));
     if (ret) {
-        ret = (mem == NULL_PTR(uint8 *));
-    }
-    else {
-        REPORT_ERROR(ErrorManagement::FatalError, "No signals defined for DataSource with name %s", GetName());
-    }
-    if (ret) {
-        signalOffsets = new uint32[nOfSignals];
-        ret = (signalOffsets != NULL_PTR(uint32*));
-        if (ret) {
-            packetSize = new uint32[nOfSignals];
-            ret = (packetSize != NULL_PTR(uint32*));
+        if (nOfSignals > 0u) {
+            signalOffsets = new uint32[nOfSignals];
+            ret = (signalOffsets != NULL_PTR(uint32*));
+            if (ret) {
+                packetSize = new uint32[nOfSignals];
+                ret = (packetSize != NULL_PTR(uint32*));
+            }
         }
     }
 
     uint32 memorySize = 0u;
     for (uint32 s = 0u; (s < nOfSignals) && (ret); s++) {
         uint32 thisSignalMemorySize;
+        uint32 samples = 1u;
         ret = GetSignalByteSize(s, thisSignalMemorySize);
+        StreamString signalName;
+        ret = GetSignalName(s, signalName);
+        if (ret) {
+            //for each function
+            uint32 numberOfFunctions = GetNumberOfFunctions();
+            for (uint32 k = 0u; (k < numberOfFunctions) && (ret); k++) {
+                uint32 nSignalsPerFun = 0u;
+                ret = GetFunctionNumberOfSignals(InputSignals, k, nSignalsPerFun);
+                if (ret) {
+                    for (uint32 h = 0u; (h < nSignalsPerFun) && (ret); h++) {
+                        StreamString functionSignalName;
+                        ret = GetFunctionSignalName(InputSignals, k, h, functionSignalName);
+                        if (ret) {
+                            if (functionSignalName == signalName) {
+                                uint32 newSamples = 0u;
+                                ret = GetFunctionSignalSamples(InputSignals, k, h, newSamples);
+                                if (ret) {
+                                    if (newSamples > samples) {
+                                        samples = newSamples;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (ret) {
+                    ret = GetFunctionNumberOfSignals(OutputSignals, k, nSignalsPerFun);
+                    if (ret) {
+                        for (uint32 h = 0u; (h < nSignalsPerFun) && (ret); h++) {
+                            StreamString functionSignalName;
+                            ret = GetFunctionSignalName(OutputSignals, k, h, functionSignalName);
+                            if (ret) {
+                                if (functionSignalName == signalName) {
+                                    uint32 newSamples = 0u;
+                                    ret = GetFunctionSignalSamples(OutputSignals, k, h, newSamples);
+                                    if (ret) {
+                                        if (newSamples > samples) {
+                                            samples = newSamples;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+
         if (ret) {
             if (signalOffsets != NULL_PTR(uint32 *)) {
                 signalOffsets[s] = memorySize;
@@ -150,7 +189,7 @@ bool MultiBufferUnrelatedDataSource::AllocateMemory() {
             ret = (thisSignalMemorySize > 0u);
         }
         if (ret) {
-            memorySize += (thisSignalMemorySize * numberOfBuffers);
+            memorySize += (thisSignalMemorySize * samples * numberOfBuffers);
             /*lint -e{613} null pointer checked before.*/
             packetSize[s] = thisSignalMemorySize;
         }
@@ -330,7 +369,10 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                     }
                     if (ret) {
                         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
-                        if (!ret) {
+                        if (ret) {
+                            outputBrokers.Insert(broker);
+                        }
+                        else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
                         }
                     }
@@ -393,7 +435,10 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                     }
                     if (ret) {
                         ret = broker->Init(InputSignals, *this, functionName, gamMemPtr);
-                        if (!ret) {
+                        if (ret) {
+                            inputBrokers.Insert(broker);
+                        }
+                        else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
                         }
 
@@ -434,6 +479,9 @@ bool MultiBufferUnrelatedDataSource::SetConfiguredDatabase(StructuredDataI & dat
                                 uint32 numberOfProducers = 0u;
                                 (void) GetSignalNumberOfProducers(timeStampSignalIndex, stateName.Buffer(), numberOfProducers);
                                 ret = (numberOfProducers == 0u);
+                                if (!ret) {
+                                    REPORT_ERROR(ErrorManagement::InitialisationError, "The timeStampSignalIndex cannot be produced");
+                                }
                             }
                         }
                     }

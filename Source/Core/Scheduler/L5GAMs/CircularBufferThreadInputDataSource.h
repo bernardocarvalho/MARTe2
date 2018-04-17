@@ -65,9 +65,9 @@ public:
 
     virtual ErrorManagement::ErrorType Execute(const ExecutionInfo & info);
 
-    virtual bool DriverRead(char8 *bufferToFill,
+    virtual bool DriverRead(char8 * const bufferToFill,
                             uint32 &sizeToRead,
-                            uint32 signalIdx)=0;
+                            const uint32 signalIdx)=0;
 
     virtual void Purge(ReferenceContainer &purgeList);
 
@@ -83,6 +83,7 @@ protected:
     uint8 *isRefreshed;
     uint32 lastWrittenBuffer;
     uint8 flags; //bits: 0-GetLatest | 1-IsSync
+    uint32 triggerAfterNPackets;
 
 };
 }

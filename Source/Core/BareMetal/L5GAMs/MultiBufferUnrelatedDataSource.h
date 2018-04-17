@@ -71,11 +71,11 @@ public:
     virtual int32 GetOffset(const uint32 signalIdx,
                             const int32 flag)=0;
 
-    virtual void TerminateRead(uint32 signalIdx,
-                               uint32 offset)=0;
+    virtual void TerminateRead(const uint32 signalIdx,
+                               const uint32 offset)=0;
 
-    virtual void TerminateWrite(uint32 signalIdx,
-                                uint32 offset)=0;
+    virtual void TerminateWrite(const uint32 signalIdx,
+                                const uint32 offset)=0;
 
 protected:
     uint32 numberOfBuffers;

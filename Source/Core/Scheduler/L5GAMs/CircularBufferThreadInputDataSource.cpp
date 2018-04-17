@@ -55,6 +55,7 @@ CircularBufferThreadInputDataSource::CircularBufferThreadInputDataSource() :
     isRefreshed = NULL_PTR(uint8 *);
     lastWrittenBuffer = 0u;
     flags = 0u;
+    triggerAfterNPackets = 0u;
 }
 
 CircularBufferThreadInputDataSource::~CircularBufferThreadInputDataSource() {
@@ -79,6 +80,13 @@ void CircularBufferThreadInputDataSource::Purge(ReferenceContainer &purgeList) {
 
 bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
     bool ret = MultiBufferUnrelatedDataSource::Initialise(data);
+    if (ret) {
+        //the number of packets that arrives to the DS at each cycle
+        ret = data.Read("TriggerAfterNPackets", triggerAfterNPackets);
+        if (!ret) {
+            REPORT_ERROR(ErrorManagement::InitialisationError, "TriggerAfterNPackets not specified");
+        }
+    }
 
     if (ret) {
         // Read cpu mask
@@ -320,7 +328,7 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(const Ex
         }
 
         if (static_cast<bool>(err)) {
-            while (!mutex.FastTryLock()){
+            while (!mutex.FastTryLock()) {
 
             }
 
