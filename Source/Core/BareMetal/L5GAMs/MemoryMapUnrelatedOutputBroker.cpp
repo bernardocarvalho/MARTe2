@@ -66,13 +66,13 @@ bool MemoryMapUnrelatedOutputBroker::Execute() {
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies); n++) {
             /*lint -e{613} null pointer checked before.*/
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 1);
+            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 0);
             if (offset >= 0) {
                 uint32 dataSourceIndex = ((i * numberOfCopies) + n);
                 (void) MemoryOperationsHelper::Copy(&((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]),
                                                     copyTable[n].gamPointer, copyTable[n].copySize);
                 /*lint -e{613} null pointer checked before.*/
-                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset));
+                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset), 0);
             }
         }
     }

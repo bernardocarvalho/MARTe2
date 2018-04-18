@@ -531,7 +531,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool IsSupportedBroker(const SignalDirection direction,
+    virtual bool IsSupportedBroker(const SignalDirection direction,
                            const uint32 functionIdx,
                            const uint32 functionSignalIdx,
                            const char8* const brokerClassName);

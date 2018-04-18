@@ -67,10 +67,10 @@ MultiBufferUnrelatedDataSourceInstanceTest    ();
             const int32 flag);
 
     virtual void TerminateRead(const uint32 signalIdx,
-            const uint32 offset);
+            const uint32 offset, const int32 flag);
 
     virtual void TerminateWrite(const uint32 signalIdx,
-            const uint32 offset);
+            const uint32 offset, const int32 flag);
 
     virtual bool Synchronise();
 
@@ -113,12 +113,14 @@ uint32 MultiBufferUnrelatedDataSourceInstanceTest::GetPacketSizeSum() {
 }
 
 void MultiBufferUnrelatedDataSourceInstanceTest::TerminateRead(const uint32 signalIdx,
-                                                               const uint32 offset) {
+                                                               const uint32 offset,
+                                                               const int32 flag) {
 
 }
 
 void MultiBufferUnrelatedDataSourceInstanceTest::TerminateWrite(const uint32 signalIdx,
-                                                                const uint32 offset) {
+                                                                const uint32 offset,
+                                                                const int32 flag) {
 }
 
 bool MultiBufferUnrelatedDataSourceInstanceTest::Synchronise() {
@@ -841,7 +843,7 @@ bool MultiBufferUnrelatedDataSourceTest::TestGetInputBrokers_False_InvalidSugges
                     ReferenceT<MultiBufferUnrelatedDataSourceTestGAM1> gam = ObjectRegistryDatabase::Instance()->Find(gamPath.Buffer());
                     ReferenceContainer inputBrokers;
 
-                    ret = !dataSource->GetInputBrokers(inputBrokers, "0", gam->GetInputSignalsMemory1());
+                    ret = !dataSource->GetInputBrokers(inputBrokers, "GAMA", gam->GetInputSignalsMemory1());
                 }
             }
         }
@@ -1009,7 +1011,7 @@ bool MultiBufferUnrelatedDataSourceTest::TestGetOutputBrokers_False_InvalidSugge
                     ReferenceT<MultiBufferUnrelatedDataSourceTestGAM1> gam = ObjectRegistryDatabase::Instance()->Find(gamPath.Buffer());
                     ReferenceContainer outputBrokers;
 
-                    ret = !dataSource->GetOutputBrokers(outputBrokers, "0", gam->GetInputSignalsMemory1());
+                    ret = !dataSource->GetOutputBrokers(outputBrokers, "GAMB", gam->GetInputSignalsMemory1());
                 }
             }
         }

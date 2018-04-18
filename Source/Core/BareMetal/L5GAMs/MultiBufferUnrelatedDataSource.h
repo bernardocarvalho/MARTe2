@@ -67,15 +67,16 @@ public:
 
     virtual bool SetConfiguredDatabase(StructuredDataI & data);
 
-
     virtual int32 GetOffset(const uint32 signalIdx,
                             const int32 flag)=0;
 
     virtual void TerminateRead(const uint32 signalIdx,
-                               const uint32 offset)=0;
+                               const uint32 offset,
+                               const int32 flag)=0;
 
     virtual void TerminateWrite(const uint32 signalIdx,
-                                const uint32 offset)=0;
+                                const uint32 offset,
+                                const int32 flag)=0;
 
 protected:
     uint32 numberOfBuffers;

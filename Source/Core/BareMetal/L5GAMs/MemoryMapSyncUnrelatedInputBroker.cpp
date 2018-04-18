@@ -68,7 +68,7 @@ bool MemoryMapSyncUnrelatedInputBroker::Execute() {
             if (offset >= 0) {
                 uint32 dataSourceIndex = ((i * numberOfCopies) + n);
                 MemoryOperationsHelper::Copy(copyTable[n].gamPointer, &(((uint8 *) (copyTable[dataSourceIndex].dataSourcePointer))[offset]), copyTable[n].copySize);
-                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset));
+                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset), 0);
             }
         }
     }

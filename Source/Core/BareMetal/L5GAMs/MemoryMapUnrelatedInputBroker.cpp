@@ -72,7 +72,7 @@ bool MemoryMapUnrelatedInputBroker::Execute() {
                                                     &((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]),
                                                     copyTable[n].copySize);
                 /*lint -e{613} null pointer checked before.*/
-                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset));
+                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset), 0);
             }
         }
     }

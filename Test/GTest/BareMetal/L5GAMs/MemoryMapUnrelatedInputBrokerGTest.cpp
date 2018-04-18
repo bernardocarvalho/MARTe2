@@ -1,7 +1,7 @@
 /**
- * @file MemoryMapSyncUnrelatedOutputBroker.cpp
- * @brief Source file for class MemoryMapSyncUnrelatedOutputBroker
- * @date Apr 12, 2018
+ * @file MemoryMapUnrelatedInputBrokerGTest.cpp
+ * @brief Source file for class MemoryMapUnrelatedInputBrokerGTest
+ * @date Apr 17, 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,22 +17,21 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapSyncUnrelatedOutputBroker (public, protected, and private). Be aware that some 
+ * the class MemoryMapUnrelatedInputBrokerGTest (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
+#include <limits.h>
+#include "gtest/gtest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
+#include "MemoryMapUnrelatedInputBrokerTest.h"
 
-#include "MemoryMapSyncUnrelatedOutputBroker.h"
-#include "MemoryOperationsHelper.h"
-#include "Endianity.h"
-#include "AdvancedErrorManagement.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -41,40 +40,13 @@
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
-namespace MARTe {
 
-MemoryMapSyncUnrelatedOutputBroker::MemoryMapSyncUnrelatedOutputBroker() :
-        MemoryMapUnrelatedOutputBroker() {
-// Auto-generated constructor stub for MemoryMapSyncUnrelatedOutputBroker
-// TODO Verify if manual additions are needed
-
+TEST(MemoryMapUnrelatedInputBrokerGTest,TestInitialise) {
+    MemoryMapUnrelatedInputBrokerTest test;
+    ASSERT_TRUE(test.TestInit());
 }
 
-MemoryMapSyncUnrelatedOutputBroker::~MemoryMapSyncUnrelatedOutputBroker() {
-// Auto-generated constructor stub for MemoryMapSyncUnrelatedOutputBroker
-// TODO Verify if manual additions are needed
-
-}
-
-bool MemoryMapSyncUnrelatedOutputBroker::Execute() {
-    uint32 n;
-    uint32 i = dataSource->GetCurrentBuffer();
-
-//REPORT_ERROR(ErrorManagement::Information, "Calling Sync");
-    for (n = 0u; (n < numberOfCopies); n++) {
-//REPORT_ERROR(ErrorManagement::Warning, "Executing...");
-        if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 1);
-            if (offset >= 0) {
-                uint32 dataSourceIndex = ((i * numberOfCopies) + n);
-                MemoryOperationsHelper::Copy(&(((uint8 *) (copyTable[dataSourceIndex].dataSourcePointer))[offset]), copyTable[n].gamPointer, copyTable[n].copySize);
-//REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "Calling Package %d", offset);
-                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset), 0);
-            }
-        }
-    }
-    dataSourceCust->Synchronise();
-    return true;
-}
-CLASS_REGISTER(MemoryMapSyncUnrelatedOutputBroker, "1.0")
+TEST(MemoryMapUnrelatedInputBrokerGTest,TestExecute) {
+    MemoryMapUnrelatedInputBrokerTest test;
+    ASSERT_TRUE(test.TestExecute());
 }

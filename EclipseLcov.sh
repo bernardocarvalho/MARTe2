@@ -3,7 +3,7 @@ OUTPUT_DIR=Build
 
 #Build with coverage enabled
 #make -f Makefile.cov clean
-make -f Makefile.cov
+#make -f Makefile.cov
 
 #Run baseline coverage
 lcov --capture --initial --directory . --no-external --output-file $OUTPUT_DIR/MARTe2.coverage.info.initial

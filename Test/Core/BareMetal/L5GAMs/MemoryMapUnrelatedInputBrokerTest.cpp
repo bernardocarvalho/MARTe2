@@ -30,20 +30,28 @@
 /*---------------------------------------------------------------------------*/
 
 #include "MemoryMapUnrelatedInputBrokerTest.h"
-
+#include "ConfigurationDatabase.h"
+#include "DataSourceI.h"
+#include "GAMSchedulerI.h"
+#include "ObjectRegistryDatabase.h"
+#include "RealTimeApplication.h"
+#include "StandardParser.h"
+#include "MemoryMapUnrelatedInputBroker.h"
+#include "MemoryMapUnrelatedOutputBroker.h"
+#include "stdio.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
 //need to create a dummy for tests
-class MultiBufferUnrelatedDataSourceInstanceTest: public MultiBufferUnrelatedDataSource {
+class MemoryMapUnrelatedInputBrokerDSTest: public MultiBufferUnrelatedDataSource {
 
 public:
     CLASS_REGISTER_DECLARATION()
 
-MultiBufferUnrelatedDataSourceInstanceTest    ();
+MemoryMapUnrelatedInputBrokerDSTest    ();
 
-    ~MultiBufferUnrelatedDataSourceInstanceTest();
+    ~MemoryMapUnrelatedInputBrokerDSTest();
 
     virtual int32 GetOffset(const uint32 signalIdx,
             const int32 flag);
@@ -52,6 +60,8 @@ MultiBufferUnrelatedDataSourceInstanceTest    ();
 
     virtual uint32 GetNumberOfMemoryBuffers();
 
+    virtual uint32 GetNumberOfInternalMemoryBuffers();
+
     virtual bool GetSignalMemoryBuffer(const uint32 signalIdx,
             const uint32 bufferIdx,
             void *&signalAddress);
@@ -59,41 +69,80 @@ MultiBufferUnrelatedDataSourceInstanceTest    ();
     virtual bool AllocateMemory();
 
     virtual void TerminateRead(const uint32 signalIdx,
-            const uint32 offset);
+            const uint32 offset, const int32 flag);
 
     virtual void TerminateWrite(const uint32 signalIdx,
-            const uint32 offset);
+            const uint32 offset, const int32 flag);
 
+    virtual bool IsSupportedBroker(const SignalDirection direction,
+            const uint32 functionIdx,
+            const uint32 functionSignalIdx,
+            const char8* const brokerClassName);
+
+    virtual bool Synchronise();
+
+    virtual bool PrepareNextState(const char8 * const currentStateName,
+            const char8 * const nextStateName);
 protected:
 
     uint32 currentOffsets[3];
     uint32 currentBuffer;
+    uint32 memorySize;
 };
 
-MultiBufferUnrelatedDataSourceInstanceTest::MultiBufferUnrelatedDataSourceInstanceTest() {
+MemoryMapUnrelatedInputBrokerDSTest::MemoryMapUnrelatedInputBrokerDSTest() {
     currentOffsets[0] = 0u;
     currentOffsets[1] = 0u;
     currentOffsets[2] = 0u;
     currentBuffer = 0u;
+    memorySize=0u;
 }
 
-MultiBufferUnrelatedDataSourceInstanceTest::~MultiBufferUnrelatedDataSourceInstanceTest() {
+MemoryMapUnrelatedInputBrokerDSTest::~MemoryMapUnrelatedInputBrokerDSTest() {
 
 }
+bool MemoryMapUnrelatedInputBrokerDSTest::IsSupportedBroker(const SignalDirection direction,
+                                                            const uint32 functionIdx,
+                                                            const uint32 functionSignalIdx,
+                                                            const char8* const brokerClassName) {
+    bool ret = DataSourceI::IsSupportedBroker(direction, functionIdx, functionSignalIdx, brokerClassName);
+    if (!ret) {
+        if (direction == InputSignals) {
+            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedInputBrokerTestInputBroker") == 0);
+        }
+        else {
+            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedInputBrokerTestOutputBroker") == 0);
+        }
+    }
+    return ret;
+}
 
-int32 MultiBufferUnrelatedDataSourceInstanceTest::GetOffset(const uint32 signalIdx,
-                                                            const int32 flag) {
+int32 MemoryMapUnrelatedInputBrokerDSTest::GetOffset(const uint32 signalIdx,
+                                                     const int32 flag) {
 
     return currentOffsets[signalIdx % 3];
 }
 
-uint32 MultiBufferUnrelatedDataSourceInstanceTest::GetNumberOfMemoryBuffers() {
+uint32 MemoryMapUnrelatedInputBrokerDSTest::GetNumberOfMemoryBuffers() {
     return 2u;
 }
 
-bool MultiBufferUnrelatedDataSourceInstanceTest::GetSignalMemoryBuffer(const uint32 signalIdx,
-                                                                       const uint32 bufferIdx,
-                                                                       void *&signalAddress) {
+uint32 MemoryMapUnrelatedInputBrokerDSTest::GetNumberOfInternalMemoryBuffers(){
+    return numberOfBuffers;
+}
+
+bool MemoryMapUnrelatedInputBrokerDSTest::Synchronise() {
+    return true;
+}
+
+bool MemoryMapUnrelatedInputBrokerDSTest::PrepareNextState(const char8 * const currentStateName,
+                                                           const char8 * const nextStateName) {
+    return true;
+}
+
+bool MemoryMapUnrelatedInputBrokerDSTest::GetSignalMemoryBuffer(const uint32 signalIdx,
+                                                                const uint32 bufferIdx,
+                                                                void *&signalAddress) {
     bool ret = (bufferIdx < 2u);
     uint32 nOfSignals = GetNumberOfSignals();
     uint32 bufferSize = 0u;
@@ -120,16 +169,14 @@ bool MultiBufferUnrelatedDataSourceInstanceTest::GetSignalMemoryBuffer(const uin
     return ret;
 }
 
-bool MultiBufferUnrelatedDataSourceInstanceTest::AllocateMemory() {
+bool MemoryMapUnrelatedInputBrokerDSTest::AllocateMemory() {
 
     uint32 nOfSignals = GetNumberOfSignals();
     bool ret = (nOfSignals > 0u);
     if (ret) {
         ret = (mem == NULL_PTR(uint8 *));
     }
-    else {
-        REPORT_ERROR(ErrorManagement::FatalError, "No signals defined for DataSource with name %s", GetName());
-    }
+
     if (ret) {
         signalOffsets = new uint32[nOfSignals];
         ret = (signalOffsets != NULL_PTR(uint32*));
@@ -139,7 +186,7 @@ bool MultiBufferUnrelatedDataSourceInstanceTest::AllocateMemory() {
         }
     }
 
-    uint32 memorySize = 0u;
+    memorySize = 0u;
     for (uint32 s = 0u; (s < nOfSignals) && (ret); s++) {
         uint32 thisSignalMemorySize;
         ret = GetSignalByteSize(s, thisSignalMemorySize);
@@ -160,13 +207,13 @@ bool MultiBufferUnrelatedDataSourceInstanceTest::AllocateMemory() {
     if (ret) {
         if (memoryHeap != NULL_PTR(HeapI *)) {
             //add the double buffer mem
-            memorySize *= 2;
+            memorySize *= GetNumberOfMemoryBuffers();
             mem = reinterpret_cast<uint8 *>(memoryHeap->Malloc(memorySize));
         }
         ret = MemoryOperationsHelper::Set(mem, '\0', memorySize);
     }
     if (ret) {
-        uin32 *memint = (uint32 *) mem;
+        uint32 *memint = (uint32 *) mem;
         for (uint32 i = 0u; i < (memorySize / 4); i++) {
             memint[i] = i;
         }
@@ -176,8 +223,9 @@ bool MultiBufferUnrelatedDataSourceInstanceTest::AllocateMemory() {
 
 }
 
-void MultiBufferUnrelatedDataSourceInstanceTest::TerminateRead(const uint32 signalIdx,
-                                                               const uint32 offset) {
+void MemoryMapUnrelatedInputBrokerDSTest::TerminateRead(const uint32 signalIdx,
+                                                        const uint32 offset,
+                                                        const int32 flag) {
 
     uint32 index = (signalIdx % 3);
     if (index == 0) {
@@ -186,24 +234,25 @@ void MultiBufferUnrelatedDataSourceInstanceTest::TerminateRead(const uint32 sign
     if (index == 1) {
         currentOffsets[index] += 2 * packetSize[index];
     }
-    if (index == 3) {
+    if (index == 2) {
         currentOffsets[index] += 3 * packetSize[index];
     }
-    currentOffsets[index] %= numberOfBuffers;
+    currentOffsets[index] %= (packetSize[index]*numberOfBuffers);
 
 }
 
-uint32 MultiBufferUnrelatedDataSourceInstanceTest::GetCurrentBuffer() {
+uint32 MemoryMapUnrelatedInputBrokerDSTest::GetCurrentBuffer() {
     return currentBuffer;
 }
 
-void MultiBufferUnrelatedDataSourceInstanceTest::TerminateWrite(const uint32 signalIdx,
-                                                                const uint32 offset) {
+void MemoryMapUnrelatedInputBrokerDSTest::TerminateWrite(const uint32 signalIdx,
+                                                         const uint32 offset,
+                                                         const int32 flag) {
     currentBuffer++;
     currentBuffer %= 2;
 }
 
-CLASS_REGISTER(MultiBufferUnrelatedDataSourceInstanceTest, "1.0")
+CLASS_REGISTER(MemoryMapUnrelatedInputBrokerDSTest, "1.0")
 
 /**
  * @brief GAM empty implementation to support the MemoryMapInputBroker tests
@@ -217,9 +266,11 @@ MemoryMapUnrelatedInputBrokerTestGAM1    ();
     virtual bool Setup();
 
     virtual bool Execute();
+
+    void *GetInputMemoryBuffer();
 };
 
-MemoryMapUnrelatedInputBrokerTestGAM1::MemoryMapInputBrokerTestGAM1() :
+MemoryMapUnrelatedInputBrokerTestGAM1::MemoryMapUnrelatedInputBrokerTestGAM1() :
         GAM() {
 }
 
@@ -229,6 +280,10 @@ bool MemoryMapUnrelatedInputBrokerTestGAM1::Setup() {
 
 bool MemoryMapUnrelatedInputBrokerTestGAM1::Execute() {
     return true;
+}
+
+void *MemoryMapUnrelatedInputBrokerTestGAM1::GetInputMemoryBuffer() {
+    return GAM::GetInputSignalsMemory();
 }
 
 CLASS_REGISTER(MemoryMapUnrelatedInputBrokerTestGAM1, "1.0")
@@ -243,6 +298,11 @@ MemoryMapUnrelatedInputBrokerTestInputBroker    () {
 
     virtual ~MemoryMapUnrelatedInputBrokerTestInputBroker() {
 
+    }
+
+    virtual uint32 *GetSignalIdxArr(uint32 &size) {
+        size=numberOfCopies;
+        return signalIdxArr;
     }
 };
 
@@ -283,6 +343,7 @@ static const char8 * const config = ""
         "                   NumberOfDimensions = 1"
         "                   NumberOfElements = 10"
         "                   Type = uint32"
+        "                   Ranges = {{0, 0}, {2, 2}}"
         "               }"
         "               Signal3 = {"
         "                   DataSource = Drv1"
@@ -313,11 +374,8 @@ static const char8 * const config = ""
         "    +Data = {"
         "        Class = ReferenceContainer"
         "        +Drv1 = {"
-        "            Class = MultiBufferUnrelatedDataSourceInstanceTest"
+        "            Class = MemoryMapUnrelatedInputBrokerDSTest"
         "            NumberOfBuffers = 2"
-        "        }"
-        "        +DDB1 = {"
-        "            Class = GAMDataSource"
         "        }"
         "        +Timings = {"
         "            Class = TimingDataSource"
@@ -388,11 +446,99 @@ static bool InitialiseMemoryMapInputBrokerEnviroment(const char8 * const config)
 
 bool MemoryMapUnrelatedInputBrokerTest::TestInit() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    MemoryMapUnrelatedInputBrokerTestInputBroker brokerTest;
+
+    ReferenceT<MemoryMapUnrelatedInputBrokerDSTest> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+
+    MemoryMapUnrelatedInputBrokerDSTest *dataSourceInstance = dataSource.operator->();
+
+    ReferenceT<MemoryMapUnrelatedInputBrokerTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+    if (ret) {
+        void* gamPtr = gam->GetInputMemoryBuffer();
+        ret = brokerTest.Init(InputSignals, *dataSourceInstance, "GAMA", gamPtr);
+    }
+
+    if (ret) {
+        uint32 nOfCopies = 0;
+        uint32 *signalIdxArr = brokerTest.GetSignalIdxArr(nOfCopies);
+        ret = (signalIdxArr != NULL);
+        if (ret) {
+            ret = (nOfCopies == 4);
+        }
+        if (ret) {
+            ret = (signalIdxArr[0] == 0);
+            ret &= (signalIdxArr[1] == 1);
+            ret &= (signalIdxArr[2] == 1);
+            ret &= (signalIdxArr[3] == 2);
+        }
+    }
+
     return ret;
 }
 
 bool MemoryMapUnrelatedInputBrokerTest::TestExecute() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    MemoryMapUnrelatedInputBrokerTestInputBroker brokerTest;
+
+    ReferenceT<MemoryMapUnrelatedInputBrokerDSTest> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+
+    ReferenceT<MemoryMapUnrelatedInputBrokerTestGAM1> gam;
+    ReferenceContainer brokers;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam->GetInputBrokers(brokers);
+    }
+
+    ReferenceT<MemoryMapUnrelatedInputBroker> broker;
+    if (ret) {
+        ret = brokers.Size() == 1;
+        if (ret) {
+            broker = brokers.Get(0);
+            ret = broker.IsValid();
+        }
+    }
+
+    uint32 *gamPtr = (uint32*) gam->GetInputMemoryBuffer();
+    if (ret) {
+        ret = broker->Execute();
+        uint32 nBuffers=dataSource->GetNumberOfInternalMemoryBuffers();
+
+        if (ret) {
+            ret=(nBuffers==2);
+            if(ret){
+                ret&=(gamPtr[0]==0);
+                ret&=(gamPtr[1]==2);
+                //call terminate read here because of range at shifts the buffer!!
+                ret&=(gamPtr[2]==4+(2%nBuffers)*10);
+                ret&=(gamPtr[3]==22);
+            }
+        }
+
+        if(ret){
+            ret = broker->Execute();
+            if(ret){
+                ret&=(gamPtr[0]==0+(1%nBuffers));
+                ret&=(gamPtr[1]==2+(4%nBuffers)*10);
+                //call terminate read here!!
+                ret&=(gamPtr[2]==4+(6%nBuffers)*10);
+                ret&=(gamPtr[3]==22+(3%nBuffers));
+            }
+        }
+
+    }
+
     return ret;
 }
 
