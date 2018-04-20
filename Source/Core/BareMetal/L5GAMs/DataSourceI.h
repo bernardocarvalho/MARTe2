@@ -311,6 +311,13 @@ public:
     bool GetSignalDefaultValue(const uint32 signalIdx,
                                const AnyType &defaultValue);
 
+
+
+    bool GetSignalPacketNumberOfChunks(const uint32 signalIdx, uint32 &numberOfPacketChunks);
+
+    bool GetSignalPacketChunkSize(const uint32 signalIdx, const uint32 chunkNumber, uint32 &chunkSize);
+
+
     /**
      * @brief Gets the type of the default value for the signal with index \a signalIdx.
      * @param[in] signalIdx the index of the signal.

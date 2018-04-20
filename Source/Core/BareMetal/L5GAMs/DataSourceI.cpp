@@ -347,6 +347,43 @@ bool DataSourceI::GetSignalDefaultValue(const uint32 signalIdx,
     return ret;
 }
 
+bool DataSourceI::GetSignalPacketNumberOfChunks(const uint32 signalIdx,
+                                                uint32 &numberOfPacketChunks) {
+    numberOfPacketChunks = 0u;
+    bool ret = MoveToSignalIndex(signalIdx);
+    if (ret) {
+        AnyType at = configuredDatabase.GetType("PacketChunkSizes");
+        ret = !at.IsVoid();
+        if (ret) {
+            numberOfPacketChunks = at.GetNumberOfElements(0u);
+        }
+    }
+    return ret;
+}
+
+bool DataSourceI::GetSignalPacketChunkSize(const uint32 signalIdx,
+                                           const uint32 chunkNumber,
+                                           uint32 &chunkSize) {
+    bool ret = MoveToSignalIndex(signalIdx);
+    if (ret) {
+        AnyType at = configuredDatabase.GetType("PacketChunkSizes");
+        ret = !at.IsVoid();
+        uint32 numberOfChunks = 0u;
+        if (ret) {
+            numberOfChunks = at.GetNumberOfElements(0u);
+            ret = (chunkNumber < numberOfChunks);
+        }
+        if (ret) {
+            Vector < uint32 > chunkSizeVec(numberOfChunks);
+            ret = configuredDatabase.Read("PacketChunkSizes", chunkSizeVec);
+            if (ret) {
+                chunkSize = chunkSizeVec[chunkNumber];
+            }
+        }
+    }
+    return ret;
+}
+
 AnyType DataSourceI::GetSignalDefaultValueType(const uint32 signalIdx) {
     AnyType retType = voidAnyType;
     if (MoveToSignalIndex(signalIdx)) {

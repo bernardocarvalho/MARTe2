@@ -154,9 +154,14 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
         uint32 lastBuffer = lastWrittenBuffer;
         mutex.FastUnLock();
         nStepsForward--;
-        lastBuffer--;
-        if (lastBuffer >= numberOfBuffers) {
-            lastBuffer += numberOfBuffers;
+
+        //If non-blocking it needs to point to the last written
+        //otherwise go one step further
+        if ((flags & (0x2u)) == 0u) {
+            lastBuffer--;
+            if (lastBuffer >= numberOfBuffers) {
+                lastBuffer += numberOfBuffers;
+            }
         }
 
         uint32 stepsBack = nStepsForward % triggerAfterNPackets;
