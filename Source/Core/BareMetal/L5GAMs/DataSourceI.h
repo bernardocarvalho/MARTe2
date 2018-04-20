@@ -113,6 +113,7 @@ public:
      *        NumberOfElements = NUMBER>0
      *        +Frequency = -1|NUMBER>0
      *        +Trigger = 0|1
+     *        +PacketChunkSizes = { NUMBER ... NUMBER }
      *        +States = {
      *          *StateN = {
      *            GAMConsumers = { "0" ... "N" }
@@ -312,9 +313,26 @@ public:
                                const AnyType &defaultValue);
 
 
-
+    /**
+     * @broef Gets the packet number of chunks of the signal with index \a signalIdx.
+     * @param[in] signalIdx the index of the signal
+     * param[out] numberOfPacketChunks the packet number of chunks of the signal.
+     * @return true if the signalIdx exists and if a PacketChunkSizes was set for this signal.
+     * @pre
+     *   SetConfiguredDatabase
+     */
     bool GetSignalPacketNumberOfChunks(const uint32 signalIdx, uint32 &numberOfPacketChunks);
 
+
+    /**
+     * @broef Gets the chunk size of the \a chunkNumber chunk of the signal with index \a signalIdx.
+     * @param[in] signalIdx the index of the signal
+     * param[in] chunkNumber index of the chunk in the packet.
+     * param[out] chunkSize the chunk size of the \a chunkNumber chunk of the signal with index \a signalIdx
+     * @return true if the signalIdx exists and if a PacketChunkSizes was set for this signal and (chunkNumber < GetSignalPacketNumberOfChunks(*)).
+     * @pre
+     *   SetConfiguredDatabase
+     */
     bool GetSignalPacketChunkSize(const uint32 signalIdx, const uint32 chunkNumber, uint32 &chunkSize);
 
 
