@@ -60,7 +60,10 @@ DataSourceI::~DataSourceI() {
 bool DataSourceI::Initialise(StructuredDataI & data) {
     bool ret = ReferenceContainer::Initialise(data);
     if (data.MoveRelative("Signals")) {
-        ret = signalsDatabase.Write("Signals", data);
+        ret = signalsDatabase.CreateAbsolute("Signals");
+        if (ret) {
+            ret = data.Link(signalsDatabase);
+        }
         if (ret) {
             ret = data.MoveToAncestor(1u);
         }
@@ -70,6 +73,7 @@ bool DataSourceI::Initialise(StructuredDataI & data) {
     }
 
     return ret;
+
 }
 
 bool DataSourceI::AddSignals(StructuredDataI &data) {
@@ -93,6 +97,7 @@ bool DataSourceI::SetConfiguredDatabase(StructuredDataI & data) {
         signalsDatabaseNode = configuredDatabase;
         numberOfSignals = configuredDatabase.GetNumberOfChildren();
     }
+
     return ret;
 }
 
@@ -280,7 +285,7 @@ bool DataSourceI::GetSignalConsumerName(const uint32 signalIdx,
             }
             if (ret) {
                 StreamString *consumerArray = new StreamString[numberOfConsumers];
-                Vector < StreamString > consumerVector(consumerArray, numberOfConsumers);
+                Vector<StreamString> consumerVector(consumerArray, numberOfConsumers);
                 ret = configuredDatabase.Read("GAMNamesConsumers", consumerVector);
                 if (ret) {
                     consumerName = consumerVector[consumerIdx];
@@ -323,7 +328,7 @@ bool DataSourceI::GetSignalProducerName(const uint32 signalIdx,
             }
             if (ret) {
                 StreamString *producerArray = new StreamString[numberOfProducers];
-                Vector < StreamString > producerVector(producerArray, numberOfProducers);
+                Vector<StreamString> producerVector(producerArray, numberOfProducers);
                 ret = configuredDatabase.Read("GAMNamesProducers", producerVector);
                 if (ret) {
                     producerName = producerVector[producerIdx];
@@ -347,42 +352,6 @@ bool DataSourceI::GetSignalDefaultValue(const uint32 signalIdx,
     return ret;
 }
 
-bool DataSourceI::GetSignalPacketNumberOfChunks(const uint32 signalIdx,
-                                                uint32 &numberOfPacketChunks) {
-    numberOfPacketChunks = 0u;
-    bool ret = MoveToSignalIndex(signalIdx);
-    if (ret) {
-        AnyType at = configuredDatabase.GetType("PacketChunkSizes");
-        ret = !at.IsVoid();
-        if (ret) {
-            numberOfPacketChunks = at.GetNumberOfElements(0u);
-        }
-    }
-    return ret;
-}
-
-bool DataSourceI::GetSignalPacketChunkSize(const uint32 signalIdx,
-                                           const uint32 chunkNumber,
-                                           uint32 &chunkSize) {
-    bool ret = MoveToSignalIndex(signalIdx);
-    if (ret) {
-        AnyType at = configuredDatabase.GetType("PacketChunkSizes");
-        ret = !at.IsVoid();
-        uint32 numberOfChunks = 0u;
-        if (ret) {
-            numberOfChunks = at.GetNumberOfElements(0u);
-            ret = (chunkNumber < numberOfChunks);
-        }
-        if (ret) {
-            Vector < uint32 > chunkSizeVec(numberOfChunks);
-            ret = configuredDatabase.Read("PacketChunkSizes", chunkSizeVec);
-            if (ret) {
-                chunkSize = chunkSizeVec[chunkNumber];
-            }
-        }
-    }
-    return ret;
-}
 
 AnyType DataSourceI::GetSignalDefaultValueType(const uint32 signalIdx) {
     AnyType retType = voidAnyType;
@@ -553,7 +522,7 @@ bool DataSourceI::GetFunctionSignalByteOffsetInfo(const SignalDirection directio
         ret = MoveToFunctionSignalIndex(direction, functionIdx, functionSignalIdx);
     }
 
-    Matrix < uint32 > byteOffsetMat(numberOfByteOffsets, 2u);
+    Matrix<uint32> byteOffsetMat(numberOfByteOffsets, 2u);
     if (ret) {
         ret = configuredDatabase.Read("ByteOffset", byteOffsetMat);
     }
@@ -661,7 +630,7 @@ bool DataSourceI::AddBrokers(const SignalDirection direction) {
     ReferenceContainer result;
     ReferenceContainerFilterReferences filter(1, ReferenceContainerFilterMode::PATH, this);
     ObjectRegistryDatabase::Instance()->ReferenceContainer::Find(result, filter);
-    ReferenceT < RealTimeApplication > application;
+    ReferenceT<RealTimeApplication> application;
     uint32 c;
     bool found = false;
     for (c = 0u; (c < result.Size()) && (!found); c++) {
@@ -685,7 +654,7 @@ bool DataSourceI::AddBrokers(const SignalDirection direction) {
                 StreamString fullFunctionName = "Functions.";
                 fullFunctionName += functionName;
 
-                ReferenceT < GAM > gam = application->Find(fullFunctionName.Buffer());
+                ReferenceT<GAM> gam = application->Find(fullFunctionName.Buffer());
                 ret = gam.IsValid();
                 void *gamMemoryAddress = NULL_PTR(void *);
 
@@ -744,5 +713,12 @@ bool DataSourceI::AddBrokers(const SignalDirection direction) {
 uint32 DataSourceI::GetCurrentBuffer() {
     return 0u;
 }
+
+void DataSourceI::Purge(ReferenceContainer &purgeList){
+    signalsDatabaseNode.Purge(purgeList);
+    functionsDatabaseNode.Purge(purgeList);
+    ReferenceContainer::Purge(purgeList);
+}
+
 
 }

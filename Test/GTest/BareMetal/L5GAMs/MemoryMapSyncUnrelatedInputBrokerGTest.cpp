@@ -1,8 +1,8 @@
 /**
- * @file GAMGroup.cpp
- * @brief Source file for class GAMGroup
- * @date 24/02/2016
- * @author Giuseppe Ferrò
+ * @file MemoryMapSyncUnrelatedInputBrokerGTest.cpp
+ * @brief Source file for class MemoryMapSyncUnrelatedInputBrokerGTest
+ * @date 26 apr 2018
+ * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class GAMGroup (public, protected, and private). Be aware that some 
+ * the class MemoryMapSyncUnrelatedInputBrokerGTest (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -25,59 +25,38 @@
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
 
-#define DLL_API
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+
+#include <limits.h>
+#include "gtest/gtest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
-#include "GAM.h"
-#include "GAMGroup.h"
-#include "ReferenceContainerFilterReferencesTemplate.h"
-#include "ReferenceT.h"
+#include "MemoryMapSyncUnrelatedInputBrokerTest.h"
+
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
-namespace MARTe {
 
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-GAMGroup::GAMGroup() :
-        ReferenceContainer() {
-}
 
-GAMGroup::~GAMGroup() {
-}
-
-bool GAMGroup::Initialise(StructuredDataI & data){
-    bool ret=ReferenceContainer::Initialise(data);
-    if(ret){
-        //Look for all the GAMs inside the RealTimeApplication
-        ReferenceContainerFilterReferencesTemplate<GAM> gamFilter(-1, ReferenceContainerFilterMode::RECURSIVE);
-        Find(GAMs, gamFilter);
-    }
-    return ret;
-}
-
-bool GAMGroup::SetContext(ConstReference context) {
-    uint32 numberOfGAMs = GAMs.Size();
-    bool ret = true;
-    for (uint32 i = 0u; (i < numberOfGAMs) && (ret); i++) {
-        ReferenceT<GAM> gam = GAMs.Get(i);
-        ret = gam.IsValid();
-        if(ret){
-            ret = gam->SetContext(context);
-        }
-    }
-    return ret;
+TEST(MemoryMapSyncUnrelatedInputBrokerGTest,TestConstructor) {
+    MemoryMapSyncUnrelatedInputBrokerTest test;
+    ASSERT_TRUE(test.TestConstructor());
 }
 
 
-void GAMGroup::Purge(ReferenceContainer &purgeList) {
-    GAMs.Purge(purgeList);
-    ReferenceContainer::Purge(purgeList);
+TEST(MemoryMapSyncUnrelatedInputBrokerGTest,TestExecute) {
+    MemoryMapSyncUnrelatedInputBrokerTest test;
+    ASSERT_TRUE(test.TestExecute());
 }
 
-}
+
+	

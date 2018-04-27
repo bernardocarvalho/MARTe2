@@ -63,7 +63,7 @@ public:
      * @post
      *   MoveToRoot() == true
      */
-ConfigurationDatabase    ();
+    ConfigurationDatabase    ();
 
     /**
      * @brief Copy constructor
@@ -156,6 +156,11 @@ ConfigurationDatabase    ();
     virtual bool CreateRelative(const char8 * const path);
 
     /**
+     * @see StructuredDataI::CreateRelative
+     */
+    virtual bool Link(StructuredDataI &destination);
+
+    /**
      * @see StructuredDataI::AddToCurrentNode
      */
     virtual bool AddToCurrentNode(Reference node);
@@ -210,6 +215,12 @@ ConfigurationDatabase    ();
      * @brief Sets the current node as the root node.
      */
     void SetCurrentNodeAsRootNode();
+
+
+    /**
+     * @see ReferenceContainer::Purge()
+     */
+    virtual void Purge(ReferenceContainer &purgeList);
 
 private:
 

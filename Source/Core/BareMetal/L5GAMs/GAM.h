@@ -397,6 +397,12 @@ public:
      */
     virtual bool SetContext(ConstReference context);
 
+
+    /**
+     * @see ReferenceContainer::Purge()
+     */
+    virtual void Purge(ReferenceContainer &purgeList);
+
     /**
      * @brief Function called when all the information about the GAM is known and set.
      * @details This allows to perform post-Initialise configurations. When this function is called

@@ -89,6 +89,7 @@ public:
     RealTimeApplicationConfigurationBuilder(ConfigurationDatabase &globalDatabaseIn,
                                             const char8 * const defaultDataSourceNameIn);
 
+
     /**
      * @brief Adds all the GAM signals to the Functions database and adds all the DataSource signals to the DataSource database.
      * @details Looks for all the GAM instances and calls GAM::AddSignals. The GAM name is stored as a qualified name (i.e. each recursion into

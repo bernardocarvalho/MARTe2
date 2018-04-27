@@ -55,7 +55,8 @@ uint32 RealTimeApplication::index = 1u;
 /*---------------------------------------------------------------------------*/
 
 RealTimeApplication::RealTimeApplication() :
-        ReferenceContainer(), MessageI() {
+        ReferenceContainer(),
+        MessageI() {
     filter = ReferenceT<RegisteredMethodsMessageFilter>(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     filter->SetDestination(this);
     ErrorManagement::ErrorType ret = MessageI::InstallMessageFilter(filter);
@@ -261,7 +262,8 @@ bool RealTimeApplication::ConfigureApplication() {
     return ret;
 }
 
-bool RealTimeApplication::ConfigureApplication(ConfigurationDatabase &functionsDatabaseIn, ConfigurationDatabase &dataDatabaseIn) {
+bool RealTimeApplication::ConfigureApplication(ConfigurationDatabase &functionsDatabaseIn,
+                                               ConfigurationDatabase &dataDatabaseIn) {
 
     RealTimeApplicationConfigurationBuilder configuration(*this, "DDB1");
     bool ret = configuration.Set(functionsDatabaseIn, dataDatabaseIn);
@@ -525,6 +527,25 @@ bool RealTimeApplication::GetStates(ReferenceContainer &states) const {
 
 uint32 RealTimeApplication::GetIndex() {
     return index;
+}
+
+void RealTimeApplication::Purge(ReferenceContainer &purgeList) {
+    if (statesContainer.IsValid()) {
+        statesContainer->Purge(purgeList);
+    }
+    if (functionsContainer.IsValid()) {
+        functionsContainer->Purge(purgeList);
+    }
+    if (scheduler.IsValid()) {
+        scheduler->Purge(purgeList);
+    }
+    if (dataSourceContainer.IsValid()) {
+        dataSourceContainer->Purge(purgeList);
+    }
+    statefulsInData.Purge(purgeList);
+    functionsDatabase.Purge(purgeList);
+    dataSourcesDatabase.Purge(purgeList);
+    ReferenceContainer::Purge(purgeList);
 }
 
 CLASS_REGISTER(RealTimeApplication, "1.0")

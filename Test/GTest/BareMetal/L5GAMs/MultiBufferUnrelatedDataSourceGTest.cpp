@@ -86,29 +86,9 @@ TEST(MultiBufferUnrelatedDataSourceGTest,TestGetInputBrokers) {
     ASSERT_TRUE(test.TestGetInputBrokers());
 }
 
-TEST(MultiBufferUnrelatedDataSourceGTest,TestGetInputBrokers_SuggestedBroker) {
-    MultiBufferUnrelatedDataSourceTest test;
-    ASSERT_TRUE(test.TestGetInputBrokers_SuggestedBroker());
-}
-
-TEST(MultiBufferUnrelatedDataSourceGTest,TestGetInputBrokers_False_InvalidSuggestedBroker) {
-    MultiBufferUnrelatedDataSourceTest test;
-    ASSERT_TRUE(test.TestGetInputBrokers_False_InvalidSuggestedBroker());
-}
-
 TEST(MultiBufferUnrelatedDataSourceGTest,TestGetOutputBrokers) {
     MultiBufferUnrelatedDataSourceTest test;
     ASSERT_TRUE(test.TestGetOutputBrokers());
-}
-
-TEST(MultiBufferUnrelatedDataSourceGTest,TestGetOutputBrokers_SuggestedBroker) {
-    MultiBufferUnrelatedDataSourceTest test;
-    ASSERT_TRUE(test.TestGetOutputBrokers_SuggestedBroker());
-}
-
-TEST(MultiBufferUnrelatedDataSourceGTest,TestGetOutputBrokers_False_InvalidSuggestedBroker) {
-    MultiBufferUnrelatedDataSourceTest test;
-    ASSERT_TRUE(test.TestGetOutputBrokers_False_InvalidSuggestedBroker());
 }
 
 TEST(MultiBufferUnrelatedDataSourceGTest,TestSetConfiguredDatabase) {
@@ -124,6 +104,26 @@ TEST(MultiBufferUnrelatedDataSourceGTest,TestSetConfiguredDatabase_False_Interna
 TEST(MultiBufferUnrelatedDataSourceGTest,TestSetConfiguredDatabase_False_InternalTimeStamp_Produced) {
     MultiBufferUnrelatedDataSourceTest test;
     ASSERT_TRUE(test.TestSetConfiguredDatabase_False_InternalTimeStamp_Produced());
+}
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestSetConfiguredDatabase_False_ErrorCheck_BadType) {
+    MultiBufferUnrelatedDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_False_ErrorCheck_BadType());
+}
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestSetConfiguredDatabase_False_ErrorCheck_Produced) {
+    MultiBufferUnrelatedDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_False_ErrorCheck_Produced());
+}
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestTerminateRead) {
+    MultiBufferUnrelatedDataSourceTest test;
+    ASSERT_TRUE(test.TestTerminateRead());
+}
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestTerminateWrite) {
+    MultiBufferUnrelatedDataSourceTest test;
+    ASSERT_TRUE(test.TestTerminateWrite());
 }
 
 

@@ -82,6 +82,8 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
     if (ret) {
         uint32 totalNumberOfElements = (numberOfCopies * numberOfBuffers);
         copyTable = new MemoryMapBrokerCopyTableEntry[totalNumberOfElements];
+        ret = (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *));
+
     }
     uint32 functionIdx = 0u;
     if (ret) {
@@ -94,7 +96,7 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
     //The same signal can be copied from different ranges. A MemoryMapBrokerCopyTableEntry is added for each signal range.
     uint32 c = 0u;
     uint32 n;
-    for (uint32 c0 = 0u; c0 < numberOfBuffers; c0++) {
+    for (uint32 c0 = 0u; (c0 < numberOfBuffers) && (ret); c0++) {
         for (n = 0u; (n < functionNumberOfSignals) && (ret); n++) {
             if (dataSource->IsSupportedBroker(direction, functionIdx, n, brokerClassName)) {
                 uint32 numberOfByteOffsets = 0u;
@@ -105,6 +107,10 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                 if (ret) {
                     ret = dataSource->GetFunctionSignalAlias(direction, functionIdx, n, functionSignalName);
                 }
+                uint32 samples = 0u;
+                if (ret) {
+                    ret = dataSource->GetFunctionSignalSamples(direction, functionIdx, n, samples);
+                }
                 uint32 signalIdx = 0u;
                 if (ret) {
                     ret = dataSource->GetSignalIndex(signalIdx, functionSignalName.Buffer());
@@ -114,11 +120,15 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                 //Take into account different ranges for the same signal
                 uint32 bo;
                 for (bo = 0u; (bo < numberOfByteOffsets) && (ret); bo++) {
-                    if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
-                        copyTable[c].copySize = GetCopyByteSize(c%(numberOfCopies));
-                        copyTable[c].gamPointer = GetFunctionPointer(c%(numberOfCopies));
+                    //in this case only one node with the whole size
+                    if (numberOfByteOffsets == 1u) {
+                        samples = 1;
+                    }
+                    for (uint32 h = 0u; (h < samples) && (ret); h++) {
+                        copyTable[c].copySize = GetCopyByteSize(c % (numberOfCopies));
+                        copyTable[c].gamPointer = GetFunctionPointer(c % (numberOfCopies));
                         copyTable[c].type = signalType;
-                        uint32 dataSourceOffset = GetCopyOffset(c%(numberOfCopies));
+                        uint32 dataSourceOffset = GetCopyOffset(c % (numberOfCopies));
 
                         void *dataSourceSignalAddress;
                         ret = dataSource->GetSignalMemoryBuffer(signalIdx, c0, dataSourceSignalAddress);
@@ -127,8 +137,9 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                             dataSourceSignalAddressChar = &dataSourceSignalAddressChar[dataSourceOffset];
                             copyTable[c].dataSourcePointer = reinterpret_cast<void *>(dataSourceSignalAddressChar);
                         }
+                        c++;
                     }
-                    c++;
+
                 }
             }
         }

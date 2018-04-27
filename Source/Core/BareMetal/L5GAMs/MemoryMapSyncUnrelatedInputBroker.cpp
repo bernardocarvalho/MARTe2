@@ -57,22 +57,14 @@ MemoryMapSyncUnrelatedInputBroker::~MemoryMapSyncUnrelatedInputBroker() {
 }
 
 bool MemoryMapSyncUnrelatedInputBroker::Execute() {
-    uint32 n;
-    /*lint -e{613} null pointer checked before.*/
-    uint32 i = dataSource->GetCurrentBuffer();
-    dataSourceCust->Synchronise();
-    for (n = 0u; (n < numberOfCopies); n++) {
-        //REPORT_ERROR(ErrorManagement::Warning, "Executing...");
-        if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 0);
-            if (offset >= 0) {
-                uint32 dataSourceIndex = ((i * numberOfCopies) + n);
-                MemoryOperationsHelper::Copy(copyTable[n].gamPointer, &(((uint8 *) (copyTable[dataSourceIndex].dataSourcePointer))[offset]), copyTable[n].copySize);
-                dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset), 0);
-            }
-        }
+
+    bool ret = dataSourceCust->Synchronise();
+
+    if (ret) {
+        ret = MemoryMapUnrelatedInputBroker::Execute();
     }
-    return true;
+
+    return ret;
 }
 CLASS_REGISTER(MemoryMapSyncUnrelatedInputBroker, "1.0")
 }

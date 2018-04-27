@@ -139,6 +139,17 @@ public:
     bool TestGetSignalDefaultValueType();
 
     /**
+     * @brief Tests the GetSignalPacketNumberOfChunks method
+     */
+    bool TestGetSignalPacketNumberOfChunks();
+
+    /**
+     * @brief Tests the TestGetSignalPacketChunkSize method
+     */
+    bool TestGetSignalPacketChunkSize();
+
+
+    /**
      * @brief Tests the GetNumberOfFunctions method.
      */
     bool TestGetNumberOfFunctions();

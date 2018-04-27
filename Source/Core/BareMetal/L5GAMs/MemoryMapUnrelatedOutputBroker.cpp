@@ -48,6 +48,10 @@ MemoryMapUnrelatedOutputBroker::MemoryMapUnrelatedOutputBroker() :
 
     dataSourceCust = NULL_PTR(MultiBufferUnrelatedDataSource *);
     signalIdxArr = NULL_PTR(uint32 *);
+    flag = NULL_PTR(uint32 *);
+    samples = NULL_PTR(uint32 *);
+    maxOffset = NULL_PTR(uint32 *);
+
 }
 
 MemoryMapUnrelatedOutputBroker::~MemoryMapUnrelatedOutputBroker() {
@@ -55,6 +59,19 @@ MemoryMapUnrelatedOutputBroker::~MemoryMapUnrelatedOutputBroker() {
         delete[] signalIdxArr;
         signalIdxArr = NULL_PTR(uint32 *);
     }
+    if (flag != NULL_PTR(uint32 *)) {
+        delete[] flag;
+        flag = NULL_PTR(uint32 *);
+    }
+    if (samples != NULL_PTR(uint32 *)) {
+        delete[] samples;
+        samples = NULL_PTR(uint32 *);
+    }
+    if (maxOffset != NULL_PTR(uint32 *)) {
+        delete[] maxOffset;
+        maxOffset = NULL_PTR(uint32 *);
+    }
+
     dataSourceCust = NULL_PTR(MultiBufferUnrelatedDataSource *);
 
 }
@@ -66,13 +83,28 @@ bool MemoryMapUnrelatedOutputBroker::Execute() {
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies); n++) {
             /*lint -e{613} null pointer checked before.*/
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], 0);
+            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], samples[n], flag[n]);
             if (offset >= 0) {
+
+                uint32 allowedSize = copyTable[n].copySize;
+                //trap the circular buffer exception
+                if ((GetCopyOffset(n) + offset) >= maxOffset[n]) {
+                    offset = 0;
+                }
+                if (allowedSize > (maxOffset[n] - (GetCopyOffset(n) + offset))) {
+                    allowedSize = (maxOffset[n] - offset);
+                    uint32 dataSourceIndex = ((i * numberOfCopies) + n);
+                    (void) MemoryOperationsHelper::Copy(&((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]),
+                                                        copyTable[n].gamPointer, allowedSize);
+                    offset = 0;
+                    allowedSize = (copyTable[n].copySize - allowedSize);
+                }
+
                 uint32 dataSourceIndex = ((i * numberOfCopies) + n);
                 (void) MemoryOperationsHelper::Copy(&((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]),
-                                                    copyTable[n].gamPointer, copyTable[n].copySize);
+                                                    copyTable[n].gamPointer, allowedSize);
                 /*lint -e{613} null pointer checked before.*/
-                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset), 0);
+                dataSourceCust->TerminateWrite(signalIdxArr[n], static_cast<uint32>(offset), samples[n], flag[n]);
             }
         }
     }
@@ -84,9 +116,11 @@ bool MemoryMapUnrelatedOutputBroker::Init(const SignalDirection direction,
                                           const char8 * const functionName,
                                           void * const gamMemoryAddress) {
     dataSource = &dataSourceIn;
-
-    bool ret = InitFunctionPointers(direction, dataSourceIn, functionName, gamMemoryAddress);
-
+    dataSourceCust = dynamic_cast<MultiBufferUnrelatedDataSource *>(dataSource);
+    bool ret = (dataSourceCust != NULL_PTR(MultiBufferUnrelatedDataSource *));
+    if (ret) {
+        ret = InitFunctionPointers(direction, dataSourceIn, functionName, gamMemoryAddress);
+    }
     const ClassProperties * properties = GetClassProperties();
     if (ret) {
         ret = (properties != NULL);
@@ -105,10 +139,23 @@ bool MemoryMapUnrelatedOutputBroker::Init(const SignalDirection direction,
         uint32 totalNumberOfElements = (numberOfCopies * numberOfBuffers);
         /*lint -e{423} copyTable is freed in MemoryMapBroker destructor.*/
         copyTable = new MemoryMapBrokerCopyTableEntry[totalNumberOfElements];
-        ret = (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *));
+        ret = (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry*));
         if (ret) {
             signalIdxArr = new uint32[numberOfCopies];
-            ret = (signalIdxArr != NULL_PTR(uint32 *));
+            ret = (signalIdxArr != NULL_PTR(uint32*));
+        }
+        if (ret) {
+            flag = new uint32[numberOfCopies];
+            ret = (flag != NULL_PTR(uint32*));
+        }
+        if (ret) {
+            samples = new uint32[numberOfCopies];
+            ret = (samples != NULL_PTR(uint32*));
+        }
+
+        if (ret) {
+            maxOffset = new uint32[numberOfCopies];
+            ret = (maxOffset != NULL_PTR(uint32*));
         }
     }
     uint32 functionIdx = 0u;
@@ -138,6 +185,24 @@ bool MemoryMapUnrelatedOutputBroker::Init(const SignalDirection direction,
                     ret = dataSource->GetSignalIndex(signalIdx, functionSignalName.Buffer());
                     signalType = dataSource->GetSignalType(signalIdx);
                 }
+                uint32 trigger = 0u;
+                if (ret) {
+                    ret = dataSource->GetFunctionSignalTrigger(direction, functionIdx, n, trigger);
+                }
+                uint32 nSamples;
+                if (ret) {
+                    ret = dataSource->GetFunctionSignalSamples(direction, functionIdx, n, nSamples);
+                }
+                uint32 maxSignalOffset;
+                if (ret) {
+                    maxSignalOffset = dataSourceCust->GetNumberOfInternalBuffers();
+                }
+
+                if (ret) {
+                    uint32 byteSize;
+                    ret = dataSourceCust->GetSignalByteSize(signalIdx, byteSize);
+                    maxSignalOffset *= byteSize;
+                }
                 //get the number of buffers
                 //Take into account different ranges for the same signal
                 uint32 bo;
@@ -149,6 +214,9 @@ bool MemoryMapUnrelatedOutputBroker::Init(const SignalDirection direction,
                         uint32 dataSourceOffset = GetCopyOffset(c % (numberOfCopies));
                         /*lint -e{613} null pointer checked before.*/
                         signalIdxArr[c % (numberOfCopies)] = signalIdx;
+                        flag[c % (numberOfCopies)] = trigger;
+                        samples[c % (numberOfCopies)] = nSamples;
+                        maxOffset[c % (numberOfCopies)] = maxSignalOffset;
                         void *dataSourceSignalAddress;
                         ret = dataSource->GetSignalMemoryBuffer(signalIdx, c0, dataSourceSignalAddress);
                         char8 *dataSourceSignalAddressChar = reinterpret_cast<char8 *>(dataSourceSignalAddress);
@@ -163,12 +231,9 @@ bool MemoryMapUnrelatedOutputBroker::Init(const SignalDirection direction,
         }
     }
 
-    if (ret) {
-        dataSourceCust = dynamic_cast<MultiBufferUnrelatedDataSource *>(dataSource);
-        ret = (dataSourceCust != NULL_PTR(MultiBufferUnrelatedDataSource *));
-    }
     return ret;
 }
+
 CLASS_REGISTER(MemoryMapUnrelatedOutputBroker, "1.0")
 
 }

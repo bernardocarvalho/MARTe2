@@ -100,10 +100,12 @@ void *BrokerI::GetFunctionPointer(const uint32 copyIdx) const {
     return ret;
 }
 
+#if 0
+
 bool BrokerI::InitFunctionPointers(const SignalDirection direction,
-                                   DataSourceI &dataSource,
-                                   const char8 * const functionName,
-                                   void * const gamMemoryAddress) {
+        DataSourceI &dataSource,
+        const char8 * const functionName,
+        void * const gamMemoryAddress) {
 
     //Need to check the broker class name. This function loops through all the signals of the
     //functionName and should only react to the signals which are related to this BrokerI instance.
@@ -178,6 +180,131 @@ bool BrokerI::InitFunctionPointers(const SignalDirection direction,
                         c++;
                     }
                     memoryOffset += copySize;
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+#endif
+
+bool BrokerI::InitFunctionPointers(const SignalDirection direction,
+                                   DataSourceI &dataSource,
+                                   const char8 * const functionName,
+                                   void * const gamMemoryAddress) {
+
+    //Need to check the broker class name. This function loops through all the signals of the
+    //functionName and should only react to the signals which are related to this BrokerI instance.
+    //Get the class name from the ClassProperties
+    const ClassProperties * properties = GetClassProperties();
+    bool ret = (properties != NULL);
+    const char8* brokerClassName = NULL_PTR(const char8*);
+    if (ret) {
+        brokerClassName = properties->GetName();
+        ret = (brokerClassName != NULL);
+    }
+    //Find the function
+    uint32 functionIdx = 0u;
+    if (ret) {
+        ret = dataSource.GetFunctionIndex(functionIdx, functionName);
+    }
+    //For this function, how many signals in this direction
+    uint32 functionNumberOfSignals = 0u;
+    if (ret) {
+        ret = dataSource.GetFunctionNumberOfSignals(direction, functionIdx, functionNumberOfSignals);
+    }
+    numberOfCopies = 0u;
+    uint32 numberOfByteOffsets = 0u;
+    uint32 samples = 0u;
+    uint32 i;
+    for (i = 0u; (i < functionNumberOfSignals) && (ret); i++) {
+        if (dataSource.IsSupportedBroker(direction, functionIdx, i, brokerClassName)) {
+            ret = dataSource.GetFunctionSignalNumberOfByteOffsets(direction, functionIdx, i, numberOfByteOffsets);
+
+            if (ret) {
+                ret = dataSource.GetFunctionSignalSamples(direction, functionIdx, i, samples);
+            }
+
+            if (ret) {
+                //One copy for each signal but each signal might want to copy several pieces (i.e. offsets)
+                if (numberOfByteOffsets > 1u) {
+                    numberOfCopies += (numberOfByteOffsets * samples);
+                }
+                else {
+                    numberOfCopies++;
+                }
+            }
+        }
+    }
+    if (numberOfCopies > 0u) {
+        functionSignalPointers = new void*[numberOfCopies];
+        copyByteSize = new uint32[numberOfCopies];
+        copyOffset = new uint32[numberOfCopies];
+
+        uint32 memoryOffset = 0u;
+        uint32 samples = 0u;
+        uint32 byteSize = 0u;
+        uint32 c = 0u;
+        //The same signal can be copied from different ranges. An entry is added for each signal range.
+        // The pointer of the gam memory for this DataSource!
+        ret = (gamMemoryAddress != NULL_PTR(void *));
+
+        for (i = 0u; (i < functionNumberOfSignals) && (ret); i++) {
+            if (dataSource.IsSupportedBroker(direction, functionIdx, i, brokerClassName)) {
+
+                ret = dataSource.GetFunctionSignalNumberOfByteOffsets(direction, functionIdx, i, numberOfByteOffsets);
+
+                if (ret) {
+                    ret = dataSource.GetFunctionSignalGAMMemoryOffset(direction, functionIdx, i, memoryOffset);
+                }
+
+                if (ret) {
+                    ret = dataSource.GetFunctionSignalsByteSize(direction, functionIdx, byteSize);
+                }
+                if (ret) {
+                    ret = dataSource.GetFunctionSignalSamples(direction, functionIdx, i, samples);
+                }
+                if (ret) {
+                    if (samples == 0u) {
+                        samples = 1u;
+                    }
+                }
+                if (numberOfByteOffsets == 1u) {
+                    uint32 offsetStart;
+                    uint32 copySize;
+                    ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, 0u, offsetStart, copySize);
+                    if (ret) {
+                        char8 *gamMemoryCharAddress = reinterpret_cast<char8 *>(gamMemoryAddress);
+                        //gamMemoryCharAddress += memoryOffset;
+                        copyByteSize[c] = copySize * samples;
+                        copyOffset[c] = offsetStart;
+                        functionSignalPointers[c] = reinterpret_cast<void *>(&gamMemoryCharAddress[memoryOffset]);
+                        //in the gam shift the sub-block size
+                        c++;
+                    }
+                }
+                else {
+                    //Take into account  different ranges for the same signal
+                    for (uint32 j = 0u; (j < numberOfByteOffsets) && (ret); j++) {
+                        uint32 offsetStart;
+                        uint32 copySize;
+                        ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, j, offsetStart, copySize);
+                        if (ret) {
+                            char8 *gamMemoryCharAddress = reinterpret_cast<char8 *>(gamMemoryAddress);
+                            //gamMemoryCharAddress += memoryOffset;
+                            for (uint32 h = 0u; h < samples; h++) {
+                                copyByteSize[c] = copySize;
+                                copyOffset[c] = offsetStart;
+                                functionSignalPointers[c] = reinterpret_cast<void *>(&gamMemoryCharAddress[memoryOffset]);
+                                c++;
+                                //skip the whole sample
+                                offsetStart += byteSize;
+                                //in the gam shift the sub-block siFze
+                                memoryOffset += copySize;
+                            }
+                        }
+                    }
                 }
             }
         }

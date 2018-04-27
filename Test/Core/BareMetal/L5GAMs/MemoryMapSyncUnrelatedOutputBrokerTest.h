@@ -1,7 +1,7 @@
 /**
- * @file MultiBufferUnrelatedDataSourceTest.h
- * @brief Header file for class MultiBufferUnrelatedDataSourceTest
- * @date Apr 16, 2018
+ * @file MemoryMapSyncUnrelatedOutputBrokerTest.h
+ * @brief Header file for class MemoryMapSyncUnrelatedOutputBrokerTest
+ * @date 27 apr 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MultiBufferUnrelatedDataSourceTest
+ * @details This header file contains the declaration of the class MemoryMapSyncUnrelatedOutputBrokerTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MULTIBUFFERUNRELATEDDATASOURCETEST_H_
-#define MULTIBUFFERUNRELATEDDATASOURCETEST_H_
+#ifndef MEMORYMAPSYNCUNRELATEDOUTPUTBROKERTEST_H_
+#define MEMORYMAPSYNCUNRELATEDOUTPUTBROKERTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,62 +31,25 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-
-#include "MultiBufferUnrelatedDataSource.h"
-
+#include "MemoryMapSyncUnrelatedOutputBroker.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 using namespace MARTe;
 
-
-class MultiBufferUnrelatedDataSourceTest {
+class MemoryMapSyncUnrelatedOutputBrokerTest {
 public:
+    MemoryMapSyncUnrelatedOutputBrokerTest();
+    virtual ~MemoryMapSyncUnrelatedOutputBrokerTest();
+    bool TestConstructor();
 
-    MultiBufferUnrelatedDataSourceTest();
-
-    ~MultiBufferUnrelatedDataSourceTest();
-
-    bool TestInitialise();
-
-    bool TestInitialise_StandardHeapDefault();
-
-    bool TestInitialise_False_NoNumberOfBuffers();
-
-    bool TestInitialise_False_InvalidHeap();
-
-    bool TestAllocateMemory();
-
-    bool TestGetNumberOfMemoryBuffers();
-
-    bool TestGetSignalMemoryBuffer();
-
-    bool TestGetBrokerName();
-
-    bool TestGetInputBrokers();
-
-    bool TestGetOutputBrokers();
-
-    bool TestSetConfiguredDatabase();
-
-    bool TestSetConfiguredDatabase_False_InternalTimeStamp_BadType();
-
-    bool TestSetConfiguredDatabase_False_InternalTimeStamp_Produced();
-
-    bool TestSetConfiguredDatabase_False_ErrorCheck_BadType();
-
-    bool TestSetConfiguredDatabase_False_ErrorCheck_Produced();
-
-    bool TestTerminateRead();
-
-    bool TestTerminateWrite();
-
+    bool TestExecute();
 };
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MULTIBUFFERUNRELATEDDATASOURCETEST_H_ */
+#endif /* MEMORYMAPSYNCUNRELATEDOUTPUTBROKERTEST_H_ */
 

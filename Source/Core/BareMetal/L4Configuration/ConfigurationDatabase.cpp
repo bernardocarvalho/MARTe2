@@ -79,7 +79,8 @@ void ConfigurationDatabase::Purge() {
     rootNode->Purge();
 }
 
-bool ConfigurationDatabase::Write(const char8 * const name, const AnyType &value) {
+bool ConfigurationDatabase::Write(const char8 * const name,
+                                  const AnyType &value) {
 
     bool ok = false;
     // call conversion Object-StructuredDataI or StructuredDataI-StructuredDataI
@@ -189,7 +190,8 @@ bool ConfigurationDatabase::MoveToRoot() {
     return ok;
 }
 
-bool ConfigurationDatabase::Read(const char8 * const name, const AnyType &value) {
+bool ConfigurationDatabase::Read(const char8 * const name,
+                                 const AnyType &value) {
 
     bool ok = false;
     // call conversion Object-StructuredDataI or StructuredDataI-StructuredDataI
@@ -375,11 +377,19 @@ bool ConfigurationDatabase::Delete(const char8 * const name) {
     return ok;
 }
 
+bool ConfigurationDatabase::Link(StructuredDataI &destination) {
+    uint32 numberOfChildren = GetNumberOfChildren();
+    bool ok = true;
+    for (uint32 i = 0u; (i < numberOfChildren) && (ok); i++) {
+        ok = destination.AddToCurrentNode(currentNode->Get(i));
+    }
+    return ok;
+}
+
 bool ConfigurationDatabase::AddToCurrentNode(Reference node) {
-    ReferenceT<ReferenceContainer> nodeToAdd = node;
-    bool ok = nodeToAdd.IsValid();
+    bool ok = node.IsValid();
     if (ok) {
-        ok = currentNode->Insert(nodeToAdd);
+        ok = currentNode->Insert(node);
     }
     return ok;
 }
@@ -411,6 +421,15 @@ ReferenceT<ReferenceContainer> ConfigurationDatabase::GetCurrentNode() const {
 
 void ConfigurationDatabase::SetCurrentNodeAsRootNode() {
     rootNode = currentNode;
+}
+
+void ConfigurationDatabase::Purge(ReferenceContainer &purgeList) {
+    if (currentNode.IsValid()) {
+        currentNode->Purge(purgeList);
+    }
+    if (rootNode.IsValid()) {
+        rootNode->Purge(purgeList);
+    }
 }
 
 CLASS_REGISTER(ConfigurationDatabase, "1.0")

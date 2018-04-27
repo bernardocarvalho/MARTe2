@@ -217,7 +217,7 @@ bool GAMSchedulerI::InsertInputBrokers(ReferenceT<GAM> gam,
                                        const char8 * const gamFullName,
                                        const uint32 stateIdx,
                                        const uint32 threadIdx,
-                                       uint32 &executableIdx) const{
+                                       uint32 &executableIdx) const {
 
     //add input brokers
     StreamString timeSignalName = gamFullName;
@@ -425,6 +425,13 @@ uint32 GAMSchedulerI::GetNumberOfExecutables(const char8 * const stateName,
 ScheduledState * const * GAMSchedulerI::GetSchedulableStates() {
     return scheduledStates;
 
+}
+
+void GAMSchedulerI::Purge(ReferenceContainer &purgeList) {
+    if (timingDataSource.IsValid()) {
+        timingDataSource->Purge(purgeList);
+    }
+    ReferenceContainer::Purge(purgeList);
 }
 
 }

@@ -98,6 +98,12 @@ RealTimeState    ();
      */
     uint32 GetNumberOfStatefuls();
 
+
+    /**
+     * @see ReferenceContainer::Purge()
+     */
+    virtual void Purge(ReferenceContainer &purgeList);
+
 private:
 
     /**

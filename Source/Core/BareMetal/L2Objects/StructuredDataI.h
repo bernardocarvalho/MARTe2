@@ -193,6 +193,14 @@ public:
     virtual bool CreateRelative(const char8 * const path) = 0;
 
     /**
+     * @brief Links the content of the current node to the provided destination.
+     * @details All the references belonging to this node will be added to \a destination.
+     * @param[out] destination where the database will be linked to.
+     * @return true if the link is successful.
+     */
+    virtual bool Link(StructuredDataI &destination) = 0;
+
+    /**
      * @brief Deletes the node with \a name under the current node (and as a consequence all the nodes underneath).
      * @param[in] name the name of the node to be deleted.
      * @return true if the current node is successfully removed.
