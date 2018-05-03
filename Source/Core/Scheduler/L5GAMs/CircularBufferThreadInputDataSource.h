@@ -95,7 +95,7 @@ protected:
     uint8 *isRefreshed;
     uint32 *lastReadBuffer;
     uint32 *lastReadBuffer_1;
-    uint8 flags; //bits: 0-GetLatest | 1-IsSync
+    uint8 *flags; //bits: 0-GetLatest | 1-IsSync
     uint32 *triggerAfterNPackets;
     uint32 *nBrokerOpPerSignal;
     uint32 *nBrokerOpPerSignalCounter;

@@ -95,6 +95,21 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestExecute) {
     ASSERT_TRUE(test.TestExecute());
 }
 
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_SameSignalDifferentModes) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_SameSignalDifferentModes());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_SameSignalDifferentModes1) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_SameSignalDifferentModes1());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_ErrorCheck) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_ErrorCheck());
+}
+
 TEST(CircularBufferThreadInputDataSourceGTest,TestPurge) {
     CircularBufferThreadInputDataSourceTest test;
     ASSERT_TRUE(test.TestPurge());

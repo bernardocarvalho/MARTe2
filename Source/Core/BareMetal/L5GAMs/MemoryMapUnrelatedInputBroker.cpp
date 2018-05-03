@@ -83,21 +83,22 @@ bool MemoryMapUnrelatedInputBroker::Execute() {
             int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], samples[n], flag[n]);
             if (offset >= 0) {
                 uint32 allowedSize = copyTable[n].copySize;
+                uint32 gamOffset = 0u;
                 //trap the circular buffer exception
                 if ((GetCopyOffset(n) + offset) >= maxOffset[n]) {
-                    offset = 0;
+                    offset = (offset - maxOffset[n]);
                 }
                 if (allowedSize > (maxOffset[n] - (GetCopyOffset(n) + offset))) {
                     allowedSize = (maxOffset[n] - offset);
                     uint32 dataSourceIndex = ((i * numberOfCopies) + n);
-                    (void) MemoryOperationsHelper::Copy(copyTable[n].gamPointer,
+                    (void) MemoryOperationsHelper::Copy(&(reinterpret_cast<uint8 *>(copyTable[n].gamPointer)[gamOffset]),
                                                         &((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]), allowedSize);
-                    offset = 0;
+                    offset = (offset - maxOffset[n]) + allowedSize;
+                    gamOffset = allowedSize;
                     allowedSize = (copyTable[n].copySize - allowedSize);
                 }
-
                 uint32 dataSourceIndex = ((i * numberOfCopies) + n);
-                (void) MemoryOperationsHelper::Copy(copyTable[n].gamPointer,
+                (void) MemoryOperationsHelper::Copy(&(reinterpret_cast<uint8 *>(copyTable[n].gamPointer)[gamOffset]),
                                                     &((reinterpret_cast<uint8 *>(copyTable[dataSourceIndex].dataSourcePointer))[offset]), allowedSize);
                 /*lint -e{613} null pointer checked before.*/
                 dataSourceCust->TerminateRead(signalIdxArr[n], static_cast<uint32>(offset), samples[n], flag[n]);
@@ -193,21 +194,37 @@ bool MemoryMapUnrelatedInputBroker::Init(const SignalDirection direction,
                 if (ret) {
                     maxSignalOffset = dataSourceCust->GetNumberOfInternalBuffers();
                 }
-
+                uint32 byteSize;
                 if (ret) {
-                    uint32 byteSize;
-                    ret = dataSourceCust->GetSignalByteSize(signalIdx, byteSize);
+                    ret = dataSource->GetSignalByteSize(signalIdx, byteSize);
                     maxSignalOffset *= byteSize;
+                }
+
+                bool noRanges = true;
+                if (ret) {
+                    uint32 offsetStart;
+                    uint32 copySize;
+                    ret = dataSource->GetFunctionSignalByteOffsetInfo(direction, functionIdx, n, 0u, offsetStart, copySize);
+                    if (ret) {
+                        noRanges = ((numberOfByteOffsets == 1u) && (copySize == byteSize));
+                    }
                 }
                 //get the number of buffers
                 //Take into account different ranges for the same signal
                 uint32 bo;
                 for (bo = 0u; (bo < numberOfByteOffsets) && (ret); bo++) {
-                    if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
+                    //in this case only one node with the whole size
+                    uint32 nFakeSamples = nSamples;
+                    if (noRanges) {
+                        nFakeSamples = 1;
+                    }
+                    for (uint32 h = 0u; (h < nFakeSamples) && (ret); h++) {
+
                         copyTable[c].copySize = GetCopyByteSize(c % (numberOfCopies));
                         copyTable[c].gamPointer = GetFunctionPointer(c % (numberOfCopies));
                         copyTable[c].type = signalType;
                         uint32 dataSourceOffset = GetCopyOffset(c % (numberOfCopies));
+
                         /*lint -e{613} null pointer checked before.*/
                         signalIdxArr[c % (numberOfCopies)] = signalIdx;
                         flag[c % (numberOfCopies)] = trigger;
@@ -220,8 +237,9 @@ bool MemoryMapUnrelatedInputBroker::Init(const SignalDirection direction,
                             dataSourceSignalAddressChar = &dataSourceSignalAddressChar[dataSourceOffset];
                             copyTable[c].dataSourcePointer = reinterpret_cast<void *>(dataSourceSignalAddressChar);
                         }
+
+                        c++;
                     }
-                    c++;
                 }
             }
         }

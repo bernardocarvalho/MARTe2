@@ -36,7 +36,7 @@
 #include "ObjectRegistryDatabase.h"
 #include "RealTimeApplication.h"
 #include "StandardParser.h"
-#include "MemoryMapUnrelatedOutputBroker.h"
+#include "MemoryMapUnrelatedInputBroker.h"
 #include "MemoryMapUnrelatedOutputBroker.h"
 #include "stdio.h"
 
@@ -69,15 +69,24 @@ CircularBufferThreadInputDataSourceTestDS    ();
 
     virtual uint32 GetNumberOfChannels();
 
+    virtual void TerminateRead(const uint32 signalIdx,
+            const uint32 offset,
+            const uint32 samples,
+            const uint32 flag);
+
     virtual FastPollingMutexSem *GetMutex();
+
+    void ContinueRead();
 
 private:
     uint32 counter;
+    volatile int32 continueRead;
 
 };
 
 CircularBufferThreadInputDataSourceTestDS::CircularBufferThreadInputDataSourceTestDS() {
     counter = 0u;
+    continueRead = 0;
 }
 
 CircularBufferThreadInputDataSourceTestDS::~CircularBufferThreadInputDataSourceTestDS() {
@@ -117,14 +126,38 @@ bool CircularBufferThreadInputDataSourceTestDS::DriverRead(char8 * const bufferT
                                                            const uint32 signalIdx) {
     //give time to sync
     if (signalIdx == 0u) {
-        Sleep::Sec(1.0);
+        while (continueRead == 0) {
+            Sleep::MSec(5);
+        }
+        Sleep::MSec(500);
     }
+
+    printf("WRITE %d %d\n", signalIdx, continueRead);
     uint32 *bufferPtr = (uint32 *) bufferToFill;
     for (uint32 i = 0u; i < sizeToRead / 4; i++) {
         bufferPtr[i] = counter;
         counter++;
     }
+
     return true;
+}
+
+void CircularBufferThreadInputDataSourceTestDS::ContinueRead() {
+
+    Atomic::TestAndSet(&continueRead);
+}
+
+void CircularBufferThreadInputDataSourceTestDS::TerminateRead(const uint32 signalIdx,
+                                                              const uint32 offset,
+                                                              const uint32 samples,
+                                                              const uint32 flag) {
+    CircularBufferThreadInputDataSource::TerminateRead(signalIdx, offset, samples, flag);
+
+    if (signalIdx == 0) {
+        Atomic::Decrement(&continueRead);
+
+        printf("HERE %d %d\n", signalIdx, continueRead);
+    }
 }
 
 FastPollingMutexSem *CircularBufferThreadInputDataSourceTestDS::GetMutex() {
@@ -156,22 +189,6 @@ CircularBufferThreadInputDataSourceTestGAM1::CircularBufferThreadInputDataSource
 
 bool CircularBufferThreadInputDataSourceTestGAM1::Setup() {
 
-    uint32 numberOfSignals = GetNumberOfOutputSignals();
-
-    totalSize = 0u;
-    for (uint32 i = 0u; i < numberOfSignals; i++) {
-        uint32 byteSize;
-        GetSignalByteSize(OutputSignals, i, byteSize);
-        uint32 nSamples = 0u;
-        GetSignalNumberOfSamples(OutputSignals, i, nSamples);
-        totalSize += (byteSize * nSamples);
-    }
-
-    uint32 *mem = (uint32 *) GetOutputSignalsMemory();
-    for (uint32 i = 0u; i < (totalSize / 4); i++) {
-        mem[i] = i;
-    }
-
     return true;
 }
 
@@ -200,7 +217,7 @@ static const char8 * const config = ""
         "               Signal1 = {"
         "                   DataSource = Drv1"
         "                   Type = uint32"
-        "                   Trigger = 0"
+        "                   Trigger = 2"
         "                   Samples = 3"
         "                   Frequency = 0"
         "               }"
@@ -210,13 +227,13 @@ static const char8 * const config = ""
         "                   NumberOfDimensions = 1"
         "                   NumberOfElements = 10"
         "                   Ranges = {{0,0}, {2,2}}"
-        "                   Trigger = 3"
+        "                   Trigger = 1"
         "                   Samples = 2"
         "               }"
         "               Signal3 = {"
         "                   DataSource = Drv1"
         "                   Type = uint32"
-        "                   Trigger = 3"
+        "                   Trigger = 1"
         "                   Samples = 4"
         "               }"
         "            }"
@@ -369,10 +386,17 @@ bool CircularBufferThreadInputDataSourceTest::TestGetBrokerName() {
         float32 freq = 0.;
         cdb.Write("Frequency", freq);
         const char8* brokerName = dataSource->GetBrokerName(cdb, InputSignals);
-        ret = StringHelper::Compare(brokerName, "MemoryMapUnrelatedInputBroker") == 0;
+        ret = StringHelper::Compare(brokerName, "MemoryMapSyncUnrelatedInputBroker") == 0;
         if (ret) {
-            brokerName = dataSource->GetBrokerName(cdb, OutputSignals);
-            ret = brokerName == NULL;
+            freq = -1.;
+            cdb.Delete("Frequency");
+            cdb.Write("Frequency", freq);
+            const char8* brokerName = dataSource->GetBrokerName(cdb, InputSignals);
+            ret = StringHelper::Compare(brokerName, "MemoryMapUnrelatedInputBroker") == 0;
+            if (ret) {
+                brokerName = dataSource->GetBrokerName(cdb, OutputSignals);
+                ret = brokerName == NULL;
+            }
         }
     }
 
@@ -423,7 +447,7 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
             "               Signal1 = {"
             "                   DataSource = Drv1"
             "                   Type = uint32"
-            "                   Trigger = 0"
+            "                   Trigger = 2"
             "                   Samples = 10"
             "                   Frequency = 0"
             "               }"
@@ -433,13 +457,13 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
             "                   NumberOfDimensions = 1"
             "                   NumberOfElements = 10"
             "                   Ranges = {{0,0}, {2,2}}"
-            "                   Trigger = 3"
+            "                   Trigger = 1"
             "                   Samples = 5"
             "               }"
             "               Signal3 = {"
             "                   DataSource = Drv1"
             "                   Type = uint32"
-            "                   Trigger = 3"
+            "                   Trigger = 1"
             "                   Samples = 12"
             "               }"
             "               InternalTimeStamp = {"
@@ -447,14 +471,14 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
             "                   Type = uint64"
             "                   NumberOfDimensions = 1"
             "                   NumberOfElements = 3"
-            "                   Trigger = 3"
+            "                   Trigger = 1"
             "               }"
             "               ErrorCheck = {"
             "                   DataSource = Drv1"
             "                   Type = uint32"
             "                   NumberOfDimensions = 1"
             "                   NumberOfElements = 3"
-            "                   Trigger = 3"
+            "                   Trigger = 1"
             "               }"
             "            }"
             "        }"
@@ -537,15 +561,15 @@ bool CircularBufferThreadInputDataSourceTest::TestPrepareNextState() {
         uint32 *currentBuffer = dataSource->GetCurrentInternalBuffer();
         FastPollingMutexSem *mutex = dataSource->GetMutex();
         while (1) {
+            dataSource->ContinueRead();
             mutex->FastLock();
-            if (currentBuffer[0] == 2) {
+            if (currentBuffer[0] >= 2) {
                 mutex->FastUnLock();
                 break;
             }
             mutex->FastUnLock();
-
+            Sleep::MSec(5);
             printf("I am %d\n", currentBuffer[0]);
-            Sleep::Sec(1);
         }
     }
 
@@ -566,15 +590,19 @@ bool CircularBufferThreadInputDataSourceTest::TestGetOffset() {
     }
 
     if (ret) {
-        int32 offset=dataSource->GetOffset(0, 10, 0);
+        dataSource->ContinueRead();
+        dataSource->Synchronise();
+        int32 offset = dataSource->GetOffset(0, 10, 0);
 
-        ret=(offset==0);
+        ret = (offset == 0);
         printf("offset = %d\n", offset);
     }
     if (ret) {
-        int32 offset=dataSource->GetOffset(0, 10, 0);
+        dataSource->ContinueRead();
+        dataSource->Synchronise();
+        int32 offset = dataSource->GetOffset(0, 10, 0);
 
-        ret=(offset==12);
+        ret = (offset == 12);
         printf("offset = %d\n", offset);
     }
     return ret;
@@ -582,7 +610,482 @@ bool CircularBufferThreadInputDataSourceTest::TestGetOffset() {
 }
 
 bool CircularBufferThreadInputDataSourceTest::TestExecute() {
-    return true;
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    if (ret) {
+        ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+        ReferenceContainer brokers;
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+        if (ret) {
+            dataSource->ContinueRead();
+            ret = broker->Execute();
+            ret = broker1->Execute();
+        }
+
+    }
+
+    if (ret) {
+        uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+        uint32 numberOfIntegers = 11;
+        for (uint32 i = 0u; i < numberOfIntegers; i++) {
+            printf("mem[%d]=%d\n", i, mem[i]);
+        }
+        ret &= mem[0] == 0;
+        ret &= mem[1] == 12;
+        ret &= mem[2] == 24;
+        ret &= mem[3] == 1;
+        ret &= mem[4] == 13;
+        ret &= mem[5] == 3;
+        ret &= mem[6] == 15;
+        ret &= mem[7] == 0;
+        ret &= mem[8] == 0;
+        ret &= mem[9] == 0;
+        ret &= mem[10] == 0;
+
+    }
+    return ret;
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestExecute_SameSignalDifferentModes() {
+
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               Signal2 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,9}}"
+            "                   Trigger = 1"
+            "                   Samples = 3"
+            "                   Alias = Signal1"
+            "               }"
+            "               Signal3 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 0"
+            "                   Samples = 4"
+            "                   Alias = Signal1"
+            "               }"
+            "               Signal4 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 1"
+            "                   Samples = 6"
+            "                   Alias = Signal1"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 20"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+    ReferenceContainer brokers;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+    uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+
+    uint32 numberOfReads = 4;
+    uint32 offsetRead = 0u;
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+        if (ret) {
+            dataSource->ContinueRead();
+            ret = broker->Execute();
+            ret = broker1->Execute();
+        }
+
+        if (ret) {
+            printf("read %d\n", n);
+            uint32 numberOfIntegers = 140;
+            for (uint32 i = 0u; i < numberOfIntegers; i++) {
+                printf("mem[%d]=%d\n", i, mem[i]);
+            }
+            //the first are separated by 10
+            uint32 nSamples = 5;
+            uint32 j = 0u;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == i * 10 + offsetRead);
+                j++;
+            }
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i * 10 + 2 + offsetRead));
+                j++;
+            }
+            nSamples = 30;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i + 30 + offsetRead));
+                j++;
+            }
+            nSamples = 40;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == i + offsetRead);
+                j++;
+            }
+            nSamples = 60;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i + offsetRead));
+                j++;
+            }
+        }
+        offsetRead += 60;
+    }
+
+    return ret;
+
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestExecute_SameSignalDifferentModes1() {
+
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 3"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               Signal2 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,9}}"
+            "                   Trigger = 1"
+            "                   Samples = 3"
+            "                   Alias = Signal1"
+            "               }"
+            "               Signal3 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 0"
+            "                   Samples = 4"
+            "                   Alias = Signal1"
+            "               }"
+            "               Signal4 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 1"
+            "                   Samples = 6"
+            "                   Alias = Signal1"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 20"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+    ReferenceContainer brokers;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+    uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+
+    uint32 numberOfReads = 4;
+    uint32 offsetRead = 0u;
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+        if (ret) {
+            dataSource->ContinueRead();
+            ret = broker->Execute();
+            ret = broker1->Execute();
+        }
+
+        if (ret) {
+            printf("read %d\n", n);
+            uint32 numberOfIntegers = 140;
+            for (uint32 i = 0u; i < numberOfIntegers; i++) {
+                printf("mem[%d]=%d\n", i, mem[i]);
+            }
+            //the first are separated by 10
+            uint32 nSamples = 5;
+            uint32 j = 0u;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == i * 10 + 10 + offsetRead);
+                j++;
+            }
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i * 10 + 12 + offsetRead));
+                j++;
+            }
+            nSamples = 30;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i + 30 + offsetRead));
+                j++;
+            }
+            nSamples = 40;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == i + offsetRead);
+                j++;
+            }
+            nSamples = 60;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                ret &= (mem[j] == (i + offsetRead));
+                j++;
+            }
+        }
+        offsetRead += 60;
+    }
+    return ret;
+
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 3"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 1"
+            "                   Trigger = 1"
+            "                   Samples = 5"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 20"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+    ReferenceContainer brokers;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+    uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+
+    uint32 numberOfReads = 4;
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+        if (ret) {
+            dataSource->ContinueRead();
+            ret = broker->Execute();
+            ret = broker1->Execute();
+        }
+
+        if (ret) {
+            uint32 nSamples = 5;
+            for (uint32 i = 0u; i < nSamples; i++) {
+                printf("error[%d]=%d\n", i, mem[10 + i]);
+            }
+        }
+    }
+    return ret;
 }
 
 bool CircularBufferThreadInputDataSourceTest::TestPurge() {

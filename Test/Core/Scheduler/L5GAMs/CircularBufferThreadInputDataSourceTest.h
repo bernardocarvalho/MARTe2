@@ -63,6 +63,12 @@ public:
 
     bool TestExecute();
 
+    bool TestExecute_SameSignalDifferentModes();
+
+    bool TestExecute_SameSignalDifferentModes1();
+
+    bool TestExecute_ErrorCheck();
+
     bool TestPurge();
 
     bool TestTerminateRead();

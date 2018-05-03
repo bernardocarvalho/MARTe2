@@ -116,12 +116,25 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                     ret = dataSource->GetSignalIndex(signalIdx, functionSignalName.Buffer());
                     signalType = dataSource->GetSignalType(signalIdx);
                 }
+                uint32 byteSize = 0u;
+                if (ret) {
+                    ret = dataSource->GetSignalByteSize(signalIdx, byteSize);
+                }
+                bool noRanges=true;
+                if(ret){
+                    uint32 offsetStart;
+                    uint32 copySize;
+                    ret = dataSource->GetFunctionSignalByteOffsetInfo(direction, functionIdx, n, 0u, offsetStart, copySize);
+                    if (ret) {
+                        noRanges = ((numberOfByteOffsets == 1u) && (copySize == byteSize));
+                    }
+                }
                 //get the number of buffers
                 //Take into account different ranges for the same signal
                 uint32 bo;
                 for (bo = 0u; (bo < numberOfByteOffsets) && (ret); bo++) {
                     //in this case only one node with the whole size
-                    if (numberOfByteOffsets == 1u) {
+                    if (noRanges) {
                         samples = 1;
                     }
                     for (uint32 h = 0u; (h < samples) && (ret); h++) {

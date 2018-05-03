@@ -258,9 +258,16 @@ bool BrokerI::InitFunctionPointers(const SignalDirection direction,
                 if (ret) {
                     ret = dataSource.GetFunctionSignalGAMMemoryOffset(direction, functionIdx, i, memoryOffset);
                 }
-
+                StreamString functionSignalName;
                 if (ret) {
-                    ret = dataSource.GetFunctionSignalsByteSize(direction, functionIdx, byteSize);
+                    ret = dataSource.GetFunctionSignalAlias(direction, functionIdx, i, functionSignalName);
+                }
+                uint32 signalIdx = 0u;
+                if (ret) {
+                    ret = dataSource.GetSignalIndex(signalIdx, functionSignalName.Buffer());
+                }
+                if (ret) {
+                    ret = dataSource.GetSignalByteSize(signalIdx, byteSize);
                 }
                 if (ret) {
                     ret = dataSource.GetFunctionSignalSamples(direction, functionIdx, i, samples);
@@ -270,9 +277,16 @@ bool BrokerI::InitFunctionPointers(const SignalDirection direction,
                         samples = 1u;
                     }
                 }
-                if (numberOfByteOffsets == 1u) {
-                    uint32 offsetStart;
-                    uint32 copySize;
+                bool noRanges = true;
+                uint32 offsetStart = 0u;
+                uint32 copySize = 0u;
+                if (ret) {
+                    ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, 0u, offsetStart, copySize);
+                    if (ret) {
+                        noRanges = ((numberOfByteOffsets == 1u) && (copySize == byteSize));
+                    }
+                }
+                if (noRanges) {
                     ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, 0u, offsetStart, copySize);
                     if (ret) {
                         char8 *gamMemoryCharAddress = reinterpret_cast<char8 *>(gamMemoryAddress);
@@ -287,11 +301,9 @@ bool BrokerI::InitFunctionPointers(const SignalDirection direction,
                 else {
                     //Take into account  different ranges for the same signal
                     for (uint32 j = 0u; (j < numberOfByteOffsets) && (ret); j++) {
-                        uint32 offsetStart;
-                        uint32 copySize;
-                        ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, j, offsetStart, copySize);
                         if (ret) {
                             char8 *gamMemoryCharAddress = reinterpret_cast<char8 *>(gamMemoryAddress);
+                            ret = dataSource.GetFunctionSignalByteOffsetInfo(direction, functionIdx, i, j, offsetStart, copySize);
                             //gamMemoryCharAddress += memoryOffset;
                             for (uint32 h = 0u; h < samples; h++) {
                                 copyByteSize[c] = copySize;
