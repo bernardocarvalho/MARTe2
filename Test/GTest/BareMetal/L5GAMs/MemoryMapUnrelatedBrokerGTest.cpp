@@ -1,7 +1,7 @@
 /**
- * @file MemoryMapUnrelatedOutputBroker.cpp
- * @brief Source file for class MemoryMapUnrelatedOutputBroker
- * @date Apr 12, 2018
+ * @file MemoryMapUnrelatedBrokerGTest.cpp
+ * @brief Source file for class MemoryMapUnrelatedBrokerGTest
+ * @date Apr 17, 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,21 +17,21 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapUnrelatedOutputBroker (public, protected, and private). Be aware that some 
+ * the class MemoryMapUnrelatedBrokerGTest (public, protected, and private). Be aware that some
  * methods, such as those inline could be defined on the header file, instead.
  */
 
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
+#include <limits.h>
+#include "gtest/gtest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
+#include "MemoryMapUnrelatedBrokerTest.h"
 
-#include "MemoryMapUnrelatedOutputBroker.h"
-#include "MemoryOperationsHelper.h"
-#include "AdvancedErrorManagement.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -41,23 +41,29 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe {
 
-MemoryMapUnrelatedOutputBroker::MemoryMapUnrelatedOutputBroker() :
-        MemoryMapUnrelatedBroker() {
-
+TEST(MemoryMapUnrelatedBrokerGTest,TestConstructor) {
+    MemoryMapUnrelatedBrokerTest test;
+    ASSERT_TRUE(test.TestConstructor());
 }
 
-MemoryMapUnrelatedOutputBroker::~MemoryMapUnrelatedOutputBroker() {
-
+TEST(MemoryMapUnrelatedBrokerGTest,TestInit) {
+    MemoryMapUnrelatedBrokerTest test;
+    ASSERT_TRUE(test.TestInit());
 }
 
-bool MemoryMapUnrelatedOutputBroker::Execute() {
-    dataSourceCust->PrepareOffsets();
-    bool ret = MemoryMapUnrelatedBroker::ExecuteCoreOut();
-    return ret;
+TEST(MemoryMapUnrelatedBrokerGTest,TestInit1) {
+    MemoryMapUnrelatedBrokerTest test;
+    ASSERT_TRUE(test.TestInit1());
 }
 
-CLASS_REGISTER(MemoryMapUnrelatedOutputBroker, "1.0")
-
+TEST(MemoryMapUnrelatedBrokerGTest,TestExecuteCoreIn) {
+    MemoryMapUnrelatedBrokerTest test;
+    ASSERT_TRUE(test.TestExecuteCoreIn());
 }
+
+TEST(MemoryMapUnrelatedBrokerGTest,TestExecuteCoreOut) {
+    MemoryMapUnrelatedBrokerTest test;
+    ASSERT_TRUE(test.TestExecuteCoreOut());
+}
+

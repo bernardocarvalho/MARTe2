@@ -1,7 +1,7 @@
 /**
- * @file MemoryMapUnrelatedInputBrokerTest.cpp
- * @brief Source file for class MemoryMapUnrelatedInputBrokerTest
- * @date Apr 16, 2018
+ * @file MemoryMapUnrelatedBrokerTest.cpp
+ * @brief Source file for class MemoryMapUnrelatedBrokerTest
+ * @date 04 mag 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MemoryMapUnrelatedInputBrokerTest (public, protected, and private). Be aware that some 
+ * the class MemoryMapUnrelatedBrokerTest (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,7 +29,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "MemoryMapUnrelatedInputBrokerTest.h"
+#include "MemoryMapUnrelatedBrokerTest.h"
 #include "ConfigurationDatabase.h"
 #include "DataSourceI.h"
 #include "GAMSchedulerI.h"
@@ -44,20 +44,18 @@
 /*---------------------------------------------------------------------------*/
 
 //need to create a dummy for tests
-class MemoryMapUnrelatedInputBrokerDSTest: public MultiBufferUnrelatedDataSource {
+class MemoryMapUnrelatedBrokerDSTest: public MultiBufferUnrelatedDataSource {
 
 public:
     CLASS_REGISTER_DECLARATION()
 
-MemoryMapUnrelatedInputBrokerDSTest    ();
+MemoryMapUnrelatedBrokerDSTest    ();
 
-    ~MemoryMapUnrelatedInputBrokerDSTest();
+    ~MemoryMapUnrelatedBrokerDSTest();
 
     virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual uint32 GetCurrentBuffer();
-
-    virtual void PrepareOffsets();
 
     virtual uint32 GetNumberOfMemoryBuffers();
 
@@ -91,7 +89,7 @@ protected:
     uint32 memorySize;
 };
 
-MemoryMapUnrelatedInputBrokerDSTest::MemoryMapUnrelatedInputBrokerDSTest() {
+MemoryMapUnrelatedBrokerDSTest::MemoryMapUnrelatedBrokerDSTest() {
     currentOffsets[0] = 0u;
     currentOffsets[1] = 0u;
     currentOffsets[2] = 0u;
@@ -99,57 +97,61 @@ MemoryMapUnrelatedInputBrokerDSTest::MemoryMapUnrelatedInputBrokerDSTest() {
     memorySize = 0u;
 }
 
-MemoryMapUnrelatedInputBrokerDSTest::~MemoryMapUnrelatedInputBrokerDSTest() {
+MemoryMapUnrelatedBrokerDSTest::~MemoryMapUnrelatedBrokerDSTest() {
 
 }
-bool MemoryMapUnrelatedInputBrokerDSTest::IsSupportedBroker(const SignalDirection direction,
-                                                            const uint32 functionIdx,
-                                                            const uint32 functionSignalIdx,
-                                                            const char8* const brokerClassName) {
+bool MemoryMapUnrelatedBrokerDSTest::IsSupportedBroker(const SignalDirection direction,
+                                                       const uint32 functionIdx,
+                                                       const uint32 functionSignalIdx,
+                                                       const char8* const brokerClassName) {
     bool ret = DataSourceI::IsSupportedBroker(direction, functionIdx, functionSignalIdx, brokerClassName);
     if (!ret) {
         if (direction == InputSignals) {
-            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedInputBrokerTestInputBroker") == 0);
+            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedBrokerTestInputBroker") == 0);
         }
         else {
-            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedInputBrokerTestOutputBroker") == 0);
+            ret = (StringHelper::Compare(brokerClassName, "MemoryMapUnrelatedBrokerTestOutputBroker") == 0);
         }
     }
     return ret;
 }
 
-int32 MemoryMapUnrelatedInputBrokerDSTest::GetOffset(const uint32 signalIdx,
-                                                     const uint32 samples) {
+int32 MemoryMapUnrelatedBrokerDSTest::GetOffset(const uint32 signalIdx,
+                                                const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
 
-uint32 MemoryMapUnrelatedInputBrokerDSTest::GetNumberOfMemoryBuffers() {
+uint32 MemoryMapUnrelatedBrokerDSTest::GetNumberOfMemoryBuffers() {
     return 2u;
 }
 
-uint32 MemoryMapUnrelatedInputBrokerDSTest::GetNumberOfInternalMemoryBuffers() {
+uint32 MemoryMapUnrelatedBrokerDSTest::GetNumberOfInternalMemoryBuffers() {
     return numberOfInternalBuffers;
 }
 
-bool MemoryMapUnrelatedInputBrokerDSTest::Synchronise() {
+bool MemoryMapUnrelatedBrokerDSTest::Synchronise() {
+    for (uint32 i = 0u; i < numberOfSignals; i++) {
+        currentOffsets[i] += packetSize[i];
+        currentOffsets[i] %= (packetSize[i] * numberOfInternalBuffers);
+    }
     return true;
 }
 
-bool MemoryMapUnrelatedInputBrokerDSTest::PrepareNextState(const char8 * const currentStateName,
-                                                           const char8 * const nextStateName) {
+bool MemoryMapUnrelatedBrokerDSTest::PrepareNextState(const char8 * const currentStateName,
+                                                      const char8 * const nextStateName) {
     return true;
 }
 
-bool MemoryMapUnrelatedInputBrokerDSTest::GetSignalMemoryBuffer(const uint32 signalIdx,
-                                                                const uint32 bufferIdx,
-                                                                void *&signalAddress) {
+bool MemoryMapUnrelatedBrokerDSTest::GetSignalMemoryBuffer(const uint32 signalIdx,
+                                                           const uint32 bufferIdx,
+                                                           void *&signalAddress) {
     bool ret = (bufferIdx < 2u);
     uint32 nOfSignals = GetNumberOfSignals();
     uint32 bufferSize = 0u;
     if (ret) {
         for (uint32 i = 0u; i < nOfSignals; i++) {
-            bufferSize += packetSize[i] * numberOfInternalBuffers;
+            bufferSize += packetSize[i];
         }
 
         ret = (signalIdx < nOfSignals);
@@ -170,7 +172,7 @@ bool MemoryMapUnrelatedInputBrokerDSTest::GetSignalMemoryBuffer(const uint32 sig
     return ret;
 }
 
-bool MemoryMapUnrelatedInputBrokerDSTest::AllocateMemory() {
+bool MemoryMapUnrelatedBrokerDSTest::AllocateMemory() {
 
     uint32 nOfSignals = GetNumberOfSignals();
     bool ret = (mem == NULL_PTR(uint8 *));
@@ -223,48 +225,31 @@ bool MemoryMapUnrelatedInputBrokerDSTest::AllocateMemory() {
 
 }
 
-void MemoryMapUnrelatedInputBrokerDSTest::TerminateRead(const uint32 signalIdx,
-                                                        const uint32 offset,
-                                                        const uint32 samples) {
-
-    uint32 index = (signalIdx % 3);
-    if (index == 0) {
-        currentOffsets[index] += packetSize[index];
-    }
-    if (index == 1) {
-        currentOffsets[index] += 2 * packetSize[index];
-    }
-    if (index == 2) {
-        currentOffsets[index] += 3 * packetSize[index];
-    }
-    currentOffsets[index] %= (packetSize[index] * numberOfInternalBuffers);
+void MemoryMapUnrelatedBrokerDSTest::TerminateRead(const uint32 signalIdx,
+                                                   const uint32 offset,
+                                                   const uint32 samples) {
 
 }
 
-uint32 MemoryMapUnrelatedInputBrokerDSTest::GetCurrentBuffer() {
+uint32 MemoryMapUnrelatedBrokerDSTest::GetCurrentBuffer() {
     return currentBuffer;
 }
 
-void MemoryMapUnrelatedInputBrokerDSTest::PrepareOffsets() {
-    currentBuffer++;
-    currentBuffer %= 2;
+void MemoryMapUnrelatedBrokerDSTest::TerminateWrite(const uint32 signalIdx,
+                                                    const uint32 offset,
+                                                    const uint32 samples) {
 }
 
-void MemoryMapUnrelatedInputBrokerDSTest::TerminateWrite(const uint32 signalIdx,
-                                                         const uint32 offset,
-                                                         const uint32 samples) {
-}
-
-CLASS_REGISTER(MemoryMapUnrelatedInputBrokerDSTest, "1.0")
+CLASS_REGISTER(MemoryMapUnrelatedBrokerDSTest, "1.0")
 
 /**
  * @brief GAM empty implementation to support the MemoryMapInputBroker tests
  */
-class MemoryMapUnrelatedInputBrokerTestGAM1: public GAM {
+class MemoryMapUnrelatedBrokerTestGAM1: public GAM {
 public:
     CLASS_REGISTER_DECLARATION()
 
-MemoryMapUnrelatedInputBrokerTestGAM1    ();
+MemoryMapUnrelatedBrokerTestGAM1    ();
 
     virtual bool Setup();
 
@@ -273,33 +258,50 @@ MemoryMapUnrelatedInputBrokerTestGAM1    ();
     void *GetInputMemoryBuffer();
 };
 
-MemoryMapUnrelatedInputBrokerTestGAM1::MemoryMapUnrelatedInputBrokerTestGAM1() :
+MemoryMapUnrelatedBrokerTestGAM1::MemoryMapUnrelatedBrokerTestGAM1() :
         GAM() {
 }
 
-bool MemoryMapUnrelatedInputBrokerTestGAM1::Setup() {
+bool MemoryMapUnrelatedBrokerTestGAM1::Setup() {
+
+    uint32 numberOfSignals = GetNumberOfOutputSignals();
+
+    uint32 totalSize = 0u;
+    for (uint32 i = 0u; i < numberOfSignals; i++) {
+        uint32 byteSize;
+        GetSignalByteSize(OutputSignals, i, byteSize);
+        uint32 nSamples = 0u;
+        GetSignalNumberOfSamples(OutputSignals, i, nSamples);
+        totalSize += (byteSize * nSamples);
+    }
+
+    uint32 *mem = (uint32 *) GetOutputSignalsMemory();
+    for (uint32 i = 0u; i < (totalSize / 4); i++) {
+        mem[i] = i;
+    }
+
     return true;
 }
 
-bool MemoryMapUnrelatedInputBrokerTestGAM1::Execute() {
+bool MemoryMapUnrelatedBrokerTestGAM1::Execute() {
     return true;
 }
 
-void *MemoryMapUnrelatedInputBrokerTestGAM1::GetInputMemoryBuffer() {
+void *MemoryMapUnrelatedBrokerTestGAM1::GetInputMemoryBuffer() {
     return GAM::GetInputSignalsMemory();
 }
 
-CLASS_REGISTER(MemoryMapUnrelatedInputBrokerTestGAM1, "1.0")
+CLASS_REGISTER(MemoryMapUnrelatedBrokerTestGAM1, "1.0")
 
-class MemoryMapUnrelatedInputBrokerTestInputBroker: public MemoryMapUnrelatedInputBroker {
+class MemoryMapUnrelatedBrokerTestInputBroker: public MemoryMapUnrelatedInputBroker {
 public:
     CLASS_REGISTER_DECLARATION()
 
-MemoryMapUnrelatedInputBrokerTestInputBroker    () {
+MemoryMapUnrelatedBrokerTestInputBroker    () {
 
     }
 
-    virtual ~MemoryMapUnrelatedInputBrokerTestInputBroker() {
+    virtual ~MemoryMapUnrelatedBrokerTestInputBroker() {
 
     }
 
@@ -310,22 +312,22 @@ MemoryMapUnrelatedInputBrokerTestInputBroker    () {
 
 };
 
-CLASS_REGISTER(MemoryMapUnrelatedInputBrokerTestInputBroker, "1.0")
+CLASS_REGISTER(MemoryMapUnrelatedBrokerTestInputBroker, "1.0")
 
-class MemoryMapUnrelatedInputBrokerTestOutputBroker: public MemoryMapUnrelatedOutputBroker {
+class MemoryMapUnrelatedBrokerTestOutputBroker: public MemoryMapUnrelatedOutputBroker {
 public:
     CLASS_REGISTER_DECLARATION()
 
-MemoryMapUnrelatedInputBrokerTestOutputBroker    () {
+MemoryMapUnrelatedBrokerTestOutputBroker    () {
 
     }
 
-    virtual ~MemoryMapUnrelatedInputBrokerTestOutputBroker() {
+    virtual ~MemoryMapUnrelatedBrokerTestOutputBroker() {
 
     }
 };
 
-CLASS_REGISTER(MemoryMapUnrelatedInputBrokerTestOutputBroker, "1.0")
+CLASS_REGISTER(MemoryMapUnrelatedBrokerTestOutputBroker, "1.0")
 
 /**
  * MARTe configuration structure to test the MemoryMapInputBroker
@@ -336,7 +338,7 @@ static const char8 * const config = ""
         "    +Functions = {"
         "        Class = ReferenceContainer"
         "        +GAMA = {"
-        "            Class = MemoryMapUnrelatedInputBrokerTestGAM1"
+        "            Class = MemoryMapUnrelatedBrokerTestGAM1"
         "            InputSignals = {"
         "               Signal1 = {"
         "                   DataSource = Drv1"
@@ -359,7 +361,7 @@ static const char8 * const config = ""
         "            }"
         "        }"
         "        +GAMB = {"
-        "            Class = MemoryMapUnrelatedInputBrokerTestGAM1"
+        "            Class = MemoryMapUnrelatedBrokerTestGAM1"
         "            InputSignals = {"
         "               Signal2 = {"
         "                   DataSource = Drv1"
@@ -380,7 +382,7 @@ static const char8 * const config = ""
         "    +Data = {"
         "        Class = ReferenceContainer"
         "        +Drv1 = {"
-        "            Class = MemoryMapUnrelatedInputBrokerDSTest"
+        "            Class = MemoryMapUnrelatedBrokerDSTest"
         "            NumberOfBuffers = 2"
         "            Signals = {"
         "               Signal4 = {"
@@ -415,13 +417,13 @@ static const char8 * const config = ""
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-MemoryMapUnrelatedInputBrokerTest::MemoryMapUnrelatedInputBrokerTest() {
-    // Auto-generated constructor stub for MemoryMapUnrelatedInputBrokerTest
+MemoryMapUnrelatedBrokerTest::MemoryMapUnrelatedBrokerTest() {
+    // Auto-generated constructor stub for MemoryMapUnrelatedBrokerTest
     // TODO Verify if manual additions are needed
 }
 
-MemoryMapUnrelatedInputBrokerTest::~MemoryMapUnrelatedInputBrokerTest() {
-    // Auto-generated destructor stub for MemoryMapUnrelatedInputBrokerTest
+MemoryMapUnrelatedBrokerTest::~MemoryMapUnrelatedBrokerTest() {
+    // Auto-generated destructor stub for MemoryMapUnrelatedBrokerTest
     // TODO Verify if manual additions are needed
 }
 
@@ -455,8 +457,8 @@ static bool InitialiseMemoryMapInputBrokerEnviroment(const char8 * const config)
     return ok;
 }
 
-bool MemoryMapUnrelatedInputBrokerTest::TestConstructor() {
-    MemoryMapUnrelatedInputBrokerTestInputBroker brokerTest;
+bool MemoryMapUnrelatedBrokerTest::TestConstructor() {
+    MemoryMapUnrelatedBrokerTestInputBroker brokerTest;
     uint32 nOfCopies = 0;
     uint32 *signalIdxArr = brokerTest.GetSignalIdxArr(nOfCopies);
     bool ret = nOfCopies == 0;
@@ -467,30 +469,105 @@ bool MemoryMapUnrelatedInputBrokerTest::TestConstructor() {
     return ret;
 }
 
-bool MemoryMapUnrelatedInputBrokerTest::TestExecute() {
+bool MemoryMapUnrelatedBrokerTest::TestInit() {
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    MemoryMapUnrelatedBrokerTestInputBroker brokerTest;
 
+    ReferenceT<MemoryMapUnrelatedBrokerDSTest> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+
+    MemoryMapUnrelatedBrokerDSTest *dataSourceInstance = dataSource.operator->();
+
+    ReferenceT<MemoryMapUnrelatedBrokerTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+    if (ret) {
+        void* gamPtr = gam->GetInputMemoryBuffer();
+        ret = brokerTest.Init(InputSignals, *dataSourceInstance, "GAMA", gamPtr);
+    }
+
+    if (ret) {
+        uint32 nOfCopies = 0;
+        uint32 *signalIdxArr = brokerTest.GetSignalIdxArr(nOfCopies);
+        ret = (signalIdxArr != NULL);
+        if (ret) {
+            ret = (nOfCopies == 4);
+        }
+        if (ret) {
+            ret = (signalIdxArr[0] == 1);
+            ret &= (signalIdxArr[1] == 2);
+            ret &= (signalIdxArr[2] == 2);
+            ret &= (signalIdxArr[3] == 3);
+        }
+    }
+
+    return ret;
+}
+
+bool MemoryMapUnrelatedBrokerTest::TestInit1() {
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    MemoryMapUnrelatedBrokerTestInputBroker brokerTest;
+
+    ReferenceT<MemoryMapUnrelatedBrokerDSTest> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+
+    MemoryMapUnrelatedBrokerDSTest *dataSourceInstance = dataSource.operator->();
+
+    ReferenceT<MemoryMapUnrelatedBrokerTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMB");
+        ret = gam.IsValid();
+    }
+    if (ret) {
+        void* gamPtr = gam->GetInputMemoryBuffer();
+        ret = brokerTest.Init(InputSignals, *dataSourceInstance, "GAMB", gamPtr);
+    }
+
+    if (ret) {
+        uint32 nOfCopies = 0;
+        uint32 *signalIdxArr = brokerTest.GetSignalIdxArr(nOfCopies);
+        ret = (signalIdxArr != NULL);
+        if (ret) {
+            ret = (nOfCopies == 2);
+        }
+        if (ret) {
+            ret = (signalIdxArr[0] == 2);
+            ret &= (signalIdxArr[1] == 2);
+        }
+    }
+
+    return ret;
+}
+
+bool MemoryMapUnrelatedBrokerTest::TestExecuteCoreIn() {
     static const char8 * const config1 = ""
             "$Application1 = {"
             "    Class = RealTimeApplication"
             "    +Functions = {"
             "        Class = ReferenceContainer"
             "        +GAMA = {"
-            "            Class = MemoryMapUnrelatedInputBrokerTestGAM1"
+            "            Class = MemoryMapUnrelatedBrokerTestGAM1"
             "            InputSignals = {"
             "               Signal1 = {"
             "                   DataSource = Drv1"
             "                   Type = uint32"
+            "                   Samples = 3"
             "               }"
             "               Signal2 = {"
             "                   DataSource = Drv1"
             "                   NumberOfDimensions = 1"
-            "                   NumberOfElements = 10"
+            "                   NumberOfElements = 3"
             "                   Type = uint32"
             "                   Ranges = {{0, 0}, {2, 2}}"
-            "               }"
-            "               Signal3 = {"
-            "                   DataSource = Drv1"
-            "                   Type = uint32"
+            "                   Samples = 3"
             "               }"
             "            }"
             "        }"
@@ -498,13 +575,8 @@ bool MemoryMapUnrelatedInputBrokerTest::TestExecute() {
             "    +Data = {"
             "        Class = ReferenceContainer"
             "        +Drv1 = {"
-            "            Class = MemoryMapUnrelatedInputBrokerDSTest"
+            "            Class = MemoryMapUnrelatedBrokerDSTest"
             "            NumberOfBuffers = 2"
-            "            Signals = {"
-            "               Signal4 = {"
-            "                   Type = uint32"
-            "               }"
-            "            }"
             "        }"
             "        +Timings = {"
             "            Class = TimingDataSource"
@@ -530,63 +602,175 @@ bool MemoryMapUnrelatedInputBrokerTest::TestExecute() {
             "}";
 
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config1);
-    MemoryMapUnrelatedInputBrokerTestInputBroker brokerTest;
+    MemoryMapUnrelatedBrokerTestInputBroker brokerTest;
 
-    ReferenceT<MemoryMapUnrelatedInputBrokerDSTest> dataSource;
+    ReferenceT<MemoryMapUnrelatedBrokerDSTest> dataSource;
     if (ret) {
         dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
         ret = dataSource.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBrokerTestGAM1> gam;
-    ReferenceContainer brokers;
+    ReferenceT<MemoryMapUnrelatedBrokerTestGAM1> gam;
     if (ret) {
         gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
-        ret = gam->GetInputBrokers(brokers);
+        ret = gam.IsValid();
     }
-
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker;
+    ReferenceContainer brokers;
+    ReferenceT<MemoryMapUnrelatedBroker> broker;
+    uint32* data = NULL;
     if (ret) {
-        ret = brokers.Size() == 1;
-        if (ret) {
-            broker = brokers.Get(0);
-            ret = broker.IsValid();
-        }
+        gam->GetInputBrokers(brokers);
+        broker = brokers.Get(0);
+        data = (uint32*) gam->GetInputMemoryBuffer();
     }
 
-    uint32 *gamPtr = (uint32*) gam->GetInputMemoryBuffer();
     if (ret) {
-        ret = broker->Execute();
-        uint32 nBuffers = dataSource->GetNumberOfInternalMemoryBuffers();
-        uint32 signal4Shift = 2;    //2 buffers
-        uint32 bufferOffset = 26;
-
-        if (ret) {
-            ret = (nBuffers == 2);
-            if (ret) {
-                ret &= (gamPtr[0] == 0 + signal4Shift + bufferOffset);
-                ret &= (gamPtr[1] == 2 + signal4Shift + bufferOffset);
-                //call terminate read here because of range at shifts the buffer!!
-                //signal 2 shift of 3!
-                ret &= (gamPtr[2] == 4 + (3 % nBuffers) * 10 + signal4Shift + bufferOffset);
-                //signal 3 shift of 4%2=21!
-                ret &= (gamPtr[3] == 22 + signal4Shift + bufferOffset);
-            }
+        broker->ExecuteCoreIn();
+        uint32 nSamples = 9;
+        for (uint32 i = 0u; i < nSamples; i++) {
+            printf("data[%d]=%d\n", i, data[i]);
         }
-        bufferOffset = 0;
-        if (ret) {
-            ret = broker->Execute();
-            if (ret) {
-                ret &= (gamPtr[0] == 0 + (2 % nBuffers) + signal4Shift + bufferOffset);
-                ret &= (gamPtr[1] == 2 + (6 % nBuffers) * 10 + signal4Shift + bufferOffset);
-                //call terminate read here!!
-                ret &= (gamPtr[2] == 4 + (9 % nBuffers) * 10 + signal4Shift + bufferOffset);
-                ret &= (gamPtr[3] == 22 + (1 % nBuffers) + signal4Shift + bufferOffset);
-            }
-        }
-
+        ret = (data[0] == 0);
+        ret &= data[1] == 1;
+        ret &= data[2] == 0;
+        ret &= data[3] == 2;
+        ret &= data[4] == 5;
+        ret &= data[5] == 2;
+        ret &= data[6] == 4;
+        ret &= data[7] == 7;
+        ret &= data[8] == 4;
     }
 
+    if (ret) {
+        dataSource->Synchronise();
+        broker->ExecuteCoreIn();
+        uint32 nSamples = 9;
+        for (uint32 i = 0u; i < nSamples; i++) {
+            printf("data[%d]=%d\n", i, data[i]);
+        }
+        ret = (data[0] == 1);
+        ret &= data[1] == 0;
+        ret &= data[2] == 1;
+        ret &= data[3] == 5;
+        ret &= data[4] == 2;
+        ret &= data[5] == 5;
+        ret &= data[6] == 7;
+        ret &= data[7] == 4;
+        ret &= data[8] == 7;
+    }
+
+    return ret;
+}
+
+bool MemoryMapUnrelatedBrokerTest::TestExecuteCoreOut() {
+    static const char8 * const config1 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = MemoryMapUnrelatedBrokerTestGAM1"
+            "            OutputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Samples = 3"
+            "               }"
+            "               Signal2 = {"
+            "                   DataSource = Drv1"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 3"
+            "                   Type = uint32"
+            "                   Ranges = {{0, 0}, {2, 2}}"
+            "                   Samples = 3"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = MemoryMapUnrelatedBrokerDSTest"
+            "            NumberOfBuffers = 2"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config1);
+    MemoryMapUnrelatedBrokerTestInputBroker brokerTest;
+
+    ReferenceT<MemoryMapUnrelatedBrokerDSTest> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+
+    ReferenceT<MemoryMapUnrelatedBrokerTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+    ReferenceContainer brokers;
+    ReferenceT<MemoryMapUnrelatedBroker> broker;
+    uint32* data = NULL;
+    if (ret) {
+        gam->GetOutputBrokers(brokers);
+        broker = brokers.Get(0);
+        dataSource->GetSignalMemoryBuffer(0, 0, (void*&) data);
+    }
+
+    if (ret) {
+        broker->ExecuteCoreOut();
+        uint32 nSamples = 8;
+        for (uint32 i = 0u; i < nSamples; i++) {
+            printf("data[%d]=%d\n", i, data[i]);
+        }
+        ret = (data[0] == 2);
+        ret &= data[1] == 1;
+        ret &= data[2] == 5;
+        ret &= data[3] == 3;
+        ret &= data[4] == 8;
+        ret &= data[5] == 4;
+        ret &= data[6] == 6;
+        ret &= data[7] == 7;
+
+    }
+    if (ret) {
+        dataSource->Synchronise();
+        broker->ExecuteCoreOut();
+        uint32 nSamples = 8;
+        for (uint32 i = 0u; i < nSamples; i++) {
+            printf("data[%d]=%d\n", i, data[i]);
+        }
+        ret = (data[0] == 1);
+        ret &= data[1] == 2;
+        ret &= data[2] == 4;
+        ret &= data[3] == 3;
+        ret &= data[4] == 7;
+        ret &= data[5] == 5;
+        ret &= data[6] == 6;
+        ret &= data[7] == 8;
+    }
     return ret;
 }
 

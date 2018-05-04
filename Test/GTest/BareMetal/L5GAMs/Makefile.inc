@@ -37,6 +37,7 @@ OBJSX=  BrokerIGTest.x\
         MemoryMapSynchronisedOutputBrokerGTest.x\
         MemoryMapSyncUnrelatedInputBrokerGTest.x \
         MemoryMapSyncUnrelatedOutputBrokerGTest.x \
+        MemoryMapUnrelatedBrokerGTest.x \
         MemoryMapUnrelatedInputBrokerGTest.x \
         MemoryMapUnrelatedOutputBrokerGTest.x \
         MultiBufferUnrelatedDataSourceGTest.x \

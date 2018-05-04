@@ -67,9 +67,10 @@ public:
     virtual bool PrepareNextState(const char8 * const currentStateName,
                                   const char8 * const nextStateName);
 
+    virtual void PrepareOffsets();
+
     virtual int32 GetOffset(const uint32 signalIdx,
-                            const uint32 samples,
-                            const uint32 flag);
+                            const uint32 samples);
 
     virtual ErrorManagement::ErrorType Execute(const ExecutionInfo & info);
 
@@ -81,8 +82,7 @@ public:
 
     virtual void TerminateRead(const uint32 signalIdx,
                                const uint32 offset,
-                               const uint32 samples,
-                               const uint32 flag);
+                               const uint32 samples);
 
 protected:
 
@@ -95,12 +95,11 @@ protected:
     uint8 *isRefreshed;
     uint32 *lastReadBuffer;
     uint32 *lastReadBuffer_1;
-    uint8 *flags; //bits: 0-GetLatest | 1-IsSync
     uint32 *triggerAfterNPackets;
     uint32 *nBrokerOpPerSignal;
     uint32 *nBrokerOpPerSignalCounter;
     uint32 numberOfChannels;
-
+    uint32 syncSignal;
 };
 }
 

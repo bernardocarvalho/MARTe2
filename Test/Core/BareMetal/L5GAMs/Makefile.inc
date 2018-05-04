@@ -40,6 +40,7 @@ OBJSX= BrokerITest.x \
        MemoryMapSynchronisedOutputBrokerTest.x\
        MemoryMapSyncUnrelatedInputBrokerTest.x \
        MemoryMapSyncUnrelatedOutputBrokerTest.x \
+       MemoryMapUnrelatedBrokerTest.x \
        MemoryMapUnrelatedInputBrokerTest.x \
        MemoryMapUnrelatedOutputBrokerTest.x \
        MultiBufferUnrelatedDataSourceTest.x\

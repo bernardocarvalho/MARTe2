@@ -42,6 +42,7 @@ OBJSX=BrokerI.x \
     RealTimeState.x \
     RealTimeThread.x \
     TimingDataSource.x \
+    MemoryMapUnrelatedBroker.x \
     MemoryMapUnrelatedInputBroker.x \
     MemoryMapUnrelatedOutputBroker.x \
     MemoryMapSyncUnrelatedInputBroker.x \

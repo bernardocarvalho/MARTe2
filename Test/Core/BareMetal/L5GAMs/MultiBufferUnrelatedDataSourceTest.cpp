@@ -62,8 +62,7 @@ MultiBufferUnrelatedDataSourceInstanceTest    ();
 
     virtual HeapI *GetMemoryHeap();
 
-    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples,
-            const uint32 flag);
+    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual bool Synchronise();
 
@@ -81,8 +80,7 @@ MultiBufferUnrelatedDataSourceInstanceTest::~MultiBufferUnrelatedDataSourceInsta
 }
 
 int32 MultiBufferUnrelatedDataSourceInstanceTest::GetOffset(const uint32 signalIdx,
-                                                            const uint32 samples,
-                                                            const uint32 flag) {
+                                                            const uint32 samples) {
 
     return 0u;
 }
@@ -219,6 +217,98 @@ static const char8 * const config = ""
         "                   Type = float64"
         "                   Samples = 5"
         "                   Trigger = 1"
+        "               }"
+        "            }"
+        "        }"
+        "    }"
+        "    +Data = {"
+        "        Class = ReferenceContainer"
+        "        +Drv1 = {"
+        "            Class = MultiBufferUnrelatedDataSourceInstanceTest"
+        "            NumberOfBuffers = 3"
+        "            HeapName = StandardHeap"
+        "        }"
+        "        +Timings = {"
+        "            Class = TimingDataSource"
+        "        }"
+        "    }"
+        "    +States = {"
+        "        Class = ReferenceContainer"
+        "        +State1 = {"
+        "            Class = RealTimeState"
+        "            +Threads = {"
+        "                Class = ReferenceContainer"
+        "                +Thread1 = {"
+        "                    Class = RealTimeThread"
+        "                    Functions = {GAMA GAMB}"
+        "                }"
+        "            }"
+        "        }"
+        "    }"
+        "    +Scheduler = {"
+        "        Class = MemoryMapInputBrokerTestScheduler1"
+        "        TimingDataSource = Timings"
+        "    }"
+        "}";
+
+
+
+static const char8 * const config1 = ""
+        "$Application1 = {"
+        "    Class = RealTimeApplication"
+        "    +Functions = {"
+        "        Class = ReferenceContainer"
+        "        +GAMA = {"
+        "            Class = MultiBufferUnrelatedDataSourceTestGAM1"
+        "            InputSignals = {"
+        "               Signal1 = {"
+        "                   DataSource = Drv1"
+        "                   Type = uint32"
+        "                   Trigger = 1"
+        "               }"
+        "               Signal2 = {"
+        "                   DataSource = Drv1"
+        "                   NumberOfDimensions = 1"
+        "                   NumberOfElements = 10"
+        "                   Type = uint32"
+        "               }"
+        "               ErrorCheck = {"
+        "                   DataSource = Drv1"
+        "                   Type = uint32"
+        "               }"
+        "            }"
+        "        }"
+        "        +GAMB = {"
+        "            Class = MultiBufferUnrelatedDataSourceTestGAM1"
+        "            InputSignals = {"
+        "               Signal2 = {"
+        "                   DataSource = Drv1"
+        "                   NumberOfDimensions = 1"
+        "                   NumberOfElements = 10"
+        "                   Ranges = {{0, 0}, {9, 9}}"
+        "                   Type = uint32"
+        "               }"
+        "               Signal4 = {"
+        "                   DataSource = Drv1"
+        "                   Type = uint8"
+        "                   Samples = 2"
+        "               }"
+        "               InternalTimeStamp = {"
+        "                   DataSource = Drv1"
+        "                   Type = uint64"
+        "               }"
+        "            }"
+        "            OutputSignals = {"
+        "               Signal5 = {"
+        "                   DataSource = Drv1"
+        "                   Type = uint32"
+        "               }"
+        "               Signal6 = {"
+        "                   DataSource = Drv1"
+        "                   Type = float64"
+        "                   Samples = 5"
+        "                   Trigger = 1"
+        "                   Frequency = 1"
         "               }"
         "            }"
         "        }"
@@ -448,8 +538,8 @@ bool MultiBufferUnrelatedDataSourceTest::TestGetSignalMemoryBuffer() {
 
 }
 
-bool MultiBufferUnrelatedDataSourceTest::TestGetBrokerName() {
-    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+static bool TestGetBrokerNameX(const char8 *conf) {
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(conf);
 
     ReferenceT<MultiBufferUnrelatedDataSourceInstanceTest> dataSource;
     if (ret) {
@@ -515,7 +605,7 @@ bool MultiBufferUnrelatedDataSourceTest::TestGetBrokerName() {
                         }
 
                         if (sync) {
-                            ret |= (brokerName == "MemoryMapSyncUnrelatedOutputBroker");
+                            ret &= (brokerName == "MemoryMapSyncUnrelatedOutputBroker");
                         }
                         else {
                             ret = (brokerName == "MemoryMapUnrelatedOutputBroker");
@@ -532,6 +622,17 @@ bool MultiBufferUnrelatedDataSourceTest::TestGetBrokerName() {
     return ret;
 
 }
+
+
+bool MultiBufferUnrelatedDataSourceTest::TestGetBrokerName_SyncInput(){
+    return TestGetBrokerNameX(config);
+}
+
+bool MultiBufferUnrelatedDataSourceTest::TestGetBrokerName_SyncOutput(){
+    return TestGetBrokerNameX(config1);
+}
+
+
 
 bool MultiBufferUnrelatedDataSourceTest::TestGetInputBrokers() {
 
@@ -802,13 +903,13 @@ bool MultiBufferUnrelatedDataSourceTest::TestSetConfiguredDatabase_False_ErrorCh
 
 bool MultiBufferUnrelatedDataSourceTest::TestTerminateRead() {
     MultiBufferUnrelatedDataSourceInstanceTest dataSource;
-    dataSource.TerminateRead(0, 0, 0, 0);
+    dataSource.TerminateRead(0, 0, 0);
     return true;
 }
 
 bool MultiBufferUnrelatedDataSourceTest::TestTerminateWrite() {
     MultiBufferUnrelatedDataSourceInstanceTest dataSource;
-    dataSource.TerminateWrite(0, 0, 0, 0);
+    dataSource.TerminateWrite(0, 0, 0);
     return true;
 }
 

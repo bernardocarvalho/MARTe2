@@ -55,9 +55,13 @@ public:
 
     bool TestSetConfiguredDatabase();
 
+    bool TestSetConfiguredDatabase_False_WrittenSignal();
+
     bool TestPrepareNextState();
 
     bool TestSynchronise();
+
+    bool TestSynchronise_FullRolling();
 
     bool TestGetOffset();
 
@@ -65,9 +69,19 @@ public:
 
     bool TestExecute_SameSignalDifferentModes();
 
-    bool TestExecute_SameSignalDifferentModes1();
-
     bool TestExecute_ErrorCheck();
+
+    bool TestExecute_ErrorCheck_Overwrite();
+
+    bool TestExecute_ErrorCheck_DriverRead();
+
+    bool TestExecute_ErrorCheck_Both();
+
+    bool TestExecute_ErrorCheck_False_BadSize();
+
+    bool TestExecute_TimeStamp();
+
+    bool TestExecute_TimeStamp_False_BadSize();
 
     bool TestPurge();
 

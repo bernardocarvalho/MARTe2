@@ -47,16 +47,6 @@ TEST(MemoryMapUnrelatedInputBrokerGTest,TestConstructor) {
     ASSERT_TRUE(test.TestConstructor());
 }
 
-TEST(MemoryMapUnrelatedInputBrokerGTest,TestInit) {
-    MemoryMapUnrelatedInputBrokerTest test;
-    ASSERT_TRUE(test.TestInit());
-}
-
-TEST(MemoryMapUnrelatedInputBrokerGTest,TestInit1) {
-    MemoryMapUnrelatedInputBrokerTest test;
-    ASSERT_TRUE(test.TestInit1());
-}
-
 TEST(MemoryMapUnrelatedInputBrokerGTest,TestExecute) {
     MemoryMapUnrelatedInputBrokerTest test;
     ASSERT_TRUE(test.TestExecute());

@@ -61,7 +61,7 @@ bool MemoryMapSyncUnrelatedInputBroker::Execute() {
     bool ret = dataSourceCust->Synchronise();
 
     if (ret) {
-        ret = MemoryMapUnrelatedInputBroker::Execute();
+        ret = MemoryMapUnrelatedBroker::ExecuteCoreIn();
     }
 
     return ret;

@@ -190,6 +190,8 @@ const char8 *MultiBufferUnrelatedDataSource::GetBrokerName(StructuredDataI &data
     const char8* brokerName = NULL_PTR(const char8 *);
 
     if (direction == InputSignals) {
+        syncInputBrokerName = "MemoryMapSyncUnrelatedInputBroker";
+
         float32 frequency = 0.F;
         if (data.Read("Frequency", frequency)) {
             if (frequency > 0.) {
@@ -208,6 +210,8 @@ const char8 *MultiBufferUnrelatedDataSource::GetBrokerName(StructuredDataI &data
     }
 
     if (direction == OutputSignals) {
+        syncOutputBrokerName = "MemoryMapSyncUnrelatedOutputBroker";
+
         float32 frequency = 0.F;
         if (data.Read("Frequency", frequency)) {
             if (frequency > 0.) {
@@ -280,7 +284,13 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                     if (ret) {
                         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
                         if (ret) {
-                            outputBrokers.Insert(broker);
+                            //insert at the beginning the sync one
+                            if (suggestedBrokerNameIn == syncOutputBrokerName) {
+                                ret = outputBrokers.Insert(broker, 0);
+                            }
+                            else {
+                                ret = outputBrokers.Insert(broker);
+                            }
                         }
                         else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
@@ -346,7 +356,13 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                     if (ret) {
                         ret = broker->Init(InputSignals, *this, functionName, gamMemPtr);
                         if (ret) {
-                            inputBrokers.Insert(broker);
+                            //insert at the beginning the sync one
+                            if (suggestedBrokerNameIn == syncInputBrokerName) {
+                                ret = inputBrokers.Insert(broker, 0);
+                            }
+                            else {
+                                ret = inputBrokers.Insert(broker);
+                            }
                         }
                         else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
@@ -430,19 +446,21 @@ bool MultiBufferUnrelatedDataSource::SetConfiguredDatabase(StructuredDataI & dat
     return ret;
 }
 
+void MultiBufferUnrelatedDataSource::PrepareOffsets() {
+
+}
+
 /*lint -e{715} .*/
 void MultiBufferUnrelatedDataSource::TerminateRead(const uint32 signalIdx,
                                                    const uint32 offset,
-                                                   const uint32 samples,
-                                                   const uint32 flag) {
+                                                   const uint32 samples) {
 
 }
 
 /*lint -e{715} .*/
 void MultiBufferUnrelatedDataSource::TerminateWrite(const uint32 signalIdx,
                                                     const uint32 offset,
-                                                    const uint32 samples,
-                                                    const uint32 flag) {
+                                                    const uint32 samples) {
 
 }
 

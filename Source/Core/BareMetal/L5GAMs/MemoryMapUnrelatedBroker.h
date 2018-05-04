@@ -1,7 +1,7 @@
 /**
- * @file MemoryMapUnrelatedInputBroker.h
- * @brief Header file for class MemoryMapUnrelatedInputBroker
- * @date Apr 12, 2018
+ * @file MemoryMapUnrelatedBroker.h
+ * @brief Header file for class MemoryMapUnrelatedBroker
+ * @date 03 mag 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MemoryMapUnrelatedInputBroker
+ * @details This header file contains the declaration of the class MemoryMapUnrelatedBroker
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MEMORYMAPUNRELATEDINPUTBROKER_H_
-#define MEMORYMAPUNRELATEDINPUTBROKER_H_
+#ifndef MEMORYMAPUNRELATEDBROKER_H_
+#define MEMORYMAPUNRELATEDBROKER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,28 +31,44 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                           Class declaration                               */
+/*---------------------------------------------------------------------------*/
+
 #include "FastPollingMutexSem.h"
 #include "MultiBufferUnrelatedDataSource.h"
-#include "MemoryMapUnrelatedBroker.h"
+#include "MemoryMapBroker.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
 
-class MemoryMapUnrelatedInputBroker: public MemoryMapUnrelatedBroker {
+class MemoryMapUnrelatedBroker: public MemoryMapBroker {
 public:
-    CLASS_REGISTER_DECLARATION()
+    MemoryMapUnrelatedBroker();
+    virtual ~MemoryMapUnrelatedBroker();
+    virtual bool ExecuteCoreIn();
+    virtual bool ExecuteCoreOut();
 
-MemoryMapUnrelatedInputBroker    ();
-    virtual ~MemoryMapUnrelatedInputBroker();
-    virtual bool Execute();
+    virtual bool Init(const SignalDirection direction,
+            DataSourceI &dataSourceIn,
+            const char8 * const functionName,
+            void * const gamMemoryAddress);
 
+protected:
+
+    MultiBufferUnrelatedDataSource *dataSourceCust;
+    uint32 *signalIdxArr;
+    uint32 *samples;
+    uint32 *maxOffset;
 };
 }
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MEMORYMAPUNRELATEDINPUTBROKER_H_ */
+#endif /* MEMORYMAPUNRELATEDBROKER_H_ */
 

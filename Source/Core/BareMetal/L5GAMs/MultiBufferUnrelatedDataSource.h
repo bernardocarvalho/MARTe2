@@ -68,18 +68,19 @@ public:
     virtual bool SetConfiguredDatabase(StructuredDataI & data);
 
     virtual int32 GetOffset(const uint32 signalIdx,
-                            const uint32 numberOfSamples,
-                            const uint32 flag)=0;
+                            const uint32 numberOfSamples)=0;
+
+    virtual void PrepareOffsets();
+
+
 
     virtual void TerminateRead(const uint32 signalIdx,
                                const uint32 offset,
-                               const uint32 samples,
-                               const uint32 flag);
+                               const uint32 samples);
 
     virtual void TerminateWrite(const uint32 signalIdx,
                                 const uint32 offset,
-                                const uint32 samples,
-                                const uint32 flag);
+                                const uint32 samples);
 
     uint32 GetNumberOfInternalBuffers() const;
 
@@ -91,6 +92,8 @@ protected:
     uint32 timeStampSignalIndex;
     uint32 errorCheckSignalIndex;
     uint32 *packetSize;
+    StreamString syncOutputBrokerName;
+    StreamString syncInputBrokerName;
 };
 }
 /*---------------------------------------------------------------------------*/
