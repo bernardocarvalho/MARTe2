@@ -72,7 +72,7 @@ public:
     virtual int32 GetOffset(const uint32 signalIdx,
                             const uint32 samples);
 
-    virtual ErrorManagement::ErrorType Execute(const ExecutionInfo & info);
+    virtual ErrorManagement::ErrorType Execute(ExecutionInfo & info);
 
     virtual bool DriverRead(char8 * const bufferToFill,
                             uint32 &sizeToRead,

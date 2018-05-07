@@ -517,7 +517,7 @@ int32 CircularBufferThreadInputDataSource::GetOffset(const uint32 signalIdx,
     return startFromIdx;
 }
 
-ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(const ExecutionInfo & info) {
+ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(ExecutionInfo & info) {
     ErrorManagement::ErrorType err;
 
     if (info.GetStage() == ExecutionInfo::MainStage) {
