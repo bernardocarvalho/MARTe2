@@ -62,7 +62,9 @@ MultiBufferUnrelatedDataSourceInstanceTest    ();
 
     virtual HeapI *GetMemoryHeap();
 
-    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples);
+    virtual int32 GetInputOffset(const uint32 signalIdx,const uint32 samples);
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual bool Synchronise();
 
@@ -79,11 +81,18 @@ MultiBufferUnrelatedDataSourceInstanceTest::~MultiBufferUnrelatedDataSourceInsta
 
 }
 
-int32 MultiBufferUnrelatedDataSourceInstanceTest::GetOffset(const uint32 signalIdx,
+int32 MultiBufferUnrelatedDataSourceInstanceTest::GetInputOffset(const uint32 signalIdx,
                                                             const uint32 samples) {
 
     return 0u;
 }
+
+int32 MultiBufferUnrelatedDataSourceInstanceTest::GetOutputOffset(const uint32 signalIdx,
+                                                            const uint32 samples) {
+
+    return 0u;
+}
+
 
 HeapI *MultiBufferUnrelatedDataSourceInstanceTest::GetMemoryHeap() {
 

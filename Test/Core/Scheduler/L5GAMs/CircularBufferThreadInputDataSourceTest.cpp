@@ -483,8 +483,8 @@ bool CircularBufferThreadInputDataSourceTest::TestSynchronise() {
 
     }
     if (ret) {
-        ret = dataSource->GetOffset(0, 5) == 0;
-        printf("offset=%d\n", dataSource->GetOffset(0, 5));
+        ret = dataSource->GetInputOffset(0, 5) == 0;
+        printf("offset=%d\n", dataSource->GetInputOffset(0, 5));
     }
     if (ret) {
         dataSource->ContinueRead();
@@ -493,8 +493,8 @@ bool CircularBufferThreadInputDataSourceTest::TestSynchronise() {
 
     }
     if (ret) {
-        ret = dataSource->GetOffset(0, 5) == 200;    //5*4*10
-        printf("offset=%d\n", dataSource->GetOffset(0, 5));
+        ret = dataSource->GetInputOffset(0, 5) == 200;    //5*4*10
+        printf("offset=%d\n", dataSource->GetInputOffset(0, 5));
     }
     return ret;
 }
@@ -869,7 +869,7 @@ bool CircularBufferThreadInputDataSourceTest::TestPrepareNextState() {
     return true;
 }
 
-bool CircularBufferThreadInputDataSourceTest::TestGetOffset() {
+bool CircularBufferThreadInputDataSourceTest::TestGetInputOffset() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
 
     ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
@@ -888,7 +888,7 @@ bool CircularBufferThreadInputDataSourceTest::TestGetOffset() {
         dataSource->PrepareOffsets();
         dataSource->TerminateRead(0, 0, 0);
 
-        uint32 offset = dataSource->GetOffset(0, 10);
+        uint32 offset = dataSource->GetInputOffset(0, 10);
 
         ret = (offset == (372 + 12 * i) % 400);
         printf("offset = %d\n", offset);

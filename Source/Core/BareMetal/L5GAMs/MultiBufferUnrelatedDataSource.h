@@ -67,12 +67,13 @@ public:
 
     virtual bool SetConfiguredDatabase(StructuredDataI & data);
 
-    virtual int32 GetOffset(const uint32 signalIdx,
-                            const uint32 numberOfSamples)=0;
+    virtual int32 GetInputOffset(const uint32 signalIdx,
+                                 const uint32 numberOfSamples)=0;
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,
+                                  const uint32 numberOfSamples)=0;
 
     virtual void PrepareOffsets();
-
-
 
     virtual void TerminateRead(const uint32 signalIdx,
                                const uint32 offset,

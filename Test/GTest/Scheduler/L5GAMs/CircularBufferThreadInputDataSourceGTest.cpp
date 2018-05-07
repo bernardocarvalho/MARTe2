@@ -95,9 +95,9 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestPrepareNextState) {
     ASSERT_TRUE(test.TestPrepareNextState());
 }
 
-TEST(CircularBufferThreadInputDataSourceGTest,TestGetOffset) {
+TEST(CircularBufferThreadInputDataSourceGTest,TestGetInputOffset) {
     CircularBufferThreadInputDataSourceTest test;
-    ASSERT_TRUE(test.TestGetOffset());
+    ASSERT_TRUE(test.TestGetInputOffset());
 }
 
 TEST(CircularBufferThreadInputDataSourceGTest,TestExecute) {

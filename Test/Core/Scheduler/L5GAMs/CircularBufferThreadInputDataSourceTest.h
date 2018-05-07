@@ -63,7 +63,7 @@ public:
 
     bool TestSynchronise_FullRolling();
 
-    bool TestGetOffset();
+    bool TestGetInputOffset();
 
     bool TestExecute();
 

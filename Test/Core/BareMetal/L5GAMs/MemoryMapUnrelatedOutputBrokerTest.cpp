@@ -53,7 +53,9 @@ MemoryMapUnrelatedOutputBrokerDSTest    ();
 
     ~MemoryMapUnrelatedOutputBrokerDSTest();
 
-    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples);
+    virtual int32 GetInputOffset(const uint32 signalIdx,const uint32 samples);
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual void PrepareOffsets();
 
@@ -116,11 +118,18 @@ bool MemoryMapUnrelatedOutputBrokerDSTest::IsSupportedBroker(const SignalDirecti
     return ret;
 }
 
-int32 MemoryMapUnrelatedOutputBrokerDSTest::GetOffset(const uint32 signalIdx,
+int32 MemoryMapUnrelatedOutputBrokerDSTest::GetInputOffset(const uint32 signalIdx,
                                                       const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
+
+int32 MemoryMapUnrelatedOutputBrokerDSTest::GetOutputOffset(const uint32 signalIdx,
+                                                      const uint32 samples) {
+
+    return currentOffsets[signalIdx % 3];
+}
+
 
 void MemoryMapUnrelatedOutputBrokerDSTest::PrepareOffsets() {
     currentBuffer++;

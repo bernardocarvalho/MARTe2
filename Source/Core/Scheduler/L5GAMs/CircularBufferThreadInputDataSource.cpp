@@ -190,8 +190,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
         nStepsForward++;
     }
 
-
-    bool ret=(nStepsForward < numberOfInternalBuffers);
+    bool ret = (nStepsForward < numberOfInternalBuffers);
     if (ret) {
         uint32 stepsBack = nStepsForward % triggerAfterNPackets[syncSignal];
         //if asynchronous return back to the last arrived samples, otherwise it will wait for new ones
@@ -224,7 +223,6 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
             numberOfPacketsSinceLastTrigger--;
         }
     }
-
 
     REPORT_ERROR(ErrorManagement::Information, "buffers %d %d", lastReadBuffer_1[syncSignal], lastReadBuffer[syncSignal]);
 
@@ -441,7 +439,8 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                         if (ret) {
                             ret = (numberOfProducers == 0u);
                             if (!ret) {
-                                REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "The signal with id=%d is written... all the signals must be only read", i);
+                                REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "The signal with id=%d is written... all the signals must be only read",
+                                                        i);
                             }
                         }
                     }
@@ -502,8 +501,8 @@ bool CircularBufferThreadInputDataSource::PrepareNextState(const char8 * const c
 }
 
 /*lint -e{715} .*/
-int32 CircularBufferThreadInputDataSource::GetOffset(const uint32 signalIdx,
-                                                     const uint32 samples) {
+int32 CircularBufferThreadInputDataSource::GetInputOffset(const uint32 signalIdx,
+                                                          const uint32 samples) {
     int32 startFromIdx = -1;
 
     uint32 startFromIdxTmp = ((lastReadBuffer[signalIdx] - samples) + 1u);
@@ -515,6 +514,11 @@ int32 CircularBufferThreadInputDataSource::GetOffset(const uint32 signalIdx,
     REPORT_ERROR(ErrorManagement::Information, "startFromIdx %d %d %d", startFromIdx, samples, lastReadBuffer[signalIdx]);
 
     return startFromIdx;
+}
+
+int32 CircularBufferThreadInputDataSource::GetOutputOffset(const uint32 signalIdx,
+                                                           const uint32 samples) {
+    return -1;
 }
 
 ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(ExecutionInfo & info) {

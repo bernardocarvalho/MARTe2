@@ -69,8 +69,11 @@ public:
 
     virtual void PrepareOffsets();
 
-    virtual int32 GetOffset(const uint32 signalIdx,
+    virtual int32 GetInputOffset(const uint32 signalIdx,
                             const uint32 samples);
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,
+                                 const uint32 samples);
 
     virtual ErrorManagement::ErrorType Execute(ExecutionInfo & info);
 

@@ -75,7 +75,7 @@ bool MemoryMapUnrelatedBroker::ExecuteCoreIn() {
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies); n++) {
             /*lint -e{613} null pointer checked before.*/
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], samples[n]);
+            int32 offset = dataSourceCust->GetInputOffset(signalIdxArr[n], samples[n]);
             if (offset >= 0) {
                 uint32 dataSourceIndex = ((currentBuffer * numberOfCopies) + n);
                 uint32 allowedSize = copyTable[n].copySize;
@@ -111,7 +111,7 @@ bool MemoryMapUnrelatedBroker::ExecuteCoreOut() {
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies); n++) {
             /*lint -e{613} null pointer checked before.*/
-            int32 offset = dataSourceCust->GetOffset(signalIdxArr[n], samples[n]);
+            int32 offset = dataSourceCust->GetOutputOffset(signalIdxArr[n], samples[n]);
             if (offset >= 0) {
                 uint32 dataSourceIndex = ((currentBuffer * numberOfCopies) + n);
 
