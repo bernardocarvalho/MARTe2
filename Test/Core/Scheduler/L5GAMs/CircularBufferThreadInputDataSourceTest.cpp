@@ -885,7 +885,7 @@ bool CircularBufferThreadInputDataSourceTest::TestGetInputOffset() {
     for (uint32 i = 0u; (i < nTests) && (ret); i++) {
         dataSource->ContinueRead();
         dataSource->Synchronise();
-        dataSource->PrepareOffsets();
+        dataSource->PrepareInputOffsets();
         dataSource->TerminateRead(0, 0, 0);
 
         uint32 offset = dataSource->GetInputOffset(0, 10);

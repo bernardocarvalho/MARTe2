@@ -119,13 +119,13 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::IsSupportedBroker(const SignalDire
 }
 
 int32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetInputOffset(const uint32 signalIdx,
-                                                         const uint32 samples) {
+                                                              const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
 
 int32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetOutputOffset(const uint32 signalIdx,
-                                                         const uint32 samples) {
+                                                               const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
@@ -157,7 +157,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::GetSignalMemoryBuffer(const uint32
     uint32 bufferSize = 0u;
     if (ret) {
         for (uint32 i = 0u; i < nOfSignals; i++) {
-            bufferSize += packetSize[i];
+            bufferSize += packetSize[i]*numberOfInternalBuffers;
         }
 
         ret = (signalIdx < nOfSignals);
@@ -213,7 +213,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::AllocateMemory() {
         }
     }
     if (ret) {
-        memorySize *= 2;
+        memorySize *= GetNumberOfMemoryBuffers();
         if (memoryHeap != NULL_PTR(HeapI *)) {
             mem = reinterpret_cast<uint8 *>(memoryHeap->Malloc(memorySize));
         }
@@ -224,6 +224,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::AllocateMemory() {
         uint32 *memint = (uint32 *) mem;
         for (uint32 i = 0u; i < (memorySize / 4); i++) {
             memint[i] = i;
+            printf("l=%d\n", memint[i] );
         }
     }
 
@@ -503,10 +504,10 @@ bool MemoryMapSyncUnrelatedInputBrokerTest::TestExecute() {
 
         if (ret) {
             ret = (nBuffers == 2);
-            uint32 bufferShift = 13;
+            uint32 bufferShift = 26;
             if (ret) {
-                ret &= (gamPtr[0] == 0 + signal4Shift) + bufferShift;
-                ret &= (gamPtr[1] == 2 + signal4Shift) + bufferShift;
+                ret &= (gamPtr[0] == 0 + signal4Shift + bufferShift);
+                ret &= (gamPtr[1] == 2 + signal4Shift + bufferShift);
                 //call terminate read here because of range at shifts the buffer!!
                 //signal 2 shift of 3!
                 ret &= (gamPtr[2] == 4 + (3 % nBuffers) * 10 + signal4Shift + bufferShift);

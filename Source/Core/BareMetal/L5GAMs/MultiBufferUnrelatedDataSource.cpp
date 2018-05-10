@@ -263,7 +263,7 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                 bool ok = true;
                 uint32 nBrokers = outputBrokers.Size();
                 for (uint32 j = 0u; (j < nBrokers) && (ret) && (ok); j++) {
-                    ReferenceT<MemoryMapUnrelatedOutputBroker> brokerRef = outputBrokers.Get(j);
+                    ReferenceT<MemoryMapUnrelatedBroker> brokerRef = outputBrokers.Get(j);
                     if (brokerRef.IsValid()) {
                         if (suggestedBrokerNameIn == brokerRef->GetClassProperties()->GetName()) {
                             ok = false;
@@ -275,7 +275,7 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                     REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "creating broker %s for %s and signal %s(%d)", suggestedBrokerNameIn.Buffer(),
                                             functionName, signalName.Buffer(), signalIdx);
 
-                    ReferenceT<MemoryMapUnrelatedOutputBroker> broker(suggestedBrokerNameIn.Buffer());
+                    ReferenceT<MemoryMapUnrelatedBroker> broker(suggestedBrokerNameIn.Buffer());
 
                     ret = broker.IsValid();
                     if (!ret) {
@@ -335,7 +335,7 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                 bool ok = true;
                 uint32 nBrokers = inputBrokers.Size();
                 for (uint32 j = 0u; (j < nBrokers) && (ret) && (ok); j++) {
-                    ReferenceT<MemoryMapUnrelatedInputBroker> brokerRef = inputBrokers.Get(j);
+                    ReferenceT<MemoryMapUnrelatedBroker> brokerRef = inputBrokers.Get(j);
                     if (brokerRef.IsValid()) {
                         if (suggestedBrokerNameIn == brokerRef->GetClassProperties()->GetName()) {
                             ok = false;
@@ -347,7 +347,7 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                     REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "creating broker %s for %s and signal %s(%d)", suggestedBrokerNameIn.Buffer(),
                                             functionName, signalName.Buffer(), signalIdx);
 
-                    ReferenceT<MemoryMapUnrelatedInputBroker> broker(suggestedBrokerNameIn.Buffer());
+                    ReferenceT<MemoryMapUnrelatedBroker> broker(suggestedBrokerNameIn.Buffer());
 
                     ret = broker.IsValid();
                     if (!ret) {
@@ -446,7 +446,11 @@ bool MultiBufferUnrelatedDataSource::SetConfiguredDatabase(StructuredDataI & dat
     return ret;
 }
 
-void MultiBufferUnrelatedDataSource::PrepareOffsets() {
+void MultiBufferUnrelatedDataSource::PrepareInputOffsets() {
+
+}
+
+void MultiBufferUnrelatedDataSource::PrepareOutputOffsets() {
 
 }
 

@@ -53,7 +53,7 @@ MemoryMapUnrelatedOutputBroker::~MemoryMapUnrelatedOutputBroker() {
 }
 
 bool MemoryMapUnrelatedOutputBroker::Execute() {
-    dataSourceCust->PrepareOffsets();
+    dataSourceCust->PrepareOutputOffsets();
     bool ret = MemoryMapUnrelatedBroker::ExecuteCoreOut();
     return ret;
 }

@@ -134,7 +134,7 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
     return ret;
 }
 
-void CircularBufferThreadInputDataSource::PrepareOffsets() {
+void CircularBufferThreadInputDataSource::PrepareInputOffsets() {
 
     for (uint32 i = 0u; i < numberOfSignals; i++) {
         uint32 nStepsForward = 0u;

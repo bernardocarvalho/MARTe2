@@ -59,7 +59,7 @@ MemoryMapUnrelatedInputBrokerDSTest    ();
 
     virtual uint32 GetCurrentBuffer();
 
-    virtual void PrepareOffsets();
+    virtual void PrepareInputOffsets();
 
     virtual uint32 GetNumberOfMemoryBuffers();
 
@@ -253,7 +253,7 @@ uint32 MemoryMapUnrelatedInputBrokerDSTest::GetCurrentBuffer() {
     return currentBuffer;
 }
 
-void MemoryMapUnrelatedInputBrokerDSTest::PrepareOffsets() {
+void MemoryMapUnrelatedInputBrokerDSTest::PrepareInputOffsets() {
     currentBuffer++;
     currentBuffer %= 2;
 }

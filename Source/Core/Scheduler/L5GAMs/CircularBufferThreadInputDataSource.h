@@ -67,7 +67,7 @@ public:
     virtual bool PrepareNextState(const char8 * const currentStateName,
                                   const char8 * const nextStateName);
 
-    virtual void PrepareOffsets();
+    virtual void PrepareInputOffsets();
 
     virtual int32 GetInputOffset(const uint32 signalIdx,
                             const uint32 samples);

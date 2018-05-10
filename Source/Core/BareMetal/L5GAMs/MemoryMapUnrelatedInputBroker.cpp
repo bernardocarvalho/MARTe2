@@ -52,7 +52,7 @@ MemoryMapUnrelatedInputBroker::~MemoryMapUnrelatedInputBroker() {
 }
 
 bool MemoryMapUnrelatedInputBroker::Execute() {
-    dataSourceCust->PrepareOffsets();
+    dataSourceCust->PrepareInputOffsets();
     bool ret = MemoryMapUnrelatedBroker::ExecuteCoreIn();
     return ret;
 }

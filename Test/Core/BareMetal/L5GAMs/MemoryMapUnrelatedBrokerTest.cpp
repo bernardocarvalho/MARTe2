@@ -159,7 +159,7 @@ bool MemoryMapUnrelatedBrokerDSTest::GetSignalMemoryBuffer(const uint32 signalId
     uint32 bufferSize = 0u;
     if (ret) {
         for (uint32 i = 0u; i < nOfSignals; i++) {
-            bufferSize += packetSize[i];
+            bufferSize += packetSize[i]*numberOfInternalBuffers;
         }
 
         ret = (signalIdx < nOfSignals);

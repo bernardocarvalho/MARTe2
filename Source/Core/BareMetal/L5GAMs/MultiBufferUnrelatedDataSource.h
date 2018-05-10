@@ -73,7 +73,10 @@ public:
     virtual int32 GetOutputOffset(const uint32 signalIdx,
                                   const uint32 numberOfSamples)=0;
 
-    virtual void PrepareOffsets();
+
+    virtual void PrepareInputOffsets();
+
+    virtual void PrepareOutputOffsets();
 
     virtual void TerminateRead(const uint32 signalIdx,
                                const uint32 offset,
