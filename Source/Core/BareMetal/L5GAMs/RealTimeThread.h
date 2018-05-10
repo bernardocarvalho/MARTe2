@@ -159,7 +159,6 @@ public:
      */
     virtual bool ToStructuredData(StructuredDataI& data);
 
-
     /**
      * @see ReferenceContainer::Purge()
      */

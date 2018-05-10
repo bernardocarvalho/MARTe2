@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MultiBufferUnrelatedDataSource.h"
+#include "MemoryDataSourceI.h"
 #include "EmbeddedServiceMethodBinderI.h"
 #include "SingleThreadService.h"
 #include "FastPollingMutexSem.h"
@@ -39,10 +39,48 @@
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
+/**
+ * @brief Multi circular buffer data source interface. The internal thread acquires sequentially a sample of each signal using the interface \a DriverRead(*)
+ * that have to be implemented for the specific data source that inherits from this one.
+ *
+ * @details Two optional signals can be defined and they are recognised by name:
+ *   \a InternalTimeStamp: stores the HighResolutionTimer::Counter() time stamp of the signals once they have been read. It must be
+ *     uint64 type and it must have a number of elements equal to the number of the normal signals that the data source produces.
+ *   \a ErrorCheck: provides an error flag for each signal. It must be uint32 type and it must have a number of elements equal to
+ *     the number of the normal signals that the data source produces. Only 2 bits are used in this implementation:
+ *       - bit 0: DriverRead(*) function returns false.
+ *       - bit 1: Write overlap. Attempting to write on a sample that haven't been read yet by the consumers.
+ *
+ *
+ * @details The configuration syntax is (names and signal quantity are only given as an example):
+ * <pre>
+ * +CircularBuffer_0 = {
+ *     Class = (child of) CircularBufferThreadInputDataSource
+ *     Signals = {
+ *         *InternalTimeStamp = {
+ *             Type = uint64
+ *             NumberOfDimensions = 1
+ *             NumberOfElements = N //the number of signals belonging to this dataSource (except InternalTimeStamp and ErrorCheck)
+ *         }
+ *         *ErrorCheck = {
+ *             Type = uint32
+ *             NumberOfDimensions = 1
+ *             NumberOfElements = N //the number of signals belonging to this dataSource (except InternalTimeStamp and ErrorCheck)
+ *         }
+ *         ....
+ *         ....
+ *         ....
+ *     }
+ * }
+ * <pre>
+ */
 namespace MARTe {
-class CircularBufferThreadInputDataSource: public MultiBufferUnrelatedDataSource, public EmbeddedServiceMethodBinderI {
+class CircularBufferThreadInputDataSource: public MemoryDataSourceI, public EmbeddedServiceMethodBinderI {
 public:
 
+    /**
+     * @brief Constructor
+     */
     CircularBufferThreadInputDataSource();
 
     virtual ~CircularBufferThreadInputDataSource();
@@ -53,10 +91,6 @@ public:
 
     virtual const char8 *GetBrokerName(StructuredDataI &data,
                                        const SignalDirection direction);
-
-    virtual bool GetInputBrokers(ReferenceContainer &inputBrokers,
-                                 const char8* const functionName,
-                                 void * const gamMemPtr);
 
     virtual bool GetOutputBrokers(ReferenceContainer &outputBrokers,
                                   const char8* const functionName,
@@ -69,12 +103,17 @@ public:
 
     virtual void PrepareInputOffsets();
 
-    virtual int32 GetInputOffset(const uint32 signalIdx,
-                            const uint32 samples);
+    virtual bool GetInputOffset(const uint32 signalIdx,
+                                const uint32 numberOfSamples,
+                                uint32 &offset);
 
-    virtual int32 GetOutputOffset(const uint32 signalIdx,
-                                 const uint32 samples);
+    virtual bool GetOutputOffset(const uint32 signalIdx,
+                                const uint32 numberOfSamples,
+                                uint32 &offset);
 
+    /**
+     * @brief The execute function
+     */
     virtual ErrorManagement::ErrorType Execute(ExecutionInfo & info);
 
     virtual bool DriverRead(char8 * const bufferToFill,
@@ -83,13 +122,12 @@ public:
 
     virtual void Purge(ReferenceContainer &purgeList);
 
-    virtual void TerminateRead(const uint32 signalIdx,
-                               const uint32 offset,
-                               const uint32 samples);
+    virtual bool TerminateInputCopy(const uint32 signalIdx,
+                                    const uint32 offset,
+                                    const uint32 numberOfSamples);
 
 protected:
-
-    //Thread parameters
+    /* The current buffer */
     uint32 *currentBuffer;
     SingleThreadService executor;
     ThreadIdentifier threadID;
@@ -97,12 +135,15 @@ protected:
     FastPollingMutexSem mutex;
     uint8 *isRefreshed;
     uint32 *lastReadBuffer;
-    uint32 *lastReadBuffer_1;
     uint32 *triggerAfterNPackets;
     uint32 *nBrokerOpPerSignal;
     uint32 *nBrokerOpPerSignalCounter;
     uint32 numberOfChannels;
     uint32 syncSignal;
+    uint32 timeStampSignalIndex;
+    uint32 errorCheckSignalIndex;
+
+
 };
 }
 

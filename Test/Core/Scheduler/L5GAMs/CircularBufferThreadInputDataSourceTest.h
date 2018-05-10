@@ -85,7 +85,7 @@ public:
 
     bool TestPurge();
 
-    bool TestTerminateRead();
+    bool TestTerminateInputCopy();
 
 
 };

@@ -57,10 +57,7 @@ MemoryMapBroker::~MemoryMapBroker() {
     /*lint -e{1740} dataSource contains a copy of a pointer. No need to be freed.*/
 }
 
-bool MemoryMapBroker::Init(const SignalDirection direction,
-                           DataSourceI &dataSourceIn,
-                           const char8 * const functionName,
-                           void * const gamMemoryAddress) {
+bool MemoryMapBroker::Init(const SignalDirection direction, DataSourceI &dataSourceIn, const char8 * const functionName, void * const gamMemoryAddress) {
     dataSource = &dataSourceIn;
 
     bool ret = InitFunctionPointers(direction, dataSourceIn, functionName, gamMemoryAddress);
@@ -78,7 +75,7 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
     if (ret) {
         ret = (numberOfCopies > 0u);
     }
-    uint32 numberOfBuffers = dataSource->GetNumberOfMemoryBuffers();
+    uint32 numberOfBuffers = dataSource->GetNumberOfStatefulMemoryBuffers();
     if (ret) {
         uint32 totalNumberOfElements = (numberOfCopies * numberOfBuffers);
         copyTable = new MemoryMapBrokerCopyTableEntry[totalNumberOfElements];
@@ -120,8 +117,8 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                 if (ret) {
                     ret = dataSource->GetSignalByteSize(signalIdx, byteSize);
                 }
-                bool noRanges=true;
-                if(ret){
+                bool noRanges = true;
+                if (ret) {
                     uint32 offsetStart;
                     uint32 copySize;
                     ret = dataSource->GetFunctionSignalByteOffsetInfo(direction, functionIdx, n, 0u, offsetStart, copySize);
@@ -135,8 +132,9 @@ bool MemoryMapBroker::Init(const SignalDirection direction,
                 for (bo = 0u; (bo < numberOfByteOffsets) && (ret); bo++) {
                     //in this case only one node with the whole size
                     if (noRanges) {
-                        samples = 1;
+                        samples = 1u;
                     }
+                    /*lint -e{613} copyTable cannot be NULL as otherwise ret would be false*/
                     for (uint32 h = 0u; (h < samples) && (ret); h++) {
                         copyTable[c].copySize = GetCopyByteSize(c % (numberOfCopies));
                         copyTable[c].gamPointer = GetFunctionPointer(c % (numberOfCopies));

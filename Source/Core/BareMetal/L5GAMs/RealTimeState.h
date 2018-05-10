@@ -100,7 +100,6 @@ RealTimeState    ();
      */
     uint32 GetNumberOfStatefuls();
 
-
     /**
      * @see ReferenceContainer::Purge()
      */

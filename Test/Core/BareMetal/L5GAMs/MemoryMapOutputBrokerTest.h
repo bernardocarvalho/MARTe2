@@ -65,9 +65,9 @@ public:
     bool TestExecute_Samples();
 
     /**
-     * @brief Tests the Execute method with a signal with multi buffer.
+     * @brief Tests the Execute method with a multi-state buffers.
      */
-    bool TestExecute_MultiBuffer();
+    bool TestExecute_MultiStateBuffer();
 
 };
 

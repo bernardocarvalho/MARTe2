@@ -150,8 +150,8 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestPurge) {
     ASSERT_TRUE(test.TestPurge());
 }
 
-TEST(CircularBufferThreadInputDataSourceGTest,TestTerminateRead) {
+TEST(CircularBufferThreadInputDataSourceGTest,TestTerminateInputCopy) {
     CircularBufferThreadInputDataSourceTest test;
-    ASSERT_TRUE(test.TestTerminateRead());
+    ASSERT_TRUE(test.TestTerminateInputCopy());
 }
 

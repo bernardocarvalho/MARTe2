@@ -36,10 +36,10 @@
 #include "ObjectRegistryDatabase.h"
 #include "RealTimeApplication.h"
 #include "StandardParser.h"
-#include "MemoryMapUnrelatedInputBroker.h"
-#include "MemoryMapUnrelatedOutputBroker.h"
-#include "MemoryMapSyncUnrelatedInputBroker.h"
-#include "MemoryMapSyncUnrelatedOutputBroker.h"
+#include "MemoryMapMultiBufferInputBroker.h"
+#include "MemoryMapMultiBufferOutputBroker.h"
+#include "MemoryMapSynchronisedMultiBufferInputBroker.h"
+#include "MemoryMapSynchronisedMultiBufferOutputBroker.h"
 #include "stdio.h"
 
 /*---------------------------------------------------------------------------*/
@@ -66,8 +66,6 @@ CircularBufferThreadInputDataSourceTestDS    ();
 
     virtual uint32 *GetLastReadBuffer();
 
-    virtual uint32 *GetLastReadBuffer_1();
-
     virtual uint32 *GetTriggerAfterNPackets();
 
     virtual uint32 *NBrokerOpPerSignal();
@@ -78,9 +76,7 @@ CircularBufferThreadInputDataSourceTestDS    ();
 
     void SetSignalDriverFalse(uint32 signal);
 
-    virtual void TerminateRead(const uint32 signalIdx,
-            const uint32 offset,
-            const uint32 samples);
+    virtual bool TerminateInputCopy(const uint32 signalIdx, const uint32 offset, const uint32 numberOfSamples);
 
     virtual FastPollingMutexSem *GetMutex();
 
@@ -110,7 +106,7 @@ const char8 *CircularBufferThreadInputDataSourceTestDS::GetBrokerName(Structured
 
     const char8 *brokerName = "Invalid";
     if (direction == InputSignals) {
-        syncInputBrokerName = "MemoryMapSyncUnrelatedInputBroker";
+        syncInputBrokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
 
         float32 freq = -1.0F;
         if (!data.Read("Frequency", freq)) {
@@ -118,10 +114,10 @@ const char8 *CircularBufferThreadInputDataSourceTestDS::GetBrokerName(Structured
         }
 
         if (freq >= 0.F) {
-            brokerName = "MemoryMapSyncUnrelatedInputBroker";
+            brokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
         }
         else {
-            brokerName = "MemoryMapUnrelatedInputBroker";
+            brokerName = "MemoryMapMultiBufferInputBroker";
         }
     }
 
@@ -146,10 +142,6 @@ uint8 *CircularBufferThreadInputDataSourceTestDS::GetIsRefreshed() {
 
 uint32 *CircularBufferThreadInputDataSourceTestDS::GetLastReadBuffer() {
     return lastReadBuffer;
-}
-
-uint32 *CircularBufferThreadInputDataSourceTestDS::GetLastReadBuffer_1() {
-    return lastReadBuffer_1;
 }
 
 uint32 *CircularBufferThreadInputDataSourceTestDS::GetTriggerAfterNPackets() {
@@ -190,16 +182,17 @@ void CircularBufferThreadInputDataSourceTestDS::ContinueRead() {
     Atomic::TestAndSet(&continueRead);
 }
 
-void CircularBufferThreadInputDataSourceTestDS::TerminateRead(const uint32 signalIdx,
-                                                              const uint32 offset,
-                                                              const uint32 samples) {
-    CircularBufferThreadInputDataSource::TerminateRead(signalIdx, offset, samples);
+bool CircularBufferThreadInputDataSourceTestDS::TerminateInputCopy(const uint32 signalIdx,
+                                                                   const uint32 offset,
+                                                                   const uint32 numberOfSamples) {
+    CircularBufferThreadInputDataSource::TerminateInputCopy(signalIdx, offset, numberOfSamples);
 
     if (signalIdx == decrementOnSignal) {
         Atomic::Decrement(&continueRead);
 
         printf("HERE %d %d\n", signalIdx, continueRead);
     }
+    return true;
 }
 
 FastPollingMutexSem *CircularBufferThreadInputDataSourceTestDS::GetMutex() {
@@ -368,9 +361,6 @@ bool CircularBufferThreadInputDataSourceTest::TestConstructor() {
         ret = (dataSource.GetLastReadBuffer() == NULL);
     }
     if (ret) {
-        ret = (dataSource.GetLastReadBuffer_1() == NULL);
-    }
-    if (ret) {
         ret = (dataSource.GetTriggerAfterNPackets() == NULL);
     }
     if (ret) {
@@ -479,22 +469,30 @@ bool CircularBufferThreadInputDataSourceTest::TestSynchronise() {
     if (ret) {
         dataSource->ContinueRead();
         ret = dataSource->Synchronise();
-        dataSource->TerminateRead(0, 0, 5);
+        dataSource->TerminateInputCopy(0, 0, 5);
 
     }
     if (ret) {
-        ret = dataSource->GetInputOffset(0, 5) == 0;
-        printf("offset=%d\n", dataSource->GetInputOffset(0, 5));
+        uint32 offset;
+        ret = dataSource->GetInputOffset(0, 5, offset);
+        if (ret) {
+            ret = offset == 0;
+        }
+        printf("offset=%d\n", offset);
     }
     if (ret) {
         dataSource->ContinueRead();
         ret = dataSource->Synchronise();
-        dataSource->TerminateRead(0, 0, 5);
+        dataSource->TerminateInputCopy(0, 0, 5);
 
     }
     if (ret) {
-        ret = dataSource->GetInputOffset(0, 5) == 200;    //5*4*10
-        printf("offset=%d\n", dataSource->GetInputOffset(0, 5));
+        uint32 offset;
+        ret = dataSource->GetInputOffset(0, 5, offset);
+        if (ret) {
+            ret = offset == 200;
+        }
+        printf("offset=%d\n", offset);
     }
     return ret;
 }
@@ -573,7 +571,7 @@ bool CircularBufferThreadInputDataSourceTest::TestSynchronise_FullRolling() {
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker1;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -624,16 +622,16 @@ bool CircularBufferThreadInputDataSourceTest::TestGetBrokerName() {
         float32 freq = 0.;
         cdb.Write("Frequency", freq);
         const char8* brokerName = dataSource->GetBrokerName(cdb, InputSignals);
-        ret = StringHelper::Compare(brokerName, "MemoryMapSyncUnrelatedInputBroker") == 0;
+        ret = StringHelper::Compare(brokerName, "MemoryMapSynchronisedMultiBufferInputBroker") == 0;
         if (ret) {
             freq = -1.;
             cdb.Delete("Frequency");
             cdb.Write("Frequency", freq);
             const char8* brokerName = dataSource->GetBrokerName(cdb, InputSignals);
-            ret = StringHelper::Compare(brokerName, "MemoryMapUnrelatedInputBroker") == 0;
+            ret = StringHelper::Compare(brokerName, "MemoryMapMultiBufferInputBroker") == 0;
         }
     }
-
+    ObjectRegistryDatabase::Instance()->Purge();
     return ret;
 }
 
@@ -646,13 +644,26 @@ bool CircularBufferThreadInputDataSourceTest::TestGetInputBrokers() {
         dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
         ret = dataSource.IsValid();
     }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
     if (ret) {
-        uint32 *nbrokerOpPerSignal = dataSource->NBrokerOpPerSignal();
-        ret = nbrokerOpPerSignal[0] == 1;
-        ret &= nbrokerOpPerSignal[1] == 4;
-        ret &= nbrokerOpPerSignal[2] == 1;
-
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
     }
+
+    if (ret) {
+        ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+        ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
+        ReferenceContainer brokers;
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+            ret &= broker.IsValid();
+        }
+    }
+
+    ObjectRegistryDatabase::Instance()->Purge();
 
     return ret;
 }
@@ -763,9 +774,6 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
         ret = (dataSource->GetLastReadBuffer() != NULL);
     }
     if (ret) {
-        ret = (dataSource->GetLastReadBuffer_1() != NULL);
-    }
-    if (ret) {
         ret = (dataSource->GetTriggerAfterNPackets() != NULL);
     }
     if (ret) {
@@ -774,6 +782,7 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
     if (ret) {
         ret = (dataSource->GetNumberOfChannels() == 3);
     }
+
     return ret;
 }
 
@@ -865,6 +874,7 @@ bool CircularBufferThreadInputDataSourceTest::TestPrepareNextState() {
             printf("I am %d\n", currentBuffer[0]);
         }
     }
+    ObjectRegistryDatabase::Instance()->Purge();
 
     return true;
 }
@@ -886,13 +896,18 @@ bool CircularBufferThreadInputDataSourceTest::TestGetInputOffset() {
         dataSource->ContinueRead();
         dataSource->Synchronise();
         dataSource->PrepareInputOffsets();
-        dataSource->TerminateRead(0, 0, 0);
+        dataSource->TerminateInputCopy(0, 0, 0);
 
-        uint32 offset = dataSource->GetInputOffset(0, 10);
+        uint32 offset;
+        ret = dataSource->GetInputOffset(0, 10, offset);
+        if (ret) {
+            ret = offset == 0;
+        }
 
         ret = (offset == (372 + 12 * i) % 400);
         printf("offset = %d\n", offset);
     }
+    ObjectRegistryDatabase::Instance()->Purge();
 
     return ret;
 
@@ -913,7 +928,9 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute() {
     }
 
     if (ret) {
-        ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+        ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+        ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
         ReferenceContainer brokers;
         ret = gam->GetInputBrokers(brokers);
         if (ret) {
@@ -952,6 +969,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute() {
         ret &= mem[10] == 35;
 
     }
+    ObjectRegistryDatabase::Instance()->Purge();
+
     return ret;
 }
 
@@ -1056,7 +1075,9 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_SameSignalDifferentMod
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1137,6 +1158,7 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_SameSignalDifferentMod
         }
         offsetRead += 50;
     }
+    ObjectRegistryDatabase::Instance()->Purge();
 
     return ret;
 
@@ -1216,7 +1238,9 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck() {
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1330,8 +1354,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Overwrite()
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapSyncUnrelatedInputBroker> broker;
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker1;
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1376,6 +1400,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Overwrite()
             }
         }
     }
+    ObjectRegistryDatabase::Instance()->Purge();
+
     return ret;
 
 }
@@ -1461,7 +1487,9 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_DriverRead(
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1514,6 +1542,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_DriverRead(
             }
         }
     }
+    ObjectRegistryDatabase::Instance()->Purge();
+
     return ret;
 
 }
@@ -1599,7 +1629,10 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Both() {
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
+
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1655,6 +1688,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Both() {
             }
         }
     }
+    ObjectRegistryDatabase::Instance()->Purge();
+
     return ret;
 }
 
@@ -1805,7 +1840,9 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp() {
         ret = gam.IsValid();
     }
 
-    ReferenceT<MemoryMapUnrelatedInputBroker> broker, broker1;
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
     if (ret) {
         ret = gam->GetInputBrokers(brokers);
@@ -1845,6 +1882,8 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp() {
             }
         }
     }
+    ObjectRegistryDatabase::Instance()->Purge();
+
     return ret;
 }
 
@@ -1925,7 +1964,7 @@ bool CircularBufferThreadInputDataSourceTest::TestPurge() {
     return true;
 }
 
-bool CircularBufferThreadInputDataSourceTest::TestTerminateRead() {
+bool CircularBufferThreadInputDataSourceTest::TestTerminateInputCopy() {
     return true;
 }
 

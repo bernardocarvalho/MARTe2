@@ -35,20 +35,21 @@ OBJSX= BrokerITest.x \
        MemoryMapBrokerTest.x\
        MemoryMapInputBrokerTest.x\
        MemoryMapInterpolatedInputBrokerTest.x\
+       MemoryMapMultiBufferBrokerTest.x \
+       MemoryMapMultiBufferInputBrokerTest.x \
+       MemoryMapMultiBufferOutputBrokerTest.x \
        MemoryMapOutputBrokerTest.x\
        MemoryMapSynchronisedInputBrokerTest.x\
+       MemoryMapSynchronisedMultiBufferOutputBrokerTest.x\
+       MemoryMapSynchronisedMultiBufferInputBrokerTest.x\
        MemoryMapSynchronisedOutputBrokerTest.x\
-       MemoryMapSyncUnrelatedInputBrokerTest.x \
-       MemoryMapSyncUnrelatedOutputBrokerTest.x \
-       MemoryMapUnrelatedBrokerTest.x \
-       MemoryMapUnrelatedInputBrokerTest.x \
-       MemoryMapUnrelatedOutputBrokerTest.x \
-       MultiBufferUnrelatedDataSourceTest.x\
        RealTimeApplicationTest.x\
        RealTimeApplicationConfigurationBuilderTest.x\
        RealTimeStateTest.x\
        RealTimeThreadTest.x\
        TimingDataSourceTest.x
+
+
 			
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..
