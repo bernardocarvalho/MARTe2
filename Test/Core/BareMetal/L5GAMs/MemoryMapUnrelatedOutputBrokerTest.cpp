@@ -508,7 +508,7 @@ bool MemoryMapUnrelatedOutputBrokerTest::TestExecute() {
     if (ret) {
         ret = broker->Execute();
         uint32 nBuffers = dataSource->GetNumberOfInternalMemoryBuffers();
-        uint32 offsetBuffer = 24;
+        uint32 offsetBuffer = 0;
 
         if (ret) {
             ret = (nBuffers == 2);
@@ -520,8 +520,11 @@ bool MemoryMapUnrelatedOutputBrokerTest::TestExecute() {
                 ret &= (dataPtr[22 + offsetBuffer] == 3);
             }
         }
-        offsetBuffer = 0;
+        offsetBuffer = 24;
         if (ret) {
+            for(uint32 i=0u; i<48; i++){
+                printf("data[%d]=%d\n",i, dataPtr[i]);
+            }
             ret = broker->Execute();
             if (ret) {
                 ret &= (dataPtr[0 + (1 % nBuffers) + offsetBuffer] == 0);

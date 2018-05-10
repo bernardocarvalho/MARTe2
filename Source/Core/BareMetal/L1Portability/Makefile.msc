@@ -24,6 +24,9 @@
 #
 #############################################################
 TARGET=msc
+ROOT_DIR=../../../..
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
+ENVIRONMENT_DIR=Environment
 
 include Makefile.inc
 

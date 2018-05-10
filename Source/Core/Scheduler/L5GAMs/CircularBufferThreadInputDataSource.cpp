@@ -386,41 +386,6 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
             nBrokerOpPerSignal[i] = 0u;
             nBrokerOpPerSignalCounter[i] = 0u;
         }
-        syncSignal = numberOfSignals;
-        uint32 numberOfFunctions = GetNumberOfFunctions();
-        for (uint32 i = 0u; (i < numberOfFunctions) && (ret); i++) {
-            uint32 numberOfSignalsPerFunction = 0u;
-            ret = GetFunctionNumberOfSignals(InputSignals, i, numberOfSignalsPerFunction);
-            //need to know the related signal index
-            for (uint32 j = 0u; (j < numberOfSignalsPerFunction) && (ret); j++) {
-                StreamString functionSignalName;
-                ret = GetFunctionSignalAlias(InputSignals, i, j, functionSignalName);
-                uint32 signalIdx = 0u;
-                if (ret) {
-                    ret = GetSignalIndex(signalIdx, functionSignalName.Buffer());
-                }
-                uint32 samples = 0u;
-                if (ret) {
-
-                    ret = GetFunctionSignalSamples(InputSignals, i, j, samples);
-                }
-                float32 frequency = -1.F;
-                if (ret) {
-                    ret = GetFunctionSignalReadFrequency(InputSignals, i, j, frequency);
-                }
-                if (ret) {
-                    if (frequency >= 0.F) {
-                        triggerAfterNPackets[signalIdx] = samples;
-                        syncSignal = signalIdx;
-                    }
-                    else if (signalIdx != syncSignal) {
-                        if (samples > triggerAfterNPackets[signalIdx]) {
-                            triggerAfterNPackets[signalIdx] = samples;
-                        }
-                    }
-                }
-            }
-        }
 
         if (ret) {
             isRefreshed = new uint8[numberOfInternalBuffers * numberOfSignals];
@@ -493,6 +458,80 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
 bool CircularBufferThreadInputDataSource::PrepareNextState(const char8 * const currentStateName,
                                                            const char8 * const nextStateName) {
     bool ret = true;
+    syncSignal = numberOfSignals;
+
+    for (uint32 i = 0u; (i < numberOfSignals) && (ret); i++) {
+        nBrokerOpPerSignal[i] = 0u;
+        nBrokerOpPerSignalCounter[i] = 0u;
+        triggerAfterNPackets[i]=0u;
+        uint32 numberOfStates = 0u;
+        ret = GetSignalNumberOfStates(i, numberOfStates);
+        for (uint32 j = 0u; (j < numberOfStates) && (ret); j++) {
+            StreamString stateName;
+            ret = GetSignalStateName(i, j, stateName);
+            if (ret) {
+                if (stateName == nextStateName) {
+                    uint32 numberOfFunctions = GetNumberOfFunctions();
+                    for (uint32 h = 0u; (h < numberOfFunctions) && (ret); h++) {
+                        uint32 numberOfFunctionSignals = 0u;
+                        ret = GetFunctionNumberOfSignals(InputSignals, h, numberOfFunctionSignals);
+                        for (uint32 k = 0u; (k < numberOfFunctionSignals) && (ret); k++) {
+                            StreamString signalName;
+                            ret = GetFunctionSignalAlias(InputSignals, h, k, signalName);
+                            uint32 signalIdxTmp = 0u;
+                            if (ret) {
+                                ret = GetSignalIndex(signalIdxTmp, signalName.Buffer());
+                            }
+                            if (ret) {
+                                if (signalIdxTmp == i) {
+                                    uint32 nOffsets = 0u;
+                                    ret = GetFunctionSignalNumberOfByteOffsets(InputSignals, h, k, nOffsets);
+                                    uint32 rangeSize = 0u;
+                                    if (ret) {
+                                        uint32 offsetStart;
+                                        ret = GetFunctionSignalByteOffsetInfo(InputSignals, h, k, 0u, offsetStart, rangeSize);
+                                    }
+                                    uint32 byteSize = 0u;
+                                    if (ret) {
+                                        ret = GetSignalByteSize(i, byteSize);
+                                    }
+                                    uint32 samples = 0u;
+                                    if (ret) {
+                                        ret = GetFunctionSignalSamples(InputSignals, h, k, samples);
+                                    }
+
+                                    float32 frequency = -1.F;
+                                    if (ret) {
+                                        ret = GetFunctionSignalReadFrequency(InputSignals, h, k, frequency);
+                                    }
+                                    if (ret) {
+                                        if (frequency >= 0.F) {
+                                            triggerAfterNPackets[i] = samples;
+                                            syncSignal = i;
+                                        }
+                                        else if (i != syncSignal) {
+                                            if (samples > triggerAfterNPackets[i]) {
+                                                triggerAfterNPackets[i] = samples;
+                                            }
+                                        }
+                                    }
+
+                                    bool noRange = ((nOffsets == 1u) && (byteSize == rangeSize));
+                                    if (noRange) {
+                                        nBrokerOpPerSignal[i]++;
+                                    }
+                                    else {
+
+                                        nBrokerOpPerSignal[i] += (nOffsets * samples);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     if (executor.GetStatus() == EmbeddedThreadI::OffState) {
         ret = executor.Start();

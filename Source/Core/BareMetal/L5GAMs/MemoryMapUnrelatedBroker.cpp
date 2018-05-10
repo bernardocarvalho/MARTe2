@@ -80,10 +80,12 @@ bool MemoryMapUnrelatedBroker::ExecuteCoreIn() {
                 uint32 dataSourceIndex = ((currentBuffer * numberOfCopies) + n);
                 uint32 allowedSize = copyTable[n].copySize;
                 uint32 gamOffset = 0u;
-                offset %= maxOffset[n];
+                //offset %= maxOffset[n];
                 //trap the circular buffer exception
                 if ((GetCopyOffset(n) + offset) >= maxOffset[n]) {
-                    offset = (offset - maxOffset[n]);
+                    while((GetCopyOffset(n) + offset) >= maxOffset[n]){
+                        offset = (offset - maxOffset[n]);
+                    }
                 }
                 if (allowedSize > (maxOffset[n] - (GetCopyOffset(n) + offset))) {
                     allowedSize = (maxOffset[n] - offset);
