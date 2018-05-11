@@ -59,14 +59,11 @@ CircularBufferThreadInputDataSourceTestDS    ();
 
     virtual uint32 *GetCurrentInternalBuffer();
 
-    virtual const char8 *GetBrokerName(StructuredDataI &data,
-            const SignalDirection direction);
-
     virtual uint8 *GetIsRefreshed();
 
     virtual uint32 *GetLastReadBuffer();
 
-    virtual uint32 *GetTriggerAfterNPackets();
+    virtual uint32 GetTriggerAfterNPackets();
 
     virtual uint32 *NBrokerOpPerSignal();
 
@@ -76,15 +73,21 @@ CircularBufferThreadInputDataSourceTestDS    ();
 
     void SetSignalDriverFalse(uint32 signal);
 
+    void SetSignalNoRead(uint32 signal);
+
     virtual bool TerminateInputCopy(const uint32 signalIdx, const uint32 offset, const uint32 numberOfSamples);
 
     virtual FastPollingMutexSem *GetMutex();
+
+    virtual const char8 *GetBrokerName(StructuredDataI &data,
+            const SignalDirection direction);
 
     void ContinueRead();
 
 private:
     uint32 decrementOnSignal;
     uint32 signalDriverFalse;
+    uint32 signalNoRead;
     uint32 counter;
     volatile int32 continueRead;
 
@@ -95,41 +98,23 @@ CircularBufferThreadInputDataSourceTestDS::CircularBufferThreadInputDataSourceTe
     continueRead = 0;
     decrementOnSignal = 0;
     signalDriverFalse = 10;
+    signalNoRead = 10;
 }
 
 CircularBufferThreadInputDataSourceTestDS::~CircularBufferThreadInputDataSourceTestDS() {
 
 }
 
-const char8 *CircularBufferThreadInputDataSourceTestDS::GetBrokerName(StructuredDataI &data,
-                                                                      const SignalDirection direction) {
-
-    const char8 *brokerName = "Invalid";
-    if (direction == InputSignals) {
-        syncInputBrokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
-
-        float32 freq = -1.0F;
-        if (!data.Read("Frequency", freq)) {
-            freq = -1.0F;
-        }
-
-        if (freq >= 0.F) {
-            brokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
-        }
-        else {
-            brokerName = "MemoryMapMultiBufferInputBroker";
-        }
-    }
-
-    return brokerName;
-
-}
 void CircularBufferThreadInputDataSourceTestDS::SetDecrementSignal(uint32 decrementSignal) {
     decrementOnSignal = decrementSignal;
 }
 
 void CircularBufferThreadInputDataSourceTestDS::SetSignalDriverFalse(uint32 signal) {
     signalDriverFalse = signal;
+}
+
+void CircularBufferThreadInputDataSourceTestDS::SetSignalNoRead(uint32 signal) {
+    signalNoRead = signal;
 }
 
 uint32 *CircularBufferThreadInputDataSourceTestDS::GetCurrentInternalBuffer() {
@@ -144,7 +129,7 @@ uint32 *CircularBufferThreadInputDataSourceTestDS::GetLastReadBuffer() {
     return lastReadBuffer;
 }
 
-uint32 *CircularBufferThreadInputDataSourceTestDS::GetTriggerAfterNPackets() {
+uint32 CircularBufferThreadInputDataSourceTestDS::GetTriggerAfterNPackets() {
     return triggerAfterNPackets;
 }
 
@@ -154,6 +139,17 @@ uint32 *CircularBufferThreadInputDataSourceTestDS::NBrokerOpPerSignal() {
 
 uint32 CircularBufferThreadInputDataSourceTestDS::GetNumberOfChannels() {
     return numberOfChannels;
+}
+
+const char8 *CircularBufferThreadInputDataSourceTestDS::GetBrokerName(StructuredDataI &data,
+                                                                      const SignalDirection direction) {
+
+    const char8 *brokerName = CircularBufferThreadInputDataSource::GetBrokerName(data, direction);
+    if (brokerName == NULL) {
+        brokerName="Invalid";
+    }
+    return brokerName;
+
 }
 
 bool CircularBufferThreadInputDataSourceTestDS::DriverRead(char8 * const bufferToFill,
@@ -172,6 +168,11 @@ bool CircularBufferThreadInputDataSourceTestDS::DriverRead(char8 * const bufferT
     for (uint32 i = 0u; i < sizeToRead / 4; i++) {
         bufferPtr[i] = counter;
         counter++;
+    }
+
+    if (signalNoRead == signalIdx) {
+        printf("WTF IM HERE!!!\n");
+        sizeToRead = 0;
     }
 
     return (signalDriverFalse != signalIdx);
@@ -361,7 +362,7 @@ bool CircularBufferThreadInputDataSourceTest::TestConstructor() {
         ret = (dataSource.GetLastReadBuffer() == NULL);
     }
     if (ret) {
-        ret = (dataSource.GetTriggerAfterNPackets() == NULL);
+        ret = (dataSource.GetTriggerAfterNPackets() == 0);
     }
     if (ret) {
         ret = (dataSource.NBrokerOpPerSignal() == NULL);
@@ -608,6 +609,130 @@ bool CircularBufferThreadInputDataSourceTest::TestSynchronise_FullRolling() {
 
 }
 
+bool CircularBufferThreadInputDataSourceTest::TestSynchronise_GetLatest() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 1"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 12"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
+    ReferenceContainer brokers;
+    FastPollingMutexSem *mux;
+    uint8 *refreshed;
+    uint32 numberOfSignals;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker1 = brokers.Get(1);
+            ret = broker1.IsValid();
+        }
+
+        if (ret) {
+            mux = dataSource->GetMutex();
+            refreshed = dataSource->GetIsRefreshed();
+            numberOfSignals = dataSource->GetNumberOfSignals();
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+
+    uint32 numberOfReads = 3;
+    //uint64 store = HighResolutionTimer::Counter();
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+
+        dataSource->ContinueRead();
+        uint32 counter = 0u;
+        while (counter < 8) {
+            mux->FastLock();
+            counter += (refreshed[n * numberOfSignals] == 1);
+            mux->FastUnLock();
+            Sleep::MSec(5);
+        }
+
+        if (ret) {
+
+            ret = dataSource->Synchronise();
+            if (ret) {
+                //ret = broker->Execute();
+                ret = broker1->Execute();
+            }
+        }
+    }
+    return ret;
+
+}
+
 bool CircularBufferThreadInputDataSourceTest::TestGetBrokerName() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
 
@@ -773,9 +898,7 @@ bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase() {
     if (ret) {
         ret = (dataSource->GetLastReadBuffer() != NULL);
     }
-    if (ret) {
-        ret = (dataSource->GetTriggerAfterNPackets() != NULL);
-    }
+
     if (ret) {
         ret = (dataSource->NBrokerOpPerSignal() != NULL);
     }
@@ -911,6 +1034,12 @@ bool CircularBufferThreadInputDataSourceTest::TestGetInputOffset() {
 
     return ret;
 
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestGetOutputOffset() {
+    CircularBufferThreadInputDataSourceTestDS dataSource;
+    uint32 offset;
+    return !dataSource.GetOutputOffset(0, 0, offset);
 }
 
 bool CircularBufferThreadInputDataSourceTest::TestExecute() {
@@ -1075,7 +1204,6 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_SameSignalDifferentMod
         ret = gam.IsValid();
     }
 
-
     ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
     ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
@@ -1237,7 +1365,6 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck() {
         gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
         ret = gam.IsValid();
     }
-
 
     ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
     ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
@@ -1487,7 +1614,6 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_DriverRead(
         ret = gam.IsValid();
     }
 
-
     ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
     ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
@@ -1629,7 +1755,6 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Both() {
         ret = gam.IsValid();
     }
 
-
     ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
     ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
 
@@ -1693,7 +1818,69 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_Both() {
     return ret;
 }
 
-bool CircularBufferThreadInputDataSourceTest::TestExecute_ErrorCheck_False_BadSize() {
+bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase_ErrorCheck_False_BadType() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint64"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 10"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    return !InitialiseMemoryMapInputBrokerEnviroment(config2);
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase_ErrorCheck_False_BadSize() {
     static const char8 * const config2 = ""
             "$Application1 = {"
             "    Class = RealTimeApplication"
@@ -1840,7 +2027,6 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp() {
         ret = gam.IsValid();
     }
 
-
     ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
     ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
     ReferenceContainer brokers;
@@ -1874,11 +2060,17 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp() {
         if (ret) {
             uint32 nSamples = 5;
             float32 delta = 0;
+            float32 delta_1 = 0;
+            float32 resolution = 10.F;
             uint64 store = *(uint64*) (&mem[10]);
             for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
                 delta = (*(uint64*) (&mem[10 + 2 * i]) - store) * HighResolutionTimer::Period() * 1e3;
                 store = *(uint64*) (&mem[10 + 2 * i]);
                 printf("ts[%d]=%llu, delta=%f\n", i, *(uint64*) (&mem[10 + 2 * i]), delta);
+                if (i > 0) {
+                    ret = ((delta - delta_1) < resolution) || ((delta - delta_1) > -resolution);
+                }
+                delta_1 = delta;
             }
         }
     }
@@ -1887,7 +2079,403 @@ bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp() {
     return ret;
 }
 
-bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp_False_BadSize() {
+bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp_NoRead() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               InternalTimeStamp = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint64"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 2"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 2"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "               Signal2 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 1"
+            "                   Samples = 5"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 10"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        dataSource->SetDecrementSignal(0);
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
+    ReferenceContainer brokers;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+            if (ret) {
+                ret = broker1.IsValid();
+            }
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+    uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+
+    uint32 numberOfReads = 4;
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+
+        if (n > 1) {
+            dataSource->SetSignalNoRead(3);
+        }
+
+        dataSource->ContinueRead();
+        if (ret) {
+            ret = broker->Execute();
+            ret &= broker1->Execute();
+        }
+
+        if (ret) {
+            //2 signals, 5 samples
+            uint32 nSamples = 10;
+            float32 delta = 0;
+            float32 delta_1 = 0;
+            uint64 store = *(uint64*) (&mem[10]);
+            float32 delta1 = 0;
+            float32 delta1_1 = 0;
+            uint64 store1 = *(uint64*) (&mem[10 + 2]);
+            float32 resolution = 10.F;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                if (i % 2 == 0) {
+                    delta = (*(uint64*) (&mem[10 + 2 * i]) - store) * HighResolutionTimer::Period() * 1e3;
+                    printf("ts[%d]=%llu, delta=%f\n", i, *(uint64*) (&mem[10 + 2 * i]), delta);
+                    store = *(uint64*) (&mem[10 + 2 * i]);
+                    if (n > 0) {
+                        ret &= ((delta - delta_1) < resolution) || ((delta - delta_1) > -resolution);
+                    }
+                    delta1_1 = delta1;
+                }
+                else {
+                    delta1 = (*(uint64*) (&mem[10 + 2 * i]) - store1) * HighResolutionTimer::Period() * 1e3;
+                    printf("ts[%d]=%llu, delta=%f\n", i, *(uint64*) (&mem[10 + 2 * i]), delta1);
+                    store1 = *(uint64*) (&mem[10 + 2 * i]);
+                    if (n > 0) {
+                        ret &= ((delta1 - delta1_1) < resolution) || ((delta1 - delta1_1) > -resolution);
+                    }
+                    if (n > 1) {
+                        ret &= delta1 == 0;
+                    }
+                    delta1_1 = delta1;
+                }
+
+            }
+        }
+    }
+    ObjectRegistryDatabase::Instance()->Purge();
+
+    return ret;
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestExecute_TimeStamp_FalseDriverRead() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               InternalTimeStamp = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint64"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 2"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 2"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "               Signal2 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 1"
+            "                   Samples = 5"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 10"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config2);
+
+    ReferenceT<CircularBufferThreadInputDataSourceTestDS> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    ReferenceT<CircularBufferThreadInputDataSourceTestGAM1> gam;
+    if (ret) {
+        dataSource->SetDecrementSignal(0);
+        gam = ObjectRegistryDatabase::Instance()->Find("Application1.Functions.GAMA");
+        ret = gam.IsValid();
+    }
+
+    ReferenceT<MemoryMapSynchronisedMultiBufferInputBroker> broker;
+    ReferenceT<MemoryMapMultiBufferInputBroker> broker1;
+    ReferenceContainer brokers;
+    if (ret) {
+        ret = gam->GetInputBrokers(brokers);
+        if (ret) {
+            broker = brokers.Get(0);
+            broker1 = brokers.Get(1);
+            ret = broker.IsValid();
+            if (ret) {
+                ret = broker1.IsValid();
+            }
+        }
+
+        if (ret) {
+            ret = dataSource->PrepareNextState("State1", "State1");
+        }
+
+    }
+    uint32 *mem = (uint32*) gam->GetInputMemoryBuffer();
+
+    uint32 numberOfReads = 4;
+    for (uint32 n = 0u; (n < numberOfReads) && (ret); n++) {
+
+        if (n > 1) {
+            dataSource->SetSignalDriverFalse(3);
+        }
+
+        dataSource->ContinueRead();
+        if (ret) {
+            ret = broker->Execute();
+            ret &= broker1->Execute();
+        }
+
+        if (ret) {
+            //2 signals, 5 samples
+            uint32 nSamples = 10;
+            float32 delta = 0;
+            float32 delta_1 = 0;
+            uint64 store = *(uint64*) (&mem[10]);
+            float32 delta1 = 0;
+            float32 delta1_1 = 0;
+            uint64 store1 = *(uint64*) (&mem[10 + 2]);
+            float32 resolution = 10.F;
+            for (uint32 i = 0u; (i < nSamples) && (ret); i++) {
+                if (i % 2 == 0) {
+                    delta = (*(uint64*) (&mem[10 + 2 * i]) - store) * HighResolutionTimer::Period() * 1e3;
+                    printf("ts[%d]=%llu, delta=%f\n", i, *(uint64*) (&mem[10 + 2 * i]), delta);
+                    store = *(uint64*) (&mem[10 + 2 * i]);
+                    if (n > 0) {
+                        ret &= ((delta - delta_1) < resolution) || ((delta - delta_1) > -resolution);
+                    }
+                    delta1_1 = delta1;
+                }
+                else {
+                    delta1 = (*(uint64*) (&mem[10 + 2 * i]) - store1) * HighResolutionTimer::Period() * 1e3;
+                    printf("ts[%d]=%llu, delta=%f\n", i, *(uint64*) (&mem[10 + 2 * i]), delta1);
+                    store1 = *(uint64*) (&mem[10 + 2 * i]);
+                    if (n > 0) {
+                        ret &= ((delta1 - delta1_1) < resolution) || ((delta1 - delta1_1) > -resolution);
+                    }
+                    if (n > 1) {
+                        ret &= delta1 == 0;
+                    }
+                    delta1_1 = delta1;
+                }
+
+            }
+        }
+    }
+    ObjectRegistryDatabase::Instance()->Purge();
+
+    return ret;
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase_TimeStamp_False_BadType() {
+    static const char8 * const config2 = ""
+            "$Application1 = {"
+            "    Class = RealTimeApplication"
+            "    +Functions = {"
+            "        Class = ReferenceContainer"
+            "        +GAMA = {"
+            "            Class = CircularBufferThreadInputDataSourceTestGAM1"
+            "            InputSignals = {"
+            "               Signal1 = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   NumberOfDimensions = 1"
+            "                   NumberOfElements = 10"
+            "                   Ranges = {{0,0}, {2,2}}"
+            "                   Trigger = 2"
+            "                   Samples = 5"
+            "                   Frequency = 0"
+            "               }"
+            "               InternalTimeStamp = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "               ErrorCheck = {"
+            "                   DataSource = Drv1"
+            "                   Type = uint32"
+            "                   Trigger = 0"
+            "                   Samples = 5"
+            "               }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        +Drv1 = {"
+            "            Class = CircularBufferThreadInputDataSourceTestDS"
+            "            NumberOfBuffers = 10"
+            "            CpuMask = 1"
+            "            ReceiverThreadPriority = 31"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +State1 = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    Functions = {GAMA}"
+            "                }"
+            "            }"
+            "        }"
+            "    }"
+            "    +Scheduler = {"
+            "        Class = MemoryMapInputBrokerTestScheduler1"
+            "        TimingDataSource = Timings"
+            "    }"
+            "}";
+
+    return !InitialiseMemoryMapInputBrokerEnviroment(config2);
+}
+
+bool CircularBufferThreadInputDataSourceTest::TestSetConfiguredDatabase_TimeStamp_False_BadSize() {
     static const char8 * const config2 = ""
             "$Application1 = {"
             "    Class = RealTimeApplication"
@@ -1965,6 +2553,6 @@ bool CircularBufferThreadInputDataSourceTest::TestPurge() {
 }
 
 bool CircularBufferThreadInputDataSourceTest::TestTerminateInputCopy() {
-    return true;
+    return TestExecute();
 }
 

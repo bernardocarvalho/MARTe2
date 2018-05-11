@@ -56,11 +56,7 @@ MAKE     = make
 #-maltivec -mabi=altivec
 DEBUG = -g -ggdb
 OPTIM = 
-<<<<<<< HEAD
-LFLAGS = -Wl,--no-as-needed --coverage  
-=======
 LFLAGS = -Wl,--no-as-needed --coverage
->>>>>>> refs/remotes/origin/develop-multibuffer-datasources
 CFLAGS = -fPIC -Wall -fprofile-arcs -ftest-coverage 
 CPPFLAGS = -fPIC -frtti -fprofile-arcs -ftest-coverage 
 CFLAGSPEC= -DARCHITECTURE=$(ARCHITECTURE) -DENVIRONMENT=$(ENVIRONMENT) -DUSE_PTHREAD -pthread

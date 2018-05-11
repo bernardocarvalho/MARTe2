@@ -40,51 +40,169 @@ using namespace MARTe;
 
 class CircularBufferThreadInputDataSourceTest {
 public:
+
+    /**
+     * @brief Constructor
+     */
     CircularBufferThreadInputDataSourceTest();
+
+    /**
+     * @brief Destructor
+     */
     ~CircularBufferThreadInputDataSourceTest();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource constructor
+     */
     bool TestConstructor();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Initialise
+     */
     bool TestInitialise();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::GetBrokerName
+     */
     bool TestGetBrokerName();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::GetInputBrokers
+     */
     bool TestGetInputBrokers();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::GetOutputBrokers
+     */
     bool TestGetOutputBrokers();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::SetConfiguredDatabase
+     */
     bool TestSetConfiguredDatabase();
 
+    /**
+     * @brief Tests that CircularBufferThreadInputDataSource::SetConfiguredDatabase returns
+     * false if a signal is produced
+     */
     bool TestSetConfiguredDatabase_False_WrittenSignal();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::PrepareNextState
+     */
     bool TestPrepareNextState();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Synchronise
+     */
     bool TestSynchronise();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Synchronise when the signal is not
+     * read and returns false
+     */
     bool TestSynchronise_FullRolling();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Synchronise when more than one chunks of
+     * samples is arrived for the sync signal
+     */
+    bool TestSynchronise_GetLatest();
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::GetInputOffset
+     */
     bool TestGetInputOffset();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::GetOutputOffset
+     */
+    bool TestGetOutputOffset();
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute
+     */
     bool TestExecute();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with different number of samples
+     * for the same signal
+     */
     bool TestExecute_SameSignalDifferentModes();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the ErrorCheck signal
+     */
     bool TestExecute_ErrorCheck();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the ErrorCheck signal and
+     * producing a write overlap error.
+     */
     bool TestExecute_ErrorCheck_Overwrite();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the ErrorCheck signal and
+     * producing a DriverRead error.
+     */
     bool TestExecute_ErrorCheck_DriverRead();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the ErrorCheck signal
+     * producing different error types.
+     */
     bool TestExecute_ErrorCheck_Both();
 
-    bool TestExecute_ErrorCheck_False_BadSize();
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::SetConfiguredDatabase that fails if
+     * the ErrorCheck signal has a type different than uint32
+     */
+    bool TestSetConfiguredDatabase_ErrorCheck_False_BadType();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::SetConfiguredDatabase that fails if
+     * the ErrorCheck signal has a bad number of elements.
+     */
+    bool TestSetConfiguredDatabase_ErrorCheck_False_BadSize();
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the InternalTimeSTamp signal
+     */
     bool TestExecute_TimeStamp();
 
-    bool TestExecute_TimeStamp_False_BadSize();
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the InternalTimeSTamp signal
+     * when the signal has not be read.
+     */
+    bool TestExecute_TimeStamp_NoRead();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Execute with the InternalTimeSTamp signal
+     * when the DriverRead fails.
+     */
+    bool TestExecute_TimeStamp_FalseDriverRead();
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::SetConfiguredDatabase that fails if the
+     * InternalTimeStamp signal has a type different than uint64
+     */
+    bool TestSetConfiguredDatabase_TimeStamp_False_BadType();
+
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::SetConfiguredDatabase that fails if the
+     * InternalTimeStamp signal has a bad number of elements
+     */
+    bool TestSetConfiguredDatabase_TimeStamp_False_BadSize();
+
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::Purge
+     */
     bool TestPurge();
 
+    /**
+     * @brief Tests the CircularBufferThreadInputDataSource::TerminateInputCopy
+     */
     bool TestTerminateInputCopy();
 
 

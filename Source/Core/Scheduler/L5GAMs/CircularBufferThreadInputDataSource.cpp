@@ -46,15 +46,14 @@ CircularBufferThreadInputDataSource::CircularBufferThreadInputDataSource() :
         MemoryDataSourceI(),
         EmbeddedServiceMethodBinderI(),
         executor(*this) {
-    threadID = 0u;
-    receiverThreadPriority = 31u;
     mutex.Create();
     currentBuffer = NULL_PTR(uint32 *);
 
     isRefreshed = NULL_PTR(uint8 *);
     lastReadBuffer = NULL_PTR(uint32 *);
+    lastReadBuffer_1 = NULL_PTR(uint32 *);
 
-    triggerAfterNPackets = NULL_PTR(uint32 *);
+    triggerAfterNPackets = 0u;
     nBrokerOpPerSignal = NULL_PTR(uint32 *);
     nBrokerOpPerSignalCounter = NULL_PTR(uint32 *);
     numberOfChannels = 0u;
@@ -70,10 +69,7 @@ CircularBufferThreadInputDataSource::~CircularBufferThreadInputDataSource() {
         delete[] isRefreshed;
         isRefreshed = NULL_PTR(uint8 *);
     }
-    if (triggerAfterNPackets != NULL_PTR(uint32 *)) {
-        delete[] triggerAfterNPackets;
-        triggerAfterNPackets = NULL_PTR(uint32 *);
-    }
+
     if (currentBuffer != NULL_PTR(uint32 *)) {
         delete[] currentBuffer;
         currentBuffer = NULL_PTR(uint32 *);
@@ -82,7 +78,10 @@ CircularBufferThreadInputDataSource::~CircularBufferThreadInputDataSource() {
         delete[] lastReadBuffer;
         lastReadBuffer = NULL_PTR(uint32 *);
     }
-
+    if (lastReadBuffer_1 != NULL_PTR(uint32 *)) {
+        delete[] lastReadBuffer_1;
+        lastReadBuffer_1 = NULL_PTR(uint32 *);
+    }
     if (nBrokerOpPerSignal != NULL_PTR(uint32 *)) {
         delete[] nBrokerOpPerSignal;
         nBrokerOpPerSignal = NULL_PTR(uint32 *);
@@ -115,7 +114,7 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
             REPORT_ERROR_PARAMETERS(ErrorManagement::Warning, "CpuMask was not specified. Using default: %d", cpuMask);
             cpuMask = 0xFFFFu;
         }
-
+        uint32 receiverThreadPriority;
         if (!data.Read("ReceiverThreadPriority", receiverThreadPriority)) {
             receiverThreadPriority = 31u;
         }
@@ -133,34 +132,36 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
 void CircularBufferThreadInputDataSource::PrepareInputOffsets() {
 
     for (uint32 i = 0u; i < numberOfSignals; i++) {
-        uint32 nStepsForward = 0u;
-        //always go to the end
+        if (i != syncSignal) {
+            lastReadBuffer_1[i] = lastReadBuffer[i];
 
-        //roll on consuming the circular buffer until the last written
-        while (nStepsForward < numberOfBuffers) {
-            uint32 lastReadBufTemp = (lastReadBuffer[i] + 1u);
-            if (lastReadBufTemp >= numberOfBuffers) {
-                lastReadBufTemp = 0u;
-            }
-            (void) mutex.FastLock();
-            uint32 index = (lastReadBufTemp * numberOfSignals) + i;
-            if (isRefreshed[index] == 0u) {
+            uint32 nStepsForward = 0u;
+            //always go to the end
+
+            //roll on consuming the circular buffer until the last written
+            while (nStepsForward < numberOfBuffers) {
+                uint32 lastReadBufTemp = (lastReadBuffer[i] + 1u);
+                if (lastReadBufTemp >= numberOfBuffers) {
+                    lastReadBufTemp = 0u;
+                }
+                (void) mutex.FastLock();
+                uint32 index = (lastReadBufTemp * numberOfSignals) + i;
+                if (isRefreshed[index] == 0u) {
+                    mutex.FastUnLock();
+                    break;
+                }
                 mutex.FastUnLock();
-                break;
+                lastReadBuffer[i] = lastReadBufTemp;
+                nStepsForward++;
             }
-            mutex.FastUnLock();
-            lastReadBuffer[i] = lastReadBufTemp;
-            nStepsForward++;
         }
-
-        //if asynchronous return back to the last arrived samples, otherwise it will wait for new ones
-        //at least double buffer (stepsBack+triggerAfterNPackets)<numberOfBuffers
-        REPORT_ERROR(ErrorManagement::Information, "buffers %d", lastReadBuffer[i]);
     }
 }
 
 /*lint -e{613} null pointer checked before.*/
 bool CircularBufferThreadInputDataSource::Synchronise() {
+
+    lastReadBuffer_1[syncSignal] = lastReadBuffer[syncSignal];
 
     uint32 nStepsForward = 0u;
     //always go to the end
@@ -184,7 +185,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
 
     bool ret = (nStepsForward < numberOfBuffers);
     if (ret) {
-        uint32 stepsBack = nStepsForward % triggerAfterNPackets[syncSignal];
+        uint32 stepsBack = nStepsForward % triggerAfterNPackets;
         //if asynchronous return back to the last arrived samples, otherwise it will wait for new ones
         //at least double buffer (stepsBack+triggerAfterNPackets)<numberOfBuffers
         lastReadBuffer[syncSignal] -= stepsBack;
@@ -195,7 +196,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
         //return to the last sub-block
         //triggerAfterNPackets not arrived yet
 
-        uint32 numberOfPacketsSinceLastTrigger = triggerAfterNPackets[syncSignal];
+        uint32 numberOfPacketsSinceLastTrigger = triggerAfterNPackets;
 
         while (numberOfPacketsSinceLastTrigger > 0u) {
 
@@ -217,7 +218,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
         }
     }
 
-    REPORT_ERROR(ErrorManagement::Information, "buffers %d", lastReadBuffer[syncSignal]);
+    //REPORT_ERROR(ErrorManagement::Information, "buffers %d", lastReadBuffer[syncSignal]);
 
     return ret;
 }
@@ -227,7 +228,7 @@ const char8 *CircularBufferThreadInputDataSource::GetBrokerName(StructuredDataI 
 
     const char8 *brokerName = NULL_PTR(const char8 *);
     if (direction == InputSignals) {
-        syncInputBrokerName = "MemoryMapSyncUnrelatedInputBroker";
+        syncInputBrokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
 
         float32 freq = -1.0F;
         if (!data.Read("Frequency", freq)) {
@@ -235,10 +236,10 @@ const char8 *CircularBufferThreadInputDataSource::GetBrokerName(StructuredDataI 
         }
 
         if (freq >= 0.F) {
-            brokerName = "MemoryMapSyncUnrelatedInputBroker";
+            brokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
         }
         else {
-            brokerName = "MemoryMapUnrelatedInputBroker";
+            brokerName = "MemoryMapMultiBufferInputBroker";
         }
     }
 
@@ -260,14 +261,14 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
     if (ret) {
         currentBuffer = new uint32[numberOfSignals];
         lastReadBuffer = new uint32[numberOfSignals];
-        triggerAfterNPackets = new uint32[numberOfSignals];
+        lastReadBuffer_1 = new uint32[numberOfSignals];
         nBrokerOpPerSignal = new uint32[numberOfSignals];
         nBrokerOpPerSignalCounter = new uint32[numberOfSignals];
 
-        for (uint32 i = 0u; i < numberOfSignals; i++) {
-            triggerAfterNPackets[i] = 0u;
+        for (uint32 i = 0u; (i < numberOfSignals) && (ret); i++) {
             currentBuffer[i] = 0u;
             lastReadBuffer[i] = (numberOfBuffers - 1u);
+            lastReadBuffer_1[i] = 0u;
             nBrokerOpPerSignal[i] = 0u;
             nBrokerOpPerSignalCounter[i] = 0u;
 
@@ -282,48 +283,15 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                     if (!ret) {
                         REPORT_ERROR(ErrorManagement::InitialisationError, "The InternalTimeStamp signal type must be uint64");
                     }
-                    //check that this signal is only consumed
-                    if (ret) {
-                        uint32 numberOfStates = 0u;
-                        ret = GetSignalNumberOfStates(timeStampSignalIndex, numberOfStates);
-                        for (uint32 j = 0u; (j < numberOfStates) && (ret); j++) {
-                            StreamString stateName;
-                            ret = GetSignalStateName(timeStampSignalIndex, j, stateName);
-                            if (ret) {
-                                uint32 numberOfProducers = 0u;
-                                (void) GetSignalNumberOfProducers(timeStampSignalIndex, stateName.Buffer(), numberOfProducers);
-                                ret = (numberOfProducers == 0u);
-                                if (!ret) {
-                                    REPORT_ERROR(ErrorManagement::InitialisationError, "The InternalTimeStamp signal cannot be produced");
-                                }
-                            }
-                        }
-                    }
                 }
-
-                if (signalName == "ErrorCheck") {
-                    errorCheckSignalIndex = i;
-                    //check the type of the time stamp signal
-                    TypeDescriptor td = GetSignalType(errorCheckSignalIndex);
-                    ret = (td == UnsignedInteger32Bit);
-                    if (!ret) {
-                        REPORT_ERROR(ErrorManagement::InitialisationError, "The ErrorCheck signal type must be uint32");
-                    }
-                    //check that this signal is only consumed
-                    if (ret) {
-                        uint32 numberOfStates = 0u;
-                        ret = GetSignalNumberOfStates(errorCheckSignalIndex, numberOfStates);
-                        for (uint32 j = 0u; (j < numberOfStates) && (ret); j++) {
-                            StreamString stateName;
-                            ret = GetSignalStateName(errorCheckSignalIndex, j, stateName);
-                            if (ret) {
-                                uint32 numberOfProducers = 0u;
-                                (void) GetSignalNumberOfProducers(errorCheckSignalIndex, stateName.Buffer(), numberOfProducers);
-                                ret = (numberOfProducers == 0u);
-                                if (!ret) {
-                                    REPORT_ERROR(ErrorManagement::InitialisationError, "The ErrorCheck signal cannot be produced");
-                                }
-                            }
+                if (ret) {
+                    if (signalName == "ErrorCheck") {
+                        errorCheckSignalIndex = i;
+                        //check the type of the time stamp signal
+                        TypeDescriptor td = GetSignalType(errorCheckSignalIndex);
+                        ret = (td == UnsignedInteger32Bit);
+                        if (!ret) {
+                            REPORT_ERROR(ErrorManagement::InitialisationError, "The ErrorCheck signal type must be uint32");
                         }
                     }
                 }
@@ -376,8 +344,8 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                     uint32 sizeCheck = static_cast<uint32>(sizeof(uint64)) * (numberOfChannels);
                     ret = (signalByteSize == sizeCheck);
                     if (!ret) {
-                        REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "The size of the InternalTimeStamp signal must be %d != %d", sizeCheck,
-                                                signalByteSize);
+                        REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "The size of the InternalTimeStamp signal must be %d != %d %d", sizeCheck,
+                                                signalByteSize, numberOfChannels);
                     }
                 }
 
@@ -411,7 +379,6 @@ bool CircularBufferThreadInputDataSource::PrepareNextState(const char8 * const c
     for (uint32 i = 0u; (i < numberOfSignals) && (ret); i++) {
         nBrokerOpPerSignal[i] = 0u;
         nBrokerOpPerSignalCounter[i] = 0u;
-        triggerAfterNPackets[i] = 0u;
         uint32 numberOfStates = 0u;
         ret = GetSignalNumberOfStates(i, numberOfStates);
         for (uint32 j = 0u; (j < numberOfStates) && (ret); j++) {
@@ -454,15 +421,8 @@ bool CircularBufferThreadInputDataSource::PrepareNextState(const char8 * const c
                                     }
                                     if (ret) {
                                         if (frequency >= 0.F) {
-                                            triggerAfterNPackets[i] = samples;
+                                            triggerAfterNPackets = samples;
                                             syncSignal = i;
-                                        }
-                                        else {
-                                            if (i != syncSignal) {
-                                                if (samples > triggerAfterNPackets[i]) {
-                                                    triggerAfterNPackets[i] = samples;
-                                                }
-                                            }
                                         }
                                     }
 
@@ -530,7 +490,6 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                 uint32 readBytes = signalSize[i];
                 uint32 memoryIndex = signalOffsets[i] + (currentBuffer[i] * signalSize[i]);
                 if (!DriverRead(reinterpret_cast<char8*>(&(memory[memoryIndex])), readBytes, i)) {
-                    REPORT_ERROR(ErrorManagement::FatalError, "Failed reading data. Thread is going to return");
                     ok = false;
                 }
                 if (ok) {
@@ -568,6 +527,20 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                             currentBuffer[i] = 0u;
                         }
                     }
+                    else {
+                        //copy the timestamp of the previous buffer
+                        if (timeStampSignalIndex != 0xFFFFFFFFu) {
+                            uint32 previousBuf = (currentBuffer[timeStampSignalIndex] - 1u);
+                            if (previousBuf >= numberOfBuffers) {
+                                previousBuf += numberOfBuffers;
+                            }
+                            uint32 index1 = (previousBuf * (numberOfChannels));
+                            uint32 index2 = (currentBuffer[timeStampSignalIndex] * (numberOfChannels));
+                            uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                            uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                            *reinterpret_cast<uint64*>(&(memory[timeMemIndex2])) = *reinterpret_cast<uint64*>(&(memory[timeMemIndex1]));
+                        }
+                    }
 
                 }
                 else {
@@ -575,8 +548,19 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                     if (errorCheckSignalIndex != 0xFFFFFFFFu) {
                         uint32 index = (currentBuffer[errorCheckSignalIndex] * (numberOfChannels));
                         errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index + cnt) * static_cast<uint32>(sizeof(uint32))));
-                        REPORT_ERROR(ErrorManagement::Information, "Case 2");
                         *reinterpret_cast<uint32*>(&(memory[errorMemIndex])) |= 1u;
+                    }
+                    //copy the timestamp of the previous buffer
+                    if (timeStampSignalIndex != 0xFFFFFFFFu) {
+                        uint32 previousBuf = (currentBuffer[timeStampSignalIndex] - 1u);
+                        if (previousBuf >= numberOfBuffers) {
+                            previousBuf += numberOfBuffers;
+                        }
+                        uint32 index1 = (previousBuf * (numberOfChannels));
+                        uint32 index2 = (currentBuffer[timeStampSignalIndex] * (numberOfChannels));
+                        uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                        uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                        *reinterpret_cast<uint64*>(&(memory[timeMemIndex2])) = *reinterpret_cast<uint64*>(&(memory[timeMemIndex1]));
                     }
                 }
                 cnt++;
@@ -616,7 +600,7 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
             currentBuffer[i] = 0u;
         }
         (void) mutex.FastLock();
-        (void)MemoryOperationsHelper::Set(&isRefreshed[0], '\0', numberOfBuffers * numberOfSignals);
+        (void) MemoryOperationsHelper::Set(&isRefreshed[0], '\0', numberOfBuffers * numberOfSignals);
         mutex.FastUnLock();
 
     }
@@ -633,37 +617,27 @@ bool CircularBufferThreadInputDataSource::TerminateInputCopy(const uint32 signal
                                                              const uint32 numberOfSamples) {
 
     nBrokerOpPerSignalCounter[signalIdx]--;
-    REPORT_ERROR(ErrorManagement::Information, "Terminate1 %d %d", signalIdx, triggerAfterNPackets[signalIdx]);
 
     if ((nBrokerOpPerSignalCounter[signalIdx] == 0u) || (nBrokerOpPerSignalCounter[signalIdx] >= nBrokerOpPerSignal[signalIdx])) {
-        REPORT_ERROR(ErrorManagement::Information, "Terminate %d %d", signalIdx, triggerAfterNPackets[signalIdx]);
         //set as read
         nBrokerOpPerSignalCounter[signalIdx] = nBrokerOpPerSignal[signalIdx];
-        uint32 index = (lastReadBuffer[signalIdx] - triggerAfterNPackets[signalIdx]) + 1u;
-        //overflow
-        if (index >= numberOfBuffers) {
-            index += numberOfBuffers;
-        }
+        uint32 index = (lastReadBuffer_1[signalIdx]);
 
         while (index != lastReadBuffer[signalIdx]) {
-            (void) mutex.FastLock();
-            uint32 index1=(index * numberOfSignals) + signalIdx;
-            isRefreshed[index1] = 0u;
-            mutex.FastUnLock();
             index++;
             if (index >= numberOfBuffers) {
                 index = 0u;
             }
-        }
 
-        (void) mutex.FastLock();
-        uint32 index1=(index * numberOfSignals) + signalIdx;
-        isRefreshed[index1] = 0u;
-        mutex.FastUnLock();
+            (void) mutex.FastLock();
+            uint32 index1 = (index * numberOfSignals) + signalIdx;
+            isRefreshed[index1] = 0u;
+            mutex.FastUnLock();
+
+        }
 
         nBrokerOpPerSignalCounter[signalIdx] = nBrokerOpPerSignal[signalIdx];
     }
-    REPORT_ERROR(ErrorManagement::Information, "Terminate2 %d %d", signalIdx, triggerAfterNPackets[signalIdx]);
 
     return true;
 }
