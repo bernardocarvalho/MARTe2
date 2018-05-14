@@ -62,7 +62,9 @@ public:
 
     bool TestGetSignalMemoryBuffer();
 
-    bool TestGetBrokerName();
+    bool TestGetBrokerName_SyncInput();
+
+    bool TestGetBrokerName_SyncOutput();
 
     bool TestGetInputBrokers();
 

@@ -150,28 +150,22 @@ uint32 DataSourceITestHelper::GetNumberOfMemoryBuffers() {
     return 0u;
 }
 
-bool DataSourceITestHelper::GetSignalMemoryBuffer(const uint32 signalIdx,
-                                                  const uint32 bufferIdx,
-                                                  void *&signalAddress) {
+bool DataSourceITestHelper::GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) {
     return true;
 }
 
-const char8 *DataSourceITestHelper::GetBrokerName(StructuredDataI &data,
-                                                  const SignalDirection direction) {
+const char8 *DataSourceITestHelper::GetBrokerName(StructuredDataI &data, const SignalDirection direction) {
     if (direction == InputSignals) {
         return "MemoryMapInputBroker";
     }
     return "MemoryMapOutputBroker";
 }
 
-bool DataSourceITestHelper::PrepareNextState(const char8 * const currentStateName,
-                                             const char8 * const nextStateName) {
+bool DataSourceITestHelper::PrepareNextState(const char8 * const currentStateName, const char8 * const nextStateName) {
     return true;
 }
 
-bool DataSourceITestHelper::GetInputBrokers(ReferenceContainer &inputBrokers,
-                                            const char8* const functionName,
-                                            void * const gamMemPtr) {
+bool DataSourceITestHelper::GetInputBrokers(ReferenceContainer &inputBrokers, const char8* const functionName, void * const gamMemPtr) {
     ReferenceT<MemoryMapInputBroker> broker("MemoryMapInputBroker");
     bool ret = broker.IsValid();
     if (ret) {
@@ -180,9 +174,7 @@ bool DataSourceITestHelper::GetInputBrokers(ReferenceContainer &inputBrokers,
     return ret;
 }
 
-bool DataSourceITestHelper::GetOutputBrokers(ReferenceContainer &outputBrokers,
-                                             const char8* const functionName,
-                                             void * const gamMemPtr) {
+bool DataSourceITestHelper::GetOutputBrokers(ReferenceContainer &outputBrokers, const char8* const functionName, void * const gamMemPtr) {
     ReferenceT<MemoryMapOutputBroker> broker("MemoryMapOutputBroker");
     bool ret = broker.IsValid();
     if (ret) {
@@ -2073,6 +2065,125 @@ bool DataSourceITest::TestIsSupportedBroker() {
     }
     if (ret) {
         ret = !dataSource->IsSupportedBroker(OutputSignals, 100000, 0, "MemoryMapOutputBroker");
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestGetCurrentStateBuffer() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        ret = (dataSource->GetCurrentStateBuffer() == 0u);
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestGetNumberOfStatefulMemoryBuffers() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        ret = (dataSource->GetNumberOfStatefulMemoryBuffers() == 1u);
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestPrepareInputOffsets() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        (dataSource->PrepareInputOffsets());
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestPrepareOutputOffsets() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        (dataSource->PrepareOutputOffsets());
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestGetInputOffset() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        uint32 offset;
+        ret = (!dataSource->GetInputOffset(0, 0, offset));
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestGetOutputOffset() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        uint32 offset;
+        ret = (!dataSource->GetOutputOffset(0, 0, offset));
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestTerminateInputCopy() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        ret = !(dataSource->TerminateInputCopy(0, 0, 0));
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestTerminateOutputCopy() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        ret = !(dataSource->TerminateOutputCopy(0, 0, 0));
+    }
+    return ret;
+}
+
+bool DataSourceITest::TestGetNumberOfMemoryBuffers() {
+    bool ret = InitialiseDataSourceIEnviroment(config1);
+    ReferenceT<DataSourceITestHelper> dataSource;
+    if (ret) {
+        dataSource = ObjectRegistryDatabase::Instance()->Find("Application1.Data.Drv1");
+        ret = dataSource.IsValid();
+    }
+    if (ret) {
+        ret = (dataSource->GetNumberOfMemoryBuffers() == 1u);
     }
     return ret;
 }

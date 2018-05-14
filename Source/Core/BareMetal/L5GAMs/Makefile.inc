@@ -31,22 +31,30 @@ OBJSX=BrokerI.x \
     GAMGroup.x \
     GAMSchedulerI.x \
     GAMDataSource.x \
+    MemoryDataSourceI.x \
     MemoryMapBroker.x \
     MemoryMapInterpolatedInputBroker.x \
+    MemoryMapMultiBufferBroker.x \
+    MemoryMapMultiBufferInputBroker.x \
+    MemoryMapMultiBufferOutputBroker.x \
     MemoryMapInputBroker.x \
     MemoryMapOutputBroker.x \
     MemoryMapSynchronisedInputBroker.x \
+    MemoryMapSynchronisedMultiBufferInputBroker.x \
+    MemoryMapSynchronisedMultiBufferOutputBroker.x \
     MemoryMapSynchronisedOutputBroker.x \
     RealTimeApplication.x \
     RealTimeApplicationConfigurationBuilder.x \
     RealTimeState.x \
     RealTimeThread.x \
-    TimingDataSource.x \
+    TimingDataSource.x
+
+#MemoryMapUnrelatedBroker.x \
     MemoryMapUnrelatedInputBroker.x \
     MemoryMapUnrelatedOutputBroker.x \
     MemoryMapSyncUnrelatedInputBroker.x \
     MemoryMapSyncUnrelatedOutputBroker.x \
-    MultiBufferUnrelatedDataSource.x 
+    MultiBufferUnrelatedDataSource.x
     
 
 PACKAGE=Core/BareMetal

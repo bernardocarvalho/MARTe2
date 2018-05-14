@@ -76,10 +76,17 @@ TEST(MultiBufferUnrelatedDataSourceGTest,TestGetSignalMemoryBuffer) {
     ASSERT_TRUE(test.TestGetSignalMemoryBuffer());
 }
 
-TEST(MultiBufferUnrelatedDataSourceGTest,TestGetBrokerName) {
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestGetBrokerName_SyncInput) {
     MultiBufferUnrelatedDataSourceTest test;
-    ASSERT_TRUE(test.TestGetBrokerName());
+    ASSERT_TRUE(test.TestGetBrokerName_SyncInput());
 }
+
+TEST(MultiBufferUnrelatedDataSourceGTest,TestGetBrokerName_SyncOutput) {
+    MultiBufferUnrelatedDataSourceTest test;
+    ASSERT_TRUE(test.TestGetBrokerName_SyncOutput());
+}
+
 
 TEST(MultiBufferUnrelatedDataSourceGTest,TestGetInputBrokers) {
     MultiBufferUnrelatedDataSourceTest test;

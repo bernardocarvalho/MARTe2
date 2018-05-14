@@ -44,6 +44,7 @@
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
+
 TEST(CircularBufferThreadInputDataSourceGTest,TestConstructor) {
     CircularBufferThreadInputDataSourceTest test;
     ASSERT_TRUE(test.TestConstructor());
@@ -54,10 +55,19 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestInitialise) {
     ASSERT_TRUE(test.TestInitialise());
 }
 
-
 TEST(CircularBufferThreadInputDataSourceGTest,TestSynchronise) {
     CircularBufferThreadInputDataSourceTest test;
     ASSERT_TRUE(test.TestSynchronise());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSynchronise_FullRolling) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSynchronise_FullRolling());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSynchronise_GetLatest) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSynchronise_GetLatest());
 }
 
 TEST(CircularBufferThreadInputDataSourceGTest,TestGetBrokerName) {
@@ -80,14 +90,24 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase) {
     ASSERT_TRUE(test.TestSetConfiguredDatabase());
 }
 
+TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase_False_WrittenSignal) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_False_WrittenSignal());
+}
+
 TEST(CircularBufferThreadInputDataSourceGTest,TestPrepareNextState) {
     CircularBufferThreadInputDataSourceTest test;
     ASSERT_TRUE(test.TestPrepareNextState());
 }
 
-TEST(CircularBufferThreadInputDataSourceGTest,TestGetOffset) {
+TEST(CircularBufferThreadInputDataSourceGTest,TestGetInputOffset) {
     CircularBufferThreadInputDataSourceTest test;
-    ASSERT_TRUE(test.TestGetOffset());
+    ASSERT_TRUE(test.TestGetInputOffset());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestGetOutputOffset) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestGetOutputOffset());
 }
 
 TEST(CircularBufferThreadInputDataSourceGTest,TestExecute) {
@@ -100,14 +120,59 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_SameSignalDifferentMod
     ASSERT_TRUE(test.TestExecute_SameSignalDifferentModes());
 }
 
-TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_SameSignalDifferentModes1) {
-    CircularBufferThreadInputDataSourceTest test;
-    ASSERT_TRUE(test.TestExecute_SameSignalDifferentModes1());
-}
-
 TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_ErrorCheck) {
     CircularBufferThreadInputDataSourceTest test;
     ASSERT_TRUE(test.TestExecute_ErrorCheck());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_ErrorCheck_Overwrite) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_ErrorCheck_Overwrite());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_ErrorCheck_DriverRead) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_ErrorCheck_DriverRead());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_ErrorCheck_Both) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_ErrorCheck_Both());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase_ErrorCheck_False_BadType) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_ErrorCheck_False_BadType());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase_ErrorCheck_False_BadSize) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_ErrorCheck_False_BadSize());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_TimeStamp) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_TimeStamp());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_TimeStamp_NoRead) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_TimeStamp_NoRead());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestExecute_TimeStamp_FalseDriverRead) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestExecute_TimeStamp_FalseDriverRead());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase_TimeStamp_False_BadSize) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_TimeStamp_False_BadSize());
+}
+
+TEST(CircularBufferThreadInputDataSourceGTest,TestSetConfiguredDatabase_TimeStamp_False_BadType) {
+    CircularBufferThreadInputDataSourceTest test;
+    ASSERT_TRUE(test.TestSetConfiguredDatabase_TimeStamp_False_BadType());
 }
 
 TEST(CircularBufferThreadInputDataSourceGTest,TestPurge) {
@@ -115,9 +180,8 @@ TEST(CircularBufferThreadInputDataSourceGTest,TestPurge) {
     ASSERT_TRUE(test.TestPurge());
 }
 
-TEST(CircularBufferThreadInputDataSourceGTest,TestTerminateRead) {
+TEST(CircularBufferThreadInputDataSourceGTest,TestTerminateInputCopy) {
     CircularBufferThreadInputDataSourceTest test;
-    ASSERT_TRUE(test.TestTerminateRead());
+    ASSERT_TRUE(test.TestTerminateInputCopy());
 }
 
-	

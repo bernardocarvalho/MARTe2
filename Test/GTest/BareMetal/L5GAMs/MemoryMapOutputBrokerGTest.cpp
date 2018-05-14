@@ -61,8 +61,8 @@ TEST(MemoryMapOutputBrokerGTest,TestExecute_Samples) {
     ASSERT_TRUE(test.TestExecute_Samples());
 }
 
-TEST(MemoryMapOutputBrokerGTest,TestExecute_MultiBuffer) {
+TEST(MemoryMapOutputBrokerGTest,TestExecute_MultiStateBuffer) {
     MemoryMapOutputBrokerTest test;
-    ASSERT_TRUE(test.TestExecute_MultiBuffer());
+    ASSERT_TRUE(test.TestExecute_MultiStateBuffer());
 }
 

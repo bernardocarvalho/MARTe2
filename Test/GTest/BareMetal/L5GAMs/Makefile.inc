@@ -32,14 +32,14 @@ OBJSX=  BrokerIGTest.x\
         MemoryMapBrokerGTest.x\
         MemoryMapInputBrokerGTest.x\
         MemoryMapInterpolatedInputBrokerGTest.x\
+        MemoryMapMultiBufferBrokerGTest.x\
+        MemoryMapMultiBufferInputBrokerGTest.x\
+        MemoryMapMultiBufferOutputBrokerGTest.x\
         MemoryMapOutputBrokerGTest.x\
         MemoryMapSynchronisedInputBrokerGTest.x\
+        MemoryMapSynchronisedMultiBufferInputBrokerGTest.x\
+        MemoryMapSynchronisedMultiBufferOutputBrokerGTest.x\
         MemoryMapSynchronisedOutputBrokerGTest.x\
-        MemoryMapSyncUnrelatedInputBrokerGTest.x \
-        MemoryMapSyncUnrelatedOutputBrokerGTest.x \
-        MemoryMapUnrelatedInputBrokerGTest.x \
-        MemoryMapUnrelatedOutputBrokerGTest.x \
-        MultiBufferUnrelatedDataSourceGTest.x \
         RealTimeApplicationGTest.x\
         RealTimeApplicationConfigurationBuilderGTest.x\
         RealTimeStateGTest.x\

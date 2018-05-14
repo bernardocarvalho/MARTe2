@@ -190,6 +190,8 @@ const char8 *MultiBufferUnrelatedDataSource::GetBrokerName(StructuredDataI &data
     const char8* brokerName = NULL_PTR(const char8 *);
 
     if (direction == InputSignals) {
+        syncInputBrokerName = "MemoryMapSyncUnrelatedInputBroker";
+
         float32 frequency = 0.F;
         if (data.Read("Frequency", frequency)) {
             if (frequency > 0.) {
@@ -208,6 +210,8 @@ const char8 *MultiBufferUnrelatedDataSource::GetBrokerName(StructuredDataI &data
     }
 
     if (direction == OutputSignals) {
+        syncOutputBrokerName = "MemoryMapSyncUnrelatedOutputBroker";
+
         float32 frequency = 0.F;
         if (data.Read("Frequency", frequency)) {
             if (frequency > 0.) {
@@ -259,7 +263,7 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                 bool ok = true;
                 uint32 nBrokers = outputBrokers.Size();
                 for (uint32 j = 0u; (j < nBrokers) && (ret) && (ok); j++) {
-                    ReferenceT<MemoryMapUnrelatedOutputBroker> brokerRef = outputBrokers.Get(j);
+                    ReferenceT<MemoryMapUnrelatedBroker> brokerRef = outputBrokers.Get(j);
                     if (brokerRef.IsValid()) {
                         if (suggestedBrokerNameIn == brokerRef->GetClassProperties()->GetName()) {
                             ok = false;
@@ -271,7 +275,7 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                     REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "creating broker %s for %s and signal %s(%d)", suggestedBrokerNameIn.Buffer(),
                                             functionName, signalName.Buffer(), signalIdx);
 
-                    ReferenceT<MemoryMapUnrelatedOutputBroker> broker(suggestedBrokerNameIn.Buffer());
+                    ReferenceT<MemoryMapUnrelatedBroker> broker(suggestedBrokerNameIn.Buffer());
 
                     ret = broker.IsValid();
                     if (!ret) {
@@ -280,7 +284,13 @@ bool MultiBufferUnrelatedDataSource::GetOutputBrokers(ReferenceContainer &output
                     if (ret) {
                         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
                         if (ret) {
-                            outputBrokers.Insert(broker);
+                            //insert at the beginning the sync one
+                            if (suggestedBrokerNameIn == syncOutputBrokerName) {
+                                ret = outputBrokers.Insert(broker, 0);
+                            }
+                            else {
+                                ret = outputBrokers.Insert(broker);
+                            }
                         }
                         else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
@@ -325,7 +335,7 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                 bool ok = true;
                 uint32 nBrokers = inputBrokers.Size();
                 for (uint32 j = 0u; (j < nBrokers) && (ret) && (ok); j++) {
-                    ReferenceT<MemoryMapUnrelatedInputBroker> brokerRef = inputBrokers.Get(j);
+                    ReferenceT<MemoryMapUnrelatedBroker> brokerRef = inputBrokers.Get(j);
                     if (brokerRef.IsValid()) {
                         if (suggestedBrokerNameIn == brokerRef->GetClassProperties()->GetName()) {
                             ok = false;
@@ -337,7 +347,7 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                     REPORT_ERROR_PARAMETERS(ErrorManagement::Information, "creating broker %s for %s and signal %s(%d)", suggestedBrokerNameIn.Buffer(),
                                             functionName, signalName.Buffer(), signalIdx);
 
-                    ReferenceT<MemoryMapUnrelatedInputBroker> broker(suggestedBrokerNameIn.Buffer());
+                    ReferenceT<MemoryMapUnrelatedBroker> broker(suggestedBrokerNameIn.Buffer());
 
                     ret = broker.IsValid();
                     if (!ret) {
@@ -346,7 +356,13 @@ bool MultiBufferUnrelatedDataSource::GetInputBrokers(ReferenceContainer &inputBr
                     if (ret) {
                         ret = broker->Init(InputSignals, *this, functionName, gamMemPtr);
                         if (ret) {
-                            inputBrokers.Insert(broker);
+                            //insert at the beginning the sync one
+                            if (suggestedBrokerNameIn == syncInputBrokerName) {
+                                ret = inputBrokers.Insert(broker, 0);
+                            }
+                            else {
+                                ret = inputBrokers.Insert(broker);
+                            }
                         }
                         else {
                             REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "Failed broker %s Init", suggestedBrokerNameIn.Buffer());
@@ -430,19 +446,25 @@ bool MultiBufferUnrelatedDataSource::SetConfiguredDatabase(StructuredDataI & dat
     return ret;
 }
 
+void MultiBufferUnrelatedDataSource::PrepareInputOffsets() {
+
+}
+
+void MultiBufferUnrelatedDataSource::PrepareOutputOffsets() {
+
+}
+
 /*lint -e{715} .*/
 void MultiBufferUnrelatedDataSource::TerminateRead(const uint32 signalIdx,
                                                    const uint32 offset,
-                                                   const uint32 samples,
-                                                   const uint32 flag) {
+                                                   const uint32 samples) {
 
 }
 
 /*lint -e{715} .*/
 void MultiBufferUnrelatedDataSource::TerminateWrite(const uint32 signalIdx,
                                                     const uint32 offset,
-                                                    const uint32 samples,
-                                                    const uint32 flag) {
+                                                    const uint32 samples) {
 
 }
 

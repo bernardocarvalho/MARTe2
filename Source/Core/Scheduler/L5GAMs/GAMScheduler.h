@@ -1,8 +1,8 @@
 /**
  * @file GAMScheduler.h
  * @brief Header file for class GAMScheduler
- * @date 09/ago/2016
- * @author pc
+ * @date 09/08/2016
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -139,7 +139,7 @@ protected:
     virtual void CustomPrepareNextState();
 
 
-private:
+protected:
 
     /**
      * The array of identifiers of the thread in execution.

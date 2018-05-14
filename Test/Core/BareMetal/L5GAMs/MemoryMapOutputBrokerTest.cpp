@@ -53,7 +53,7 @@ MemoryMapOutputBrokerTestScheduler1    ();
 
     virtual MARTe::ErrorManagement::ErrorType StopCurrentStateExecution();
 
-    virtual void CustomPrepareNextState() {
+    virtual void CustomPrepareNextState(){
 
     }
 
@@ -64,11 +64,11 @@ MemoryMapOutputBrokerTestScheduler1::MemoryMapOutputBrokerTestScheduler1() :
 
 }
 
-MARTe::ErrorManagement::ErrorType MemoryMapOutputBrokerTestScheduler1::StartNextStateExecution() {
+MARTe::ErrorManagement::ErrorType  MemoryMapOutputBrokerTestScheduler1::StartNextStateExecution() {
     return MARTe::ErrorManagement::NoError;
 }
 
-MARTe::ErrorManagement::ErrorType MemoryMapOutputBrokerTestScheduler1::StopCurrentStateExecution() {
+MARTe::ErrorManagement::ErrorType  MemoryMapOutputBrokerTestScheduler1::StopCurrentStateExecution() {
     return MARTe::ErrorManagement::NoError;
 }
 
@@ -159,8 +159,6 @@ MemoryMapOutputBrokerDataSourceTestHelper    ();
 
     virtual ~ MemoryMapOutputBrokerDataSourceTestHelper();
 
-    virtual uint32 GetCurrentBuffer();
-
     virtual bool AllocateMemory();
 
     virtual uint32 GetNumberOfMemoryBuffers();
@@ -173,7 +171,7 @@ MemoryMapOutputBrokerDataSourceTestHelper    ();
             const SignalDirection direction);
 
     virtual bool PrepareNextState(const char8 * const currentStateName,
-            const char8 * const nextStateName);
+                                  const char8 * const nextStateName);
 
     virtual bool GetInputBrokers(
             ReferenceContainer &inputBrokers,
@@ -200,10 +198,6 @@ MemoryMapOutputBrokerDataSourceTestHelper::MemoryMapOutputBrokerDataSourceTestHe
     signalMemory = NULL_PTR(void *);
     offsets = NULL_PTR(uint32 *);
     samples = 10;
-}
-
-uint32 MemoryMapOutputBrokerDataSourceTestHelper::GetCurrentBuffer() {
-    return bufferIndex;
 }
 
 MemoryMapOutputBrokerDataSourceTestHelper::~MemoryMapOutputBrokerDataSourceTestHelper() {
@@ -279,7 +273,7 @@ bool MemoryMapOutputBrokerDataSourceTestHelper::GetInputBrokers(ReferenceContain
 bool MemoryMapOutputBrokerDataSourceTestHelper::GetOutputBrokers(ReferenceContainer &outputBrokers,
                                                                  const char8* const functionName,
                                                                  void * const gamMemPtr) {
-    ReferenceT < MemoryMapOutputBroker > broker("MemoryMapOutputBroker");
+    ReferenceT<MemoryMapOutputBroker> broker("MemoryMapOutputBroker");
     bool ret = broker.IsValid();
     if (ret) {
         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
@@ -488,7 +482,7 @@ static const char8 * const config1 = ""
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 bool MemoryMapOutputBrokerTest::TestConstructor() {
-    ReferenceT < MemoryMapOutputBroker > broker("MemoryMapOutputBroker");
+    ReferenceT<MemoryMapOutputBroker> broker("MemoryMapOutputBroker");
     bool ret = broker.IsValid();
     if (ret) {
         ret = broker->GetNumberOfCopies() == 0;
@@ -499,7 +493,7 @@ bool MemoryMapOutputBrokerTest::TestConstructor() {
 bool MemoryMapOutputBrokerTest::TestExecute() {
     bool ret = InitialiseMemoryMapOutputBrokerEnviroment(config1);
     ReferenceT<MemoryMapOutputBrokerDataSourceTestHelper> dataSource;
-    ReferenceT < MemoryMapOutputBroker > broker;
+    ReferenceT<MemoryMapOutputBroker> broker;
     ReferenceT<MemoryMapOutputBrokerTestGAM1> gamC;
     ReferenceContainer brokers;
     if (ret) {
@@ -556,7 +550,7 @@ bool MemoryMapOutputBrokerTest::TestExecute() {
 bool MemoryMapOutputBrokerTest::TestExecute_Ranges() {
     bool ret = InitialiseMemoryMapOutputBrokerEnviroment(config1);
     ReferenceT<MemoryMapOutputBrokerDataSourceTestHelper> dataSource;
-    ReferenceT < MemoryMapOutputBroker > broker;
+    ReferenceT<MemoryMapOutputBroker> broker;
     ReferenceT<MemoryMapOutputBrokerTestGAM1> gamC;
     ReferenceContainer brokers;
     if (ret) {
@@ -623,7 +617,7 @@ bool MemoryMapOutputBrokerTest::TestExecute_Ranges() {
 bool MemoryMapOutputBrokerTest::TestExecute_Samples() {
     bool ret = InitialiseMemoryMapOutputBrokerEnviroment(config1);
     ReferenceT<MemoryMapOutputBrokerDataSourceTestHelper> dataSource;
-    ReferenceT < MemoryMapOutputBroker > broker;
+    ReferenceT<MemoryMapOutputBroker> broker;
     ReferenceT<MemoryMapOutputBrokerTestGAM1> gamC;
     ReferenceContainer brokers;
     if (ret) {
@@ -676,7 +670,7 @@ bool MemoryMapOutputBrokerTest::TestExecute_Samples() {
     return ret;
 }
 
-bool MemoryMapOutputBrokerTest::TestExecute_MultiBuffer() {
+bool MemoryMapOutputBrokerTest::TestExecute_MultiStateBuffer() {
     bool ret = InitialiseMemoryMapOutputBrokerEnviroment(config1);
     ReferenceT<MemoryMapOutputBrokerDataSourceTestHelper> dataSource;
     ReferenceT < MemoryMapOutputBroker > broker;

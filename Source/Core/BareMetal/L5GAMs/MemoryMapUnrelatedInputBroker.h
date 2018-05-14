@@ -33,31 +33,21 @@
 /*---------------------------------------------------------------------------*/
 #include "FastPollingMutexSem.h"
 #include "MultiBufferUnrelatedDataSource.h"
-#include "MemoryMapInputBroker.h"
+#include "MemoryMapUnrelatedBroker.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
 
-class MemoryMapUnrelatedInputBroker: public MemoryMapBroker {
+class MemoryMapUnrelatedInputBroker: public MemoryMapUnrelatedBroker {
 public:
-    CLASS_REGISTER_DECLARATION()MemoryMapUnrelatedInputBroker();
+    CLASS_REGISTER_DECLARATION()
+
+MemoryMapUnrelatedInputBroker    ();
     virtual ~MemoryMapUnrelatedInputBroker();
     virtual bool Execute();
 
-    virtual bool Init(const SignalDirection direction,
-            DataSourceI &dataSourceIn,
-            const char8 * const functionName,
-            void * const gamMemoryAddress);
-
-protected:
-
-    MultiBufferUnrelatedDataSource *dataSourceCust;
-    uint32 *signalIdxArr;
-    uint32 *flag;
-    uint32 *samples;
-    uint32 *maxOffset;
 };
 }
 /*---------------------------------------------------------------------------*/

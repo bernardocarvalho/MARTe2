@@ -182,7 +182,6 @@ public:
      */
     virtual ErrorManagement::ErrorType StopCurrentStateExecution()=0;
 
-
     /**
      * @see ReferenceContainer::Purge()
      */

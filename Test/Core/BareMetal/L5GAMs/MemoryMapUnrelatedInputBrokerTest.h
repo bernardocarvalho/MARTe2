@@ -44,8 +44,6 @@ public:
     ~MemoryMapUnrelatedInputBrokerTest();
 
     bool TestConstructor();
-    bool TestInit();
-    bool TestInit1();
     bool TestExecute();
 };
 

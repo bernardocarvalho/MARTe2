@@ -58,8 +58,8 @@ enum SignalDirection {
  *
  * The minimum configuration structure is (more information about the syntax in RealTimeApplicationConfigurationBuilder):
  * <pre>
- * +ThisDataSourceIObjectName = {"
- *    Class = ClassThatImplementsDataSourceI"
+ * +ThisDataSourceIObjectName = {
+ *    Class = ClassThatImplementsDataSourceI
  *    Signals = {
  *        +*NAME = {
  *            +Type = BasicType|StructuredType
@@ -116,7 +116,6 @@ public:
      *        NumberOfElements = NUMBER>0
      *        +Frequency = -1|NUMBER>0
      *        +Trigger = 0|1
-     *        +PacketChunkSizes = { NUMBER ... NUMBER }
      *        +States = {
      *          *StateN = {
      *            GAMConsumers = { "0" ... "N" }
@@ -168,8 +167,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalIndex(uint32 &signalIdx,
-                        const char8* const signalName);
+    bool GetSignalIndex(uint32 &signalIdx, const char8* const signalName);
 
     /**
      * @brief Gets the name of the signal at position \a signalIdx.
@@ -179,8 +177,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalName(const uint32 signalIdx,
-                       StreamString &signalName);
+    bool GetSignalName(const uint32 signalIdx, StreamString &signalName);
 
     /**
      * @brief Gets the type of the signal at position \a signalIdx.
@@ -200,8 +197,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalNumberOfDimensions(const uint32 signalIdx,
-                                     uint8 &numberOfDimensions);
+    bool GetSignalNumberOfDimensions(const uint32 signalIdx, uint8 &numberOfDimensions);
 
     /**
      * @brief Gets the number of elements of the signal at position \a signalIdx.
@@ -212,8 +208,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalNumberOfElements(const uint32 signalIdx,
-                                   uint32 &numberOfElements);
+    bool GetSignalNumberOfElements(const uint32 signalIdx, uint32 &numberOfElements);
 
     /**
      * @brief Gets the number of bytes required to represent the signal at position \a signalIdx.
@@ -223,8 +218,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalByteSize(const uint32 signalIdx,
-                           uint32 &byteSize);
+    bool GetSignalByteSize(const uint32 signalIdx, uint32 &byteSize);
 
     /**
      * @brief Gets the number of states on which the signal at position \a signalIdx is used.
@@ -234,8 +228,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalNumberOfStates(const uint32 signalIdx,
-                                 uint32 &numberOfStates);
+    bool GetSignalNumberOfStates(const uint32 signalIdx, uint32 &numberOfStates);
 
     /**
      * @brief For the signal at position \a signalIdx, gets the name of the state at position \a stateIdx (see GetSignalNumberOfStates)
@@ -246,9 +239,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalStateName(const uint32 signalIdx,
-                            const uint32 stateIdx,
-                            StreamString &stateName);
+    bool GetSignalStateName(const uint32 signalIdx, const uint32 stateIdx, StreamString &stateName);
 
     /**
      * @brief Gets the number of functions consuming the signal at position \a signalIdx in the state with name \a stateName.
@@ -259,9 +250,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalNumberOfConsumers(const uint32 signalIdx,
-                                    const char8 * const stateName,
-                                    uint32 &numberOfConsumers);
+    bool GetSignalNumberOfConsumers(const uint32 signalIdx, const char8 * const stateName, uint32 &numberOfConsumers);
 
     /**
      * @brief Gets the number of functions producing the signal at position \a signalIdx in the state with name \a stateName.
@@ -272,9 +261,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalNumberOfProducers(const uint32 signalIdx,
-                                    const char8 * const stateName,
-                                    uint32 &numberOfProducers);
+    bool GetSignalNumberOfProducers(const uint32 signalIdx, const char8 * const stateName, uint32 &numberOfProducers);
     /**
      * @brief Gets the name of function with index \a consumerIdx and which is consuming the signal at position \a signalIdx in the state with name \a stateName.
      * @param[in] signalIdx the index of the signal.
@@ -285,10 +272,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalConsumerName(const uint32 signalIdx,
-                               const char8 * const stateName,
-                               const uint32 consumerIdx,
-                               StreamString &consumerName);
+    bool GetSignalConsumerName(const uint32 signalIdx, const char8 * const stateName, const uint32 consumerIdx, StreamString &consumerName);
     /**
      * @brief Gets the name of function with index \a producerIdx and which is producing the signal at position \a signalIdx in the state with name \a stateName.
      * @param[in] signalIdx the index of the signal.
@@ -299,10 +283,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalProducerName(const uint32 signalIdx,
-                               const char8 * const stateName,
-                               const uint32 producerIdx,
-                               StreamString &producerName);
+    bool GetSignalProducerName(const uint32 signalIdx, const char8 * const stateName, const uint32 producerIdx, StreamString &producerName);
 
     /**
      * @brief Gets the default of the signal with index \a signalIdx.
@@ -312,11 +293,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetSignalDefaultValue(const uint32 signalIdx,
-                               const AnyType &defaultValue);
-
-
-
+    bool GetSignalDefaultValue(const uint32 signalIdx, const AnyType &defaultValue);
 
     /**
      * @brief Gets the type of the default value for the signal with index \a signalIdx.
@@ -344,8 +321,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionName(const uint32 functionIdx,
-                         StreamString &functionName);
+    bool GetFunctionName(const uint32 functionIdx, StreamString &functionName);
 
     /**
      * @brief Gets the index of the function with name \a functionName.
@@ -355,8 +331,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionIndex(uint32 &functionIdx,
-                          const char8* const functionName);
+    bool GetFunctionIndex(uint32 &functionIdx, const char8* const functionName);
 
     /**
      * @brief Gets the number of signals, from the function with index \a functionIdx, which interacts with this DataSourceI (in the specified \a direction).
@@ -367,9 +342,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionNumberOfSignals(const SignalDirection direction,
-                                    const uint32 functionIdx,
-                                    uint32 &numSignals);
+    bool GetFunctionNumberOfSignals(const SignalDirection direction, const uint32 functionIdx, uint32 &numSignals);
 
     /**
      * @brief Gets the number of bytes, required for the function with index \a functionIdx, which interacts with this DataSourceI (in the specified \a direction).
@@ -380,9 +353,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalsByteSize(const SignalDirection direction,
-                                    const uint32 functionIdx,
-                                    uint32 &byteSize);
+    bool GetFunctionSignalsByteSize(const SignalDirection direction, const uint32 functionIdx, uint32 &byteSize);
 
     /**
      * @brief Gets the name of the signal from the function with index \a functionIdx, which interacts with this DataSourceI (in the specified \a direction).
@@ -394,10 +365,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalName(const SignalDirection direction,
-                               const uint32 functionIdx,
-                               const uint32 functionSignalIdx,
-                               StreamString &functionSignalName);
+    bool GetFunctionSignalName(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, StreamString &functionSignalName);
 
     /**
      * @brief Gets the alias of the signal from the function with index \a functionIdx, which interacts with this DataSourceI (in the specified \a direction).
@@ -409,10 +377,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalAlias(const SignalDirection direction,
-                                const uint32 functionIdx,
-                                const uint32 functionSignalIdx,
-                                StreamString &functionSignalAlias);
+    bool GetFunctionSignalAlias(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, StreamString &functionSignalAlias);
 
     /**
      * @brief Gets the index of the signal with the name \a functionSignalName, from the function with index \a functionIdx, which interacts with this DataSourceI (in the specified \a direction).
@@ -424,10 +389,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalIndex(const SignalDirection direction,
-                                const uint32 functionIdx,
-                                uint32 &functionSignalIdx,
-                                const char8* const functionSignalName);
+    bool GetFunctionSignalIndex(const SignalDirection direction, const uint32 functionIdx, uint32 &functionSignalIdx, const char8* const functionSignalName);
 
     /**
      * @brief Gets the number of different byte offsets (one for each different Range) that were set for the signal with index \a functionSignalIdx.
@@ -439,9 +401,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalNumberOfByteOffsets(const SignalDirection direction,
-                                              const uint32 functionIdx,
-                                              const uint32 functionSignalIdx,
+    bool GetFunctionSignalNumberOfByteOffsets(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx,
                                               uint32 &numberOfByteOffsets);
 
     /**
@@ -456,12 +416,8 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalByteOffsetInfo(const SignalDirection direction,
-                                         const uint32 functionIdx,
-                                         const uint32 functionSignalIdx,
-                                         const uint32 byteOffsetIndex,
-                                         uint32 &byteOffsetStart,
-                                         uint32 &byteOffsetSize);
+    bool GetFunctionSignalByteOffsetInfo(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx,
+                                         const uint32 byteOffsetIndex, uint32 &byteOffsetStart, uint32 &byteOffsetSize);
 
     /**
      * @brief Gets the number of samples that were set for the signal with index \a functionSignalIdx.
@@ -476,10 +432,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalSamples(const SignalDirection direction,
-                                  const uint32 functionIdx,
-                                  const uint32 functionSignalIdx,
-                                  uint32 &samples);
+    bool GetFunctionSignalSamples(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, uint32 &samples);
 
     /**
      * @brief Gets the frequency that was set for the signal with index \a functionSignalIdx.
@@ -492,10 +445,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalReadFrequency(const SignalDirection direction,
-                                        const uint32 functionIdx,
-                                        const uint32 functionSignalIdx,
-                                        float32 &frequency);
+    bool GetFunctionSignalReadFrequency(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, float32 &frequency);
 
     /**
      * @brief Gets the trigger that was set for the signal with index \a functionSignalIdx.
@@ -508,10 +458,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalTrigger(const SignalDirection direction,
-                                  const uint32 functionIdx,
-                                  const uint32 functionSignalIdx,
-                                  uint32 &trigger);
+    bool GetFunctionSignalTrigger(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, uint32 &trigger);
 
     /**
      * @brief Gets the offset in bytes of this signal with respect to the beginning of the GAM signal memory address.
@@ -523,10 +470,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    bool GetFunctionSignalGAMMemoryOffset(const SignalDirection direction,
-                                          const uint32 functionIdx,
-                                          const uint32 functionSignalIdx,
-                                          uint32 &memoryOffset);
+    bool GetFunctionSignalGAMMemoryOffset(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, uint32 &memoryOffset);
 
     /**
      * @brief Checks if the broker with name \a brokerClassName is suitable for this signal
@@ -538,10 +482,7 @@ public:
      * @pre
      *   SetConfiguredDatabase
      */
-    virtual bool IsSupportedBroker(const SignalDirection direction,
-                           const uint32 functionIdx,
-                           const uint32 functionSignalIdx,
-                           const char8* const brokerClassName);
+    bool IsSupportedBroker(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx, const char8* const brokerClassName);
 
     /**
      * @brief For every signal in the provided direction assign a Broker that knows how to copy from the DataSourceI memory to the GAM memory.
@@ -565,32 +506,16 @@ public:
     virtual bool AllocateMemory() = 0;
 
     /**
-     * @brief Gets the number of memory buffers supported by this DataSourceI.
-     * @details This information can be used by a BrokerI to implement, for example, a circular buffer interface.
-     * @return the number of memory buffers supported by this DataSourceI.
-     */
-    virtual uint32 GetNumberOfMemoryBuffers() = 0;
-
-    /**
-     * @brief Gets the current available buffer index.
-     * @details This information can be used by a Broker to communicate with a multi-buffer DataSource
-     * @return the index of the current buffer that this DataSource makes available.
-     */
-    virtual uint32 GetCurrentBuffer();
-
-    /**
      * @brief Gets the memory address for the signal at index \a signalIdx.
      * @param[in] signalIdx the index of the signal.
-     * @param[in] bufferIdx the index of the buffer (see GetNumberOfMemoryBuffers()).
+     * @param[in] bufferIdx the index of the state buffer (see GetNumberOfStatefulMemoryBuffers()). Not to be confused with the buffer index given by GetNumberOfMemoryBuffers (which is handled with the Offset functions below).
      * @param[out] signalAddress a pointer to the memory address of this signal for this \a bufferIdx.
      * @return true if the signalIdx and the bufferIdx exist and the memory address can be retrieved for this signal.
      * @pre
      *   signalIdx < GetNumberOfSignals() &&
      *   bufferIdx < GetNumberOfMemoryBuffers()
      */
-    virtual bool GetSignalMemoryBuffer(const uint32 signalIdx,
-                                       const uint32 bufferIdx,
-                                       void *&signalAddress) = 0;
+    virtual bool GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) = 0;
 
     /**
      * @brief Gets the name of the broker for the signal information available in the input \a data.
@@ -606,8 +531,7 @@ public:
      * @param[in] direction the signal direction.
      * @return the name of the BrokerI class that will handle the copy of this signal from the DataSourceI memory to the GAM memory.
      */
-    virtual const char8 *GetBrokerName(StructuredDataI &data,
-                                       const SignalDirection direction)=0;
+    virtual const char8 *GetBrokerName(StructuredDataI &data, const SignalDirection direction)=0;
 
     /**
      * @brief Adds to the \a inputBrokers all the BrokerI instances that will interact with the GAM with name \a functionName.
@@ -616,9 +540,7 @@ public:
      * @param[in] gamMemPtr the GAM memory where the signals will be read from.
      * @return true if a list of BrokerI instances can be successfully added to the inputBrokers list.
      */
-    virtual bool GetInputBrokers(ReferenceContainer &inputBrokers,
-                                 const char8* const functionName,
-                                 void * const gamMemPtr)=0;
+    virtual bool GetInputBrokers(ReferenceContainer &inputBrokers, const char8* const functionName, void * const gamMemPtr)=0;
 
     /**
      * @brief Adds to the \a outputBrokers all the BrokerI instances that will interact with the GAM with name \a functionName.
@@ -627,16 +549,82 @@ public:
      * @param[in] gamMemPtr the GAM memory where the signals will be written to.
      * @return true if a list of BrokerI instances can be successfully added to the outputBrokers list.
      */
-    virtual bool GetOutputBrokers(ReferenceContainer &outputBrokers,
-                                  const char8* const functionName,
-                                  void * const gamMemPtr)=0;
+    virtual bool GetOutputBrokers(ReferenceContainer &outputBrokers, const char8* const functionName, void * const gamMemPtr)=0;
+
+    /**
+     * @brief Gets the number of stateful memory buffers (i.e. number of buffers for any given state) that is supported by this DataSourceI.
+     * @details This information can be used by a BrokerI to implement, for example, a stateful buffer interface. Note that total number of buffers will
+     *  be GetNumberOfMemoryBuffers() * GetNumberOfStatefulMemoryBuffers(), i.e. each Stateful buffer will hold N GetNumberOfMemoryBuffers.
+     * @return the number of stateful memory buffers supported by this DataSourceI.
+     */
+    virtual uint32 GetNumberOfStatefulMemoryBuffers();
+
+    /**
+     * @brief Gets the number of memory buffers supported by this DataSourceI.
+     * @details This information can be used by a BrokerI to implement, for example, a circular buffer interface. Not to be confused with GetNumberOfStatefulMemoryBuffers.
+     * @return the number of memory buffers supported by this DataSourceI.
+     */
+    virtual uint32 GetNumberOfMemoryBuffers();
+
+    /**
+     * @brief Returns the index of the buffer associated to the current state.
+     * @details Only meaningful for DataSources whose memory addresses depend on a state.
+     * @return the index of the buffer associated to the current state.
+     */
+    virtual uint32 GetCurrentStateBuffer();
+
+    /**
+     * @brief Warns the DataSourceI that GetInputOffset or GetOutputOffset will be called.
+     * @details Only meaningful for DataSources whose input signal offsets vary over time (i.e. multi-buffer DataSources).
+     */
+    virtual void PrepareInputOffsets();
+
+    virtual void PrepareOutputOffsets();
+
+
+    /**
+     * @brief Gets the memory offset (in bytes) from where a given signal should be copied from w.r.t. to the pointer returned by GetSignalMemoryBuffer for the same signalIdx.
+     * @details Only meaningful for DataSources whose input signal offsets vary over time (i.e. multi-buffer DataSources).
+     * @param[in] signalIdx the index of the signal to copy.
+     * @param[in] numberOfSamples the number of samples to be copied.
+     * @param[out] offset the offset to return.
+     * @return true if the offset could be retrieved.
+     */
+    virtual bool GetInputOffset(const uint32 signalIdx, const uint32 numberOfSamples, uint32 &offset);
+
+    /**
+     * @brief Gets the memory offset (in bytes) from where a given signal should be copied to w.r.t. to the pointer returned by GetSignalMemoryBuffer for the same signalIdx.
+     * @details Only meaningful for DataSources whose output signal offsets vary over time (i.e. multi-buffer DataSources).
+     * @param[in] signalIdx the index of the signal to copy.
+     * @param[in] numberOfSamples the number of samples to be copied.
+     * @param[out] offset the offset to return.
+     * @return true if the offset could be retrieved.
+     */
+    virtual bool GetOutputOffset(const uint32 signalIdx, const uint32 numberOfSamples, uint32 &offset);
+
+    /**
+     * @brief Enables a Broker to inform the DataSource that a given signal has been copied from its memory.
+     * @param[in] signalIdx the index of the signal that was copied.
+     * @param[in] signalIdx the offset of the signal that was copied.
+     * @param[in] numberOfSamples the number of samples of the signal that was copied.
+     * @return true if the DataSource post-copy action was successful.
+     */
+    virtual bool TerminateInputCopy(const uint32 signalIdx, const uint32 offset, const uint32 numberOfSamples);
+
+    /**
+     * @brief Enables a Broker to inform the DataSource that a given signal has been copied to its memory.
+     * @param[in] signalIdx the index of the signal that was copied.
+     * @param[in] signalIdx the offset of the signal that was copied.
+     * @param[in] numberOfSamples the number of samples of the signal that was copied.
+     * @return true if the DataSource post-copy action was successful.
+     */
+    virtual bool TerminateOutputCopy(const uint32 signalIdx, const uint32 offset, const uint32 numberOfSamples);
 
 
     /**
      * @see ReferenceContainer::Purge()
      */
     virtual void Purge(ReferenceContainer &purgeList);
-
 
 protected:
 
@@ -671,22 +659,20 @@ protected:
      * @param[in] functionSignalIdx the index of the signal where to move to.
      * @return true if the functionIdx exists.
      */
-    bool MoveToFunctionSignalIndex(const SignalDirection direction,
-                                   const uint32 functionIdx,
-                                   const uint32 functionSignalIdx);
+    bool MoveToFunctionSignalIndex(const SignalDirection direction, const uint32 functionIdx, const uint32 functionSignalIdx);
 
-
-protected:
     /**
-     * Number of signals assigned to this function
+     * Number of signals assigned to this DataSourceI.
      */
     uint32 numberOfSignals;
+
+private:
 
     /**
      * Accelerator reference for the signalsDatabaseNode.
      */
     ConfigurationDatabase signalsDatabaseNode;
-       
+
     /**
      * Accelerator reference for the functionsDatabaseNode.
      */

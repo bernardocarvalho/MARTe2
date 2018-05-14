@@ -53,8 +53,9 @@ MemoryMapSyncUnrelatedOutputBrokerDSTest    ();
 
     ~MemoryMapSyncUnrelatedOutputBrokerDSTest();
 
-    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples,
-            const uint32 flag);
+    virtual int32 GetInputOffset(const uint32 signalIdx,const uint32 samples);
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual uint32 GetCurrentBuffer();
 
@@ -67,10 +68,10 @@ MemoryMapSyncUnrelatedOutputBrokerDSTest    ();
             void *&signalAddress);
 
     virtual void TerminateRead(const uint32 signalIdx,
-            const uint32 offset, const uint32 samples,const uint32 flag);
+            const uint32 offset, const uint32 samples);
 
     virtual void TerminateWrite(const uint32 signalIdx,
-            const uint32 offset, const uint32 samples,const uint32 flag);
+            const uint32 offset, const uint32 samples);
 
     virtual bool IsSupportedBroker(const SignalDirection direction,
             const uint32 functionIdx,
@@ -115,9 +116,14 @@ bool MemoryMapSyncUnrelatedOutputBrokerDSTest::IsSupportedBroker(const SignalDir
     return ret;
 }
 
-int32 MemoryMapSyncUnrelatedOutputBrokerDSTest::GetOffset(const uint32 signalIdx,
-                                                          const uint32 samples,
-                                                      const uint32 flag) {
+int32 MemoryMapSyncUnrelatedOutputBrokerDSTest::GetInputOffset(const uint32 signalIdx,
+                                                          const uint32 samples) {
+
+    return currentOffsets[signalIdx % 3];
+}
+
+int32 MemoryMapSyncUnrelatedOutputBrokerDSTest::GetOutputOffset(const uint32 signalIdx,
+                                                          const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
@@ -172,8 +178,7 @@ bool MemoryMapSyncUnrelatedOutputBrokerDSTest::GetSignalMemoryBuffer(const uint3
 
 void MemoryMapSyncUnrelatedOutputBrokerDSTest::TerminateRead(const uint32 signalIdx,
                                                          const uint32 offset,
-                                                         const uint32 samples,
-                                                         const uint32 flag) {
+                                                         const uint32 samples) {
 
     currentBuffer++;
     currentBuffer %= 2;
@@ -185,8 +190,7 @@ uint32 MemoryMapSyncUnrelatedOutputBrokerDSTest::GetCurrentBuffer() {
 
 void MemoryMapSyncUnrelatedOutputBrokerDSTest::TerminateWrite(const uint32 signalIdx,
                                                           const uint32 offset,
-                                                          const uint32 samples,
-                                                          const uint32 flag) {
+                                                          const uint32 samples) {
     uint32 index = (signalIdx % 3);
     if (index == 0) {
         currentOffsets[index] += packetSize[index];
@@ -288,11 +292,6 @@ MemoryMapSyncUnrelatedOutputBrokerTestOutputBroker    () {
     virtual uint32 *GetSignalIdxArr(uint32 &size) {
         size=numberOfCopies;
         return signalIdxArr;
-    }
-
-    virtual uint32 *GetSignalFlags(uint32 &size) {
-        size=numberOfCopies;
-        return flag;
     }
 };
 
@@ -410,13 +409,6 @@ bool MemoryMapSyncUnrelatedOutputBrokerTest::TestConstructor() {
     bool ret = nOfCopies == 0;
     if (ret) {
         ret = signalIdxArr == NULL;
-    }
-    if (ret) {
-        uint32 *flags = brokerTest.GetSignalFlags(nOfCopies);
-        ret = nOfCopies == 0;
-        if (ret) {
-            ret = flags == NULL;
-        }
     }
     return ret;
 }

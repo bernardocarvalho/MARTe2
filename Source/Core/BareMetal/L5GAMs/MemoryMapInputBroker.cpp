@@ -52,7 +52,7 @@ MemoryMapInputBroker::~MemoryMapInputBroker() {
 bool MemoryMapInputBroker::Execute() {
     uint32 n;
     /*lint -e{613} null pointer checked before.*/
-    uint32 i = dataSource->GetCurrentBuffer();
+    uint32 i = dataSource->GetCurrentStateBuffer();
     bool ret = true;
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies) && (ret); n++) {

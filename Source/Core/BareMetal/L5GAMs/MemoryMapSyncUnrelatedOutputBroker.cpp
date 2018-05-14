@@ -57,7 +57,8 @@ MemoryMapSyncUnrelatedOutputBroker::~MemoryMapSyncUnrelatedOutputBroker() {
 }
 
 bool MemoryMapSyncUnrelatedOutputBroker::Execute() {
-    bool ret = MemoryMapUnrelatedOutputBroker::Execute();
+
+    bool ret = MemoryMapUnrelatedBroker::ExecuteCoreOut();
 
     if (ret) {
         ret = dataSourceCust->Synchronise();

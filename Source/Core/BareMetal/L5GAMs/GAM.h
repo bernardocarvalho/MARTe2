@@ -450,7 +450,7 @@ protected:
     void *GetOutputSignalMemory(const uint32 signalIdx) const;
 
     /**
-     * Holds the Signals definition which is received in the Initialise phase.
+     * Holds the Signals definition which are received in the Initialise phase.
      */
     ConfigurationDatabase signalsDatabase;
 

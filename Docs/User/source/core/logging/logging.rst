@@ -22,7 +22,7 @@ MARTe offers a logging mechanism that is both :ref:`thread and interrupt safe <l
 ErrorType
 ---------
 
-The framework offers the following ErrorTypes (i.e. severities, see :vcisdoxygencl:`ErrorType`).
+The framework offers the following ErrorTypes (i.e. severities, see :vcisdoxygenclem:`ErrorType`).
 
 =================== =======
 Type                Meaning
@@ -55,7 +55,7 @@ The :vciscorebml3:`AdvancedErrorManagement` defines two main error logging macro
 
 The ``REPORT_ERROR_STATIC`` is to be called by classes that do not inherit from :vcisdoxygencl:`Object` while the ``REPORT_ERROR`` should be called by classes that inherit from Object, since this will automatically add the object name, class name and object pointer to the log message.  
 
-Both macros expect a compulsory :vcisdoxygencl:`ErrorType`, followed by a compulsory error/information string and a list of optional parameters that will be ``Printf`` in the String using the rules described in the :doc:`/core/streams/streams` section. 
+Both macros expect a compulsory :vcisdoxygenclem:`ErrorType`, followed by a compulsory error/information string and a list of optional parameters that will be ``Printf`` in the String using the rules described in the :doc:`/core/streams/streams` section. 
 
 .. code-block:: c++   
 
@@ -74,7 +74,7 @@ This is set by calling the global function ``SetErrorProcessFunction`` with a po
 
    typedef void (*ErrorProcessFunctionType)(const ErrorInformation &errorInfo, const char8 * const errorDescription);   
    
-The ``errorDescription`` already contains the *printfed* message while the :vcisdoxygenclem:`ErrorInformation` provides a list of properties related to the conditions at the time of the logging (e.g. time, line number, ...).
+The ``errorDescription`` already contains the *printfed* message while the :vcisdoxygenstem:`ErrorInformation` provides a list of properties related to the conditions at the time of the logging (e.g. time, line number, ...).
 
 .. code-block:: c++
    

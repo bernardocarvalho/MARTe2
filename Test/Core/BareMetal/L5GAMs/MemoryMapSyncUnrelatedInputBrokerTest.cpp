@@ -53,8 +53,9 @@ MemoryMapSyncUnrelatedInputBrokerDSTest    ();
 
     ~MemoryMapSyncUnrelatedInputBrokerDSTest();
 
-    virtual int32 GetOffset(const uint32 signalIdx,const uint32 samples,
-            const uint32 flag);
+    virtual int32 GetInputOffset(const uint32 signalIdx,const uint32 samples);
+
+    virtual int32 GetOutputOffset(const uint32 signalIdx,const uint32 samples);
 
     virtual uint32 GetCurrentBuffer();
 
@@ -69,10 +70,10 @@ MemoryMapSyncUnrelatedInputBrokerDSTest    ();
     virtual bool AllocateMemory();
 
     virtual void TerminateRead(const uint32 signalIdx,
-            const uint32 offset,const uint32 samples, const uint32 flag);
+            const uint32 offset,const uint32 samples);
 
     virtual void TerminateWrite(const uint32 signalIdx,
-            const uint32 offset,const uint32 samples, const uint32 flag);
+            const uint32 offset,const uint32 samples);
 
     virtual bool IsSupportedBroker(const SignalDirection direction,
             const uint32 functionIdx,
@@ -117,9 +118,14 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::IsSupportedBroker(const SignalDire
     return ret;
 }
 
-int32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetOffset(const uint32 signalIdx,
-                                                         const uint32 samples,
-                                                         const uint32 flag) {
+int32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetInputOffset(const uint32 signalIdx,
+                                                              const uint32 samples) {
+
+    return currentOffsets[signalIdx % 3];
+}
+
+int32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetOutputOffset(const uint32 signalIdx,
+                                                               const uint32 samples) {
 
     return currentOffsets[signalIdx % 3];
 }
@@ -151,7 +157,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::GetSignalMemoryBuffer(const uint32
     uint32 bufferSize = 0u;
     if (ret) {
         for (uint32 i = 0u; i < nOfSignals; i++) {
-            bufferSize += packetSize[i];
+            bufferSize += packetSize[i]*numberOfInternalBuffers;
         }
 
         ret = (signalIdx < nOfSignals);
@@ -207,7 +213,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::AllocateMemory() {
         }
     }
     if (ret) {
-        memorySize *= 2;
+        memorySize *= GetNumberOfMemoryBuffers();
         if (memoryHeap != NULL_PTR(HeapI *)) {
             mem = reinterpret_cast<uint8 *>(memoryHeap->Malloc(memorySize));
         }
@@ -218,6 +224,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::AllocateMemory() {
         uint32 *memint = (uint32 *) mem;
         for (uint32 i = 0u; i < (memorySize / 4); i++) {
             memint[i] = i;
+            printf("l=%d\n", memint[i] );
         }
     }
 
@@ -227,8 +234,7 @@ bool MemoryMapSyncUnrelatedInputBrokerDSTest::AllocateMemory() {
 
 void MemoryMapSyncUnrelatedInputBrokerDSTest::TerminateRead(const uint32 signalIdx,
                                                             const uint32 offset,
-                                                            const uint32 samples,
-                                                            const uint32 flag) {
+                                                            const uint32 samples) {
 
     uint32 index = (signalIdx % 3);
     if (index == 0) {
@@ -250,8 +256,7 @@ uint32 MemoryMapSyncUnrelatedInputBrokerDSTest::GetCurrentBuffer() {
 
 void MemoryMapSyncUnrelatedInputBrokerDSTest::TerminateWrite(const uint32 signalIdx,
                                                              const uint32 offset,
-                                                             const uint32 samples,
-                                                             const uint32 flag) {
+                                                             const uint32 samples) {
 
 }
 
@@ -306,11 +311,6 @@ MemoryMapSyncUnrelatedInputBrokerTestInputBroker    () {
     virtual uint32 *GetSignalIdxArr(uint32 &size) {
         size=numberOfCopies;
         return signalIdxArr;
-    }
-
-    virtual uint32 *GetSignalFlags(uint32 &size) {
-        size=numberOfCopies;
-        return flag;
     }
 };
 
@@ -467,13 +467,6 @@ bool MemoryMapSyncUnrelatedInputBrokerTest::TestConstructor() {
     if (ret) {
         ret = signalIdxArr == NULL;
     }
-    if (ret) {
-        uint32 *flags = brokerTest.GetSignalFlags(nOfCopies);
-        ret = nOfCopies == 0;
-        if (ret) {
-            ret = flags == NULL;
-        }
-    }
     return ret;
 }
 
@@ -511,10 +504,10 @@ bool MemoryMapSyncUnrelatedInputBrokerTest::TestExecute() {
 
         if (ret) {
             ret = (nBuffers == 2);
-            uint32 bufferShift = 13;
+            uint32 bufferShift = 26;
             if (ret) {
-                ret &= (gamPtr[0] == 0 + signal4Shift) + bufferShift;
-                ret &= (gamPtr[1] == 2 + signal4Shift) + bufferShift;
+                ret &= (gamPtr[0] == 0 + signal4Shift + bufferShift);
+                ret &= (gamPtr[1] == 2 + signal4Shift + bufferShift);
                 //call terminate read here because of range at shifts the buffer!!
                 //signal 2 shift of 3!
                 ret &= (gamPtr[2] == 4 + (3 % nBuffers) * 10 + signal4Shift + bufferShift);
