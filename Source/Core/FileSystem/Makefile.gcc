@@ -23,6 +23,8 @@
 # $Id: Makefile.gcc 3 2015-01-15 16:26:07Z aneto $
 #
 #############################################################
+MAKEDEFAULTDIR=../../../MakeDefaults
 
+ROOT_DIR=../../..
 include Makefile.inc
 

@@ -35,8 +35,7 @@ OBJSX=	EmbeddedServiceI.x \
     SingleThreadService.x \
         
 PACKAGE=Core/Scheduler
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
+
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES += -I.

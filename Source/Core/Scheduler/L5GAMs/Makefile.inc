@@ -23,8 +23,7 @@
 #############################################################
 
 PACKAGE=Core/Scheduler
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
+
 
 
 OBJSX = CircularBufferThreadInputDataSource.x \

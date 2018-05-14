@@ -25,7 +25,9 @@
 #############################################################
 
 TARGET=msc
+MAKEDEFAULTDIR=../../../MakeDefaults
 
+ROOT_DIR=../../..
 include Makefile.inc
 
 LIBRARIES0 = kernel32.lib wsock32.lib user32.lib advapi32.lib ws2_32.lib

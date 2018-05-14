@@ -24,7 +24,9 @@
 #
 #############################################################
 TARGET=cov
+MAKEDEFAULTDIR=../../../MakeDefaults
 
+ROOT_DIR=../../..
 include Makefile.inc
 
 LIBRARIES_STATIC=L1Portability/cov/L1PortabilityF$(LIBEXT)

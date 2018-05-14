@@ -23,10 +23,8 @@
 #############################################################
 
 PACKAGE=Core/FileSystem
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
-SPB=Environment/$(ENVIRONMENT).x
+SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
 
 OBJSX=
 

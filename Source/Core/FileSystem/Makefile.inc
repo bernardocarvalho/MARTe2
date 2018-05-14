@@ -26,9 +26,7 @@
 OBJSX= 
 SPB    = L1Portability.x L3Streams.x L4LoggerService.x L6App.x
 PACKAGE=Core
-MAKEDEFAULTDIR=../../../MakeDefaults
 
-ROOT_DIR=../../..
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 LIBRARIES_STATIC+=$(BUILD_DIR)/L1Portability/L1PortabilityF$(LIBEXT)

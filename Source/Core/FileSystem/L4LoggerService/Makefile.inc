@@ -27,8 +27,7 @@
 OBJSX=	UDPLogger.x
         
 PACKAGE=Core/FileSystem
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
+
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES += -I.
