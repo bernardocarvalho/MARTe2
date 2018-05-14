@@ -27,8 +27,6 @@
 OBJSX=	MessageI.x Message.x MessageFilter.x MessageFilterPool.x RegisteredMethodsMessageFilter.x ReplyMessageCatcherMessageFilter.x
         
 PACKAGE=Core/BareMetal
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES += -I.

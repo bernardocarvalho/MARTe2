@@ -23,8 +23,6 @@
 #############################################################
 
 PACKAGE=Core/BareMetal
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX=  AnyType.x \
                 ClassMethodCaller.x\

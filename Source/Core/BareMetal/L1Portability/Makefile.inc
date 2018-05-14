@@ -23,10 +23,8 @@
 #############################################################
 
 PACKAGE=Core/BareMetal
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
-SPB=Environment/$(ENVIRONMENT).x
+SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
 
 OBJSX=  FastPollingEventSem.x \
 	FastPollingMutexSem.x \
