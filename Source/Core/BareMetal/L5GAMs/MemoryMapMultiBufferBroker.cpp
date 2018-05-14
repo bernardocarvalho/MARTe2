@@ -75,8 +75,8 @@ bool MemoryMapMultiBufferBroker::CopyInputs() {
     if (copyTable != NULL_PTR(MemoryMapBrokerCopyTableEntry *)) {
         for (n = 0u; (n < numberOfCopies) && (ret); n++) {
             uint32 ioffset = 0u;
-            ret = dataSource->GetInputOffset(signalIdxArr[n], samples[n], ioffset);
-            if (ret) {
+            bool ok = dataSource->GetInputOffset(signalIdxArr[n], samples[n], ioffset);
+            if (ok) {
                 uint32 dataSourceIndex = ((currentBuffer * numberOfCopies) + n);
                 uint32 allowedSize = copyTable[n].copySize;
                 uint32 gamOffset = 0u;
@@ -152,8 +152,8 @@ bool MemoryMapMultiBufferBroker::CopyOutputs() {
         for (n = 0u; (n < numberOfCopies) && (ret); n++) {
             uint32 ioffset = 0u;
             /*lint -e{613} null pointer checked before.*/
-            ret = dataSource->GetOutputOffset(signalIdxArr[n], samples[n], ioffset);
-            if (ret) {
+            bool ok = dataSource->GetOutputOffset(signalIdxArr[n], samples[n], ioffset);
+            if (ok) {
                 uint32 dataSourceIndex = ((currentBuffer * numberOfCopies) + n);
                 uint32 allowedSize = copyTable[n].copySize;
                 uint32 gamOffset = 0u;
