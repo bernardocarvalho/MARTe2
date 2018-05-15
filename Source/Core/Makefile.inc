@@ -28,7 +28,6 @@ SPB    = BareMetal.x Scheduler.x FileSystem.x
 PACKAGE=
 MAKEDEFAULTDIR=../../MakeDefaults
 
-ROOT_DIR=../..
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES += -IBareMetal/L0Types

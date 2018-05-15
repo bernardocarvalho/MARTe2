@@ -29,7 +29,6 @@ SPB    = Source/Core.x Source/App.x Test/Core/BareMetal.x Test/Core/Scheduler.x 
 
 MAKEDEFAULTDIR=MakeDefaults
 
-ROOT_DIR=.
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 all: $(OBJS) $(SUBPROJ) 

@@ -24,9 +24,6 @@
 #
 #############################################################
 TARGET=cov
-ENVIRONMENT_DIR=Environment
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include Makefile.inc
 

@@ -22,6 +22,7 @@
 #
 #############################################################
 
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 PACKAGE=Core/BareMetal
 
 OBJSX=  LinkedListable.x \

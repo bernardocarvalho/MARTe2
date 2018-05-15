@@ -21,10 +21,10 @@
 # permissions and limitations under the Licence. 
 #
 #############################################################
-
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 PACKAGE=Core/BareMetal
 
-SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
+SPB=$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT).x
 
 OBJSX=  FastPollingEventSem.x \
 	FastPollingMutexSem.x \
