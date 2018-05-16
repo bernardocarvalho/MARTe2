@@ -24,9 +24,6 @@
 #
 #############################################################
 TARGET=cov
-MAKEDEFAULTDIR=../../../MakeDefaults
-
-ROOT_DIR=../../..
 
 include Makefile.inc
 

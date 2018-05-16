@@ -24,6 +24,10 @@
 MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 PACKAGE=Core/BareMetal
 
+ifndef ENVIRONMENT_BM_L1Portability_DIR
+    ENVIRONMENT_BM_L1Portability_DIR = Environment
+endif
+
 SPB=$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT).x
 
 OBJSX=  FastPollingEventSem.x \

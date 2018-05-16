@@ -23,12 +23,17 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX=Loader.x RealTimeLoader.x
 
 PACKAGE=Core/BareMetal
 
-SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
+ifndef ENVIRONMENT_BM_L6App_DIR
+    ENVIRONMENT_BM_L6App_DIR = Environment
+endif
+
+SPB=$(ENVIRONMENT_BM_L6App_DIR)/$(ENVIRONMENT).x
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

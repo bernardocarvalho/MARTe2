@@ -21,9 +21,15 @@
 # permissions and limitations under the Licence. 
 #
 #############################################################
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 PACKAGE=Core/Scheduler
-SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
+
+ifndef ENVIRONMENT_SC_L1Portability_DIR
+    ENVIRONMENT_SC_L1Portability_DIR = Environment
+endif
+
+SPB=$(ENVIRONMENT_SC_L1Portability_DIR)/$(ENVIRONMENT).x
 
 OBJSX =
 

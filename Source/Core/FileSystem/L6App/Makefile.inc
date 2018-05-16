@@ -21,10 +21,15 @@
 # permissions and limitations under the Licence. 
 #
 #############################################################
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 PACKAGE=Core/FileSystem
 
-SPB=$(ENVIRONMENT_DIR)/$(ENVIRONMENT).x
+ifndef ENVIRONMENT_FS_L6App_DIR
+    ENVIRONMENT_FS_L6App_DIR = Environment
+endif
+
+SPB=$(ENVIRONMENT_FS_L6App_DIR)/$(ENVIRONMENT).x
 
 OBJSX=
 

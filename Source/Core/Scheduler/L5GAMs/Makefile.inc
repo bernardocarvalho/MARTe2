@@ -21,6 +21,7 @@
 # permissions and limitations under the Licence. 
 #
 #############################################################
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 PACKAGE=Core/Scheduler
 

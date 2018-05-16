@@ -24,9 +24,6 @@
 #
 #############################################################
 TARGET=msc
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
-ENVIRONMENT_DIR=Environment
 include Makefile.inc
 
 LIBRARIES += $(BUILD_DIR)/$(ENVIRONMENT)/L1Portability$(LIBEXT)
