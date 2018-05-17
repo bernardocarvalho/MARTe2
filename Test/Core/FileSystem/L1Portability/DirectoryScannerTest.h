@@ -38,7 +38,8 @@
 #include "SortFilter.h"
 #include "BasicFile.h"
 #include "stdio.h"
-#include INCLUDE_FILE_ENVIRONMENT(ENVIRONMENT,DirectoryCore.h)
+#include INCLUDE_FILE_ENVIRONMENT(_ENVIRONMENT_FS_L1Portability_DIR,ENVIRONMENT,DirectoryCore.h)
+
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/

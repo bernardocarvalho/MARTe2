@@ -42,17 +42,17 @@
  * @brief Builds an include filename based on actual architecture.
  */
 /*lint -save -e9026 -estring(1960, *16-0-6*) , function-like macro defined, unparenthesized macro parameter*/
-#define INCLUDE_FILE_ARCHITECTURE(x,y) QUOTE(_ARCHITECTURE_DIR/x/y)
+#define INCLUDE_FILE_ARCHITECTURE(dir,x,y) QUOTE(dir/x/y)
 /*lint -restore */
 
 /**
  * @brief Builds an include filename based on actual environment.
  */
 /*lint -save -e9026 -estring(1960, *16-0-6*) , function-like macro defined, unparenthesized macro parameter*/
-#define INCLUDE_FILE_ENVIRONMENT(x,y) QUOTE(_ENVIRONMENT_DIR/x/y)
+#define INCLUDE_FILE_ENVIRONMENT(dir,x,y) QUOTE(dir/x/y)
 /*lint -restore */
 
-#include INCLUDE_FILE_ARCHITECTURE(ARCHITECTURE,CompilerTypes.h)
+#include INCLUDE_FILE_ARCHITECTURE(_ARCHITECTURE_BM_L0Types_DIR,ARCHITECTURE,CompilerTypes.h)
 
 /**
  * @brief Casts a 0 value to the target pointer type.

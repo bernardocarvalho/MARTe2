@@ -63,6 +63,41 @@ INCLUDE =
 LFLAGS = -Wl,--no-as-needed -fPIC
 CFLAGS = -fPIC -Wall -Wall -std=c++98 -Werror -Wno-invalid-offsetof
 CPPFLAGS = -fPIC -frtti -Wall -std=c++98 -Werror -Wno-invalid-offsetof
-CFLAGSPEC= -DARCHITECTURE=$(ARCHITECTURE) -DENVIRONMENT=$(ENVIRONMENT) -D_ARCHITECTURE_DIR=Architecture -D_ENVIRONMENT_DIR=Environment -DUSE_PTHREAD -pthread
+
+ifndef ARCHITECTURE_BM_L0Types_DIR
+	 ARCHITECTURE_BM_L0Types_DIR = Architecture
+endif
+ifndef ARCHITECTURE_BM_L1Portability_DIR
+	 ARCHITECTURE_BM_L1Portability_DIR = Architecture
+endif
+ifndef ENVIRONMENT_BM_L1Portability_DIR
+	 ENVIRONMENT_BM_L1Portability_DIR = Environment
+endif
+ifndef ENVIRONMENT_BM_L6App_DIR
+	 ENVIRONMENT_BM_L6App_DIR = Environment
+endif
+ifndef ENVIRONMENT_FS_L1Portability_DIR
+	 ENVIRONMENT_FS_L1Portability_DIR = Environment
+endif
+ifndef ENVIRONMENT_FS_L6App_DIR
+	 ENVIRONMENT_FS_L6App_DIR = Environment
+endif
+ifndef ENVIRONMENT_SC_L1Portability_DIR
+	 ENVIRONMENT_SC_L1Portability_DIR = Environment
+endif
+
+CFLAGSPEC= -DARCHITECTURE=$(ARCHITECTURE) -DENVIRONMENT=$(ENVIRONMENT) -DUSE_PTHREAD -pthread -D_ARCHITECTURE_BM_L0Types_DIR=$(ARCHITECTURE_BM_L0Types_DIR)\
+	-D_ARCHITECTURE_BM_L1Portability_DIR=$(ARCHITECTURE_BM_L1Portability_DIR)\
+	-D_ENVIRONMENT_BM_L1Portability_DIR=$(ENVIRONMENT_BM_L1Portability_DIR)\
+	-D_ENVIRONMENT_BM_L6App_DIR=$(ENVIRONMENT_BM_L6App_DIR)\
+	-D_ENVIRONMENT_FS_L1Portability_DIR=$(ENVIRONMENT_FS_L1Portability_DIR)\
+	-D_ENVIRONMENT_FS_L6App_DIR=$(ENVIRONMENT_FS_L6App_DIR)\
+	-D_ENVIRONMENT_FS_L6App_DIR=$(ENVIRONMENT_FS_L6App_DIR)\
+	-D_ENVIRONMENT_SC_L1Portability_DIR=$(ENVIRONMENT_SC_L1Portability_DIR)
+	
+	
+	
+
+
 LIBRARIES =  -lm -lnsl -lpthread -lrt -lncurses -ldl
 .SUFFIXES:   .c  .cpp  .o .a .exe .ex .ex_ .so .gam

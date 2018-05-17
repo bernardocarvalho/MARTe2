@@ -35,7 +35,7 @@
 
 #include "ErrorManagement.h"
 #include "GeneralDefinitions.h"
-#include INCLUDE_FILE_ARCHITECTURE(ARCHITECTURE,FastMathA.h)
+#include INCLUDE_FILE_ARCHITECTURE(_ARCHITECTURE_BM_L1Portability_DIR,ARCHITECTURE,FastMathA.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Module declaration                              */

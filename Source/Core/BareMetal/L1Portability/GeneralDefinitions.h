@@ -35,10 +35,10 @@
 #include "CompilerTypes.h"
 
 /*---------------------------------------------------------------------------*/
-/*                           Module declaration                               */
+/*                           Module declaration                              */
 /*---------------------------------------------------------------------------*/
 
-#include INCLUDE_FILE_ENVIRONMENT(ENVIRONMENT,GeneralDefinitions.h)
+#include INCLUDE_FILE_ENVIRONMENT(_ENVIRONMENT_BM_L1Portability_DIR,ENVIRONMENT,GeneralDefinitions.h)
 
 namespace MARTe {
 

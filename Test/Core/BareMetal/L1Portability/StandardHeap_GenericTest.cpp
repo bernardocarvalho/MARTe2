@@ -32,7 +32,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "StandardHeap_GenericTest.h"
-#include INCLUDE_FILE_ENVIRONMENT(ENVIRONMENT,StandardHeap.h)
+#include INCLUDE_FILE_ENVIRONMENT(_ENVIRONMENT_BM_L1Portability_DIR,ENVIRONMENT,StandardHeap.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */

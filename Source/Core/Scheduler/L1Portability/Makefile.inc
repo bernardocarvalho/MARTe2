@@ -29,11 +29,13 @@ ifndef ENVIRONMENT_SC_L1Portability_DIR
     ENVIRONMENT_SC_L1Portability_DIR = Environment
 endif
 
+
 SPB=$(ENVIRONMENT_SC_L1Portability_DIR)/$(ENVIRONMENT).x
 
 OBJSX =
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
+CFLAGSPEC += -D_ENVIRONMENT_DIR=$(ENVIRONMENT_SC_L1Portability_DIR)
 
 INCLUDES+=-I../../BareMetal/L1Portability -I../../BareMetal/L0Types
 

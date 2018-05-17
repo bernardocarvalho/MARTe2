@@ -33,7 +33,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "GeneralDefinitions.h"
-#include INCLUDE_FILE_ARCHITECTURE(ARCHITECTURE,EndianityA.h)
+#include INCLUDE_FILE_ARCHITECTURE(_ARCHITECTURE_BM_L1Portability_DIR,ARCHITECTURE,EndianityA.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Module declaration                               */

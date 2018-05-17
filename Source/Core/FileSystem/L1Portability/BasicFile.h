@@ -37,7 +37,7 @@
 #include "StreamI.h"
 #include "HandleI.h"
 #include "StreamString.h"
-#include INCLUDE_FILE_ENVIRONMENT(ENVIRONMENT,BasicFileProperties.h)
+#include INCLUDE_FILE_ENVIRONMENT(_ENVIRONMENT_FS_L1Portability_DIR,ENVIRONMENT,BasicFileProperties.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */

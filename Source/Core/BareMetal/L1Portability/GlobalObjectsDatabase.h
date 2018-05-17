@@ -35,7 +35,7 @@
 #include "GeneralDefinitions.h"
 #include "GlobalObjectI.h"
 
-#include INCLUDE_FILE_ENVIRONMENT(ENVIRONMENT,StandardHeap.h)
+#include INCLUDE_FILE_ENVIRONMENT(_ENVIRONMENT_BM_L1Portability_DIR,ENVIRONMENT,StandardHeap.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
