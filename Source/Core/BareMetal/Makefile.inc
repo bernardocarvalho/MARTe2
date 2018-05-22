@@ -26,7 +26,8 @@
 MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX= 
-SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x L6App.x
+SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x
+#L6App.x
 PACKAGE=Core
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

@@ -24,10 +24,11 @@
 #
 #############################################################
 OBJSX=
-SPB    = Source/Core.x Source/App.x Test/Core/BareMetal.x Test/Core/Scheduler.x Test/Core/FileSystem.x Test/GTest.x
+SPB    = Source/Core.x
+#Source/App.x Test/Core/BareMetal.x Test/Core/Scheduler.x Test/Core/FileSystem.x Test/GTest.x
 
 
-MAKEDEFAULTDIR=MakeDefaults
+MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
