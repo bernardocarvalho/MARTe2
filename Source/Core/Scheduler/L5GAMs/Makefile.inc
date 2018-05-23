@@ -43,6 +43,7 @@ INCLUDES += -I../../BareMetal/L4Messages
 INCLUDES += -I../../BareMetal/L5GAMs
 INCLUDES += -I../../Scheduler/L1Portability
 INCLUDES += -I../../Scheduler/L3Services
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 
 all: $(OBJS) $(SUBPROJ)   \

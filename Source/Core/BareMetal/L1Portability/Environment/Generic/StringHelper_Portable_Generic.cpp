@@ -29,7 +29,8 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "../../StringHelper.h"
+#include "GeneralDefinitions.h"
+#include QUOTE(_MARTe2_DIR/Source/Core/BareMetal/L1Portability/StringHelper.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */

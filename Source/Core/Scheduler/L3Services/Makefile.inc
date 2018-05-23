@@ -48,6 +48,8 @@ INCLUDES += -I../../BareMetal/L4Configuration
 INCLUDES += -I../../BareMetal/L4Messages
 INCLUDES += -I../../BareMetal/L5GAMs
 INCLUDES += -I../../Scheduler/L1Portability
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
+
 all: $(OBJS)    \
 	        $(BUILD_DIR)/L3ServicesS$(LIBEXT) \
 	        $(BUILD_DIR)/L3ServicesS.def

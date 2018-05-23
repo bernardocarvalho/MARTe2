@@ -35,6 +35,7 @@ INCLUDES += -I../L0Types
 INCLUDES += -I../L1Portability
 INCLUDES += -I../L2Objects
 INCLUDES += -I../L3Streams
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 all: $(OBJS)    \
 	        $(BUILD_DIR)/L4LoggerB$(LIBEXT) \

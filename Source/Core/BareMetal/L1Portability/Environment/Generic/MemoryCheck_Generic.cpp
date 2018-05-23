@@ -36,8 +36,9 @@
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
+#include "GeneralDefinitions.h"
+#include QUOTE(_MARTe2_DIR/Source/Core/BareMetal/L1Portability/MemoryCheck.h)
 
-#include "../../MemoryCheck.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */

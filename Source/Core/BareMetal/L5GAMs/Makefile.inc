@@ -69,6 +69,7 @@ INCLUDES += -I../L2Objects
 INCLUDES += -I../L3Streams
 INCLUDES += -I../L4Configuration
 INCLUDES += -I../L4Messages
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 all: $(OBJS)    \
 	        $(BUILD_DIR)/L5GAMsB$(LIBEXT) \

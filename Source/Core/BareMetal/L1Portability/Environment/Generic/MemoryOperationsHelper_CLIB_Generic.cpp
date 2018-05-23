@@ -35,7 +35,8 @@
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
-#include "../../MemoryOperationsHelper.h"
+#include "GeneralDefinitions.h"
+#include QUOTE(_MARTe2_DIR/Source/Core/BareMetal/L1Portability/MemoryOperationsHelper.h)
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
