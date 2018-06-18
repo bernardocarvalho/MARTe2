@@ -26,8 +26,6 @@ OBJSX=
 SPB = BareMetal.x Scheduler.x FileSystem.x
 
 PACKAGE=
-ROOT_DIR=../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 INCLUDES += -I../../Source/Core/BareMetal/L0Types

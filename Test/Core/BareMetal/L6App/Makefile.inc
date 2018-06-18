@@ -28,8 +28,6 @@
 OBJSX= LoaderTest.x RealTimeLoaderTest.x
 
 PACKAGE=Core/BareMetal
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
@@ -43,6 +41,7 @@ INCLUDES += -I../../../../Source/Core/BareMetal/L5GAMs
 INCLUDES += -I../../../../Source/Core/BareMetal/L6App
 INCLUDES += -I../../../../Source/Core/FileSystem/L1Portability
 INCLUDES += -I../../../../Source/Core/Scheduler/L1Portability
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 
 all: $(OBJS) \

@@ -58,7 +58,7 @@ TEST(HighResolutionTimerGTest,TestPeriodFrequency) {
 
 TEST(HighResolutionTimerGTest,TestCounter) {
     HighResolutionTimerTest hrtTest;
-    ASSERT_TRUE(hrtTest.TestCounter(0.5));
+    ASSERT_TRUE(hrtTest.TestCounter(0.1));
 }
 
 TEST(HighResolutionTimerGTest,TestCounter32) {

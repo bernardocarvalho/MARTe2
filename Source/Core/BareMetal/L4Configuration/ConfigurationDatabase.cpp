@@ -37,6 +37,8 @@
 #include "ReferenceContainerFilterReferences.h"
 #include "StreamString.h"
 #include "TypeConversion.h"
+#include "StreamMemoryReference.h"
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -177,7 +179,7 @@ bool ConfigurationDatabase::Copy(StructuredDataI &destination) {
 bool ConfigurationDatabase::Initialise(StructuredDataI &data) {
     bool ok = Object::Initialise(data);
     if (ok) {
-        ok = data.Copy(*this);
+        ok = data.Link(*this);
     }
     return ok;
 }
@@ -298,8 +300,10 @@ bool ConfigurationDatabase::MoveToAncestor(const uint32 generations) {
     return ok;
 }
 
+
+
 bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
-    StreamString pathStr = path;
+    StreamMemoryReference pathStr = StreamMemoryReference(path, StringHelper::Length(path)+1u);
     bool ok = pathStr.Seek(0Lu);
     if (ok) {
         ok = (pathStr.Size() > 0u);
@@ -307,11 +311,12 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
     StreamString token;
     char8 c;
     bool created = false;
-    ReferenceT<ReferenceContainer> currentNodeOld = currentNode;
+    ReferenceT < ReferenceContainer > currentNodeOld = currentNode;
 
     while ((pathStr.GetToken(token, ".", c)) && (ok)) {
         ok = (token.Size() > 0u);
         if (ok) {
+
             //Check if a node with this name already exists
             bool found = false;
             Reference foundReference;
@@ -325,7 +330,7 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
                 currentNode = foundReference;
             }
             else {
-                ReferenceT<ReferenceContainer> container(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+                ReferenceT < ReferenceContainer > container(GlobalObjectsDatabase::Instance()->GetStandardHeap());
                 container->SetName(token.Buffer());
                 ok = currentNode->Insert(container);
                 if (ok) {
@@ -342,6 +347,7 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
             }
 
         }
+
     }
     if (ok) {
         ok = created;
@@ -351,6 +357,7 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
     }
     return ok;
 }
+
 
 bool ConfigurationDatabase::CreateAbsolute(const char8 * const path) {
     currentNode = rootNode;

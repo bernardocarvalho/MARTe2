@@ -23,7 +23,6 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX=Loader.x RealTimeLoader.x
 
@@ -45,6 +44,7 @@ INCLUDES += -I../L3Streams
 INCLUDES += -I../L4Configuration
 INCLUDES += -I../L4Messages
 INCLUDES += -I../L5GAMs
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 LIBRARIES_STATIC+=$(BUILD_DIR)/$(ENVIRONMENT)/L6App$(LIBEXT)
 

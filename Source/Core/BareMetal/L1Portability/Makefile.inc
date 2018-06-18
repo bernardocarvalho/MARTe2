@@ -21,7 +21,6 @@
 # permissions and limitations under the Licence. 
 #
 #############################################################
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 PACKAGE=Core/BareMetal
 
 ifndef ENVIRONMENT_BM_L1Portability_DIR

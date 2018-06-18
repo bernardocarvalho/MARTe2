@@ -31,6 +31,7 @@
 #include "HighResolutionTimerTest.h"
 #include "HighResolutionTimer.h"
 #include "Sleep.h"
+#include <stdio.h>
 
 using namespace MARTe;
 
@@ -51,6 +52,7 @@ static bool Tolerance(float64 a,
 }
 
 bool HighResolutionTimerTest::TestFrequency() {
+    HighResolutionTimerCalibrator calib;
     return HighResolutionTimer::Frequency() > 0;
 }
 
@@ -63,10 +65,12 @@ bool HighResolutionTimerTest::TestCounter(float64 sleepTime) {
     uint64 counter = 0;
     float64 time;
     counter_1 = HighResolutionTimer::Counter();
+
     Sleep::Sec(sleepTime);
     counter = HighResolutionTimer::Counter();
     time = HighResolutionTimer::TicksToTime(int64(counter), int64(counter_1));
-    return Tolerance(time, sleepTime, sleepTime * .1);
+    //printf("elapsed=%f", time);
+    return Tolerance(time, sleepTime, sleepTime * .2);
 }
 
 bool HighResolutionTimerTest::TestCounter32(float64 sleepTime) {
@@ -74,10 +78,13 @@ bool HighResolutionTimerTest::TestCounter32(float64 sleepTime) {
     uint32 counter = 0;
     float64 time;
     counter_1 = HighResolutionTimer::Counter32();
+
     Sleep::Sec(sleepTime);
     counter = HighResolutionTimer::Counter32();
+
     time = (counter - counter_1) * HighResolutionTimer::Period();
-    return Tolerance(time, sleepTime, sleepTime * .5);
+    //printf("elapsed=%f", time);
+    return Tolerance(time, sleepTime, sleepTime * .2);
 }
 
 bool HighResolutionTimerTest::TestTicksToTime() {

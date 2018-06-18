@@ -27,8 +27,6 @@ OBJSX=
 SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x L6App.x
 
 PACKAGE=GTest
-ROOT_DIR=../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

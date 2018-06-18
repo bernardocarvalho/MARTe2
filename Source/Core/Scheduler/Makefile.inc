@@ -23,7 +23,6 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX= 
 SPB = L1Portability.x L3Services.x L4LoggerService.x L4Messages.x L4StateMachine.x L5GAMs.x

@@ -27,9 +27,7 @@ OBJSX=
 SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x L6App.x
 
 PACKAGE=Core
-MAKEDEFAULTDIR=../../../MakeDefaults
 
-ROOT_DIR=../../..
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 LIBRARIES_STATIC+=$(BUILD_DIR)/L0Types/L0TypesTest$(LIBEXT)

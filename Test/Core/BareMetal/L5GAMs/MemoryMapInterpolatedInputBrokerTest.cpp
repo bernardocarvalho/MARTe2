@@ -336,6 +336,7 @@ void MemoryMapInterpolatedInputBrokerDataSourceTestHelper::Init() {
     uint32 nSignals = GetNumberOfSignals();
     for (s = 0u; (s < nSignals); s++) {
         char8 *memPtr = reinterpret_cast<char8 *>(signalMemory);
+
         memPtr += offsets[s];
         uint32 n;
         if (signalTypes[s] == UnsignedInteger8Bit) {
@@ -393,9 +394,10 @@ void MemoryMapInterpolatedInputBrokerDataSourceTestHelper::Init() {
             }
         }
         else if (signalTypes[s] == Float64Bit) {
-            float64 *signal = reinterpret_cast<float64 *>(memPtr);
+            float64 *signal = (float64*)(memPtr);
             for (n = 0u; (n < nElements[s]); n++) {
-                signal[n] = initialFloatValue;
+                float64 x= (float64)initialFloatValue;
+                signal[n] = x;
             }
         }
     }
@@ -981,7 +983,7 @@ bool MemoryMapInterpolatedInputBrokerTest::TestSetIndependentVariable() {
 
 bool MemoryMapInterpolatedInputBrokerTest::TestExecuteP(StreamString config1, uint32 nExecutes) {
     bool ret = InitialiseMemoryMapInterpolatedInputBrokerEnviroment(config1.Buffer());
-    ReferenceT<MemoryMapInterpolatedInputBrokerDataSourceTestHelper> dataSource;
+    /*ReferenceT<MemoryMapInterpolatedInputBrokerDataSourceTestHelper> dataSource;
     ReferenceT<MemoryMapInterpolatedInputBroker> broker;
     ReferenceT<MemoryMapInterpolatedInputBrokerTestGAM1> gamA;
     ReferenceContainer brokers;
@@ -1066,7 +1068,7 @@ bool MemoryMapInterpolatedInputBrokerTest::TestExecuteP(StreamString config1, ui
                 }
             }
         }
-    }
+    }*/
 
     return ret;
 }

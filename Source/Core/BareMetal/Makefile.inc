@@ -23,11 +23,9 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 OBJSX= 
-SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x
-#L6App.x
+SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L5GAMs.x L6App.x
 PACKAGE=Core
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
@@ -39,7 +37,7 @@ LIBRARIES_STATIC+=$(BUILD_DIR)/L4Configuration/L4ConfigurationB$(LIBEXT)
 LIBRARIES_STATIC+=$(BUILD_DIR)/L4Logger/L4LoggerB$(LIBEXT)
 LIBRARIES_STATIC+=$(BUILD_DIR)/L4Messages/L4MessagesB$(LIBEXT)
 LIBRARIES_STATIC+=$(BUILD_DIR)/L5GAMs/L5GAMsB$(LIBEXT)
-#LIBRARIES_STATIC+=$(BUILD_DIR)/L6App/L6AppB$(LIBEXT)
+LIBRARIES_STATIC+=$(BUILD_DIR)/L6App/L6AppB$(LIBEXT)
 
 all: $(OBJS) $(SUBPROJ) \
 		$(BUILD_DIR)/MARTeCoreB$(LIBEXT) \

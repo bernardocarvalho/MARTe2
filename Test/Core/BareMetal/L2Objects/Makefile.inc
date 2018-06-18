@@ -53,8 +53,6 @@ OBJSX=  AnyTypeTest.x\
 		
 		
 PACKAGE=Core/BareMetal
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
@@ -64,6 +62,7 @@ INCLUDES += -I../../../../Source/Core/BareMetal/L2Objects
 INCLUDES += -I../../../../Source/Core/BareMetal/L3Streams
 INCLUDES += -I../../../../Source/Core/BareMetal/L4Configuration
 INCLUDES += -I../../../../Source/Core/Scheduler/L1Portability
+INCLUDES+=-I$(ENVIRONMENT_BM_L1Portability_DIR)/$(ENVIRONMENT)
 
 all: $(OBJS) \
                 $(BUILD_DIR)/L2ObjectsTest$(LIBEXT)

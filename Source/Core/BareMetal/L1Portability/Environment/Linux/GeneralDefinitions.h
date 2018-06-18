@@ -35,6 +35,7 @@
 #ifndef NULL
 #define NULL 0
 #endif
+#include "CompilerTypes.h"
 
 
 namespace MARTe{
@@ -64,6 +65,8 @@ const uint32 NUMBER_OF_GLOBAL_OBJECTS = 64u;
  * and the framework does not define such type*/
 typedef long oslong;
 typedef unsigned long osulong;
+
+typedef size_t ossize;
 
 #define __ERROR_FUNCTION_NAME__   __PRETTY_FUNCTION__
 

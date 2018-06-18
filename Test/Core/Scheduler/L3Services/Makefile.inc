@@ -34,8 +34,6 @@ OBJSX=  EmbeddedServiceMethodBinderTTest.x \
     SingleThreadServiceTest.x
 
 PACKAGE=Core/Scheduler
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

@@ -24,10 +24,8 @@
 #
 #############################################################
 OBJSX=
-SPB    = BareMetal.x Scheduler.x
-#FileSystem.x
+SPB    = BareMetal.x Scheduler.x FileSystem.x
 PACKAGE=
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
@@ -50,6 +48,12 @@ INCLUDES += -IScheduler/L4LoggerService
 INCLUDES += -IScheduler/L4Messages
 INCLUDES += -IScheduler/L4StateMachine
 INCLUDES += -IScheduler/L5GAMs
+
+LIBRARIES_STATIC += $(ROOT_DIR)/Build/$(TARGET)/Core/BareMetal/MARTeCoreB$(LIBEXT)
+LIBRARIES_STATIC += $(ROOT_DIR)/Build/$(TARGET)/Core/Scheduler/MARTeCoreS$(LIBEXT)
+LIBRARIES_STATIC += $(ROOT_DIR)/Build/$(TARGET)/Core/FileSystem/MARTeCoreF$(LIBEXT)
+
+
 
 all: $(OBJS) $(SUBPROJ) \
                 $(BUILD_DIR)/MARTe2$(LIBEXT)\

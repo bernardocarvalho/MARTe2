@@ -70,7 +70,7 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
         char8 buffer[LINUX_CPUINFO_BUFFER_SIZE + 1u];
         memset(&buffer[0], 0, LINUX_CPUINFO_BUFFER_SIZE + 1u);
 
-        FILE *f = fopen("/proc/cpuinfo", "r");
+        FILE *f = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", "r");
         size_t size = LINUX_CPUINFO_BUFFER_SIZE;
         if (f != NULL) {
             size = fread(&buffer[0], size, static_cast<size_t>(1u), f);
@@ -80,7 +80,16 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
             REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "HighResolutionTimerCalibrator: fopen()");
         }
 
-        if (size > 0u) {
+        if (buffer[0] != '\0') {
+            const char8 *p = &buffer[0];
+
+            float64 freqKHz = strtof(p, static_cast<char8 **>(0));
+            if (freqKHz > 0.) {
+                float64 frequencyF = freqKHz * 1.0e3;
+                period = 1.0 / frequencyF;
+                frequency = static_cast<uint64>(frequencyF);
+            }
+#if 0
             const char8 *pattern = "MHz";
             const char8 *p = StringHelper::SearchString(&buffer[0], pattern);
             if (p != NULL) {
@@ -93,6 +102,7 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
                     frequency = static_cast<uint64>(frequencyF);
                 }
             }
+#endif
         }
         else {
             REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "HighResolutionTimerCalibrator: fread()");

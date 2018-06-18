@@ -28,8 +28,6 @@ OBJSX=  QueuedMessageIGTest.x\
     QueueingMessageFilterGTest.x
 
 PACKAGE=GTest/Scheduler
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

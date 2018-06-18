@@ -27,8 +27,6 @@
 OBJSX=  BootstrapGTest.x
 		
 PACKAGE=GTest/FileSystem
-ROOT_DIR=../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

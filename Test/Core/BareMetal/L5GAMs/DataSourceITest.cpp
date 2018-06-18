@@ -147,7 +147,7 @@ bool DataSourceITestHelper::AllocateMemory() {
 }
 
 uint32 DataSourceITestHelper::GetNumberOfMemoryBuffers() {
-    return 0u;
+    return 1u;
 }
 
 bool DataSourceITestHelper::GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) {
@@ -2157,7 +2157,7 @@ bool DataSourceITest::TestTerminateInputCopy() {
         ret = dataSource.IsValid();
     }
     if (ret) {
-        ret = !(dataSource->TerminateInputCopy(0, 0, 0));
+        ret = (dataSource->TerminateInputCopy(0, 0, 0));
     }
     return ret;
 }
@@ -2170,7 +2170,7 @@ bool DataSourceITest::TestTerminateOutputCopy() {
         ret = dataSource.IsValid();
     }
     if (ret) {
-        ret = !(dataSource->TerminateOutputCopy(0, 0, 0));
+        ret = (dataSource->TerminateOutputCopy(0, 0, 0));
     }
     return ret;
 }

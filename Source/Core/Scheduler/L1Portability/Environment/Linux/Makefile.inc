@@ -25,8 +25,6 @@
 #############################################################
 
 PACKAGE=Core/Scheduler/L1Portability
-ROOT_DIR=../../../../../..
-MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 
 OBJSX=  EventSem.x \
