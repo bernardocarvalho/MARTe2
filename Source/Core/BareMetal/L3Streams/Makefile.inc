@@ -25,7 +25,8 @@
 #############################################################
 
 OBJSX=	BufferedStreamI.x \
-		BufferedStreamIOBuffer.x \
+                Base64Encoder.x\
+                BufferedStreamIOBuffer.x \
 		CharBuffer.x \
 		DoubleBufferedStream.x \
 		IOBuffer.x \
@@ -34,7 +35,8 @@ OBJSX=	BufferedStreamI.x \
 		SingleBufferedStream.x \
 		StreamMemoryReference.x \
 		StreamString.x \
-		StreamStringIOBuffer.x
+		StreamStringIOBuffer.x \
+		StructuredDataStream.x
         
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..
