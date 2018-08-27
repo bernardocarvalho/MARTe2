@@ -520,8 +520,7 @@ bool AnyTypeTest::TestAnyType_Object() {
         retVal &= (td.isConstant == false);
 
         uint32 structuredDataIdCode = td.structuredDataIdCode;
-//        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
-        uint32 classUniqueId = classItem->GetClassProperties()->GetTypeDescriptor().structuredDataIdCode;
+        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
         retVal &= (structuredDataIdCode == classUniqueId);
     }
     return retVal;
@@ -543,8 +542,7 @@ bool AnyTypeTest::TestAnyType_ConstObject() {
         retVal &= (td.isConstant == true);
 
         uint32 structuredDataIdCode = td.structuredDataIdCode;
-//        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
-        uint32 classUniqueId = classItem->GetClassProperties()->GetTypeDescriptor().structuredDataIdCode;
+        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
         retVal &= (structuredDataIdCode == classUniqueId);
     }
     return retVal;
@@ -567,8 +565,7 @@ bool AnyTypeTest::TestCreateFromOtherType() {
         retVal &= (td.isConstant == false);
 
         uint32 structuredDataIdCode = td.structuredDataIdCode;
-//        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
-        uint32 classUniqueId = classItem->GetClassProperties()->GetTypeDescriptor().structuredDataIdCode;
+        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
         retVal &= (structuredDataIdCode == classUniqueId);
     }
     return retVal;
@@ -591,8 +588,7 @@ bool AnyTypeTest::TestCreateFromOtherConstType() {
         retVal &= (td.isConstant == true);
 
         uint32 structuredDataIdCode = td.structuredDataIdCode;
-//        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
-        uint32 classUniqueId = classItem->GetClassProperties()->GetTypeDescriptor().structuredDataIdCode;
+        uint32 classUniqueId = classItem->GetClassProperties()->GetUniqueIdentifier();
         retVal &= (structuredDataIdCode == classUniqueId);
     }
     return retVal;
@@ -704,11 +700,7 @@ bool AnyTypeTest::TestPositionOperator_MatrixStructuredStaticDeclared() {
         }
     }
 
-    TypeDescriptor tdes =  ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetTypeDescriptor();
-    tdes.isConstant = false;
-//    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
-
-
+    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
 
     AnyType at(tdes, 0, test);
     at.SetNumberOfDimensions(2);
@@ -745,9 +737,7 @@ bool AnyTypeTest::TestPositionOperator_MatrixStructuredHeapDeclared() {
         }
     }
 
-//    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
-    TypeDescriptor tdes =  ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetTypeDescriptor();
-    tdes.isConstant = false;
+    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
 
     AnyType at(tdes, 0, test);
     at.SetNumberOfDimensions(2);
@@ -859,9 +849,7 @@ bool AnyTypeTest::TestPositionOperator_VectorStructured() {
         test[i].member1 = i;
     }
 
-    TypeDescriptor tdes =  ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetTypeDescriptor();
-    tdes.isConstant = false;
-//    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
+    TypeDescriptor tdes(false, ClassRegistryDatabase::Instance()->Find("TestATStructure")->GetClassProperties()->GetUniqueIdentifier());
 
     AnyType at(tdes, 0, test);
     at.SetNumberOfDimensions(1);

@@ -52,10 +52,9 @@ AnyType::AnyType(Object &obj) {
     const ClassRegistryItem *classItem = classDatabase->Find(className);
 
     if (classItem != NULL_PTR(ClassRegistryItem *)) {
-        dataDescriptor = classItem->GetClassProperties()->GetTypeDescriptor();
-//        dataDescriptor.isStructuredData = true;
+        dataDescriptor.isStructuredData = true;
         dataDescriptor.isConstant = false;
-//      dataDescriptor.structuredDataIdCode = static_cast<uint14>(classItem->GetClassProperties()->GetUniqueIdentifier());
+        dataDescriptor.structuredDataIdCode = static_cast<uint14>(classItem->GetClassProperties()->GetUniqueIdentifier());
     }
 }
 
@@ -69,10 +68,9 @@ AnyType::AnyType(const Object &obj) {
     const ClassRegistryItem *classItem = classDatabase->Find(className);
 
     if (classItem != NULL_PTR(ClassRegistryItem *)) {
-        dataDescriptor = classItem->GetClassProperties()->GetTypeDescriptor();
-//        dataDescriptor.isStructuredData = true;
+        dataDescriptor.isStructuredData = true;
         dataDescriptor.isConstant = true;
-//        dataDescriptor.structuredDataIdCode = static_cast<uint14>(classItem->GetClassProperties()->GetUniqueIdentifier());
+        dataDescriptor.structuredDataIdCode = static_cast<uint14>(classItem->GetClassProperties()->GetUniqueIdentifier());
     }
 }
 
