@@ -1,7 +1,7 @@
 /**
- * @file HttpService.h
- * @brief Header file for class HttpService
- * @date 24 ago 2018
+ * @file HttpInterface.h
+ * @brief Header file for class HttpInterface
+ * @date 27 ago 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class HttpService
+ * @details This header file contains the declaration of the class HttpInterface
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef HTTPSERVICE_H_
-#define HTTPSERVICE_H_
+#ifndef HTTPINTERFACE_H_
+#define HTTPINTERFACE_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,63 +31,31 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MultiClientService.h"
-#include "MessageI.h"
-#include "TCPSocket.h"
-#include "StreamString.h"
+#include "StructuredDataStream.h"
+#include "HttpRealmI.h"
 #include "ReferenceT.h"
-#include "EmbeddedServiceMethodBinderT.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+namespace MARTe {
 
-class HttpService: public MultiClientService, public MessageI {
+class HttpInterface {
 public:
-    CLASS_REGISTER_DECLARATION()
+    HttpInterface();
 
-    HttpService();
-    virtual ~HttpService();
+    virtual ~HttpInterface();
 
-    virtual bool Initialise(StructuredDataI &data);
+    virtual bool ProcessHttpMessage(StructuredDataStream &hStream) = 0;
 
-    ErrorManagement::ErrorType ServerCycle(MARTe::ExecutionInfo &information);
-
-    ErrorManagement::ErrorType ClientService(TCPSocket *commClient);
-
-protected:
-    /** The server socket */
-    TCPSocket server;
-
-    /** The port this server is listening to */
-    uint32 port;
-
-
-    uint32 listenMaxConnections;
-
-    /** verboseLevel = 0 means no diagnostics
-     1 enables warnings (default)
-     5 shows important informations 10 all information */
-    uint32 verboseLevel;
-
-    /** http://server:port server that will provide port allocation and relay of http */
-    StreamString httpRelayURL;
-
-    /** Where the web pages are contained.
-     It will use the URL to search in the container */
-    ReferenceT<ReferenceContainer> webRoot;
-
-
-    EmbeddedServiceMethodBinderI *embeddedMethod;
+    virtual ReferenceT<HttpRealmI> GetRealm()=0;
 
 };
 
 }
-
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* HTTPSERVICE_H_ */
+#endif /* SOURCE_CORE_BAREMETAL_L4HTTPSERVICE_HTTPINTERFACE_H_ */
 

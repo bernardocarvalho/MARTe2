@@ -103,6 +103,9 @@ public:
      */
     virtual bool Initialise(StructuredDataI & data);
 
+    virtual const char8 *GetBrokerName(StructuredDataI &data,
+            const SignalDirection direction);
+
 protected:
     /**
      * The memory address.

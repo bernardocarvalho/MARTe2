@@ -959,5 +959,19 @@ HSHttpCommand HttpStream::GetHttpCommand() const {
 
 }
 
+void HttpStream::SetUnmatchedUrl(char8 *unMatchedUrlIn) {
+    unMatchedUrl = unMatchedUrlIn;
+}
+
+const char8 *HttpStream::GetPath(){
+    return path.Buffer();
+}
+
+
+const char8 *HttpStream::GetUrl(){
+    return path.Buffer();
+}
+
+
 }
 

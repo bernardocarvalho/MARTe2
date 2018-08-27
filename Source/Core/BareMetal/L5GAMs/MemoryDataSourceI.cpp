@@ -155,7 +155,9 @@ bool MemoryDataSourceI::Initialise(StructuredDataI & data) {
 }
 
 /*lint -e{613} a valid Initialise is a pre-condition that guarantees memory to be != NULL*/
-bool MemoryDataSourceI::GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) {
+bool MemoryDataSourceI::GetSignalMemoryBuffer(const uint32 signalIdx,
+                                              const uint32 bufferIdx,
+                                              void *&signalAddress) {
     bool ret = (bufferIdx < GetNumberOfStatefulMemoryBuffers());
     uint32 nOfSignals = GetNumberOfSignals();
     if (ret) {
@@ -178,6 +180,51 @@ bool MemoryDataSourceI::GetSignalMemoryBuffer(const uint32 signalIdx, const uint
     }
 
     return ret;
+}
+
+const char8 *MemoryDataSourceI::GetBrokerName(StructuredDataI &data,
+                                              const SignalDirection direction) {
+
+    const char8* brokerName = NULL_PTR(const char8 *);
+
+    if (direction == InputSignals) {
+        float32 frequency = 0.F;
+        if (data.Read("Frequency", frequency)) {
+            if (frequency > 0.) {
+                brokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
+            }
+        }
+        uint32 trigger = 0u;
+        if (data.Read("Trigger", trigger)) {
+            if (trigger > 0u) {
+                brokerName = "MemoryMapSynchronisedMultiBufferInputBroker";
+            }
+        }
+        if (brokerName == NULL_PTR(const char8 *)) {
+            brokerName = "MemoryMapMultiBufferInputBroker";
+        }
+    }
+
+    if (direction == OutputSignals) {
+
+        float32 frequency = 0.F;
+        if (data.Read("Frequency", frequency)) {
+            if (frequency > 0.) {
+                brokerName = "MemoryMapSynchronisedMultiBufferOutputBroker";
+            }
+        }
+        uint32 trigger = 0u;
+        if (data.Read("Trigger", trigger)) {
+            if (trigger > 0u) {
+                brokerName = "MemoryMapSynchronisedMultiBufferOutputBroker";
+            }
+        }
+        if (brokerName == NULL_PTR(const char8 *)) {
+            brokerName = "MemoryMapMultiBufferOutputBroker";
+        }
+    }
+
+    return brokerName;
 }
 
 }

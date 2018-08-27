@@ -112,16 +112,16 @@ int32 ReferenceContainerFilter::GetOriginalSetOccurrence() const {
 void ReferenceContainerFilter::SetOriginalSetOccurrence(const int32 occurrenceToSet) {
     originallySetOccurrence = occurrenceToSet;
     Reset();
-    SetMode(GetMode());
-}
+    SetMode (GetMode());}
 
 void ReferenceContainerFilter::SetMode(const uint32& modeToSet) {
     mode = modeToSet;
 
     //set the recursive bit
     if (IsStorePath()) {
-        if (IsSearchAll()) {
-            REPORT_ERROR_STATIC_0(ErrorManagement::Warning, "Cannot use PATH mode to search more than one reference. The filter will match the first occurrence");
+        if (IsSearchAll() || (originallySetOccurrence > 1)) {
+            REPORT_ERROR_STATIC_0(ErrorManagement::Warning,
+                                  "Cannot use PATH mode to search more than one reference. The filter will match the first occurrence");
             originallySetOccurrence = 1;
         }
         mode |= ReferenceContainerFilterMode::RECURSIVE;

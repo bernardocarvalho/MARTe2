@@ -25,7 +25,8 @@
 #############################################################
 
 OBJSX=	HttpStream.x\
-    HttpClient.x
+    HttpClient.x\
+    HttpService.x
         
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..
@@ -39,9 +40,11 @@ INCLUDES+=-I../../BareMetal/L2Objects
 INCLUDES+=-I../../BareMetal/L3Streams
 INCLUDES+=-I../../BareMetal/L4Configuration
 INCLUDES+=-I../../BareMetal/L4HttpService
+INCLUDES+=-I../../BareMetal/L4Messages
 INCLUDES+=-I../L1Portability
 INCLUDES+=-I../L3Streams
 INCLUDES+=-I../../Scheduler/L1Portability
+INCLUDES+=-I../../Scheduler/L3Services
 
 all: $(OBJS)    \
 	        $(BUILD_DIR)/L4HttpServiceF$(LIBEXT) \

@@ -34,6 +34,9 @@
 #include "HttpStream.h"
 #include "Select.h"
 #include "HttpRealmI.h"
+#include "HttpInterface.h"
+#include "ReferenceContainerFilterNameAndType.h"
+#include "AdvancedErrorManagement.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -44,11 +47,13 @@
 
 namespace MARTe {
 
-HttpService::HttpService() {
+HttpService::HttpService() :
+        MultiClientService(*(embeddedMethod = new EmbeddedServiceMethodBinderT<HttpService>(*this, &HttpService::ServerCycle))) {
     port = 0u;
 }
 
 HttpService::~HttpService() {
+    delete embeddedMethod;
     // Auto-generated destructor stub for HttpService
     // TODO Verify if manual additions are needed
 }
@@ -95,7 +100,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 
     if (err.ErrorsCleared()) {
         commClient->SetBlocking(true);
-        HttpStream hstream(commClient);
+        HttpStream hstream(*commClient);
 
         Select sel;
         (void)sel.AddReadHandle(*commClient);
@@ -106,31 +111,46 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                 err=ErrorManagement::CommunicationError;
                 REPORT_ERROR(ErrorManagement::CommunicationError, "Error while reading HTTP header");
             }
-            ReferenceT< HttpInterface > hi;
+            ReferenceT<HttpInterface> hi;
             ReferenceT<HttpRealmI> realm;
             bool pagePrepared = false;
 
             if (err.ErrorsCleared()) {
-
-                if (hstream.path.Size() > 0) {
+                StreamString path=hstream.GetPath();
+                if (path.Size() > 0) {
                     // search for destination
-                    HSSearchFilter searchFilter(hstream.path.Buffer());
-                    hi = webRoot->Find(&searchFilter, GCFT_Recurse);
-                    realm = searchFilter.GetRealm();
-
-                    // save remainder of address
-                    hstream.unMatchedUrl = hstream.url.Buffer() + searchFilter.NameIndex();
-                    if (hstream.unMatchedUrl.Buffer()[hstream.unMatchedUrl.Size() - 1] == '/') {
-                        hstream.unMatchedUrl.SetSize(hstream.unMatchedUrl.Size() - 1);
+                    uint32 occurrences=1u;
+                    uint32 mode= ReferenceContainerFilterMode::PATH;
+                    ReferenceContainerFilterNameAndType<HttpInterface> filter(occurrences, mode, path.Buffer());
+                    ReferenceContainer results;
+                    webRoot->Find(results, filter);
+                    if(results.Size()>0u) {
+                        uint32 last=results.Size()-1u;
+                        hi=results.Get(last);
                     }
-                }
-                if (!hi.IsValid()) {
-                    hi = webRoot;
-                    if (hi.IsValid()) {
-                        if ((hi->Realm()).IsValid()) {
-                            realm = hi->Realm();
+
+                    if(hi.IsValid()) {
+                        realm=hi->GetRealm();
+                    }
+                    else {
+                        hi = webRoot;
+                        if (hi.IsValid()) {
+                            if ((hi->GetRealm()).IsValid()) {
+                                realm = hi->GetRealm();
+                            }
                         }
                     }
+
+                    // save remainder of address
+                    uint32 remAddrIndex=filter.GetRemainedAddrIndex();
+                    StreamString urlTemp=hstream.GetUrl();
+                    StreamString unmatchedUrl=&urlTemp.Buffer()[remAddrIndex];
+
+                    uint32 newUrlLastCharIdx=(unmatchedUrl.Size()-1u);
+                    if (unmatchedUrl.Buffer()[newUrlLastCharIdx] == '/') {
+                        unmatchedUrl.SetSize(newUrlLastCharIdx);
+                    }
+                    hstream.SetUnmatchedUrl(unmatchedUrl.BufferReference());
                 }
 
                 if (hi.IsValid()) {
@@ -138,14 +158,16 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                     //            GCRTemplate<HttpRealm> realm = searchFilter.GetRealm();
                     if (realm.IsValid()) {
                         if (!hstream.SecurityCheck(realm, (commClient->GetSource()).GetAddressAsNumber())) {
-
-                            hstream.SwitchPrintAndCommit("OutputHttpOtions", "text/html", "%s", {"Content-Type"});
+                            AnyType args[]= {"Content-Type"};
+                            hstream.SwitchPrintAndCommit("OutputHttpOtions", "text/html", "%s", args);
 
                             StreamString realmMsg;
                             realm->GetAuthenticationRequest(realmMsg);
-                            hstream.SwitchPrintAndCommit("OutputHttpOtions", "WWW-Authenticate", "%s", {realmMsg.Buffer()});
+                            args[0]=realmMsg.Buffer();
 
-                            hstream.Printf("<HTML><HEAD>\n"
+                            hstream.SwitchPrintAndCommit("OutputHttpOtions", "WWW-Authenticate", "%s", args);
+
+                            hstream.Printf("%s","<HTML><HEAD>\n"
                                     "<TITLE>401 Authorization Required</TITLE>\n"
                                     "</HEAD><BODY>\n"
                                     "<H1>Authorization Required</H1>\n"
@@ -158,7 +180,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                                     "</BODY></HTML>\n");
 
                             // force reissuing of a new thread
-                            hstream.keepAlive = false;
+                            hstream.SetKeepAlive(false);
                             if (!hstream.WriteReplyHeader(true, 401)) {
                                 err=ErrorManagement::CommunicationError;
                                 REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
@@ -175,22 +197,25 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
             if (err.ErrorsCleared()) {
 
                 if (!pagePrepared) {
+                    AnyType args[]= {"text/html"};
+                    hstream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", args);
 
-                    hstream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", {"text/html"});
+                    if (!hstream.KeepAlive()) {
+                        args[0]="Close";
 
-                    if (!hstream.keepAlive) {
-                        hstream.SwitchPrintAndCommit("OutputHttpOtions", "Connection", "%s", {"Close"});
+                        hstream.SwitchPrintAndCommit("OutputHttpOtions", "Connection", "%s", args);
 
-                    hstream.Printf("<HTML>Page Not Found!</HTML>");
-                    if(!hstream.WriteReplyHeader(true, 200)) {
-                        err=ErrorManagement::CommunicationError;
-                        REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
+                        hstream.Printf("%s", "<HTML>Page Not Found!</HTML>");
+                        if(!hstream.WriteReplyHeader(true, 200)) {
+                            err=ErrorManagement::CommunicationError;
+                            REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
+                        }
                     }
                 }
-            }
-            if (err.ErrorsCleared()) {
-                if (!hstream.keepAlive) {
-                    err=ErrorManagement::Completed;
+                if (err.ErrorsCleared()) {
+                    if (!hstream.KeepAlive()) {
+                        err=ErrorManagement::Completed;
+                    }
                 }
             }
         }

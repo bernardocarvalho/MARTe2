@@ -56,7 +56,6 @@ public:
     bool WriteReplyHeader(bool bodyCompleted,
                           uint32 httpErrorCode = 200);
 
-
     bool CompleteReadOperation(BufferedStreamI *s,
                                TimeoutType msecTimeout = TTInfiniteWait);
 
@@ -86,6 +85,11 @@ public:
 
     HSHttpCommand GetHttpCommand() const;
 
+    void SetUnmatchedUrl(char8 *unMatchedUrlIn);
+
+    const char8 *GetPath();
+
+    const char8 *GetUrl();
 
 protected:
 
@@ -152,7 +156,8 @@ private:
     /***********************/
     /* used in ReadHeader  */
     /***********************/
-    bool RetrieveHttpCommand(StreamString &command, StreamString &line);
+    bool RetrieveHttpCommand(StreamString &command,
+                             StreamString &line);
 
     void BuildUrl(StreamString &line);
 
