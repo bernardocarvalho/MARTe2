@@ -31,6 +31,9 @@
 
 #include "ReferenceContainerFilterNameAndTypeTest.h"
 #include "StreamString.h"
+#include "ReferenceT.h"
+#include "GlobalObjectsDatabase.h"
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -45,7 +48,7 @@ ReferenceContainerFilterNameAndTypeTest::~ReferenceContainerFilterNameAndTypeTes
     // TODO Verify if manual additions are needed
 }
 
-class ReferenceContainerFilterNameAndTypeTestObj: public Object {
+class ReferenceContainerFilterNameAndTypeTestObj: public ReferenceContainer {
 
 public:
 
@@ -133,10 +136,105 @@ bool ReferenceContainerFilterNameAndTypeTest::TestCopyConstructor() {
 }
 
 bool ReferenceContainerFilterNameAndTypeTest::TestTest() {
-    return true;
+    /*build a tree
+         A
+        / \
+       B   C*
+      / \   \
+     D*  F*  G*
+     |
+     E
+     */
+
+    ReferenceT<ReferenceContainer> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    a->SetName("A");
+    ReferenceT<ReferenceContainer> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    b->SetName("B");
+    a->Insert(b);
+    ReferenceT<ReferenceContainerFilterNameAndTypeTestObj> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    c->SetName("C");
+    a->Insert(c);
+    ReferenceT<ReferenceContainerFilterNameAndTypeTestObj> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    d->SetName("D");
+    b->Insert(d);
+    ReferenceT<ReferenceContainer> e(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    e->SetName("E");
+    d->Insert(e);
+    ReferenceT<ReferenceContainerFilterNameAndTypeTestObj> f(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    f->SetName("F");
+    b->Insert(f);
+    ReferenceT<ReferenceContainerFilterNameAndTypeTestObj> g(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    g->SetName("G");
+    c->Insert(g);
+
+    //first test... find C
+    ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test(1, ReferenceContainerFilterMode::PATH, "C");
+    ReferenceContainer result;
+    a->Find(result, test);
+    bool ret = result.Get(0) == c;
+    if (ret) {
+        ret = test.GetRemainedAddrIndex() == 1;
+    }
+
+    if (ret) {
+        //find G, C should return
+        ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test1(1, ReferenceContainerFilterMode::PATH, "C.G");
+        ReferenceContainer result1;
+        a->Find(result1, test1);
+        ret = result1.Get(0) == c;
+        if (ret) {
+            ret = test1.GetRemainedAddrIndex() == 2;
+        }
+    }
+
+    if (ret) {
+        //find D
+        ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test2(1, ReferenceContainerFilterMode::PATH, "B.D");
+        ReferenceContainer result2;
+        a->Find(result2, test2);
+        ret = result2.Get(1) == d;
+        if (ret) {
+            ret = test2.GetRemainedAddrIndex() == 3;
+        }
+    }
+
+    if (ret) {
+        //find D
+        ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test3(1, ReferenceContainerFilterMode::PATH, "B.D.E");
+        ReferenceContainer result3;
+        a->Find(result3, test3);
+        ret = result3.Get(1) == d;
+        if (ret) {
+            ret = test3.GetRemainedAddrIndex() == 4;
+        }
+    }
+
+
+    if (ret) {
+        //find D
+        ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test4(1, ReferenceContainerFilterMode::PATH, "B.F");
+        ReferenceContainer result4;
+        a->Find(result4, test4);
+        ret = result4.Get(1) == f;
+        if (ret) {
+            ret = test4.GetRemainedAddrIndex() == 3;
+        }
+    }
+
+
+    if (ret) {
+        //find D
+        ReferenceContainerFilterNameAndType<ReferenceContainerFilterNameAndTypeTestObj> test5(1, ReferenceContainerFilterMode::PATH, "B");
+        ReferenceContainer result5;
+        a->Find(result5, test5);
+        ret = result5.Size() == 0;
+
+    }
+
+    return ret;
 }
 
 bool ReferenceContainerFilterNameAndTypeTest::TestGetRemainedAddrIndex() {
-    return true;
+    return TestTest();
 }
 
