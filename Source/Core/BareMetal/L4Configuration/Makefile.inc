@@ -27,7 +27,6 @@
 OBJSX=	AnyObject.x \
 		AnyTypeCreator.x \
 		ConfigurationDatabase.x\
-		ConfigurationDatabaseStream.x\
 		FloatToInteger.x \
 		IntegerToFloat.x \
 		JsonParser.x \

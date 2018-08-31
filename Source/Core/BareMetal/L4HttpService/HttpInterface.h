@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StructuredDataStream.h"
+#include "MultiStream.h"
 #include "HttpRealmI.h"
 #include "ReferenceT.h"
 /*---------------------------------------------------------------------------*/
@@ -46,7 +46,7 @@ public:
 
     virtual ~HttpInterface();
 
-    virtual bool ProcessHttpMessage(StructuredDataStream &hStream) = 0;
+    virtual bool ProcessHttpMessage(MultiStream &hStream) = 0;
 
     virtual ReferenceT<HttpRealmI> GetRealm()=0;
 

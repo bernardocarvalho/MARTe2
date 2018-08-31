@@ -32,11 +32,12 @@ OBJSX=	BufferedStreamI.x \
 		IOBuffer.x \
 		IOBufferFloatPrint.x \
 		IOBufferIntegerPrint.x \
+		MultiStream.x\
 		SingleBufferedStream.x \
 		StreamMemoryReference.x \
 		StreamString.x \
 		StreamStringIOBuffer.x \
-		StructuredDataStream.x
+		StructuredDataStreamT.x
         
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

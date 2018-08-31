@@ -35,7 +35,8 @@ OBJSX=	AdvancedErrorManagementTest.x \
 	StreamMemoryReferenceTest.x \
 	StreamStringIOBufferTest.x \
 	StreamStringTest.x \
-	StreamTestHelper.x
+	StreamTestHelper.x\
+	StructuredDataStreamTTest.x
 		
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

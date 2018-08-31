@@ -45,7 +45,7 @@ namespace MARTe {
 using namespace HttpDefinition;
 
 HttpStream::HttpStream() :
-        ConfigurationDatabaseStream() {
+        StructuredDataStreamT<ConfigurationDatabase>() {
     // Auto-generated constructor stub for HttpStream
     // TODO Verify if manual additions are needed
 }

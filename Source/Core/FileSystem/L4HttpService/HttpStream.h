@@ -32,7 +32,8 @@
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 #include "HttpRealmI.h"
-#include "ConfigurationDatabaseStream.h"
+#include "ConfigurationDatabase.h"
+#include "StructuredDataStreamT.h"
 #include "EventSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
@@ -41,7 +42,7 @@
 namespace MARTe {
 using namespace HttpDefinition;
 
-class HttpStream: public ConfigurationDatabaseStream {
+class HttpStream: public StructuredDataStreamT<ConfigurationDatabase>{
 public:
     HttpStream();
 
