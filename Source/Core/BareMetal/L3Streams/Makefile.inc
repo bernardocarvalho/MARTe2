@@ -36,8 +36,7 @@ OBJSX=	BufferedStreamI.x \
 		SingleBufferedStream.x \
 		StreamMemoryReference.x \
 		StreamString.x \
-		StreamStringIOBuffer.x \
-		StructuredDataStreamT.x
+		StreamStringIOBuffer.x
         
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..
