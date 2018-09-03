@@ -1,7 +1,7 @@
 /**
- * @file UrlAddress.h
- * @brief Header file for class UrlAddress
- * @date 22 ago 2018
+ * @file MultiStream.h
+ * @brief Header file for class MultiStream
+ * @date 30 ago 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class UrlAddress
+ * @details This header file contains the declaration of the class MultiStream
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef URLADDRESS_H_
-#define URLADDRESS_H_
+#ifndef MULTISTREAM_H_
+#define MULTISTREAM_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -32,56 +32,43 @@
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 #include "StreamString.h"
-#include "HttpDefinition.h"
+#include "StructuredDataI.h"
+#include "AnyType.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
-
 namespace MARTe {
 
-using namespace HttpDefinition;
-
-class UrlAddress {
+class MultiStream: public StreamString {
 public:
-    UrlAddress();
-    virtual ~UrlAddress();
+    MultiStream();
 
-    void Init(const char8 * serverIn = "",
-              const char8 * uriIn = "",
-              uint32 portIn = 80u,
-              UrlProtocols protocolIn = URLP_HTTP);
+    virtual ~MultiStream();
 
-    bool Load(BufferedStreamI & stream);
+    virtual bool Switch(const char8 *path)=0;
 
-    bool Load(const char8 * buffer);
+    virtual bool Load(const char8 *varName)=0;
 
-    bool Save(BufferedStreamI & stream);
+    virtual bool Commit(const char8 *varName)=0;
 
-    const char * GetServer();
+    virtual bool Delete(const char8 *varName)=0;
 
-    const char * GetUri();
+    virtual void GetCurrentPath(StreamString &path)=0;
 
-    uint32 GetPort();
+    virtual bool SwitchPrintAndCommit(const char8* path,
+                              const char8* varName,
+                              const char8* format,
+                              const AnyType pars[])=0;
 
-    HttpDefinition::UrlProtocols GetProtocol();
-private:
-    /** valid for HTTP,FTP */
-    StreamString server;
-
-    /** valid for HTTP,FTP*/
-    uint32 port;
-
-    /** HTTP FTP FILE */
-    HttpDefinition::UrlProtocols protocol;
-
-    /** The resource identification */
-    StreamString uri;
+    virtual bool IsValid() const;
 
 };
+
 }
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* URLADDRESS_H_ */
+#endif /* SOURCE_CORE_BAREMETAL_L3STREAMS_MULTISTREAM_H_ */
 

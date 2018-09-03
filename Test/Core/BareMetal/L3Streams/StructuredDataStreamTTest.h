@@ -1,7 +1,7 @@
 /**
- * @file UrlAddress.h
- * @brief Header file for class UrlAddress
- * @date 22 ago 2018
+ * @file StructuredDataStreamTTest.h
+ * @brief Header file for class StructuredDataStreamTTest
+ * @date 30 ago 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class UrlAddress
+ * @details This header file contains the declaration of the class StructuredDataStreamTTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef URLADDRESS_H_
-#define URLADDRESS_H_
+#ifndef STRUCTUREDDATASTREAMTEST_H_
+#define STRUCTUREDDATASTREAMTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,57 +31,36 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StreamString.h"
-#include "HttpDefinition.h"
+#include "StructuredDataStreamT.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe {
+using namespace MARTe;
 
-using namespace HttpDefinition;
-
-class UrlAddress {
+class StructuredDataStreamTTest {
 public:
-    UrlAddress();
-    virtual ~UrlAddress();
+    StructuredDataStreamTTest();
+    virtual ~StructuredDataStreamTTest();
 
-    void Init(const char8 * serverIn = "",
-              const char8 * uriIn = "",
-              uint32 portIn = 80u,
-              UrlProtocols protocolIn = URLP_HTTP);
 
-    bool Load(BufferedStreamI & stream);
+    bool TestSwitch();
 
-    bool Load(const char8 * buffer);
+    bool TestLoad();
 
-    bool Save(BufferedStreamI & stream);
+    bool TestCommit();
 
-    const char * GetServer();
+    bool TestDelete();
 
-    const char * GetUri();
+    bool TestGetCurrentPath();
 
-    uint32 GetPort();
-
-    HttpDefinition::UrlProtocols GetProtocol();
-private:
-    /** valid for HTTP,FTP */
-    StreamString server;
-
-    /** valid for HTTP,FTP*/
-    uint32 port;
-
-    /** HTTP FTP FILE */
-    HttpDefinition::UrlProtocols protocol;
-
-    /** The resource identification */
-    StreamString uri;
+    bool TestSwitchPrintAndCommit();
 
 };
-}
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* URLADDRESS_H_ */
+#endif /* TEST_CORE_BAREMETAL_L3STREAMS_STRUCTUREDDATASTREAMTEST_H_ */
 

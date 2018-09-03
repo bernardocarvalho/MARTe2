@@ -45,21 +45,21 @@
 namespace MARTe {
 
 UrlAddress::UrlAddress() {
-    this->server = "";
-    this->uri = "";
-    this->port = 80;
-    this->protocol = URLP_HTTP;
+    server = "";
+    uri = "";
+    port = 80;
+    protocol = URLP_HTTP;
 }
 
 /** Initialise from discrete information */
-void UrlAddress::Init(const char8 * server,
-                      const char8 * uri,
-                      uint32 port,
-                      HttpDefinition::UrlProtocols protocol) {
-    this->server = server;
-    this->uri = uri;
-    this->port = port;
-    this->protocol = protocol;
+void UrlAddress::Init(const char8 * serverIn,
+                      const char8 * uriIn,
+                      uint32 portIn,
+                      HttpDefinition::UrlProtocols protocolIn) {
+    server = serverIn;
+    uri = uriIn;
+    port = portIn;
+    protocol = protocolIn;
 }
 
 UrlAddress::~UrlAddress() {
@@ -79,15 +79,15 @@ bool UrlAddress::Load(BufferedStreamI & stream) {
         if (ret) {
             // evaluate protocol
             protocol = URLP_NONE;
-            if (StringHelper::CompareN(ptoken.Buffer(), "http:", 6) == 0) {
+            if (StringHelper::CompareN(ptoken.Buffer(), "http:", 5) == 0) {
                 protocol = URLP_HTTP;
                 port = 80;
             }
-            else if (StringHelper::CompareN(ptoken.Buffer(), "ftp:", 5) == 0) {
+            else if (StringHelper::CompareN(ptoken.Buffer(), "ftp:", 4) == 0) {
                 protocol = URLP_FTP;
                 port = 25;
             }
-            else if (StringHelper::CompareN(ptoken.Buffer(), "file:", 6) == 0) {
+            else if (StringHelper::CompareN(ptoken.Buffer(), "file:", 5) == 0) {
                 protocol = URLP_FILE;
             }
 
@@ -101,11 +101,13 @@ bool UrlAddress::Load(BufferedStreamI & stream) {
                     TypeConvert(port, ptoken.Buffer());
                 }
             }
+            uri.SetSize(0u);
 
+            /*
             uint32 sizeW = 1u;
             char8 slash = '/';
             uri.Write(&slash, sizeW);
-
+            */
             //load the whole uri
             //false??
             ret = stream.GetLine(uri);
@@ -123,7 +125,7 @@ bool UrlAddress::Load(const char8 * buffer) {
 }
 
 /** the decoded server */
-const char * UrlAddress::Server() {
+const char * UrlAddress::GetServer() {
     return server.Buffer();
 }
 
@@ -133,12 +135,12 @@ const char * UrlAddress::GetUri() {
 }
 
 /** The comm port */
-uint32 UrlAddress::Port() {
+uint32 UrlAddress::GetPort() {
     return port;
 }
 
 /** The protocol */
-HttpDefinition::UrlProtocols UrlAddress::Protocol() {
+HttpDefinition::UrlProtocols UrlAddress::GetProtocol() {
     return protocol;
 }
 
@@ -154,7 +156,7 @@ bool UrlAddress::Save(BufferedStreamI &stream) {
     }
         break;
     case URLP_FILE: {
-        stream.Printf("file:///%s", uri.Buffer());
+        stream.Printf("file:///%s/%s", server.Buffer(), uri.Buffer());
     }
         break;
     default:

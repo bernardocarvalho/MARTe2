@@ -1,7 +1,7 @@
 /**
- * @file UrlAddress.h
- * @brief Header file for class UrlAddress
- * @date 22 ago 2018
+ * @file MultiStreamTest.h
+ * @brief Header file for class MultiStreamTest
+ * @date 03 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class UrlAddress
+ * @details This header file contains the declaration of the class MultiStreamTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef URLADDRESS_H_
-#define URLADDRESS_H_
+#ifndef MULTISTREAMTEST_H_
+#define MULTISTREAMTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,57 +31,29 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StreamString.h"
-#include "HttpDefinition.h"
+#include "MultiStream.h"
+
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe {
+using namespace MARTe;
 
-using namespace HttpDefinition;
-
-class UrlAddress {
+class MultiStreamTest {
 public:
-    UrlAddress();
-    virtual ~UrlAddress();
+    MultiStreamTest();
 
-    void Init(const char8 * serverIn = "",
-              const char8 * uriIn = "",
-              uint32 portIn = 80u,
-              UrlProtocols protocolIn = URLP_HTTP);
+    virtual ~MultiStreamTest();
 
-    bool Load(BufferedStreamI & stream);
+    bool TestConstructor();
 
-    bool Load(const char8 * buffer);
-
-    bool Save(BufferedStreamI & stream);
-
-    const char * GetServer();
-
-    const char * GetUri();
-
-    uint32 GetPort();
-
-    HttpDefinition::UrlProtocols GetProtocol();
-private:
-    /** valid for HTTP,FTP */
-    StreamString server;
-
-    /** valid for HTTP,FTP*/
-    uint32 port;
-
-    /** HTTP FTP FILE */
-    HttpDefinition::UrlProtocols protocol;
-
-    /** The resource identification */
-    StreamString uri;
+    bool TestIsValid();
 
 };
-}
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* URLADDRESS_H_ */
+#endif /* MULTISTREAMTEST_H_ */
 

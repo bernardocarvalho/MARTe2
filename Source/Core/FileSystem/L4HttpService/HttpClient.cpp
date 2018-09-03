@@ -143,14 +143,14 @@ bool HttpClient::HttpGet(UrlAddress url,
         operationId = lastOperationId++;
     }
 
-    bool ret = (url.Protocol() == URLP_HTTP);
+    bool ret = (url.GetProtocol() == URLP_HTTP);
     if (!ret) {
         REPORT_ERROR(ErrorManagement::ParametersError, "Only HTTP url is supported\n");
     }
     else {
         const char8 *urlUri = url.GetUri();
-        const char8 *urlHost = url.Server();
-        uint32 urlPort = url.Port();
+        const char8 *urlHost = url.GetServer();
+        uint32 urlPort = url.GetPort();
 
         bool reConnect = (!socket.IsConnected());
 

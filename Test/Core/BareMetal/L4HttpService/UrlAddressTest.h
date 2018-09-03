@@ -1,7 +1,7 @@
 /**
- * @file ConfigurationDatabaseStream.h
- * @brief Header file for class ConfigurationDatabaseStream
- * @date 17 ago 2018
+ * @file UrlAddressTest.h
+ * @brief Header file for class UrlAddressTest
+ * @date 03 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class ConfigurationDatabaseStream
+ * @details This header file contains the declaration of the class UrlAddressTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef CONFIGURATIONDATABASESTREAM_H_
-#define CONFIGURATIONDATABASESTREAM_H_
+#ifndef URLADDRESSTEST_H_
+#define URLADDRESSTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,31 +31,40 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StructuredDataStream.h"
-#include "ConfigurationDatabase.h"
+#include "UrlAddress.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+using namespace MARTe;
 
-class ConfigurationDatabaseStream: public StructuredDataStream {
+class UrlAddressTest {
 public:
+    UrlAddressTest();
+    virtual ~UrlAddressTest();
 
-    ConfigurationDatabaseStream();
+    bool TestConstructor();
 
-    virtual ~ConfigurationDatabaseStream();
+    bool TestInit();
 
-    operator ConfigurationDatabase();
+    bool TestLoadStream();
 
-protected:
-    ConfigurationDatabase cdb;
+    bool TestLoadString();
+
+    bool TestSave();
+
+    bool TestGetServer();
+
+    bool TestGetUri();
+
+    bool TestGetPort();
+
+    bool TestGetProtocol();
 };
 
-}
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* CONFIGURATIONDATABASESTREAM_H_ */
+#endif /* URLADDRESSTEST_H_ */
 
