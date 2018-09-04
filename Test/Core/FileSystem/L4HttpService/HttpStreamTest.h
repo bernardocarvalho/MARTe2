@@ -31,16 +31,41 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-
+#include "HttpStream.h"
+#include "EventSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
+using namespace MARTe;
+
 class HttpStreamTest {
 public:
     HttpStreamTest();
+
     virtual ~HttpStreamTest();
 
+    bool TestConstructor();
+
+    bool TestReadHeader_Get1();
+
+    bool TestReadHeader_Get2_Commands();
+
+    bool TestReadHeader_Put1();
+
+    bool TestReadHeader_Post1();
+
+    bool TestReadHeader_Post2_Multiform();
+
+    bool TestReadHeader_Head();
+
+    bool TestReadHeader_Reply();
+
+    bool TestCompleteReadOperation();
+
+    bool TestWriteHeader();
+
+    EventSem eventSem;
 };
 
 /*---------------------------------------------------------------------------*/

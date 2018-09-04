@@ -66,17 +66,6 @@ public:
 
     bool ReadHeader();
 
-    uint32 NumberOfInputCommands();
-
-    bool InputCommandName(StreamString &name,
-                          uint32 idx);
-
-    bool InputCommandValue(StreamString &value,
-                           uint32 idx);
-
-    bool InputCommandValue(StreamString &value,
-                           const char8 *name);
-
     bool SecurityCheck(ReferenceT<HttpRealmI> realm,
                        uint32 ipNumber);
 
@@ -94,7 +83,7 @@ public:
 
 protected:
 
-    BufferedStreamI *clientStream;
+    BufferedStreamI *socketStream;
 
     /**
      * How much data is still waiting in the
@@ -110,7 +99,7 @@ protected:
     /**
      * possible values are
      * writeToString writeToClient
-     * writeToCDB
+     * writeToCDBs
      */
     HSOperatingMode operationMode;
 
@@ -160,7 +149,7 @@ private:
     bool RetrieveHttpCommand(StreamString &command,
                              StreamString &line);
 
-    void BuildUrl(StreamString &line);
+    char8 BuildUrl(StreamString &line);
 
     bool StoreCommands(StreamString &line);
 

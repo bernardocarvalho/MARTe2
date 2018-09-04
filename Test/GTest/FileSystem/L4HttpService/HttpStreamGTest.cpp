@@ -49,4 +49,43 @@ TEST(HttpStreamGTest, TestConstructor) {
     ASSERT_TRUE(test.TestConstructor());
 }
 
-	
+
+TEST(HttpStreamGTest, TestReadHeader_Get1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Get1());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Get2_Commands) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Get2_Commands());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Put1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Put1());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Post1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post1());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Post2_Multiform) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post2_Multiform());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Head) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Head());
+}
+
+TEST(HttpStreamGTest, TestReadHeader_Reply) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestReadHeader_Reply());
+}
+
+TEST(HttpStreamGTest, TestCompleteReadOperation) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestCompleteReadOperation());
+}

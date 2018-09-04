@@ -32,7 +32,8 @@
 #include "HttpStream.h"
 #include "HttpDefinition.h"
 #include "AdvancedErrorManagement.h"
-#include "BasicTCPSocket.h"
+#include "BasicSocket.h"
+#include "DoubleBufferedStream.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -44,11 +45,7 @@
 namespace MARTe {
 using namespace HttpDefinition;
 
-HttpStream::HttpStream() :
-        StructuredDataStreamT<ConfigurationDatabase>() {
-    // Auto-generated constructor stub for HttpStream
-    // TODO Verify if manual additions are needed
-}
+//#define NULL_PTR(x) NULL
 
 HttpStream::HttpStream(BufferedStreamI &clientBufferedStreamIn) {
     operationMode = HSOMWriteToString;
@@ -56,8 +53,9 @@ HttpStream::HttpStream(BufferedStreamI &clientBufferedStreamIn) {
     httpVersion = 1000;
     httpErrorCode = 200;
     keepAlive = true;
-    clientStream = &clientBufferedStreamIn;
+    socketStream = &clientBufferedStreamIn;
     bodyCompletedEvent.Create();
+    lastUpdateTime = 0ull;
     /** unknown information length */
     unreadInput = -1;
 }
@@ -72,21 +70,21 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
 
     bool ret = true;
     //This way we can change the falsely undefined content-length when this is called from Write Header
-    if ((streamout == NULL)&& (unreadInput == HTTPNoContentLengthSpecified)) {
+    if ((streamout == NULL) && (unreadInput < 0)) {
         unreadInput = -1;
     }
     else {
         uint64 startCounter = HighResolutionTimer::Counter();
 
         // convert the stop time
-        uint64 maxTicks = startCounter + static_cast<uint64>((msecTimeout.GetTimeoutMSec()/1000.0)*HighResolutionTimer::Frequency());
+        uint64 maxTicks = startCounter + static_cast<uint64>((msecTimeout.GetTimeoutMSec() / 1000.0) * HighResolutionTimer::Frequency());
 
         uint32 bufferSize = 1024u;
         char8 *buffer = new char8[bufferSize];
         uint32 readSize = 1u;
-        uint32 sizeToRead=bufferSize;
+        uint32 sizeToRead = bufferSize;
 
-        if(unreadInput != HTTPNoContentLengthSpecified) {
+        if (unreadInput > 0) {
             sizeToRead = unreadInput;
             //clip the size
             if (sizeToRead > bufferSize) {
@@ -94,20 +92,20 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
             }
         }
 
-        while ((sizeToRead>0u) && (readSize > 0u) && (ret)) {
+        while ((sizeToRead > 0u) && (readSize > 0u) && (ret)) {
 
-            ret=clientStream->Read(buffer,sizeToRead,msecTimeout);
+            ret = socketStream->Read(buffer, sizeToRead, msecTimeout);
 
-            if(ret) {
-                readSize=sizeToRead;
+            if (ret) {
+                readSize = sizeToRead;
                 if (streamout!=NULL_PTR(BufferedStreamI *)) {
                     uint32 sizeToWrite = readSize;
                     //complete write?
-                    streamout->Write(buffer,sizeToWrite,msecTimeout);
+                    streamout->Write(buffer, sizeToWrite, msecTimeout);
                 }
                 sizeToRead = bufferSize;
 
-                if(unreadInput != HTTPNoContentLengthSpecified) {
+                if (unreadInput > 0) {
                     unreadInput -= readSize;
                     sizeToRead = unreadInput;
                     //clip the size
@@ -122,7 +120,7 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
                 }
             }
             else {
-                REPORT_ERROR_STATIC(ErrorManagement::Timeout,"Possible Timeout on completion");
+                //REPORT_ERROR_STATIC(ErrorManagement::Timeout, "Possible Timeout on completion");
             }
         }
 
@@ -141,21 +139,21 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
                              HSHttpCommand command,
                              const char8 * url) {
 
-    // complete transaction with remote host
+// complete transaction with remote host
     CompleteReadOperation(NULL_PTR(BufferedStreamI*));
 
-    // if it is a reply get errorCode
-    // otherwise mark the httpCommand as none
+// if it is a reply get errorCode
+// otherwise mark the httpCommand as none
     bool isReply = IsReplyCode(command, httpErrorCode);
     if (!isReply) {
         httpCommand = HSHCNone;
     }
 
-    // saves all the pending changes
+// saves all the pending changes
     bool ret = true;
     bool goOn = ((operationMode != HSOMCompleted) && (operationMode != HSOMWriteToClient));
 
-    // do it if not one yet. OTW its ok
+// do it if not one yet. OTW its ok
     if (goOn) {
         if (bodyCompleted) {
             operationMode = HSOMCompleted;
@@ -169,31 +167,31 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
         uint32 majorVersion = (httpVersion / 1000u);
         uint32 minorVersion = ((httpVersion % 1000u) / 100u);
         if (isReply) {
-            if (!clientStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, GetErrorCodeString(httpErrorCode))) {
-                REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
+            if (!socketStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, GetErrorCodeString(httpErrorCode))) {
+                //REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
                 ret = false;
             }
         }
         else if (command == HSHCGet) {
-            if (!clientStream->Printf("GET %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
+            if (!socketStream->Printf("GET %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
                 ret = false;
             }
         }
         else if (command == HSHCPut) {
-            if (!clientStream->Printf("PUT %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
+            if (!socketStream->Printf("PUT %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
                 ret = false;
             }
         }
         else if (command == HSHCPost) {
-            if (!clientStream->Printf("POST %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
+            if (!socketStream->Printf("POST %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
                 ret = false;
             }
         }
         else if (command == HSHCHead) {
-            if (!clientStream->Printf("HEAD %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
+            if (!socketStream->Printf("HEAD %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
                 ret = false;
             }
@@ -238,21 +236,21 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
                     StreamString value;
                     StreamString key = data->GetChildName(i);
                     if (data->Read(key.Buffer(), value)) {
-                        ret = clientStream->Printf("%s:%s\r\n", key.Buffer(), value.Buffer());
+                        ret = socketStream->Printf("%s:%s\r\n", key.Buffer(), value.Buffer());
                         if (!ret) {
                             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "write key %s on socket failed\n", key.Buffer());
                         }
                     }
                 }
                 if (ret) {
-                    clientStream->Printf("%s", "\r\n");
+                    socketStream->Printf("%s", "\r\n");
 
                     // return to root
                     data->MoveToRoot();
 
                     // send out the body
                     uint32 toWrite = Size();
-                    ret = clientStream->Write(Buffer(), toWrite);
+                    ret = socketStream->Write(Buffer(), toWrite);
                     if (ret) {
                         // notify completion
                         if (bodyCompleted) {
@@ -263,7 +261,7 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
 
             }
             else {
-                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Cannot move cdb to InputHttpOtions");
+                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Cannot move cdb to InputHttpOptions");
             }
         }
     }
@@ -339,7 +337,7 @@ bool HttpStream::RetrieveHttpCommand(StreamString &command,
     return ret;
 }
 
-void HttpStream::BuildUrl(StreamString &line) {
+char8 HttpStream::BuildUrl(StreamString &line) {
 
     StreamString tempUrl;
     char8 terminator;
@@ -369,6 +367,7 @@ void HttpStream::BuildUrl(StreamString &line) {
         }
     }
     unMatchedUrl = url;
+    return terminator;
 }
 
 bool HttpStream::StoreCommands(StreamString &line) {
@@ -387,6 +386,7 @@ bool HttpStream::StoreCommands(StreamString &line) {
     }
 
     if (ret) {
+        commands.Seek(0ull);
         StreamString command;
         char8 terminator;
         while ((commands.GetToken(command, "&", terminator)) && (ret)) {
@@ -432,25 +432,25 @@ bool HttpStream::StoreInputOptions() {
     char8 terminator;
 
     if (ret) {
-        //delete existing
-        (void) data->Delete("InputHttpOtions");
-        ret = data->CreateRelative("InputHttpOtions");
+//delete existing
+        (void) data->Delete("InputHttpOptions");
+        ret = data->CreateRelative("InputHttpOptions");
         if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node InputHttpOtions");
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node InputHttpOptions");
         }
     }
     if (ret) {
         bool ok = true;
         while (ok) {
             StreamString line;
-            ret = clientStream->GetLine(line);
+            ret = socketStream->GetLine(line);
             if (!ret) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading a line from socket");
             }
 
             if (ret) {
                 ok = (line.Size() > 0u);
-                // parse HTTP Options and add to CDB
+// parse HTTP Options and add to CDB
                 if (ok) {
                     line.Seek(0);
                     StreamString key;
@@ -482,56 +482,56 @@ bool HttpStream::HandlePostHeader(StreamString &line,
                                   StreamString &filename) {
     const char8 *temp = NULL;
 
-    bool ret=true;
+    bool ret = true;
     //read the name (it is in the form name="_NAME_")
-    const char8* nameTemp=StringHelper::SearchString(line.Buffer(), "name=\"");
-    if(nameTemp != NULL) {
+    const char8* nameTemp = StringHelper::SearchString(line.Buffer(), "name=\"");
+    if (nameTemp != NULL) {
         name = &nameTemp[StringHelper::Length("name=\"")];
         temp = name.Buffer();
         uint32 count = 0u;
-        while(temp[count] != '\"') {
+        while (temp[count] != '\"') {
             count++;
         }
         name.SetSize(count);
     }
     else {
-        nameTemp=StringHelper::SearchString(line.Buffer(), "name=");
+        nameTemp = StringHelper::SearchString(line.Buffer(), "name=");
 
-        if(nameTemp != NULL) {
+        if (nameTemp != NULL) {
             name = &nameTemp[StringHelper::Length("name=")];
         }
     }
     //Check if the content is a file
-    const char8* filenameTemp=StringHelper::SearchString(line.Buffer(), "filename=\"");
-    if(filenameTemp != NULL) {
+    const char8* filenameTemp = StringHelper::SearchString(line.Buffer(), "filename=\"");
+    if (filenameTemp != NULL) {
         filename = &filenameTemp[StringHelper::Length("filename=\"")];
         temp = filename.Buffer();
         uint32 count = 0u;
-        while(temp[count] != '\"') {
+        while (temp[count] != '\"') {
             count++;
         }
         filename.SetSize(count);
     }
-    if(filename.Size() > 0u) {
+    if (filename.Size() > 0u) {
         StreamString key = name;
         key += ":filename";
 
         //Write the filename
-        ret=data->Write(key.Buffer(), filename.Buffer());
-        if(!ret) {
+        ret = data->Write(key.Buffer(), filename.Buffer());
+        if (!ret) {
             REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the filename");
         }
-        if(ret) {
+        if (ret) {
             //Check the file mime type
             line.SetSize(0);
-            if(content.GetLine(line)) {
-                const char8* fcTypeTemp=StringHelper::SearchString(line.Buffer(), "Content-Type: ");
-                if(fcTypeTemp != NULL) {
+            if (content.GetLine(line)) {
+                const char8* fcTypeTemp = StringHelper::SearchString(line.Buffer(), "Content-Type: ");
+                if (fcTypeTemp != NULL) {
                     StreamString fcType = &fcTypeTemp[StringHelper::Length("Content-Type: ")];
                     key = name;
                     key += ":Content-Type";
-                    ret=data->Write(key.Buffer(), fcType.Buffer());
-                    if(!ret) {
+                    ret = data->Write(key.Buffer(), fcType.Buffer());
+                    if (!ret) {
                         REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the file content type");
                     }
                 }
@@ -555,11 +555,11 @@ bool HttpStream::HandlePostContent(StreamString &line,
         //reset...new blank line is new handler
         headerHandled = false;
 
-        ret=data->Write(name.Buffer(), value.Buffer());
-        if(!ret) {
+        ret = data->Write(name.Buffer(), value.Buffer());
+        if (!ret) {
             REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the content");
         }
-        if(ret) {
+        if (ret) {
             value.SetSize(0);
             line.SetSize(0);
             filename.SetSize(0);
@@ -568,7 +568,7 @@ bool HttpStream::HandlePostContent(StreamString &line,
     }
     //if not boundary store in value
     else {
-        if(value.Size() > 0u) {
+        if (value.Size() > 0u) {
             value += "\n";
         }
         value += line;
@@ -687,15 +687,15 @@ bool HttpStream::HandlePost(StreamString &contentType,
 
         //Check if it is a "multipart/form-data"
         if (StringHelper::SearchString(contentType.Buffer(), "multipart/form-data") != NULL) {
-            ret=HandlePostMultipartFormData(contentType, content);
+            ret = HandlePostMultipartFormData(contentType, content);
         }
-        else if(StringHelper::SearchString(contentType.Buffer(), "application/x-www-form-urlencoded") != NULL) {
+        else if (StringHelper::SearchString(contentType.Buffer(), "application/x-www-form-urlencoded") != NULL) {
             //read the content. Key values encoded as in a GET url
-            ret=HandlePostApplicationForm(contentType, content);
+            ret = HandlePostApplicationForm(contentType, content);
         }
         else {
             REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Content-type handler for: %s not found", contentType.Buffer());
-            ret=false;
+            ret = false;
         }
     }
     return ret;
@@ -713,7 +713,7 @@ bool HttpStream::ReadHeader() {
     StreamString line;
     char8 terminator;
     // Reads the HTTP command
-    bool ret = clientStream->GetLine(line, false);
+    bool ret = socketStream->GetLine(line, false);
     if (!ret) {
         REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading a line from socket");
     }
@@ -725,18 +725,20 @@ bool HttpStream::ReadHeader() {
         ret = RetrieveHttpCommand(command, line);
     }
 
-    if (ret) {
-        // extract the uri and build a path based n that
-        BuildUrl(line);
+    // if httpCommand is a HSHCReply then the version has already been calculated
+    if (HSHCReply > httpCommand) {
 
-        // extracts commands
-        ret = StoreCommands(line);
-    }
+        if (ret) {
+            // extract the uri and build a path based n that
+            char8 termChar = BuildUrl(line);
+            if (termChar == '?') {
+                // extracts commands
+                ret = StoreCommands(line);
+            }
+        }
 
-    //store the HTTP version
-    if (ret) {
-        // if httpCommand is a HSHCReply then the version has already been calculated
-        if (HSHCReply > httpCommand) {
+        //store the HTTP version
+        if (ret) {
             StreamString version;
             ret = line.GetToken(version, " \n\t", terminator, " \n\t");
             if (ret) {
@@ -755,13 +757,9 @@ bool HttpStream::ReadHeader() {
             }
         }
     }
+
     if (ret) {
-
-        ret = StoreOutputOptions();
-        if (ret) {
-            ret = StoreInputOptions();
-        }
-
+        ret = StoreInputOptions();
     }
 
     StreamString contentType;
@@ -771,50 +769,52 @@ bool HttpStream::ReadHeader() {
         // then do not shut the connection and load only the specified size
         keepAlive = (httpVersion >= 1100);
         StreamString connection;
-        ret = data->Read("Connection", connection);
-        if (ret) {
-            if (StringHelper::Compare(connection.Buffer(), "keep-alive") == 0) {
+        if (data->Read("Connection", connection)) {
+            if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "keep-alive", 10u) == 0) {
                 keepAlive = true;
             }
-            else if (StringHelper::Compare(connection.Buffer(), "close") == 0) {
+            else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "closed", 6u) == 0) {
                 keepAlive = false;
             }
 
-            if (!data->Read("Content-Length", unreadInput)) {
-                unreadInput = HTTPNoContentLengthSpecified;
-            }
+        }
+        if (!data->Read("Content-Length", unreadInput)) {
+            unreadInput = HTTPNoContentLengthSpecified;
+        }
 
-            if (!data->Read("Content-Type", contentType)) {
-                contentType = "";
-            }
+        if (!data->Read("Content-Type", contentType)) {
+            contentType = "";
         }
 
     }
 
     //write the peer in the configuration
     if (ret) {
+        //HTTP 1.1 might require to reply to 100-continue so that the client will continue to send more information
+        StreamString expectStr;
+        if (!data->Read("Expect", expectStr)) {
+            expectStr = "";
+        }
+        if (expectStr == "100-continue") {
+            socketStream->Printf("%s", "HTTP/1.1 100 Continue\r\n");
+            DoubleBufferedStream *dbSocket = dynamic_cast<DoubleBufferedStream*>(socketStream);
+            if (dbSocket != NULL) {
+                dbSocket->Flush();
+            }
+        }
         ret = data->MoveToRoot();
         if (ret) {
-            //HTTP 1.1 might require to reply to 100-continue so that the client will continue to send more information
-            StreamString expectStr;
-            if (!data->Read("Expect", expectStr)) {
-                expectStr = "";
-            }
-            if (expectStr == "100-continue") {
-                clientStream->Printf("%s", "HTTP/1.1 100 Continue\r\n");
-            }
-
             StreamString peer = "";
-            BasicTCPSocket *clientSocket = dynamic_cast<BasicTCPSocket *>(clientStream);
+            BasicSocket *clientSocket = dynamic_cast<BasicSocket *>(socketStream);
             if (clientSocket != NULL) {
                 // this could be very slow I think ip number will suffice
                 // clientSocket->Source().HostName(peer);
-                peer=(clientSocket->GetSource()).GetAddress();
+                peer = (clientSocket->GetSource()).GetAddress();
                 if (peer == "127.0.0.1") {
                     peer = InternetHost::GetLocalAddress();
                 }
+                ret = data->Write("Peer", peer.Buffer());
             }
-            ret = data->Write("Peer", peer.Buffer());
         }
     }
 
@@ -848,7 +848,7 @@ bool HttpStream::ReadHeader() {
                     char8 buffer[1024];
                     while ((unreadInput > 0) && (ret)) {
                         uint32 bufferReadSize = 1024u;
-                        ret = clientStream->Read(buffer, bufferReadSize);
+                        ret = socketStream->Read(buffer, bufferReadSize);
                         if (!ret) {
                             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading from socket in POST section");
                         }
@@ -881,55 +881,6 @@ bool HttpStream::ReadHeader() {
     return ret;
 }
 
-uint32 HttpStream::NumberOfInputCommands() {
-    uint32 count = 0u;
-    if (!data->MoveRelative("InputCommands")) {
-        count = 0u;
-    }
-    count = data->GetNumberOfChildren();
-    (void) data->MoveToRoot();
-    return count;
-}
-
-bool HttpStream::InputCommandName(StreamString &name,
-                                  uint32 idx) {
-    bool ret = (data->MoveRelative("InputCommands"));
-    if (ret) {
-        name = data->GetChildName(idx);
-
-        ret = data->MoveToRoot();
-    }
-    return ret;
-}
-
-bool HttpStream::InputCommandValue(StreamString &value,
-                                   uint32 idx) {
-
-    bool ret = (data->MoveRelative("InputCommands"));
-    if (ret) {
-        StreamString name = data->GetChildName(idx);
-        ret = data->Read(name.Buffer(), value);
-        if (ret) {
-            ret = data->MoveToRoot();
-        }
-    }
-    return ret;
-}
-
-bool HttpStream::InputCommandValue(StreamString &value,
-                                   const char8 *name) {
-    bool ret = data->MoveRelative("InputCommands");
-
-    if (ret) {
-
-        ret = data->Read(name, value);
-        if (ret) {
-            ret = data->MoveToRoot();
-        }
-    }
-    return ret;
-}
-
 bool HttpStream::SecurityCheck(ReferenceT<HttpRealmI> realm,
                                uint32 ipNumber) {
     bool ret = true;
@@ -938,9 +889,11 @@ bool HttpStream::SecurityCheck(ReferenceT<HttpRealmI> realm,
     if (!realm.IsValid()) {
         // get key. on failure exit
         StreamString authorisationKey;
-        ret = data->Read("InputHttpOtions.Authorization", authorisationKey);
-        if (ret) {
-            ret = realm->Validate(authorisationKey.Buffer(), httpCommand, ipNumber);
+        if (data->MoveRelative("InputHttpOptions")) {
+            if (data->Read("Authorization", authorisationKey)) {
+                ret = realm->Validate(authorisationKey.Buffer(), httpCommand, ipNumber);
+            }
+            (void) data->MoveToAncestor(1u);
         }
     }
     return ret;
@@ -963,15 +916,13 @@ void HttpStream::SetUnmatchedUrl(char8 *unMatchedUrlIn) {
     unMatchedUrl = unMatchedUrlIn;
 }
 
-const char8 *HttpStream::GetPath(){
+const char8 *HttpStream::GetPath() {
     return path.Buffer();
 }
 
-
-const char8 *HttpStream::GetUrl(){
-    return path.Buffer();
+const char8 *HttpStream::GetUrl() {
+    return url.Buffer();
 }
-
 
 }
 
