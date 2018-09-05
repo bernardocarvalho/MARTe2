@@ -89,3 +89,126 @@ TEST(HttpStreamGTest, TestCompleteReadOperation) {
     HttpStreamTest test;
     ASSERT_TRUE(test.TestCompleteReadOperation());
 }
+
+TEST(HttpStreamGTest, TestWriteHeader_Get1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Get1());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Get2) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Get2());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Put1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Put1());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Put2) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Put2());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Head1) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Head1());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Head2) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Head2());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Post) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Post());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Reply) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Reply());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_Reply2) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Reply2());
+}
+
+TEST(HttpStreamGTest, TestSecurityCheck) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestSecurityCheck());
+}
+
+TEST(HttpStreamGTest, TestKeepAliveDefault) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestKeepAliveDefault());
+}
+
+TEST(HttpStreamGTest, TestKeepAliveTrue) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestKeepAlive(true));
+}
+
+
+TEST(HttpStreamGTest, TestKeepAliveFalse) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestKeepAlive(false));
+}
+
+
+TEST(HttpStreamGTest, TestSetKeepAliveTrue) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestSetKeepAlive(true));
+}
+
+TEST(HttpStreamGTest, TestSetKeepAliveFalse) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestSetKeepAlive(false));
+}
+
+TEST(HttpStreamGTest, TestGetHttpCommandGet) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCGet));
+}
+
+TEST(HttpStreamGTest, TestGetHttpCommandPut) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPut));
+}
+
+TEST(HttpStreamGTest, TestGetHttpCommandHead) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCHead));
+}
+
+TEST(HttpStreamGTest, TestGetHttpCommandPost) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPost));
+}
+
+TEST(HttpStreamGTest, TestGetHttpCommandReply) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCReply));
+}
+
+TEST(HttpStreamGTest, TestSetUnmatchedUrl) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestSetUnmatchedUrl());
+}
+
+TEST(HttpStreamGTest, TestGetUnmatchedUrl) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetUnmatchedUrl());
+}
+
+TEST(HttpStreamGTest, TestGetPath) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetPath());
+}
+
+TEST(HttpStreamGTest, TestGetUrl) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestGetUrl());
+}
+

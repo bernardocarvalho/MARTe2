@@ -65,7 +65,51 @@ public:
 
     bool TestWriteHeader();
 
+    bool TestWriteHeader2();
+
+    bool TestWriteHeader_Get1();
+
+    bool TestWriteHeader_Get2();
+
+    bool TestWriteHeader_Put1();
+
+    bool TestWriteHeader_Put2();
+
+    bool TestWriteHeader_Head1();
+
+    bool TestWriteHeader_Head2();
+
+    bool TestWriteHeader_Post();
+
+    bool TestWriteHeader_Reply();
+
+    bool TestWriteHeader_Reply2();
+
+    bool TestSecurityCheck();
+
+    bool TestKeepAliveDefault();
+
+    bool TestKeepAlive(bool isKeepAliveIn);
+
+    bool TestSetKeepAlive(bool isKeepAlive);
+
+    bool TestGetHttpCommand(HSHttpCommand commandIn);
+
+    bool TestSetUnmatchedUrl();
+
+    bool TestGetUnmatchedUrl();
+
+    bool TestGetPath();
+
+    bool TestGetUrl();
+
     EventSem eventSem;
+
+    bool retVal;
+
+    HSHttpCommand command;
+
+    bool isKeepAlive;
 };
 
 /*---------------------------------------------------------------------------*/

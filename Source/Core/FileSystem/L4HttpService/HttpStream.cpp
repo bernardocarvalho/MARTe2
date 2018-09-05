@@ -47,14 +47,12 @@ using namespace HttpDefinition;
 
 //#define NULL_PTR(x) NULL
 
-HttpStream::HttpStream(BufferedStreamI &clientBufferedStreamIn) {
-    operationMode = HSOMWriteToString;
+HttpStream::HttpStream(DoubleBufferedStream &clientBufferedStreamIn) {
     httpCommand = HSHCNone;
     httpVersion = 1000;
     httpErrorCode = 200;
     keepAlive = true;
     socketStream = &clientBufferedStreamIn;
-    bodyCompletedEvent.Create();
     lastUpdateTime = 0ull;
     /** unknown information length */
     unreadInput = -1;
@@ -70,6 +68,7 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
 
     bool ret = true;
     //This way we can change the falsely undefined content-length when this is called from Write Header
+    //complete the read only when the body is completed from the other part
     if ((streamout == NULL) && (unreadInput < 0)) {
         unreadInput = -1;
     }
@@ -96,7 +95,7 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
 
             ret = socketStream->Read(buffer, sizeToRead, msecTimeout);
 
-            if (ret) {
+            if ((ret) || (sizeToRead>0u)) {
                 readSize = sizeToRead;
                 if (streamout!=NULL_PTR(BufferedStreamI *)) {
                     uint32 sizeToWrite = readSize;
@@ -130,14 +129,12 @@ bool HttpStream::CompleteReadOperation(BufferedStreamI *streamout,
 
 }
 
-bool HttpStream::WriteReplyHeader(bool bodyCompleted,
-                                  uint32 httpErrorCode) {
-    return WriteHeader(bodyCompleted, GenerateReplyCode(httpErrorCode), NULL);
-}
-
 bool HttpStream::WriteHeader(bool bodyCompleted,
                              HSHttpCommand command,
                              const char8 * url) {
+
+    //if sending something with bodyCompleted=false
+    //remember to write Transfer-Encoding: chunked in options
 
 // complete transaction with remote host
     CompleteReadOperation(NULL_PTR(BufferedStreamI*));
@@ -149,138 +146,106 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
         httpCommand = HSHCNone;
     }
 
-// saves all the pending changes
+    // saves all the pending changes
     bool ret = true;
-    bool goOn = ((operationMode != HSOMCompleted) && (operationMode != HSOMWriteToClient));
 
-// do it if not one yet. OTW its ok
-    if (goOn) {
-        if (bodyCompleted) {
-            operationMode = HSOMCompleted;
-        }
-        else {
-            operationMode = HSOMWriteToClient;
-        }
+    // assemble the header
+    // deal with a reply
+    uint32 majorVersion = (httpVersion / 1000u);
+    uint32 minorVersion = ((httpVersion % 1000u) / 100u);
 
-        // assemble the header
-        // deal with a reply
-        uint32 majorVersion = (httpVersion / 1000u);
-        uint32 minorVersion = ((httpVersion % 1000u) / 100u);
-        if (isReply) {
-            if (!socketStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, GetErrorCodeString(httpErrorCode))) {
-                //REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-                ret = false;
-            }
-        }
-        else if (command == HSHCGet) {
-            if (!socketStream->Printf("GET %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
-                REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-                ret = false;
-            }
-        }
-        else if (command == HSHCPut) {
-            if (!socketStream->Printf("PUT %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
-                REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-                ret = false;
-            }
-        }
-        else if (command == HSHCPost) {
-            if (!socketStream->Printf("POST %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
-                REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-                ret = false;
-            }
-        }
-        else if (command == HSHCHead) {
-            if (!socketStream->Printf("HEAD %s HTTP/%i.%i\r\n", url, majorVersion, minorVersion)) {
-                REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-                ret = false;
-            }
-        }
-        else {
-            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Command code %i unknown \n", command);
+    const char8* urlToUse = url;
+    if (urlToUse == NULL) {
+        urlToUse="";
+    }
+
+    if (isReply) {
+        if (!socketStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, GetErrorCodeString(httpErrorCode))) {
+            //REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
         }
+    }
+    else if (command == HSHCGet) {
+        if (!socketStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
+            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
+            ret = false;
+        }
+    }
+    else if (command == HSHCPut) {
+        if (!socketStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
+            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
+            ret = false;
+        }
+    }
+    else if (command == HSHCPost) {
+        if (!socketStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
+            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
+            ret = false;
+        }
+    }
+    else if (command == HSHCHead) {
+        if (!socketStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
+            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
+            ret = false;
+        }
+    }
+    else {
+        REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Command code %i unknown \n", command);
+        ret = false;
+    }
 
+    if (ret) {
+
+        data->MoveToRoot();
+        if (!data->MoveRelative("OutputHttpOtions")) {
+            ret = data->CreateRelative("OutputHttpOtions");
+        }
         if (ret) {
-
-            data->MoveToRoot();
-            if (!data->MoveRelative("OutputHttpOtions")) {
-                ret = data->CreateRelative("OutputHttpOtions");
+            if (bodyCompleted) {
+                ret = data->Write("Content-Length", Size());
+            }
+        }
+        if (ret) {
+            StreamString connection;
+            if (data->Read("Connection", connection)) {
+                if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "keep-alive", 10u) == 0) {
+                    keepAlive = true;
+                }
+                else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "close", 6u) == 0) {
+                    keepAlive = false;
+                }
+            }
+            // write all options
+            uint32 numberOfChildren = data->GetNumberOfChildren();
+            for (uint32 i = 0u; (i < numberOfChildren) && (ret); i++) {
+                StreamString value;
+                StreamString key = data->GetChildName(i);
+                if (data->Read(key.Buffer(), value)) {
+                    ret = socketStream->Printf("%s: %s\r\n", key.Buffer(), value.Buffer());
+                    if (!ret) {
+                        REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "write key %s on socket failed\n", key.Buffer());
+                    }
+                }
             }
             if (ret) {
+                socketStream->Printf("%s", "\r\n");
 
-                // if complete we can provide the body size
-                if ((bodyCompleted) && (httpCommand != HSHCHead)) {
-                    ret = data->Write("Content-Length", Size());
-                }
-                else {
-                    // HEAD is like GET but no body in the reply!
-                    if (httpCommand == HSHCHead) {
-                        ret = data->Write("Content-Length", 0);
-                    }
-                }
+                // return to root
+                data->MoveToRoot();
+
+                // send out the body
+                uint32 toWrite = Size();
+                ret = socketStream->Write(Buffer(), toWrite);
             }
-            if (ret) {
-                StreamString connection;
-                if (data->Read("Connection", connection)) {
-                    if (StringHelper::Compare(connection.Buffer(), "keep-alive") == 0) {
-                        keepAlive = true;
-                    }
-                    else if (StringHelper::Compare(connection.Buffer(), "close") == 0) {
-                        keepAlive = false;
-                    }
-                }
-                // write all options
-                uint32 numberOfChildren = data->GetNumberOfChildren();
-                for (uint32 i = 0u; (i < numberOfChildren) && (ret); i++) {
-                    StreamString value;
-                    StreamString key = data->GetChildName(i);
-                    if (data->Read(key.Buffer(), value)) {
-                        ret = socketStream->Printf("%s:%s\r\n", key.Buffer(), value.Buffer());
-                        if (!ret) {
-                            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "write key %s on socket failed\n", key.Buffer());
-                        }
-                    }
-                }
-                if (ret) {
-                    socketStream->Printf("%s", "\r\n");
-
-                    // return to root
-                    data->MoveToRoot();
-
-                    // send out the body
-                    uint32 toWrite = Size();
-                    ret = socketStream->Write(Buffer(), toWrite);
-                    if (ret) {
-                        // notify completion
-                        if (bodyCompleted) {
-                            ret = BodyCompleted();
-                        }
-                    }
-                }
-
-            }
-            else {
-                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Cannot move cdb to InputHttpOptions");
-            }
+        }
+        if (ret) {
+            //flush the stream
+            socketStream->Flush();
         }
     }
 
     return ret;
 
-}
-
-/** Flag that the writing of the body has been completed */
-bool HttpStream::BodyCompleted() {
-    operationMode = HSOMCompleted;
-
-    bodyCompletedEvent.Post();
-    return true;
-}
-
-/** the sender thread waits for the completion of this activity */
-bool HttpStream::WaitForBodyCompleted(TimeoutType msecTimeout) {
-    return bodyCompletedEvent.Wait(msecTimeout);
 }
 
 bool HttpStream::RetrieveHttpCommand(StreamString &command,
@@ -706,8 +671,6 @@ bool HttpStream::HandlePost(StreamString &contentType,
 bool HttpStream::ReadHeader() {
     /** unknown information length */
     unreadInput = -1;
-    operationMode = HSOMWriteToString;
-    bodyCompletedEvent.Reset();
     lastUpdateTime = HighResolutionTimer::Counter();
 
     StreamString line;
@@ -797,10 +760,7 @@ bool HttpStream::ReadHeader() {
         }
         if (expectStr == "100-continue") {
             socketStream->Printf("%s", "HTTP/1.1 100 Continue\r\n");
-            DoubleBufferedStream *dbSocket = dynamic_cast<DoubleBufferedStream*>(socketStream);
-            if (dbSocket != NULL) {
-                dbSocket->Flush();
-            }
+            socketStream->Flush();
         }
         ret = data->MoveToRoot();
         if (ret) {
@@ -881,17 +841,19 @@ bool HttpStream::ReadHeader() {
     return ret;
 }
 
-bool HttpStream::SecurityCheck(ReferenceT<HttpRealmI> realm,
-                               uint32 ipNumber) {
-    bool ret = true;
+bool HttpStream::SecurityCheck(ReferenceT<HttpRealmI> realm) {
+    bool ret = false;
 
     // no valid realm !
-    if (!realm.IsValid()) {
+    if (realm.IsValid()) {
         // get key. on failure exit
         StreamString authorisationKey;
         if (data->MoveRelative("InputHttpOptions")) {
             if (data->Read("Authorization", authorisationKey)) {
-                ret = realm->Validate(authorisationKey.Buffer(), httpCommand, ipNumber);
+                BasicSocket* socket = dynamic_cast<BasicSocket *>(socketStream);
+                if (socket != NULL) {
+                    ret = realm->Validate(authorisationKey.Buffer(), httpCommand, (socket->GetSource()).GetAddressAsNumber());
+                }
             }
             (void) data->MoveToAncestor(1u);
         }
@@ -912,16 +874,20 @@ HSHttpCommand HttpStream::GetHttpCommand() const {
 
 }
 
-void HttpStream::SetUnmatchedUrl(char8 *unMatchedUrlIn) {
+void HttpStream::SetUnmatchedUrl(const char8 *unMatchedUrlIn) {
     unMatchedUrl = unMatchedUrlIn;
 }
 
-const char8 *HttpStream::GetPath() {
-    return path.Buffer();
+void HttpStream::GetUnmatchedUrl(StreamString& unmatchedUrlOut) {
+    unmatchedUrlOut = unMatchedUrl;
 }
 
-const char8 *HttpStream::GetUrl() {
-    return url.Buffer();
+void HttpStream::GetPath(StreamString& pathOut) {
+    pathOut = path;
+}
+
+void HttpStream::GetUrl(StreamString& urlOut) {
+    urlOut = url;
 }
 
 }

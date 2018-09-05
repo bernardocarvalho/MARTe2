@@ -33,10 +33,61 @@
 #include "StringHelper.h"
 #include "TCPSocket.h"
 #include "Threads.h"
+#include "GlobalObjectsDatabase.h"
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
+class HttpStreamTestRealm: public HttpRealmI {
+public:
+    CLASS_REGISTER_DECLARATION();
+
+    HttpStreamTestRealm();
+    virtual ~HttpStreamTestRealm();
+
+    virtual bool Validate(const char8 * key,
+            HttpDefinition::HSHttpCommand command,
+            uint32 ipNumber);
+
+    virtual bool DigestSecurityNeeded();
+
+    virtual bool GetAuthenticationRequest(StreamString &message);
+
+    void SetPassw(const char8* passwIn);
+
+private:
+    StreamString passw;
+};
+
+HttpStreamTestRealm::HttpStreamTestRealm() {
+
+}
+
+HttpStreamTestRealm::~HttpStreamTestRealm() {
+
+}
+
+void HttpStreamTestRealm::SetPassw(const char8* passwIn) {
+    passw = passwIn;
+}
+
+bool HttpStreamTestRealm::Validate(const char8 * key,
+                                   HttpDefinition::HSHttpCommand command,
+                                   uint32 ipNumber) {
+    return (passw == key);
+}
+
+bool HttpStreamTestRealm::DigestSecurityNeeded() {
+    return true;
+}
+
+bool HttpStreamTestRealm::GetAuthenticationRequest(StreamString &message) {
+    message = passw;
+    return true;
+}
+
+CLASS_REGISTER(HttpStreamTestRealm, "1.0")
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -45,6 +96,7 @@ HttpStreamTest::HttpStreamTest() {
     // Auto-generated constructor stub for HttpStreamTest
     // TODO Verify if manual additions are needed
     eventSem.Create();
+    retVal = true;
 }
 
 HttpStreamTest::~HttpStreamTest() {
@@ -58,8 +110,12 @@ bool HttpStreamTest::TestConstructor() {
     HttpStream test(client);
 
     bool ret = test.KeepAlive();
-    ret &= StringHelper::Compare(test.GetPath(), "") == 0;
-    ret &= StringHelper::Compare(test.GetUrl(), "") == 0;
+    StreamString path;
+    test.GetPath(path);
+    ret &= StringHelper::Compare(path.Buffer(), "") == 0;
+    StreamString url;
+    test.GetPath(url);
+    ret &= StringHelper::Compare(url.Buffer(), "") == 0;
 
     ret &= test.GetHttpCommand() == HSHCNone;
 
@@ -148,14 +204,16 @@ bool HttpStreamTest::TestReadHeader_Get1() {
     }
 
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "docs/index.html");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "docs.index.html");
         printf("path=%s\n", path.Buffer());
     }
@@ -259,14 +317,16 @@ bool HttpStreamTest::TestReadHeader_Get2_Commands() {
     }
 
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "docs/index.html");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "docs.index.html");
         printf("path=%s\n", path.Buffer());
     }
@@ -347,14 +407,16 @@ bool HttpStreamTest::TestReadHeader_Put1() {
     }
 
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "user/1234567890");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "user.1234567890");
         printf("path=%s\n", path.Buffer());
     }
@@ -477,18 +539,21 @@ bool HttpStreamTest::TestReadHeader_Post1() {
     }
 
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "email_verification/");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "email_verification.");
         printf("path=%s\n", path.Buffer());
     }
-
+    newSocket.Close();
+    socket.Close();
     return ret;
 }
 
@@ -605,17 +670,22 @@ bool HttpStreamTest::TestReadHeader_Post2_Multiform() {
         par.SetSize(0);
     }
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "submit.cgi");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "submit.cgi");
         printf("path=%s\n", path.Buffer());
     }
+
+    newSocket.Close();
+    socket.Close();
     return ret;
 }
 
@@ -680,17 +750,22 @@ bool HttpStreamTest::TestReadHeader_Head() {
         ret &= (par == "www.legaltorrents.com");
     }
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "bit/thinner-archives-vol-1.zip.torrent");
         printf("url=%s\n", url.Buffer());
 
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "bit.thinner-archives-vol-1.zip.torrent");
         printf("path=%s\n", path.Buffer());
     }
+
+    newSocket.Close();
+    socket.Close();
     return ret;
 }
 
@@ -782,22 +857,23 @@ bool HttpStreamTest::TestReadHeader_Reply() {
         par.SetSize(0);
     }
     if (ret) {
-        StreamString url = test.GetUrl();
+        StreamString url;
+        test.GetUrl(url);
         ret = (url == "");
         printf("url=%s\n", url.Buffer());
     }
 
     if (ret) {
-        StreamString path = test.GetPath();
+        StreamString path;
+        test.GetPath(path);
         ret = (path == "");
         printf("path=%s\n", path.Buffer());
     }
+
+    newSocket.Close();
+    socket.Close();
     return ret;
 
-}
-
-bool HttpStreamTest::TestWriteHeader() {
-    return true;
 }
 
 bool HttpStreamTest::TestCompleteReadOperation() {
@@ -836,11 +912,605 @@ bool HttpStreamTest::TestCompleteReadOperation() {
     printf("%s\n", output.Buffer());
 
     printf("remained %s\n", remained.Buffer());
-    if(ret){
-        ret=(remained=="<html>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>\n");
+    if (ret) {
+        ret = (remained == "<html>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>\n");
+    }
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobWrite(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+        HttpStream test(socket);
+        AnyType at1[] = { "application/x-www-form-urlencoded" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at1);
+        test.SetSize(0);
+        test.Printf("%s", "ciaobellooo\n");
+        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
     }
 
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+static void clientJobWrite2(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+        HttpStream test(socket);
+        AnyType at[] = { "chunked" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Transfer-Encoding", "%s", at);
+        AnyType at1[] = { "application/x-www-form-urlencoded" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at1);
+        test.SetSize(0);
+        test.Printf("%s", "ciao");
+        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        tt.eventSem.Wait();
+        tt.eventSem.Reset();
+        test.Switch("OutputHttpOtions");
+        test.Delete("Transfer-Encoding");
+        test.Switch("");
+
+        test.SetSize(0);
+        test.Printf("%s", "bellooo\n");
+        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpStreamTest::TestWriteHeader() {
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobWrite, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained);
+    }
+
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    printf("%s\n", remained.Buffer());
+    if (command != HSHCPost) {
+        if (ret) {
+            ret = (remained == "ciaobellooo\n");
+        }
+    }
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "12");
+        par.SetSize(0);
+
+        ret &= cdb->Read("Content-Type", par);
+        ret &= (par == "application/x-www-form-urlencoded");
+        par.SetSize(0);
+    }
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
+
+}
+
+bool HttpStreamTest::TestWriteHeader2() {
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    Threads::BeginThread((ThreadFunctionType) clientJobWrite2, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained, 10);
+    }
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Transfer-Encoding", par);
+        ret &= (par == "chunked");
+        par.SetSize(0);
+    }
+
+    eventSem.Post();
+
+    StreamString remained2;
+    if (ret) {
+        ret = test.ReadHeader();
+        if (ret) {
+            ret = test.CompleteReadOperation(&remained2);
+        }
+    }
+
+    eventSem.Wait();
+
+    cdb->MoveToRoot();
+    StreamString output2;
+    output2.Printf("%@", *cdb);
+    printf("%s\n", output2.Buffer());
+
+    printf("%s\n", remained.Buffer());
+    printf("%s\n", remained2.Buffer());
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "8");
+        par.SetSize(0);
+    }
+    if (command != HSHCPost) {
+
+        if (ret) {
+            ret = (remained == "ciao");
+        }
+        if (ret) {
+            ret = (remained2 == "bellooo\n");
+        }
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Get1() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCGet;
+    return TestWriteHeader();
+}
+
+bool HttpStreamTest::TestWriteHeader_Get2() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCGet;
+    return TestWriteHeader2();
+}
+
+bool HttpStreamTest::TestWriteHeader_Put1() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCPut;
+    return TestWriteHeader();
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Put2() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCPut;
+    return TestWriteHeader2();
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Head1() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCHead;
+    return TestWriteHeader();
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Head2() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCHead;
+    return TestWriteHeader2();
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Post() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCPost;
+    return TestWriteHeader();
+
+}
+
+bool HttpStreamTest::TestWriteHeader_Reply() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCReplyOK;
+    return TestWriteHeader();
+}
+
+bool HttpStreamTest::TestWriteHeader_Reply2() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCReplyOK;
+    return TestWriteHeader2();
+}
+
+static void clientJobAuth(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 4444);
+    if (ret) {
+        socket.Printf("%s", "GET /docs/index.html HTTP/1.1\n");
+        socket.Printf("%s", "Host: www.nowhere123.com\n");
+        socket.Printf("%s", "Authorization: admin1234\n");
+        socket.Printf("%s", "\n");
+        socket.Flush();
+    }
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpStreamTest::TestSecurityCheck() {
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    ReferenceT<HttpStreamTestRealm> realm(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    realm->SetPassw("admin1234");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobAuth, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    if (ret) {
+        ret = test.SecurityCheck(realm);
+    }
+    if (ret) {
+        realm->SetPassw("invalid");
+        ret = !test.SecurityCheck(realm);
+    }
+
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    newSocket.Close();
+    socket.Close();
 
     return ret;
+}
+
+bool HttpStreamTest::TestKeepAliveDefault() {
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        ret = test.KeepAlive();
+    }
+
+    newSocket.Close();
+    socket.Close();
+
+    return ret;
+}
+
+static void clientJobKeepAlive(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 4444);
+    if (ret) {
+        socket.Printf("%s", "GET /docs/index.html HTTP/1.1\n");
+        socket.Printf("%s", "Host: www.nowhere123.com\n");
+        if (tt.isKeepAlive) {
+            socket.Printf("%s", "Connection: keep-alive\n");
+        }
+        else {
+            socket.Printf("%s", "Connection: closed\n");
+        }
+        socket.Printf("%s", "\n");
+        socket.Flush();
+    }
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpStreamTest::TestKeepAlive(bool isKeepAliveIn) {
+    isKeepAlive = isKeepAliveIn;
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobKeepAlive, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        ret = (test.KeepAlive() == isKeepAlive);
+    }
+
+    newSocket.Close();
+    socket.Close();
+
+    return ret;
+}
+
+bool HttpStreamTest::TestSetKeepAlive(bool isKeepAlive) {
+    TCPSocket newSocket;
+
+    HttpStream test(newSocket);
+    test.SetKeepAlive(isKeepAlive);
+    return test.KeepAlive() == isKeepAlive;
+}
+
+bool HttpStreamTest::TestGetHttpCommand(HSHttpCommand commandIn) {
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    if (commandIn == HSHCGet) {
+        Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
+    }
+    else if (commandIn == HSHCPut) {
+        Threads::BeginThread((ThreadFunctionType) clientJobPut1, this);
+    }
+    else if (commandIn == HSHCHead) {
+        Threads::BeginThread((ThreadFunctionType) clientJobHead, this);
+    }
+    else if (commandIn == HSHCPost) {
+        Threads::BeginThread((ThreadFunctionType) clientJobPost1, this);
+    }
+    else if (commandIn == HSHCReply) {
+        Threads::BeginThread((ThreadFunctionType) clientJobReply, this);
+    }
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        if (commandIn == HSHCReply) {
+            ret = test.GetHttpCommand() == (commandIn + 200);
+        }
+        else {
+            ret = test.GetHttpCommand() == commandIn;
+        }
+    }
+    newSocket.Close();
+    socket.Close();
+
+    return ret;
+
+}
+
+bool HttpStreamTest::TestSetUnmatchedUrl() {
+    TCPSocket newSocket;
+    HttpStream test(newSocket);
+    test.SetUnmatchedUrl("pippo");
+    StreamString ret;
+    test.GetUnmatchedUrl(ret);
+    return ret == "pippo";
+}
+
+bool HttpStreamTest::TestGetUnmatchedUrl() {
+    //normally it is the url
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        StreamString unmatchedUrl;
+        test.GetUnmatchedUrl(unmatchedUrl);
+        StreamString url;
+        test.GetUnmatchedUrl(url);
+        ret = (unmatchedUrl == url);
+    }
+
+    newSocket.Close();
+    socket.Close();
+
+    return (ret && TestSetUnmatchedUrl());
+}
+
+
+bool HttpStreamTest::TestGetPath(){
+    return TestReadHeader_Get1();
+}
+
+bool HttpStreamTest::TestGetUrl(){
+    return TestReadHeader_Get1();
 }
 

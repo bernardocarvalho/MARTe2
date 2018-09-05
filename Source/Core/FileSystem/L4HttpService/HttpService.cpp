@@ -92,6 +92,12 @@ bool HttpService::Initialise(StructuredDataI &data) {
         }
     }
 
+    if(ret){
+
+        //TODO open ecc ecc
+        ret = (server.Listen(port, listenMaxConnections));
+    }
+
     return ret;
 }
 
@@ -116,7 +122,8 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
             bool pagePrepared = false;
 
             if (err.ErrorsCleared()) {
-                StreamString path=hstream.GetPath();
+                StreamString path;
+                hstream.GetPath(path);
                 if (path.Size() > 0) {
                     // search for destination
                     uint32 occurrences=1u;
@@ -143,7 +150,8 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 
                     // save remainder of address
                     uint32 remAddrIndex=filter.GetRemainedAddrIndex();
-                    StreamString urlTemp=hstream.GetUrl();
+                    StreamString urlTemp;
+                    hstream.GetUrl(urlTemp);
                     StreamString unmatchedUrl=&urlTemp.Buffer()[remAddrIndex];
 
                     uint32 newUrlLastCharIdx=(unmatchedUrl.Size()-1u);
@@ -157,7 +165,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                     // check security
                     //            GCRTemplate<HttpRealm> realm = searchFilter.GetRealm();
                     if (realm.IsValid()) {
-                        if (!hstream.SecurityCheck(realm, (commClient->GetSource()).GetAddressAsNumber())) {
+                        if (!hstream.SecurityCheck(realm)) {
                             AnyType args[]= {"Content-Type"};
                             hstream.SwitchPrintAndCommit("OutputHttpOtions", "text/html", "%s", args);
 
@@ -181,7 +189,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 
                             // force reissuing of a new thread
                             hstream.SetKeepAlive(false);
-                            if (!hstream.WriteReplyHeader(true, 401)) {
+                            if (!hstream.WriteHeader(true, HSHCReplyAUTH)) {
                                 err=ErrorManagement::CommunicationError;
                                 REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                             }
@@ -206,7 +214,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                         hstream.SwitchPrintAndCommit("OutputHttpOtions", "Connection", "%s", args);
 
                         hstream.Printf("%s", "<HTML>Page Not Found!</HTML>");
-                        if(!hstream.WriteReplyHeader(true, 200)) {
+                        if(!hstream.WriteHeader(true)) {
                             err=ErrorManagement::CommunicationError;
                             REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                         }
@@ -228,8 +236,6 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &information) {
     ErrorManagement::ErrorType err;
     if (information.GetStage() == MARTe::ExecutionInfo::StartupStage) {
-        //todo bind and initialisation?? Maybe the listen goes outside??
-        err = !(server.Listen(port, listenMaxConnections));
     }
     if (information.GetStage() == MARTe::ExecutionInfo::MainStage) {
         TCPSocket *commClient = NULL;

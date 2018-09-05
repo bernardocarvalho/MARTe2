@@ -34,7 +34,7 @@
 #include "HttpRealmI.h"
 #include "ConfigurationDatabase.h"
 #include "StructuredDataStreamT.h"
-#include "EventSem.h"
+#include "DoubleBufferedStream.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
@@ -46,28 +46,21 @@ class HttpStream: public StructuredDataStreamT<ConfigurationDatabase>{
 public:
     HttpStream();
 
-    HttpStream(BufferedStreamI &clientBufferedStreamIn);
+    HttpStream(DoubleBufferedStream &clientBufferedStreamIn);
 
     virtual ~HttpStream();
 
+    //normally is write reply header
     bool WriteHeader(bool bodyCompleted,
-                     HSHttpCommand command,
-                     const char8 * url);
-
-    bool WriteReplyHeader(bool bodyCompleted,
-                          uint32 httpErrorCode = 200);
+                     HSHttpCommand command=HSHCReplyOK,
+                     const char8 * url=NULL);
 
     bool CompleteReadOperation(BufferedStreamI *s,
                                TimeoutType msecTimeout = TTInfiniteWait);
 
-    bool BodyCompleted();
-
-    bool WaitForBodyCompleted(TimeoutType msecTimeout);
-
     bool ReadHeader();
 
-    bool SecurityCheck(ReferenceT<HttpRealmI> realm,
-                       uint32 ipNumber);
+    bool SecurityCheck(ReferenceT<HttpRealmI> realm);
 
     bool KeepAlive() const;
 
@@ -75,15 +68,17 @@ public:
 
     HSHttpCommand GetHttpCommand() const;
 
-    void SetUnmatchedUrl(char8 *unMatchedUrlIn);
+    void SetUnmatchedUrl(const char8 *unMatchedUrlIn);
 
-    const char8 *GetPath();
+    void GetUnmatchedUrl(StreamString& unmatchedUrlOut);
 
-    const char8 *GetUrl();
+    void GetPath(StreamString& pathOut);
+
+    void GetUrl(StreamString& urlOut);
 
 protected:
 
-    BufferedStreamI *socketStream;
+    DoubleBufferedStream *socketStream;
 
     /**
      * How much data is still waiting in the
@@ -112,11 +107,6 @@ protected:
      * True if communication should continue after transaction
      */
     bool keepAlive;
-
-    /**
-     * to wait for body completed
-     */
-    EventSem bodyCompletedEvent;
 
     /**
      * The last time the body has been updated
