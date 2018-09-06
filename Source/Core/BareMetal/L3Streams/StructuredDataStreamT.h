@@ -40,7 +40,7 @@
 
 namespace MARTe {
 
-template<typename T>
+template<class structuredData>
 class StructuredDataStreamT: public MultiStream {
 public:
     StructuredDataStreamT();
@@ -64,11 +64,11 @@ public:
 
     virtual bool IsValid() const;
 
-    T* GetData() const;
+    structuredData* GetData() const;
 
 protected:
 
-    T *data;
+    structuredData *data;
 
     StreamString nodeName;
     StreamString leafName;
@@ -83,9 +83,9 @@ protected:
 namespace MARTe {
 //#define NULL_PTR(x) NULL
 
-template<typename T>
-StructuredDataStreamT<T>::StructuredDataStreamT() {
-    data = new T;
+template<class structuredData>
+StructuredDataStreamT<structuredData>::StructuredDataStreamT() {
+    data = new structuredData;
     StructuredDataI* x = dynamic_cast<StructuredDataI*>(data);
     if (x == NULL) {
         delete data;
@@ -95,16 +95,16 @@ StructuredDataStreamT<T>::StructuredDataStreamT() {
     leafName = "";
 }
 
-template<typename T>
-StructuredDataStreamT<T>::~StructuredDataStreamT() {
+template<class structuredData>
+StructuredDataStreamT<structuredData>::~StructuredDataStreamT() {
     if (data != NULL) {
         delete data;
         data=NULL;
     }
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::Switch(const char8 *path) {
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::Switch(const char8 *path) {
     bool ret = true;
     if ((path != NULL) && (StringHelper::Length(path)>0u)) {
         if(!data->MoveAbsolute(path)) {
@@ -122,8 +122,8 @@ bool StructuredDataStreamT<T>::Switch(const char8 *path) {
     return ret;
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::Load(const char8 *varName) {
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::Load(const char8 *varName) {
     bool ret = this->SetSize(0u);
     if (ret) {
         ret = data->Read(varName, *this);
@@ -134,8 +134,8 @@ bool StructuredDataStreamT<T>::Load(const char8 *varName) {
     return ret;
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::Commit(const char8 *varName) {
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::Commit(const char8 *varName) {
     (void) Delete(varName);
     bool ret = data->Write(varName, this->Buffer());
     if (ret) {
@@ -144,8 +144,8 @@ bool StructuredDataStreamT<T>::Commit(const char8 *varName) {
     return ret;
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::Delete(const char8 *varName) {
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::Delete(const char8 *varName) {
     bool ret = data->Delete(varName);
     if (ret) {
         leafName = "";
@@ -153,8 +153,8 @@ bool StructuredDataStreamT<T>::Delete(const char8 *varName) {
     return ret;
 }
 
-template<typename T>
-void StructuredDataStreamT<T>::GetCurrentPath(StreamString &path) {
+template<class structuredData>
+void StructuredDataStreamT<structuredData>::GetCurrentPath(StreamString &path) {
     path = nodeName;
     if (leafName.Size() > 0u) {
         path += ".";
@@ -162,8 +162,8 @@ void StructuredDataStreamT<T>::GetCurrentPath(StreamString &path) {
     }
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::SwitchPrintAndCommit(const char8* path,
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::SwitchPrintAndCommit(const char8* path,
                                                     const char8* varName,
                                                     const char8* format,
                                                     const AnyType pars[]) {
@@ -188,13 +188,13 @@ bool StructuredDataStreamT<T>::SwitchPrintAndCommit(const char8* path,
     return ret;
 }
 
-template<typename T>
-T* StructuredDataStreamT<T>::GetData() const {
+template<class structuredData>
+structuredData* StructuredDataStreamT<structuredData>::GetData() const {
     return data;
 }
 
-template<typename T>
-bool StructuredDataStreamT<T>::IsValid() const {
+template<class structuredData>
+bool StructuredDataStreamT<structuredData>::IsValid() const {
 
     return (data != NULL);
 
