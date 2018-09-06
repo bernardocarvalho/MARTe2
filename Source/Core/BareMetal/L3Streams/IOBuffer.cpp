@@ -92,9 +92,316 @@ extern bool FloatToStream(IOBuffer &buffer,
                           float64 number,
                           const FormatDescriptor &format);
 
+// Standard print functions implemented in IOBufferStandardPrint.cpp
+
+extern bool PrintStandardOpenMatrix(IOBuffer &iobuff);
+
+extern bool PrintStandardCloseMatrix(IOBuffer &iobuff);
+
+extern bool PrintStandardScalarSeparator(IOBuffer &iobuff);
+
+extern bool PrintStandardVectorSeparator(IOBuffer &iobuff);
+
+extern bool PrintStandardOpenVector(IOBuffer &iobuff);
+
+extern bool PrintStandardCloseVector(IOBuffer &iobuff);
+
+extern bool PrintStandardOpenBlock(IOBuffer &iobuff,
+                                   const char8* blockName);
+
+extern bool PrintStandardCloseBlock(IOBuffer &iobuff);
+
+extern bool PrintStandardOpenAssignment(IOBuffer &iobuff,
+                                        const char8 *varName);
+
+// Json print functions implemented in IOBufferStandardPrint.cpp
+
+extern bool PrintJsonOpenMatrix(IOBuffer &iobuff);
+
+extern bool PrintJsonCloseMatrix(IOBuffer &iobuff);
+
+extern bool PrintJsonScalarSeparator(IOBuffer &iobuff);
+
+extern bool PrintJsonVectorSeparator(IOBuffer &iobuff);
+
+extern bool PrintJsonVariableSeparator(IOBuffer &iobuff);
+
+extern bool PrintJsonBlockSeparator(IOBuffer &iobuff);
+
+extern bool PrintJsonOpenVector(IOBuffer &iobuff);
+
+extern bool PrintJsonCloseVector(IOBuffer &iobuff);
+
+extern bool PrintJsonOpenBlock(IOBuffer &iobuff,
+                               const char8* blockName);
+
+extern bool PrintJsonCloseBlock(IOBuffer &iobuff);
+
+extern bool PrintJsonOpenAssignment(IOBuffer &iobuff,
+                                    const char8 *varName);
+
+// XML print functions implemented in IOBufferStandardPrint.cpp
+
+extern bool PrintXMLOpenMatrix(IOBuffer &iobuff);
+
+extern bool PrintXMLCloseMatrix(IOBuffer &iobuff);
+
+extern bool PrintXMLScalarSeparator(IOBuffer &iobuff);
+
+extern bool PrintXMLVectorSeparator(IOBuffer &iobuff);
+
+extern bool PrintXMLOpenVector(IOBuffer &iobuff);
+
+extern bool PrintXMLCloseVector(IOBuffer &iobuff);
+
+extern bool PrintXMLOpenBlock(IOBuffer &iobuff,
+                              const char8* blockName);
+
+extern bool PrintXMLCloseBlock(IOBuffer &iobuff,
+                               const char8* blockName);
+
+extern bool PrintXMLOpenAssignment(IOBuffer &iobuff,
+                                   const char8 *varName);
+
+extern bool PrintXMLCloseAssignment(IOBuffer &iobuff,
+                                    const char8 *varName);
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
+
+bool PrintOpenMatrix(IOBuffer &iobuff,
+                     const FormatDescriptor &fd) {
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardOpenMatrix(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonOpenMatrix(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLOpenMatrix(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintCloseMatrix(IOBuffer &iobuff,
+                      const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardCloseMatrix(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonCloseMatrix(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLCloseMatrix(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintScalarSeparator(IOBuffer &iobuff,
+                          const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardScalarSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonScalarSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLScalarSeparator(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintVectorSeparator(IOBuffer &iobuff,
+                          const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardVectorSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonVectorSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLVectorSeparator(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintVariableSeparator(IOBuffer &iobuff,
+                            const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = true;
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonVariableSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = true;
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintBlockSeparator(IOBuffer &iobuff,
+                         const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = true;
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonBlockSeparator(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = true;
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintOpenVector(IOBuffer &iobuff,
+                     const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardOpenVector(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonOpenVector(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLOpenVector(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintCloseVector(IOBuffer &iobuff,
+                      const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardCloseVector(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonCloseVector(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLCloseVector(iobuff);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+}
+
+bool PrintOpenBlock(IOBuffer &iobuff,
+                    const char8 *blockName,
+                    const FormatDescriptor &fd) {
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardOpenBlock(iobuff, blockName);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonOpenBlock(iobuff, blockName);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLOpenBlock(iobuff, blockName);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+
+}
+
+bool PrintCloseBlock(IOBuffer &iobuff,
+                     const char8 *varName,
+                     const FormatDescriptor &fd) {
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardCloseBlock(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonCloseBlock(iobuff);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLCloseBlock(iobuff, varName);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+
+}
+
+bool PrintOpenAssignment(IOBuffer &iobuff,
+                         const char8 *varName,
+                         const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = PrintStandardOpenAssignment(iobuff, varName);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintJsonOpenAssignment(iobuff, varName);
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLOpenAssignment(iobuff, varName);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+
+}
+
+bool PrintCloseAssignment(IOBuffer &iobuff,
+                          const char8 *varName,
+                          const FormatDescriptor &fd) {
+
+    bool ret = false;
+    if (fd.spareBits == PrintInStandardGrammar) {
+        ret = true;
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = true;
+    }
+    else if (fd.spareBits == PrintInJsonGrammar) {
+        ret = PrintXMLCloseAssignment(iobuff, varName);
+    }
+    else {
+        ret = false;
+    }
+    return ret;
+
+}
 
 /**
  * @brief Print a const char8* string on a buffer.
@@ -390,6 +697,7 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
 
 static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                                          StructuredDataI * const structuredData,
+                                         const FormatDescriptor &fd,
                                          uint32 nodeLevel = 0u) {
     bool ret = true;
     uint32 numberOfChildren = structuredData->GetNumberOfChildren();
@@ -403,11 +711,25 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                 AnyType noneType = voidAnyType;
                 ret = (iobuff.PrintFormatted("    ", &noneType));
             }
-            AnyType printLeftSide[] = {childName, "= ", voidAnyType};
-            ret = (iobuff.PrintFormatted("%s %s", &printLeftSide[0]));
+
+            ret=PrintOpenAssignment(iobuff, childName, fd);
+            //AnyType printLeftSide[] = {childName, "= ", voidAnyType};
+            //ret = (iobuff.PrintFormatted("%s %s", &printLeftSide[0]));
             if (ret) {
                 AnyType printLeaf[] = {toPrint, voidAnyType};
-                ret = (iobuff.PrintFormatted("%#!\r\n", &printLeaf[0]));
+                ret = (iobuff.PrintFormatted("%#!", &printLeaf[0]));
+            }
+            if(ret) {
+                ret=PrintCloseAssignment(iobuff, childName, fd);
+            }
+            if(ret){
+                if(j!=(numberOfChildren-1u)){
+                    ret=PrintVariableSeparator(iobuff, fd);
+                    if(ret){
+                        AnyType noneType = voidAnyType;
+                        ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                    }
+                }
             }
         }
         else {
@@ -418,8 +740,13 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                     AnyType noneType = voidAnyType;
                     ret = (iobuff.PrintFormatted("    ", &noneType));
                 }
-                AnyType printLeftSide[] = {childName, "= {", voidAnyType};
-                ret = (iobuff.PrintFormatted("%s %s\r\n", &printLeftSide[0]));
+                //AnyType printLeftSide[] = {childName, "= {", voidAnyType};
+                //ret = (iobuff.PrintFormatted("%s %s\r\n", &printLeftSide[0]));
+                ret=PrintOpenBlock(iobuff, childName, fd);
+                if(ret) {
+                    AnyType noneType = voidAnyType;
+                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                }
                 if (ret) {
                     nodeLevel++;
                     ret = PrintStructuredDataInterface(iobuff, structuredData, nodeLevel);
@@ -433,8 +760,18 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                         AnyType noneType = voidAnyType;
                         ret = (iobuff.PrintFormatted("    ", &noneType));
                     }
-                    AnyType printClose[] = {"}", voidAnyType};
-                    ret = (iobuff.PrintFormatted("%s\r\n", &printClose[0]));
+                    //AnyType printClose[] = {"}", voidAnyType};
+                    //ret = (iobuff.PrintFormatted("%s\r\n", &printClose[0]));
+                    ret=PrintCloseBlock(iobuff, childName, fd);
+                    if(ret){
+                        if(j!=(numberOfChildren-1u)){
+                            ret=PrintBlockSeparator(iobuff, fd);
+                            if(ret){
+                                AnyType noneType = voidAnyType;
+                                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -816,7 +1153,7 @@ static bool PrintToStreamScalar(IOBuffer & iobuff,
             //StructuredDataInterface.
             if (((par.GetTypeDescriptor()).type) == StructuredDataNode) {
                 StructuredDataI * structuredData = static_cast<StructuredDataI *>(dataPointer);
-                ret = PrintStructuredDataInterface(iobuff, structuredData);
+                ret = PrintStructuredDataInterface(iobuff, structuredData, fd);
             }
         }
     }
@@ -842,9 +1179,10 @@ static bool PrintToStreamVector(IOBuffer & iobuff,
     char8* dataPointer = static_cast<char8*>(parIn.GetDataPointer());
     uint32 numberOfElements = parIn.GetNumberOfElements(0u);
     uint32 elementSize = parIn.GetByteSize();
-    FormatDescriptor newFD;
-    bool ret = PrintCCString(iobuff, "{ ", newFD);
-
+    bool ret = PrintOpenVector(iobuff, fd);
+    if (ret) {
+        ret = iobuff.PutC(' ');
+    }
     for (uint32 i = 0u; (i < numberOfElements) && (ret); i++) {
         uint32 index = i * elementSize;
         char8* scalarPointer = &dataPointer[index];
@@ -871,12 +1209,19 @@ static bool PrintToStreamVector(IOBuffer & iobuff,
 
         ret = PrintToStreamScalar(iobuff, scalar, fd);
         if (ret) {
-            ret = PrintCCString(iobuff, " ", newFD);
+            ret = PrintScalarSeparator(iobuff, fd);
+            if (ret) {
+                ret = iobuff.PutC(' ');
+            }
         }
     }
 
-    ret = PrintCCString(iobuff, "} ", newFD);
-
+    if (ret) {
+        ret = PrintCloseVector(iobuff, fd);
+    }
+    if (ret) {
+        ret = iobuff.PutC(' ');
+    }
     return ret;
 }
 
@@ -897,8 +1242,14 @@ static bool PrintToStreamMatrix(IOBuffer & iobuff,
     uint32 numberOfColumns = parIn.GetNumberOfElements(0u);
     uint32 elementSize = parIn.GetByteSize();
     bool isStaticDeclared = parIn.IsStaticDeclared();
-    FormatDescriptor newFD;
-    bool ret = PrintCCString(iobuff, "{ ", newFD);
+
+    //search the printer by the format descriptor
+    //print open matrix(iobuff, formatDescriptor)
+
+    bool ret = PrintOpenMatrix(iobuff, fd);
+    if (ret) {
+        ret = iobuff.PutC(' ');
+    }
     for (uint32 i = 0u; (i < numberOfRows) && (ret); i++) {
 
         if (ret) {
@@ -916,11 +1267,19 @@ static bool PrintToStreamMatrix(IOBuffer & iobuff,
                 vector.SetNumberOfElements(0u, numberOfColumns);
                 vector.SetStaticDeclared(parIn.IsStaticDeclared());
                 ret = PrintToStreamVector(iobuff, vector, fd);
+                if(ret) {
+                    ret=PrintVectorSeparator(iobuff, fd);
+                }
             }
         }
 
     }
-    ret = PrintCCString(iobuff, "} ", newFD);
+    if (ret) {
+        ret = PrintCloseMatrix(iobuff, newFD);
+    }
+    if (ret) {
+        ret = iobuff.PutC(' ');
+    }
     return ret;
 }
 
@@ -1255,7 +1614,8 @@ bool IOBuffer::SetBufferHeapMemory(const uint32 desiredSize,
     //between two unsigned integers we can obtain bigger numbers (overflow).
     if (desiredSize < reservedSpaceAtEnd) {
         usedSize = 0u;
-        REPORT_ERROR_STATIC_0(ErrorManagement::Warning, "IOBuffer: The reserved space at end is greater than the size to be allocated: set the used size to zero");
+        REPORT_ERROR_STATIC_0(ErrorManagement::Warning,
+                              "IOBuffer: The reserved space at end is greater than the size to be allocated: set the used size to zero");
     }
 
     // truncating

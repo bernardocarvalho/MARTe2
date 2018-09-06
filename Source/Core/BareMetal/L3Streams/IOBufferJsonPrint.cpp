@@ -1,0 +1,106 @@
+/**
+ * @file IOBufferJsonPrint.cpp
+ * @brief Source file for class IOBufferJsonPrint
+ * @date 06 set 2018
+ * @author pc
+ *
+ * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
+ * the Development of Fusion Energy ('Fusion for Energy').
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
+ * by the European Commission - subsequent versions of the EUPL (the "Licence")
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+ *
+ * @warning Unless required by applicable law or agreed to in writing, 
+ * software distributed under the Licence is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the Licence permissions and limitations under the Licence.
+
+ * @details This source file contains the definition of all the methods for
+ * the class IOBufferJsonPrint (public, protected, and private). Be aware that some 
+ * methods, such as those inline could be defined on the header file, instead.
+ */
+
+/*---------------------------------------------------------------------------*/
+/*                         Json header includes                          */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+#include "IOBuffer.h"
+#include "AnyType.h"
+
+/*---------------------------------------------------------------------------*/
+/*                           definitions                              */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                           Method definitions                              */
+/*---------------------------------------------------------------------------*/
+
+namespace MARTe{
+
+
+bool PrintJsonOpenMatrix(IOBuffer &iobuff) {
+    return iobuff.PutC('[');
+}
+
+bool PrintJsonCloseMatrix(IOBuffer &iobuff) {
+    return iobuff.PutC(']');
+}
+
+bool PrintJsonScalarSeparator(IOBuffer &iobuff) {
+    return iobuff.PutC(',');
+}
+
+bool PrintJsonVectorSeparator(IOBuffer &iobuff) {
+    return iobuff.PutC(',');
+}
+
+bool PrintJsonVariableSeparator(IOBuffer &iobuff) {
+    return iobuff.PutC(',');
+}
+
+bool PrintJsonBlockSeparator(IOBuffer &iobuff) {
+    return iobuff.PutC(',');
+}
+
+
+bool PrintJsonOpenVector(IOBuffer &iobuff) {
+    return iobuff.PutC('[');
+
+}
+
+bool PrintJsonCloseVector(IOBuffer &iobuff) {
+    return iobuff.PutC(']');
+}
+
+bool PrintJsonOpenBlock(IOBuffer &iobuff, const char8 *blockName) {
+    uint32 size = 2u;
+    AnyType at[]={blockName, voidAnyType};
+    return iobuff.PrintFormatted("\"%s\": ", at);
+}
+
+bool PrintJsonCloseBlock(IOBuffer &iobuff) {
+    return iobuff.PutC('}');
+}
+
+bool PrintJsonOpenAssignment(IOBuffer &iobuff,
+                                const char8 *varName) {
+    uint32 size = StringHelper::Length(varName);
+    bool ret = iobuff.PutC('"');
+    if (ret) {
+        ret = iobuff.Write(varName, size);
+    }
+    if (ret) {
+        ret = iobuff.PutC('"');
+    }
+    if (ret) {
+        size = 2u;
+        ret = iobuff.Write(" :", size);
+    }
+    return ret;
+}
+
+}

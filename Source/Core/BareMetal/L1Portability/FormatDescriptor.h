@@ -150,6 +150,17 @@ const DesiredAction PrintInfo = 5u;
  */
 const DesiredAction PrintStruct = 6u;
 
+
+typedef uint4 DesiredGrammar;
+
+
+const DesiredGrammar PrintInStandardGrammar=0u;
+
+const DesiredGrammar PrintInJsonGrammar=1u;
+
+const DesiredGrammar PrintInXMLGrammar=2u;
+
+
 /**
  * @brief Definition of a format descriptor.
  * @details This class is used to describe the output format of a variable.\n
