@@ -30,6 +30,7 @@
 /*---------------------------------------------------------------------------*/
 #include "IOBuffer.h"
 #include "AnyType.h"
+#include "StringHelper.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           definitions                              */
@@ -77,9 +78,8 @@ bool PrintJsonCloseVector(IOBuffer &iobuff) {
 }
 
 bool PrintJsonOpenBlock(IOBuffer &iobuff, const char8 *blockName) {
-    uint32 size = 2u;
     AnyType at[]={blockName, voidAnyType};
-    return iobuff.PrintFormatted("\"%s\": ", at);
+    return iobuff.PrintFormatted("\"%s\": {", at);
 }
 
 bool PrintJsonCloseBlock(IOBuffer &iobuff) {
@@ -97,8 +97,7 @@ bool PrintJsonOpenAssignment(IOBuffer &iobuff,
         ret = iobuff.PutC('"');
     }
     if (ret) {
-        size = 2u;
-        ret = iobuff.Write(" :", size);
+        ret = iobuff.PutC(':');
     }
     return ret;
 }

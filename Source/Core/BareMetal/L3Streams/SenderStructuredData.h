@@ -35,25 +35,37 @@
 #include "StructuredDataI.h"
 #include "LinkedListable.h"
 #include "ReferenceContainer.h"
+#include "BufferedStreamI.h"
+#include "SingleBufferedStream.h"
+#include "DoubleBufferedStream.h"
+#include "StreamString.h"
+#include "ReferenceT.h"
+#include "ReferenceContainer.h"
+#include "ReferenceContainerFilterReferences.h"
+#include "ReferenceContainerFilterObjectName.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+namespace MARTe {
 
-class NodeName: public Object{
+class NodeName: public ReferenceContainer {
 public:
+
+    NodeName();
+    virtual ~NodeName();
+
     uint8 isClosed;
+    uint32 numberOfVariables;
 };
 
+template<class Printer>
 class SenderStructuredData: public StructuredDataI {
 public:
-    SenderStructuredData();
+    SenderStructuredData(BufferedStreamI &streamIn);
+
     virtual ~SenderStructuredData();
-
-    void SetStream(DoubleBufferedStream &streamIn);
-
 
     /**
      * @brief Reads a previously stored AnyType. The node with this name has to be a child of the current node.
@@ -64,7 +76,8 @@ public:
      * @pre
      *   GetType(name).GetTypeDescriptor() != VoidType
      */
-    virtual bool Read(const char8 * const name, const AnyType &value);
+    virtual bool Read(const char8 * const name,
+                      const AnyType &value);
 
     /**
      * @brief Gets the type of a previously stored AnyType.
@@ -83,7 +96,8 @@ public:
      *   name != NULL &&
      *   StringHelper::Length(name) > 0
      */
-    virtual bool Write(const char8 * const name, const AnyType &value);
+    virtual bool Write(const char8 * const name,
+                       const AnyType &value);
 
     /**
      * @brief Copies the content of the current node to the provided destination.
@@ -177,7 +191,7 @@ public:
      * @brief Retrieves the name of the current node.
      * @return the name of the current node.
      */
-    virtual const char8 *GetName()=0;
+    virtual const char8 *GetName();
 
     /**
      * @brief Retrieves the name of the child in the specified index.
@@ -207,6 +221,8 @@ protected:
     ReferenceT<NodeName> currentNode;
 
     StreamString middleBuffer;
+
+    Printer printer;
 };
 
 }
@@ -214,6 +230,410 @@ protected:
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
+
+namespace MARTe {
+
+template<class Printer>
+SenderStructuredData<Printer>::SenderStructuredData(BufferedStreamI &streamIn) :
+        treeDescriptor(GlobalObjectsDatabase::Instance()->GetStandardHeap()),
+        printer(streamIn) {
+    stream = &streamIn;
+
+    currentNode = treeDescriptor;
+
+    //accelerators
+    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
+    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
+    bufferType = 0u;
+    if (streamSingle != NULL) {
+        bufferType=1u;
+    }
+    if (streamDouble != NULL) {
+        bufferType=2u;
+    }
+
+}
+
+template<class Printer>
+SenderStructuredData<Printer>::~SenderStructuredData() {
+
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::Read(const char8 * const name,
+                                         const AnyType &value) {
+    return false;
+}
+
+template<class Printer>
+AnyType SenderStructuredData<Printer>::GetType(const char8 * const name) {
+    return voidAnyType;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::Write(const char8 * const name,
+                                          const AnyType &value) {
+
+    bool ret = true;
+    if (currentNode->numberOfVariables > 0u) {
+        ret = printer.PrintVariableSeparator();
+    }
+    if (ret) {
+        ret = stream->Printf("%s", "\n\r");
+    }
+    if (ret) {
+        //use custom component to print
+        ret = printer.PrintOpenAssignment(name);
+    }
+    if (ret) {
+        ret = printer.PrintVariable(value);
+    }
+    if (ret) {
+        ret = printer.PrintCloseAssignment(name);
+    }
+
+    if (ret) {
+        if (bufferType == 1u) {
+            streamSingle->FlushAndResync();
+        }
+        else if (bufferType == 2u) {
+            streamDouble->Flush();
+        }
+        currentNode->numberOfVariables++;
+    }
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::Copy(StructuredDataI &destination) {
+    return false;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::AddToCurrentNode(Reference node) {
+    ReferenceT<NodeName> toAdd = node;
+    bool ret = toAdd.IsValid();
+    if (ret) {
+        ret = currentNode->Insert(node);
+    }
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::MoveToRoot() {
+
+    //find the last node by path
+    //close the nodes along the path
+
+    ReferenceContainerFilterReferences filter(1, ReferenceContainerFilterMode::PATH, currentNode);
+    ReferenceContainer path;
+    treeDescriptor->Find(path, filter);
+
+    uint32 pathSize = path.Size();
+    bool ret = (pathSize > 0u);
+    for (uint32 i = 0u; (i < pathSize) && (ret); i++) {
+        ReferenceT<NodeName> ref = path.Get(i);
+        ret = ref.IsValid();
+        if (ret) {
+            ref->isClosed = 1u;
+            ret = stream->Printf("%s", "\n\r");
+            if (ret) {
+                ret = printer.PrintCloseBlock(ref->GetName());
+            }
+        }
+    }
+
+    if (ret) {
+        currentPath = "";
+        currentNode = treeDescriptor;
+    }
+    if (ret) {
+        if (bufferType == 1u) {
+            streamSingle->FlushAndResync();
+        }
+        else if (bufferType == 2u) {
+            streamDouble->Flush();
+        }
+    }
+
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::MoveToAncestor(uint32 generations) {
+
+    bool ret = true;
+    if (generations > 0u) {
+
+        ReferenceContainerFilterReferences filter(1, ReferenceContainerFilterMode::PATH, currentNode);
+        ReferenceContainer path;
+        treeDescriptor->Find(path, filter);
+
+        uint32 pathSize = path.Size();
+        ret = (pathSize > generations);
+
+        uint32 goodOnes = (pathSize - generations);
+        StreamString currentPathTmp = "";
+        currentPath.Seek(0u);
+        for (uint32 i = 0u; (i < pathSize) && (ret); i++) {
+
+            if (i < goodOnes) {
+                StreamString token;
+                char8 terminator;
+                ret = currentPath.GetToken(token, ".", terminator);
+                if (ret) {
+                    ret = (terminator == '.');
+                    if (ret) {
+                        currentPathTmp += token;
+                    }
+                }
+            }
+            else {
+                ReferenceT<NodeName> ref = path.Get(i);
+                ret = (ref.IsValid());
+                if (ret) {
+                    ref->isClosed = 1u;
+                    ret = stream->Printf("%s", "\n\r");
+                    if (ret) {
+                        ret = printer.PrintCloseBlock(ref->GetName());
+                    }
+                }
+            }
+        }
+        if (ret) {
+            currentNode = path.Get(goodOnes - 1u);
+            currentPath = currentPathTmp;
+        }
+        if (ret) {
+            if (bufferType == 1u) {
+                streamSingle->FlushAndResync();
+            }
+            else if (bufferType == 2u) {
+                streamDouble->Flush();
+            }
+        }
+    }
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
+
+    ReferenceContainerFilterObjectName filterDest(1, ReferenceContainerFilterMode::PATH, path);
+    ReferenceContainer resultDest;
+    treeDescriptor->Find(resultDest, filterDest);
+
+    uint32 pathDestSize = resultDest.Size();
+    bool ret = (pathDestSize > 0u);
+    if (ret) {
+        ReferenceT<NodeName> ref = resultDest.Get(pathDestSize - 1u);
+        ret = (ref.IsValid());
+        if (ret) {
+            ret = (ref->isClosed == 0u);
+        }
+        if (ret) {
+
+            ReferenceContainerFilterReferences filter(1, ReferenceContainerFilterMode::PATH, currentNode);
+            ReferenceContainer result;
+            treeDescriptor->Find(result, filter);
+
+            uint32 pathSize = result.Size();
+
+            StreamString curPathTemp = currentPath;
+            curPathTemp.Seek(0u);
+            char8 terminator = '.';
+            uint32 i = 0u;
+
+            for (i = 0u; (i < pathDestSize) && (terminator == '.') && (ret); i++) {
+
+                StreamString token;
+                curPathTemp.GetToken(token, ".", terminator);
+                ReferenceT<NodeName> ref = resultDest.Get(i);
+                ret = (ref.IsValid());
+                if (ret) {
+                    StreamString nodeName = ref->GetName();
+                    if (token != nodeName) {
+                        break;
+                    }
+                }
+            }
+
+            //close nodes and braces
+            uint32 exitIndex = i;
+            bool blocksClosed = (exitIndex < pathSize);
+            for (uint32 j = exitIndex; (j < pathSize) && (ret); j++) {
+                ReferenceT<NodeName> ref = result.Get(j);
+                ret = (ref.IsValid());
+                if (ret) {
+                    ref->isClosed = 1u;
+                    ret = stream->Printf("%s", "\n\r");
+                    if (ret) {
+                        ret = printer.PrintCloseBlock(ref->GetName());
+                    }
+                }
+            }
+
+            //open braces
+            for (uint32 j = exitIndex; (j < pathDestSize) && (ret); j++) {
+                ReferenceT<NodeName> ref = resultDest.Get(j);
+                ret = (ref.IsValid());
+                if (ret) {
+                    if (j == exitIndex) {
+                        if (blocksClosed) {
+                            ret = printer.PrintBlockSeparator();
+                        }
+                    }
+                    ret = stream->Printf("%s", "\n\r");
+                    if (ret) {
+                        ret = printer.PrintOpenBlock(ref->GetName());
+                    }
+                }
+            }
+
+            if (ret) {
+                if (blocksClosed) {
+                    //close deeply also the children
+                    uint32 curSize = currentNode->Size();
+                    for (uint32 j = 0u; (j < curSize) && (ret); j++) {
+                        Reference ref = currentNode->Get(j);
+                        ret = currentNode->Delete(ref);
+                    }
+                }
+                if (ret) {
+                    currentPath = path;
+                    currentNode = ref;
+                }
+            }
+            if (ret) {
+                if (bufferType == 1u) {
+                    streamSingle->FlushAndResync();
+                }
+                else if (bufferType == 2u) {
+                    streamDouble->Flush();
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::MoveRelative(const char8 * const path) {
+    StreamString totalPath = currentPath;
+    totalPath += path;
+    return MoveAbsolute(totalPath.Buffer());
+
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::MoveToChild(const uint32 childIdx) {
+
+    ReferenceT<NodeName> child = currentNode->Get(childIdx);
+    bool ret = child.IsValid();
+    if (ret) {
+        ret = (child->isClosed == 0u);
+    }
+    if (ret) {
+        ret = stream->Printf("%s", "\n\r");
+        if (ret) {
+            ret = printer.PrintOpenBlock(child->GetName());
+        }
+        if (ret) {
+            currentPath += child->GetName();
+        }
+        if (ret) {
+            if (bufferType == 1u) {
+                streamSingle->FlushAndResync();
+            }
+            else if (bufferType == 2u) {
+                streamDouble->Flush();
+            }
+        }
+    }
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::CreateAbsolute(const char8 * const path) {
+    StreamString pathStr = path;
+    pathStr.Seek(0u);
+    ReferenceT<NodeName> node = treeDescriptor;
+
+    //tokenize the path
+    char8 terminator;
+    StreamString token;
+    bool ret = true;
+    while ((pathStr.GetToken(token, ".", terminator)) && (ret)) {
+        uint32 nodeSize = node->Size();
+        bool found = false;
+        for (uint32 i = 0u; (i < nodeSize) && (ret) && (!found); i++) {
+            ReferenceT<NodeName> child = node->Get(i);
+            ret = child.IsValid();
+            if (ret) {
+                found = (token == child->GetName());
+                if (found) {
+                    node = child;
+                }
+            }
+        }
+        if ((ret) && (!found)) {
+            //create the node
+            ReferenceT<NodeName> newNode(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+            ret = newNode.IsValid();
+            if (ret) {
+                newNode->SetName(token.Buffer());
+                ret = node->Insert(newNode);
+                node = newNode;
+            }
+        }
+        token.SetSize(0);
+    }
+
+    if (ret) {
+        ret = MoveAbsolute(path);
+    }
+
+    return ret;
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::CreateRelative(const char8 * const path) {
+    StreamString totalPath = (currentPath);
+    totalPath += path;
+    return CreateAbsolute(totalPath.Buffer());
+}
+
+template<class Printer>
+bool SenderStructuredData<Printer>::Delete(const char8 * const name) {
+    return false;
+}
+
+template<class Printer>
+const char8 *SenderStructuredData<Printer>::GetName() {
+    return currentNode->GetName();
+}
+
+template<class Printer>
+const char8 *SenderStructuredData<Printer>::GetChildName(const uint32 index) {
+    uint32 size = currentNode->Size();
+
+    const char8 * ret = NULL;
+    if (index < size) {
+        ReferenceT<NodeName> child = currentNode->Get(index);
+        if (child.IsValid()) {
+            ret = child->GetName();
+        }
+    }
+    return ret;
+}
+
+template<class Printer>
+uint32 SenderStructuredData<Printer>::GetNumberOfChildren() {
+    return currentNode->Size();
+}
+
+}
 
 #endif /* SOURCE_CORE_BAREMETAL_L3STREAMS_SENDERSTRUCTUREDDATA_H_ */
 

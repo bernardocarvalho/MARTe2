@@ -179,7 +179,7 @@ bool PrintOpenMatrix(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonOpenMatrix(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLOpenMatrix(iobuff);
     }
     else {
@@ -198,7 +198,7 @@ bool PrintCloseMatrix(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonCloseMatrix(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLCloseMatrix(iobuff);
     }
     else {
@@ -217,7 +217,7 @@ bool PrintScalarSeparator(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonScalarSeparator(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLScalarSeparator(iobuff);
     }
     else {
@@ -236,7 +236,7 @@ bool PrintVectorSeparator(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonVectorSeparator(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLVectorSeparator(iobuff);
     }
     else {
@@ -255,7 +255,7 @@ bool PrintVariableSeparator(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonVariableSeparator(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = true;
     }
     else {
@@ -274,7 +274,7 @@ bool PrintBlockSeparator(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonBlockSeparator(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = true;
     }
     else {
@@ -293,7 +293,7 @@ bool PrintOpenVector(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonOpenVector(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLOpenVector(iobuff);
     }
     else {
@@ -312,7 +312,7 @@ bool PrintCloseVector(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonCloseVector(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLCloseVector(iobuff);
     }
     else {
@@ -331,7 +331,7 @@ bool PrintOpenBlock(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonOpenBlock(iobuff, blockName);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLOpenBlock(iobuff, blockName);
     }
     else {
@@ -351,7 +351,7 @@ bool PrintCloseBlock(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonCloseBlock(iobuff);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLCloseBlock(iobuff, varName);
     }
     else {
@@ -372,7 +372,7 @@ bool PrintOpenAssignment(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = PrintJsonOpenAssignment(iobuff, varName);
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLOpenAssignment(iobuff, varName);
     }
     else {
@@ -393,7 +393,7 @@ bool PrintCloseAssignment(IOBuffer &iobuff,
     else if (fd.spareBits == PrintInJsonGrammar) {
         ret = true;
     }
-    else if (fd.spareBits == PrintInJsonGrammar) {
+    else if (fd.spareBits == PrintInXMLGrammar) {
         ret = PrintXMLCloseAssignment(iobuff, varName);
     }
     else {
@@ -456,6 +456,9 @@ static bool PrintCCString(IOBuffer & iobuff,
             // otherwise remove it from the string size
             if (!isPaddingSize) {
                 stringSize -= (gap - paddingSize);
+            }
+            else {
+                paddingSize -= gap;
             }
 
             bool isLeftAligned = fd.leftAligned;
@@ -532,7 +535,7 @@ static bool PrintStream(IOBuffer & iobuff,
 
         uint32 desSize = fd.size;
 
-        if (desSize != 0u) {
+        if (desSize > 0u) {
             //if the desired size is minor, clip the stream size.
             if (streamSizeL > desSize) {
                 streamSizeL = desSize;
@@ -545,6 +548,7 @@ static bool PrintStream(IOBuffer & iobuff,
                 if (streamSizeL < desSize) {
                     paddingSize = desSize - streamSizeL;
                 }
+
             }
         }
         else {
@@ -565,6 +569,9 @@ static bool PrintStream(IOBuffer & iobuff,
                 if (!isPadding) {
                     streamSizeL -= (gap - paddingSize);
                 }
+                else {
+                    paddingSize -= gap;
+                }
 
                 //if right aligned put the padding at the beginning
                 if ((!fd.leftAligned) && (isPadding)) {
@@ -572,6 +579,12 @@ static bool PrintStream(IOBuffer & iobuff,
                         if (!iobuff.PutC(' ')) {
                             ret = false;
                         }
+                    }
+                }
+
+                if (addQuotesOnString) {
+                    if (!iobuff.PutC('\"')) {
+                        ret = false;
                     }
                 }
 
@@ -586,6 +599,12 @@ static bool PrintStream(IOBuffer & iobuff,
                         ret = false;
                     }
                     streamSizeL--;
+                }
+
+                if (addQuotesOnString) {
+                    if (!iobuff.PutC('\"')) {
+                        ret = false;
+                    }
                 }
 
                 if (ret) {
@@ -713,6 +732,10 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
             }
 
             ret=PrintOpenAssignment(iobuff, childName, fd);
+            if(ret) {
+                AnyType noneType = voidAnyType;
+                ret = (iobuff.PrintFormatted(" ", &noneType));
+            }
             //AnyType printLeftSide[] = {childName, "= ", voidAnyType};
             //ret = (iobuff.PrintFormatted("%s %s", &printLeftSide[0]));
             if (ret) {
@@ -722,13 +745,13 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
             if(ret) {
                 ret=PrintCloseAssignment(iobuff, childName, fd);
             }
-            if(ret){
-                if(j!=(numberOfChildren-1u)){
+            if(ret) {
+                if(i<(numberOfChildren-1u)) {
                     ret=PrintVariableSeparator(iobuff, fd);
-                    if(ret){
-                        AnyType noneType = voidAnyType;
-                        ret = (iobuff.PrintFormatted("\r\n", &noneType));
-                    }
+                }
+                if(ret) {
+                    AnyType noneType = voidAnyType;
+                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
                 }
             }
         }
@@ -749,7 +772,7 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                 }
                 if (ret) {
                     nodeLevel++;
-                    ret = PrintStructuredDataInterface(iobuff, structuredData, nodeLevel);
+                    ret = PrintStructuredDataInterface(iobuff, structuredData, fd, nodeLevel);
                 }
                 if (ret) {
                     ret = (structuredData->MoveToAncestor(1u));
@@ -763,13 +786,13 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                     //AnyType printClose[] = {"}", voidAnyType};
                     //ret = (iobuff.PrintFormatted("%s\r\n", &printClose[0]));
                     ret=PrintCloseBlock(iobuff, childName, fd);
-                    if(ret){
-                        if(j!=(numberOfChildren-1u)){
+                    if(ret) {
+                        if(i<(numberOfChildren-1u)) {
                             ret=PrintBlockSeparator(iobuff, fd);
-                            if(ret){
-                                AnyType noneType = voidAnyType;
-                                ret = (iobuff.PrintFormatted("\r\n", &noneType));
-                            }
+                        }
+                        if(ret) {
+                            AnyType noneType = voidAnyType;
+                            ret = (iobuff.PrintFormatted("\r\n", &noneType));
                         }
                     }
                 }
@@ -1209,7 +1232,9 @@ static bool PrintToStreamVector(IOBuffer & iobuff,
 
         ret = PrintToStreamScalar(iobuff, scalar, fd);
         if (ret) {
-            ret = PrintScalarSeparator(iobuff, fd);
+            if (i < (numberOfElements - 1u)) {
+                ret = PrintScalarSeparator(iobuff, fd);
+            }
             if (ret) {
                 ret = iobuff.PutC(' ');
             }
@@ -1268,14 +1293,16 @@ static bool PrintToStreamMatrix(IOBuffer & iobuff,
                 vector.SetStaticDeclared(parIn.IsStaticDeclared());
                 ret = PrintToStreamVector(iobuff, vector, fd);
                 if(ret) {
-                    ret=PrintVectorSeparator(iobuff, fd);
+                    if(i<(numberOfRows-1u)) {
+                        ret=PrintVectorSeparator(iobuff, fd);
+                    }
                 }
             }
         }
 
     }
     if (ret) {
-        ret = PrintCloseMatrix(iobuff, newFD);
+        ret = PrintCloseMatrix(iobuff, fd);
     }
     if (ret) {
         ret = iobuff.PutC(' ');

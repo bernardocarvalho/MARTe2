@@ -31,6 +31,7 @@ OBJSX=  AdvancedErrorManagementGTest.x \
 	DoubleBufferedStreamGTest.x \
 	IOBufferGTest.x \
 	MultiStreamGTest.x\
+	SenderStructuredDataGTest.x\
 	SingleBufferedStreamGTest.x \
 	StreamMemoryReferenceGTest.x \
 	StreamStringGTest.x \

@@ -1367,6 +1367,7 @@ bool IOBufferTest::TestPrintFormatted_Stream() {
         AnyType toPrint = stream;
         ioBuffer.PrintFormatted(printfStreamTable[i][0], &toPrint);
         if (StringHelper::Compare(ioBuffer.Buffer(), printfStreamTable[i][2]) != 0) {
+            printf("|%s| |%s|", ioBuffer.Buffer(), printfStreamTable[i][2]);
             return false;
         }
         stream.FlushAndResync();
@@ -1781,19 +1782,19 @@ bool IOBufferTest::TestPrintStructuredDataInterface() {
     cdb.MoveToRoot();
 
     IOBuffer ioBuffer;
-    uint32 allocationSize = 64;
+    uint32 allocationSize = 128;
     ioBuffer.SetBufferHeapMemory(allocationSize, 0);
     Clear(ioBuffer);
-    AnyType toPrint(cdb);
+    AnyType toPrint(*(StructuredDataI*)(&cdb));
     ioBuffer.PrintFormatted("%s", &toPrint);
     const char8* test = "A = {\r\n"
-            "B = {\r\n"
-            "x = +1\r\n"
-            "y = +2\r\n"
-            "}\r\n"
-            "C = {\r\n"
-            "z = +3\r\n"
-            "}\r\n"
+            "    B = {\r\n"
+            "        x = +1\r\n"
+            "        y = +2\r\n"
+            "    }\r\n"
+            "    C = {\r\n"
+            "        z = +3\r\n"
+            "    }\r\n"
             "}\r\n";
 
     printf("\r\n%s\r\n", ioBuffer.Buffer());

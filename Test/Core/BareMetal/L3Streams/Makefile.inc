@@ -32,6 +32,7 @@ OBJSX=	AdvancedErrorManagementTest.x \
 	DoubleBufferedStreamTest.x \
 	IOBufferTest.x \
 	MultiStreamTest.x\
+	SenderStructuredDataTest.x\
 	SingleBufferedStreamTest.x \
 	StreamMemoryReferenceTest.x \
 	StreamStringIOBufferTest.x \

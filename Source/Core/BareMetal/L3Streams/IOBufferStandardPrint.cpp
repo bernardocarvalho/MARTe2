@@ -31,7 +31,7 @@
 
 #include "IOBuffer.h"
 #include "AnyType.h"
-
+#include "StringHelper.h"
 /*---------------------------------------------------------------------------*/
 /*                           definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -52,11 +52,11 @@ bool PrintStandardCloseMatrix(IOBuffer &iobuff) {
 }
 
 bool PrintStandardScalarSeparator(IOBuffer &iobuff) {
-    return iobuff.PutC(',');
+    return true;
 }
 
 bool PrintStandardVectorSeparator(IOBuffer &iobuff) {
-    return iobuff.PutC(',');
+    return true;
 }
 
 
@@ -72,7 +72,7 @@ bool PrintStandardCloseVector(IOBuffer &iobuff) {
 
 bool PrintStandardOpenBlock(IOBuffer &iobuff, const char8 *blockName) {
     AnyType at[]={blockName, voidAnyType};
-    iobuff.PrintFormatted("%s = {", at);
+    return iobuff.PrintFormatted("%s = {", at);
 }
 
 bool PrintStandardCloseBlock(IOBuffer &iobuff) {
