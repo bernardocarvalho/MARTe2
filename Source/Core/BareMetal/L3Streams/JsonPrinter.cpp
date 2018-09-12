@@ -39,11 +39,17 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+namespace MARTe {
 
-JsonPrinter::JsonPrinter(BufferedStreamI & streamIn): PrinterI(streamIn) {
+JsonPrinter::JsonPrinter(BufferedStreamI & streamIn) :
+        PrinterI(streamIn) {
     // Auto-generated constructor stub for JsonPrinter
     // TODO Verify if manual additions are needed
+}
+
+JsonPrinter::JsonPrinter() :
+        PrinterI() {
+
 }
 
 JsonPrinter::~JsonPrinter() {
@@ -51,56 +57,55 @@ JsonPrinter::~JsonPrinter() {
     // TODO Verify if manual additions are needed
 }
 
-
-bool JsonPrinter::PrintOpenMatrix(){
+bool JsonPrinter::PrintOpenMatrix() {
     return stream->Printf("%s", "[");
 }
 
-bool JsonPrinter::PrintCloseMatrix(){
+bool JsonPrinter::PrintCloseMatrix() {
     return stream->Printf("%s", "]");
 }
 
-bool JsonPrinter::PrintScalarSeparator(){
+bool JsonPrinter::PrintScalarSeparator() {
     return stream->Printf("%s", ",");
 }
 
-bool JsonPrinter::PrintVectorSeparator(){
+bool JsonPrinter::PrintVectorSeparator() {
     return stream->Printf("%s", ",");
 }
 
-bool JsonPrinter::PrintVariableSeparator(){
+bool JsonPrinter::PrintVariableSeparator() {
     return stream->Printf("%s", ",");
 }
 
-bool JsonPrinter::PrintBlockSeparator(){
+bool JsonPrinter::PrintBlockSeparator() {
     return stream->Printf("%s", ",");
 }
 
-bool JsonPrinter::PrintOpenVector(){
+bool JsonPrinter::PrintOpenVector() {
     return stream->Printf("%s", "[");
 }
 
-bool JsonPrinter::PrintCloseVector(){
+bool JsonPrinter::PrintCloseVector() {
     return stream->Printf("%s", "]");
 }
 
-bool JsonPrinter::PrintOpenBlock(const char8 *blockName){
+bool JsonPrinter::PrintOpenBlock(const char8 *blockName) {
     return stream->Printf("\"%s\": {", blockName);
 }
 
-bool JsonPrinter::PrintCloseBlock(const char8 *blockName){
+bool JsonPrinter::PrintCloseBlock(const char8 *blockName) {
     return stream->Printf("%s", "}");
 }
 
-bool JsonPrinter::PrintOpenAssignment(const char8 *varName){
+bool JsonPrinter::PrintOpenAssignment(const char8 *varName) {
     return stream->Printf("\"%s\": ", varName);
 }
 
-bool JsonPrinter::PrintCloseAssignment(const char8 *varName){
+bool JsonPrinter::PrintCloseAssignment(const char8 *varName) {
     return true;
 }
 
-bool JsonPrinter::PrintVariable(AnyType var){
+bool JsonPrinter::PrintVariable(AnyType var) {
     return stream->Printf("%#J!", var);
 }
 }

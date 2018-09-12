@@ -41,6 +41,8 @@ namespace MARTe{
 
 class StandardPrinter: public PrinterI {
 public:
+    StandardPrinter();
+
     StandardPrinter(BufferedStreamI & streamIn);
 
     virtual ~StandardPrinter();
@@ -70,6 +72,7 @@ public:
     virtual bool PrintCloseAssignment(const char8 *varName);
 
     virtual bool PrintVariable(AnyType var);
+
 };
 
 }

@@ -24,7 +24,7 @@
 #
 #############################################################
 
-OBJSX=  HttpStreamGTest.x
+OBJSX=  HttpStreamGTest.x HttpServiceGTest.x
 		
 PACKAGE=GTest/FileSystem
 ROOT_DIR=../../../..
@@ -38,7 +38,9 @@ INCLUDES += -I../../../Core/BareMetal/L1Portability
 INCLUDES += -I../../../Core/BareMetal/L2Objects
 INCLUDES += -I../../../Core/BareMetal/L3Streams
 INCLUDES += -I../../../Core/BareMetal/L4Configuration
+INCLUDES += -I../../../Core/BareMetal/L4Messages
 INCLUDES += -I../../../Core/Scheduler/L1Portability
+INCLUDES += -I../../../Core/Scheduler/L3Services
 INCLUDES += -I../../../Core/FileSystem/L1Portability
 INCLUDES += -I../../../Core/FileSystem/L3Streams
 INCLUDES += -I../../../Core/FileSystem/L4HttpService
@@ -49,7 +51,9 @@ INCLUDES += -I../../../../Source/Core/BareMetal/L2Objects
 INCLUDES += -I../../../../Source/Core/BareMetal/L3Streams
 INCLUDES += -I../../../../Source/Core/BareMetal/L4Configuration
 INCLUDES += -I../../../../Source/Core/BareMetal/L4HttpService
+INCLUDES += -I../../../../Source/Core/BareMetal/L4Messages
 INCLUDES += -I../../../../Source/Core/Scheduler/L1Portability
+INCLUDES += -I../../../../Source/Core/Scheduler/L3Services
 INCLUDES += -I../../../../Source/Core/FileSystem/L1Portability
 INCLUDES += -I../../../../Source/Core/FileSystem/L3Streams
 INCLUDES += -I../../../../Source/Core/FileSystem/L4LoggerService

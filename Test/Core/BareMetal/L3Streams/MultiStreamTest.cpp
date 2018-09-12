@@ -47,7 +47,7 @@ public:
 
     virtual bool Commit(const char8 *varName);
 
-    virtual bool Delete(const char8 *varName);
+    virtual bool DeleteStream(const char8 *varName);
 
     virtual void GetCurrentPath(StreamString &path);
 
@@ -79,7 +79,7 @@ bool MultiStreamTestDS::Commit(const char8 *varName){
     return true;
 }
 
-bool MultiStreamTestDS::Delete(const char8 *varName){
+bool MultiStreamTestDS::DeleteStream(const char8 *varName){
     return true;
 }
 

@@ -85,6 +85,10 @@ public:
 
     bool TestWriteHeader_Reply2();
 
+    bool TestWriteHeader_StrucuredDataStored();
+
+    bool TestWriteHeader_StrucuredDataOnline();
+
     bool TestSecurityCheck();
 
     bool TestKeepAliveDefault();

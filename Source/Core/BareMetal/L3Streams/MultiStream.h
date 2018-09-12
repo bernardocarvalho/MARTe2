@@ -51,7 +51,7 @@ public:
 
     virtual bool Commit(const char8 *varName)=0;
 
-    virtual bool Delete(const char8 *varName)=0;
+    virtual bool DeleteStream(const char8 *varName)=0;
 
     virtual void GetCurrentPath(StreamString &path)=0;
 

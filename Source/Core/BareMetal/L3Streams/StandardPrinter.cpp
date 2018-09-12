@@ -46,6 +46,10 @@ StandardPrinter::StandardPrinter(BufferedStreamI & streamIn): PrinterI(streamIn)
     // TODO Verify if manual additions are needed
 }
 
+StandardPrinter::StandardPrinter():PrinterI(){
+
+}
+
 StandardPrinter::~StandardPrinter() {
     // Auto-generated destructor stub for StandardPrinter
     // TODO Verify if manual additions are needed

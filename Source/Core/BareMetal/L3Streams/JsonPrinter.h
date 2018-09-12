@@ -40,6 +40,8 @@ namespace MARTe{
 
 class JsonPrinter: public PrinterI {
 public:
+    JsonPrinter();
+
     JsonPrinter(BufferedStreamI & streamIn);
 
     virtual ~JsonPrinter();
@@ -69,6 +71,8 @@ public:
     virtual bool PrintCloseAssignment(const char8 *varName);
 
     virtual bool PrintVariable(AnyType var);
+
+
 };
 
 }

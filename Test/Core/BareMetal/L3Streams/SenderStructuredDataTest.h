@@ -52,6 +52,15 @@ struct SenderStructuredDataTestWriteStruct {
     StreamString desResult;
 };
 
+struct SenderStructuredDataTestAddToCurrentNodeStruct {
+    Reference toAdd;
+    const char8 ** movements;
+    bool *expected;
+    StreamString desResult;
+    uint32 nMoveUps;
+    uint32 *index;
+};
+
 template<class Printer>
 class SenderStructuredDataTest {
 public:
@@ -66,29 +75,29 @@ public:
 
     bool TestCopy();
 
-    bool TestAddToCurrentNode();
+    bool TestAddToCurrentNode(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToRoot();
+    bool TestMoveToRoot(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToAncestor();
+    bool TestMoveToAncestor(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveAbsolute();
+    bool TestMoveAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveRelative();
+    bool TestMoveRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToChild();
+    bool TestMoveToChild(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestCreateAbsolute();
+    bool TestCreateAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestCreateRelative();
+    bool TestCreateRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
     bool TestDelete();
 
-    bool TestGetName();
+    bool TestGetName(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestGetChildName();
+    bool TestGetChildName(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestGetNumberOfChildren();
+    bool TestGetNumberOfChildren(SenderStructuredDataTestAddToCurrentNodeStruct *table);
 
 };
 /*---------------------------------------------------------------------------*/
@@ -137,8 +146,8 @@ bool SenderStructuredDataTest<Printer>::TestWrite(SenderStructuredDataTestWriteS
         i++;
     }
 
-    if(ret){
-        ret=string==table->desResult;
+    if (ret) {
+        ret = string == table->desResult;
         printf("|%s||%s| %lld %lld\n", string.Buffer(), table->desResult.Buffer(), string.Size(), table->desResult.Size());
 
     }
@@ -158,87 +167,229 @@ bool SenderStructuredDataTest<Printer>::TestCopy() {
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestAddToCurrentNode() {
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
-    a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
-    b->SetName("B");
-    a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
-    c->SetName("C");
-    a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
-    d->SetName("D");
-    c->Insert(d);
-
+bool SenderStructuredDataTest<Printer>::TestAddToCurrentNode(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<JsonPrinter> test(string);
+    SenderStructuredData<Printer> test(string);
 
-    test.AddToCurrentNode(a);
+    bool ret = test.AddToCurrentNode(table->toAdd);
 
-    test.MoveAbsolute("A.C.D");
-    test.MoveAbsolute("A.B");
-    test.MoveAbsolute("A.C.D");
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveAbsolute(table->movements[i])==table->expected[i]);
+        i++;
+    }
 
-    printf("%s\n", string.Buffer());
-    return true;
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToRoot() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestMoveToRoot(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveAbsolute(table->movements[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = test.MoveToRoot();
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToAncestor() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestMoveToAncestor(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveAbsolute(table->movements[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = test.MoveToAncestor(table->nMoveUps);
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveAbsolute() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestMoveAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    return TestAddToCurrentNode(table);
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveRelative() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestMoveRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveRelative(table->movements[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToChild() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestMoveToChild(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveToChild(table->index[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestCreateAbsolute() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestCreateAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = true;
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.CreateAbsolute(table->movements[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestCreateRelative() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestCreateRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = true;
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.CreateRelative(table->movements[i])==table->expected[i]);
+        i++;
+    }
+
+    if (ret) {
+        ret = (string == table->desResult);
+    }
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
 bool SenderStructuredDataTest<Printer>::TestDelete() {
-    return true;
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    return !test.Delete("boh");
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetName() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestGetName(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(test.MoveToChild(table->index[i])==table->expected[i]);
+        if(ret) {
+            ret=(StringHelper::Compare(test.GetName(),table->movements[i])==0);
+        }
+        i++;
+    }
+
+    return ret;
+
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetChildName() {
-    return true;
+bool SenderStructuredDataTest<Printer>::TestGetChildName(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    test.MoveToChild(0);
+
+    uint32 i = 0u;
+    while ((table->movements[i] != NULL) && (ret)) {
+        ret=(StringHelper::Compare(test.GetChildName(table->index[i]),table->movements[i])==0);
+        i++;
+    }
+
+    printf("|%s||%s|\n", string.Buffer(), table->desResult.Buffer());
+
+    return ret;
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetNumberOfChildren() {
-    return true;
-}
+bool SenderStructuredDataTest<Printer>::TestGetNumberOfChildren(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
 
+    StreamString string;
+    SenderStructuredData<Printer> test(string);
+
+    bool ret = test.AddToCurrentNode(table->toAdd);
+
+    test.MoveToChild(0);
+
+    if (ret) {
+        ret = test.GetNumberOfChildren() == table->nMoveUps;
+    }
+
+    return ret;
+}
 
 #endif /* TEST_CORE_BAREMETAL_L3STREAMS_SENDERSTRUCTUREDDATATEST_H_ */
 

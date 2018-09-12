@@ -1,7 +1,7 @@
 /**
- * @file StructuredDataStream.h
- * @brief Header file for class StructuredDataStream
- * @date 17 ago 2018
+ * @file HttpServiceTest.h
+ * @brief Header file for class HttpServiceTest
+ * @date 12 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class StructuredDataStream
+ * @details This header file contains the declaration of the class HttpServiceTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef STRUCTUREDDATASTREAM_H_
-#define STRUCTUREDDATASTREAM_H_
+#ifndef HTTPSERVICETEST_H_
+#define HTTPSERVICETEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,49 +31,41 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StreamString.h"
-#include "StructuredDataI.h"
-#include "AnyType.h"
+#include "HttpService.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
+using namespace MARTe;
 
-
-namespace MARTe {
-
-
-class StructuredDataStream: public StreamString {
+class HttpServiceTest {
 public:
-    StructuredDataStream();
+    HttpServiceTest();
+    virtual ~HttpServiceTest();
 
-    virtual ~StructuredDataStream();
+    bool TestConstructor();
 
-    virtual bool Switch(const char8 *path);
+    bool TestInitialise();
 
-    virtual bool Load(const char8 *varName);
+    bool TestInitialise_DefaultWebRoot();
 
-    virtual bool Commit(const char8 *varName);
+    bool TestInitialise_FalseNoDefaultWebRoot();
 
-    virtual bool DeleteStream(const char8 *varName);
+    bool TestInitialise_DefaultNListenConnections();
 
-    virtual void GetCurrentPath(StreamString &path);
+    bool TestInitialise_DefaultRelyUrl();
 
-    virtual bool SwitchPrintAndCommit(const char8* path, const char8* varName, const char8* format, const AnyType pars[]);
+    bool TestInitialise_DefaultPort();
 
-protected:
+    bool TestServerCycle();
 
-    StructuredDataI *data;
-
-    StreamString nodeName;
-    StreamString leafName;
-
+    bool TestClientService();
 };
 
-}
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* STRUCTUREDDATASTREAM_H_ */
+#endif /* HTTPSERVICETEST_H_ */
 

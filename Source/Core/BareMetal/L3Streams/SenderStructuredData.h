@@ -208,6 +208,10 @@ public:
 
 protected:
 
+    SenderStructuredData();
+
+    virtual void SetStream(BufferedStreamI &streamIn);
+
     BufferedStreamI *stream;
 
     //accelerators
@@ -223,6 +227,7 @@ protected:
     StreamString middleBuffer;
 
     Printer printer;
+    bool blockCloseState;
 };
 
 }
@@ -251,7 +256,43 @@ SenderStructuredData<Printer>::SenderStructuredData(BufferedStreamI &streamIn) :
     if (streamDouble != NULL) {
         bufferType=2u;
     }
+    blockCloseState = false;
+}
 
+template<class Printer>
+SenderStructuredData<Printer>::SenderStructuredData() :
+        treeDescriptor(GlobalObjectsDatabase::Instance()->GetStandardHeap()),
+        printer() {
+
+    stream = NULL;
+
+    currentNode = treeDescriptor;
+
+    //accelerators
+    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
+    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
+    bufferType = 0u;
+    streamSingle = NULL;
+    streamDouble = NULL;
+
+    blockCloseState = false;
+}
+
+template<class Printer>
+void SenderStructuredData<Printer>::SetStream(BufferedStreamI &streamIn) {
+    stream = &streamIn;
+    printer.SetStream(streamIn);
+
+    //accelerators
+    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
+    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
+    bufferType = 0u;
+    if (streamSingle != NULL) {
+        bufferType=1u;
+    }
+    if (streamDouble != NULL) {
+        bufferType=2u;
+    }
 }
 
 template<class Printer>
@@ -332,13 +373,14 @@ bool SenderStructuredData<Printer>::MoveToRoot() {
     uint32 pathSize = path.Size();
     bool ret = (pathSize > 0u);
     for (uint32 i = 0u; (i < pathSize) && (ret); i++) {
-        ReferenceT<NodeName> ref = path.Get(i);
+        ReferenceT<NodeName> ref = path.Get(pathSize - i - 1u);
         ret = ref.IsValid();
         if (ret) {
             ref->isClosed = 1u;
             ret = stream->Printf("%s", "\n\r");
             if (ret) {
                 ret = printer.PrintCloseBlock(ref->GetName());
+                blockCloseState = true;
             }
         }
     }
@@ -389,13 +431,14 @@ bool SenderStructuredData<Printer>::MoveToAncestor(uint32 generations) {
                 }
             }
             else {
-                ReferenceT<NodeName> ref = path.Get(i);
+                ReferenceT<NodeName> ref = path.Get(pathSize - i + goodOnes - 1u);
                 ret = (ref.IsValid());
                 if (ret) {
                     ref->isClosed = 1u;
                     ret = stream->Printf("%s", "\n\r");
                     if (ret) {
                         ret = printer.PrintCloseBlock(ref->GetName());
+                        blockCloseState = true;
                     }
                 }
             }
@@ -461,14 +504,17 @@ bool SenderStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
             //close nodes and braces
             uint32 exitIndex = i;
             bool blocksClosed = (exitIndex < pathSize);
-            for (uint32 j = exitIndex; (j < pathSize) && (ret); j++) {
-                ReferenceT<NodeName> ref = result.Get(j);
-                ret = (ref.IsValid());
-                if (ret) {
-                    ref->isClosed = 1u;
-                    ret = stream->Printf("%s", "\n\r");
+            if (pathSize > 0u) {
+                for (uint32 j = (pathSize - 1u); (j >= exitIndex) && (ret); j--) {
+                    ReferenceT<NodeName> ref = result.Get(j);
+                    ret = (ref.IsValid());
                     if (ret) {
-                        ret = printer.PrintCloseBlock(ref->GetName());
+                        ref->isClosed = 1u;
+                        ret = stream->Printf("%s", "\n\r");
+                        if (ret) {
+                            ret = printer.PrintCloseBlock(ref->GetName());
+                            blockCloseState = true;
+                        }
                     }
                 }
             }
@@ -479,13 +525,14 @@ bool SenderStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
                 ret = (ref.IsValid());
                 if (ret) {
                     if (j == exitIndex) {
-                        if (blocksClosed) {
+                        if (blockCloseState) {
                             ret = printer.PrintBlockSeparator();
                         }
                     }
                     ret = stream->Printf("%s", "\n\r");
                     if (ret) {
                         ret = printer.PrintOpenBlock(ref->GetName());
+                        blockCloseState = false;
                     }
                 }
             }
@@ -521,6 +568,9 @@ bool SenderStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
 template<class Printer>
 bool SenderStructuredData<Printer>::MoveRelative(const char8 * const path) {
     StreamString totalPath = currentPath;
+    if (currentPath.Size() > 0u) {
+        totalPath += ".";
+    }
     totalPath += path;
     return MoveAbsolute(totalPath.Buffer());
 
@@ -538,9 +588,11 @@ bool SenderStructuredData<Printer>::MoveToChild(const uint32 childIdx) {
         ret = stream->Printf("%s", "\n\r");
         if (ret) {
             ret = printer.PrintOpenBlock(child->GetName());
+            blockCloseState = false;
         }
         if (ret) {
             currentPath += child->GetName();
+            currentNode = child;
         }
         if (ret) {
             if (bufferType == 1u) {
@@ -600,6 +652,9 @@ bool SenderStructuredData<Printer>::CreateAbsolute(const char8 * const path) {
 template<class Printer>
 bool SenderStructuredData<Printer>::CreateRelative(const char8 * const path) {
     StreamString totalPath = (currentPath);
+    if (currentPath.Size() > 0u) {
+        totalPath += ".";
+    }
     totalPath += path;
     return CreateAbsolute(totalPath.Buffer());
 }

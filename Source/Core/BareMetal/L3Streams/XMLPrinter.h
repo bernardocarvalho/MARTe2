@@ -1,7 +1,7 @@
 /**
- * @file StructuredDataStream.h
- * @brief Header file for class StructuredDataStream
- * @date 17 ago 2018
+ * @file XMLPrinter.h
+ * @brief Header file for class XMLPrinter
+ * @date 07 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class StructuredDataStream
+ * @details This header file contains the declaration of the class XMLPrinter
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef STRUCTUREDDATASTREAM_H_
-#define STRUCTUREDDATASTREAM_H_
+#ifndef XMLPRINTER_H_
+#define XMLPRINTER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,42 +31,50 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StreamString.h"
-#include "StructuredDataI.h"
-#include "AnyType.h"
+
+/*---------------------------------------------------------------------------*/
+/*                           Class declaration                               */
+/*---------------------------------------------------------------------------*/
+#include "PrinterI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
+namespace MARTe{
 
-
-namespace MARTe {
-
-
-class StructuredDataStream: public StreamString {
+class XMLPrinter: public PrinterI {
 public:
-    StructuredDataStream();
+    XMLPrinter();
 
-    virtual ~StructuredDataStream();
+    XMLPrinter(BufferedStreamI & streamIn);
 
-    virtual bool Switch(const char8 *path);
+    virtual ~XMLPrinter();
 
-    virtual bool Load(const char8 *varName);
+    virtual bool PrintOpenMatrix();
 
-    virtual bool Commit(const char8 *varName);
+    virtual bool PrintCloseMatrix();
 
-    virtual bool DeleteStream(const char8 *varName);
+    virtual bool PrintScalarSeparator();
 
-    virtual void GetCurrentPath(StreamString &path);
+    virtual bool PrintVectorSeparator();
 
-    virtual bool SwitchPrintAndCommit(const char8* path, const char8* varName, const char8* format, const AnyType pars[]);
+    virtual bool PrintVariableSeparator();
 
-protected:
+    virtual bool PrintBlockSeparator();
 
-    StructuredDataI *data;
+    virtual bool PrintOpenVector();
 
-    StreamString nodeName;
-    StreamString leafName;
+    virtual bool PrintCloseVector();
+
+    virtual bool PrintOpenBlock(const char8 *blockName);
+
+    virtual bool PrintCloseBlock(const char8 *blockName);
+
+    virtual bool PrintOpenAssignment(const char8 *varName);
+
+    virtual bool PrintCloseAssignment(const char8 *varName);
+
+    virtual bool PrintVariable(AnyType var);
 
 };
 
@@ -75,5 +83,5 @@ protected:
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* STRUCTUREDDATASTREAM_H_ */
+#endif /* SOURCE_CORE_BAREMETAL_L3STREAMS_XMLPRINTER_H_ */
 

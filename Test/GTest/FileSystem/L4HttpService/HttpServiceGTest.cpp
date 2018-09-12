@@ -1,7 +1,7 @@
 /**
- * @file XMLPrinter.cpp
- * @brief Source file for class XMLPrinter
- * @date 07 set 2018
+ * @file HttpServiceGTest.cpp
+ * @brief Source file for class HttpServiceGTest
+ * @date 12 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class XMLPrinter (public, protected, and private). Be aware that some 
+ * the class HttpServiceGTest (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,7 +29,14 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "XMLPrinter.h"
+
+#include <limits.h>
+#include "gtest/gtest.h"
+
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+#include "HttpServiceTest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -38,74 +45,49 @@
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
+TEST(HttpServiceGTest, TestConstructor) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestConstructor());
+}
 
-namespace MARTe{
+TEST(HttpServiceGTest, TestInitialise) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise());
+}
 
-XMLPrinter::XMLPrinter(BufferedStreamI & streamIn): PrinterI(streamIn) {
-    // Auto-generated constructor stub for XMLPrinter
-    // TODO Verify if manual additions are needed
+TEST(HttpServiceGTest, TestInitialise_DefaultWebRoot) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise_DefaultWebRoot());
+}
+
+TEST(HttpServiceGTest, TestInitialise_FalseNoDefaultWebRoot) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise_FalseNoDefaultWebRoot());
 }
 
 
-XMLPrinter::XMLPrinter(): PrinterI(){
-
+TEST(HttpServiceGTest, TestInitialise_DefaultNListenConnections) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise_DefaultNListenConnections());
 }
 
-XMLPrinter::~XMLPrinter() {
-    // Auto-generated destructor stub for XMLPrinter
-    // TODO Verify if manual additions are needed
+TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
 }
 
-
-bool XMLPrinter::PrintOpenMatrix(){
-    return stream->Printf("%s", "[");
+TEST(HttpServiceGTest, TestServerCycle) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestServerCycle());
 }
 
-bool XMLPrinter::PrintCloseMatrix(){
-    return stream->Printf("%s", "]");
+TEST(HttpServiceGTest, TestClientService) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService());
 }
 
-bool XMLPrinter::PrintScalarSeparator(){
-    return stream->Printf("%s", ",");
+TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestInitialise_DefaultPort());
 }
 
-bool XMLPrinter::PrintVectorSeparator(){
-    return stream->Printf("%s", ",");
-}
-
-bool XMLPrinter::PrintVariableSeparator(){
-    return true;
-}
-
-bool XMLPrinter::PrintBlockSeparator(){
-    return true;
-}
-
-bool XMLPrinter::PrintOpenVector(){
-    return stream->Printf("%s", "[");
-}
-
-bool XMLPrinter::PrintCloseVector(){
-    return stream->Printf("%s", "]");
-}
-
-bool XMLPrinter::PrintOpenBlock(const char8 *blockName){
-    return stream->Printf("<%s>", blockName);
-}
-
-bool XMLPrinter::PrintCloseBlock(const char8 *blockName){
-    return stream->Printf("</%s>",blockName);
-}
-
-bool XMLPrinter::PrintOpenAssignment(const char8 *varName){
-    return stream->Printf("<%s>", varName);
-}
-
-bool XMLPrinter::PrintCloseAssignment(const char8 *varName){
-    return stream->Printf("</%s>", varName);
-}
-
-bool XMLPrinter::PrintVariable(AnyType var){
-    return stream->Printf("%#X!", var);
-}
-}

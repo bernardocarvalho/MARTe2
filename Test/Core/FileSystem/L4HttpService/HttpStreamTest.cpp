@@ -974,7 +974,7 @@ static void clientJobWrite2(HttpStreamTest &tt) {
         tt.eventSem.Wait();
         tt.eventSem.Reset();
         test.Switch("OutputHttpOtions");
-        test.Delete("Transfer-Encoding");
+        test.DeleteStream("Transfer-Encoding");
         test.Switch("");
 
         test.SetSize(0);
@@ -985,6 +985,335 @@ static void clientJobWrite2(HttpStreamTest &tt) {
     tt.eventSem.Post();
     socket.Close();
     Threads::EndThread();
+}
+
+static void clientJobWriteStructuredStored(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+        HttpStream test(socket);
+        AnyType at[] = { "chunked" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Transfer-Encoding", "%s", at);
+        AnyType at1[] = { "application/x-www-form-urlencoded" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at1);
+        test.SetSize(0);
+        test.Printf("%s", "ciao");
+        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        tt.eventSem.Wait();
+        tt.eventSem.Reset();
+        test.Switch("OutputHttpOtions");
+        test.DeleteStream("Transfer-Encoding");
+        test.Switch("");
+
+        test.SetSize(0);
+        test.Printf("%s", "bellooo\n");
+
+        test.CreateAbsolute("A.B.C");
+        test.CreateAbsolute("A.D");
+        test.CreateAbsolute("A.E.F");
+        test.MoveAbsolute("A.B.C");
+        uint32 var1 = 1u;
+        test.Write("var1", var1);
+
+        test.MoveAbsolute("A.D");
+        uint32 var2 = 2u;
+        test.Write("var2", var2);
+
+        test.MoveAbsolute("A.E.F");
+        uint32 var3 = 3u;
+        test.Write("var3", var3);
+
+        //test.WriteStructuredDataOnSocket();
+
+        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpStreamTest::TestWriteHeader_StrucuredDataStored() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCReplyOK;
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    Threads::BeginThread((ThreadFunctionType) clientJobWriteStructuredStored, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained, 10);
+    }
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+    /*
+     if (ret) {
+     ret = cdb->MoveAbsolute("InputHttpOptions");
+     StreamString par;
+     ret &= cdb->Read("Transfer-Encoding", par);
+     ret &= (par == "chunked");
+     par.SetSize(0);
+     }
+     */
+    eventSem.Post();
+
+    StreamString remained2;
+    if (ret) {
+        ret = test.ReadHeader();
+        if (ret) {
+            ret = test.CompleteReadOperation(&remained2);
+        }
+    }
+
+    eventSem.Wait();
+
+    cdb->MoveToRoot();
+    StreamString output2;
+    output2.Printf("%@", *cdb);
+    printf("%s\n", output2.Buffer());
+
+    printf("%s\n", remained.Buffer());
+    printf("|%s||%s|\n", remained2.Buffer(), "bellooo\n"
+           "\"A\": {\r\n"
+           "    \"B\": {\r\n"
+           "        \"C\": {\r\n"
+           "            \"var1\": +1\r\n"
+           "        }\r\n"
+           "    },\r\n"
+           "    \"D\": {\r\n"
+           "        \"var2\": +2\r\n"
+           "    },\r\n"
+           "    \"E\": {\r\n"
+           "        \"F\": {\r\n"
+           "            \"var3\": +3\r\n"
+           "        }\r\n"
+           "    }\r\n"
+           "}\r\n");
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "200");
+        par.SetSize(0);
+    }
+    if (ret) {
+
+        ret = (remained == "ciao");
+        if (ret) {
+            ret = (remained2 == "bellooo\n"
+                    "\"A\": {\r\n"
+                    "    \"B\": {\r\n"
+                    "        \"C\": {\r\n"
+                    "            \"var1\": +1\r\n"
+                    "        }\r\n"
+                    "    },\r\n"
+                    "    \"D\": {\r\n"
+                    "        \"var2\": +2\r\n"
+                    "    },\r\n"
+                    "    \"E\": {\r\n"
+                    "        \"F\": {\r\n"
+                    "            \"var3\": +3\r\n"
+                    "        }\r\n"
+                    "    }\r\n"
+                    "}\r\n");
+        }
+    }
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
+}
+
+static void clientJobWriteStructuredOnline(HttpStreamTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+        HttpStream test(socket, false);
+        AnyType at[] = { "chunked" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Transfer-Encoding", "%s", at);
+        AnyType at1[] = { "application/x-www-form-urlencoded" };
+        test.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at1);
+        test.SetSize(0);
+        test.Printf("%s", "ciao");
+        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        tt.eventSem.Wait();
+        tt.eventSem.Reset();
+        test.Switch("OutputHttpOtions");
+        test.DeleteStream("Transfer-Encoding");
+        test.Switch("");
+
+        test.SetSize(0);
+        test.Printf("%s", "bellooo");
+
+        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        test.CreateAbsolute("A.B.C");
+        uint32 var1 = 1u;
+        test.Write("var1", var1);
+        test.CreateAbsolute("A.D");
+        uint32 var2 = 2u;
+        test.Write("var2", var2);
+        test.CreateAbsolute("A.E.F");
+        uint32 var3 = 3u;
+        test.Write("var3", var3);
+        test.MoveToRoot();
+
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpStreamTest::TestWriteHeader_StrucuredDataOnline() {
+    retVal = true;
+    eventSem.Reset();
+    command = HSHCReplyOK;
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    Threads::BeginThread((ThreadFunctionType) clientJobWriteStructuredOnline, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpStream test(newSocket);
+    bool ret = test.ReadHeader();
+
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained, 10);
+    }
+
+    ConfigurationDatabase *cdb = test.GetData();
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+    /*
+     if (ret) {
+     ret = cdb->MoveAbsolute("InputHttpOptions");
+     StreamString par;
+     ret &= cdb->Read("Transfer-Encoding", par);
+     ret &= (par == "chunked");
+     par.SetSize(0);
+     }
+     */
+    eventSem.Post();
+
+    StreamString remained2;
+    if (ret) {
+        ret = test.ReadHeader();
+        if (ret) {
+            ret = test.CompleteReadOperation(&remained2);
+        }
+    }
+
+    eventSem.Wait();
+
+    cdb->MoveToRoot();
+    StreamString output2;
+    output2.Printf("%@", *cdb);
+    printf("%s\n", output2.Buffer());
+
+    printf("%s\n", remained.Buffer());
+    printf("|%s||%s|\n", remained2.Buffer(), "bellooo\n\r"
+           "\"A\": {\n\r"
+           "\"B\": {\n\r"
+           "\"C\": {\n\r"
+           "\"var1\": +1\n\r"
+           "}\n\r"
+           "},\n\r"
+           "\"D\": {\n\r"
+           "\"var2\": +2\n\r"
+           "},\r\n"
+           "\"E\": {\n\r"
+           "\"F\": {\n\r"
+           "\"var3\": +3\n\r"
+           "}\n\r"
+           "}\n\r"
+           "}");
+
+    if (ret) {
+
+        ret = (remained == "ciao");
+        if (ret) {
+            ret = (remained2 == "bellooo\n\r"
+                    "\"A\": {\n\r"
+                    "\"B\": {\n\r"
+                    "\"C\": {\n\r"
+                    "\"var1\": +1\n\r"
+                    "}\n\r"
+                    "},\n\r"
+                    "\"D\": {\n\r"
+                    "\"var2\": +2\n\r"
+                    "},\n\r"
+                    "\"E\": {\n\r"
+                    "\"F\": {\n\r"
+                    "\"var3\": +3\n\r"
+                    "}\n\r"
+                    "}\n\r"
+                    "}");
+        }
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
 }
 
 bool HttpStreamTest::TestWriteHeader() {
@@ -1505,12 +1834,11 @@ bool HttpStreamTest::TestGetUnmatchedUrl() {
     return (ret && TestSetUnmatchedUrl());
 }
 
-
-bool HttpStreamTest::TestGetPath(){
+bool HttpStreamTest::TestGetPath() {
     return TestReadHeader_Get1();
 }
 
-bool HttpStreamTest::TestGetUrl(){
+bool HttpStreamTest::TestGetUrl() {
     return TestReadHeader_Get1();
 }
 

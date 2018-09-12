@@ -47,7 +47,10 @@ using namespace HttpDefinition;
 
 //#define NULL_PTR(x) NULL
 
-HttpStream::HttpStream(DoubleBufferedStream &clientBufferedStreamIn) {
+HttpStream::HttpStream(DoubleBufferedStream &clientBufferedStreamIn,
+                       bool store) :
+        StructuredDataStreamT<ConfigurationDatabase>(),
+        SenderStructuredData<JsonPrinter>() {
     httpCommand = HSHCNone;
     httpVersion = 1000;
     httpErrorCode = 200;
@@ -56,6 +59,9 @@ HttpStream::HttpStream(DoubleBufferedStream &clientBufferedStreamIn) {
     lastUpdateTime = 0ull;
     /** unknown information length */
     unreadInput = -1;
+    storeBody = store;
+    SenderStructuredData<JsonPrinter>::SetStream(*socketStream);
+
 }
 
 HttpStream::~HttpStream() {
@@ -196,6 +202,9 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
 
     if (ret) {
 
+        storedData.MoveToRoot();
+        StructuredDataStreamT<ConfigurationDatabase>::Printf("%J!", storedData);
+
         data->MoveToRoot();
         if (!data->MoveRelative("OutputHttpOtions")) {
             ret = data->CreateRelative("OutputHttpOtions");
@@ -229,7 +238,6 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
             }
             if (ret) {
                 socketStream->Printf("%s", "\r\n");
-
                 // return to root
                 data->MoveToRoot();
 
@@ -247,6 +255,21 @@ bool HttpStream::WriteHeader(bool bodyCompleted,
     return ret;
 
 }
+/*
+
+ bool HttpStream::WriteStructuredDataOnSocket(){
+ bool ret=true;
+ if(storeBody){
+ StreamString tempStream;
+ StructuredDataStreamT<ConfigurationDatabase>::Printf("%J!", storedData);
+
+ // send out the body
+ uint32 toWrite = StructuredDataStreamT<ConfigurationDatabase>::Size();
+ ret = socketStream->Write(Buffer(), toWrite);
+ }
+
+ return ret;
+ }*/
 
 bool HttpStream::RetrieveHttpCommand(StreamString &command,
                                      StreamString &line) {
@@ -888,6 +911,74 @@ void HttpStream::GetPath(StreamString& pathOut) {
 
 void HttpStream::GetUrl(StreamString& urlOut) {
     urlOut = url;
+}
+
+bool HttpStream::Read(const char8 * const name,
+                      const AnyType &value) {
+    //use a special node
+    return (storeBody) ? (storedData.Read(name, value)) : (SenderStructuredData<JsonPrinter>::Read(name, value));
+}
+
+AnyType HttpStream::GetType(const char8 * const name) {
+    return (storeBody) ? (storedData.GetType(name)) : (SenderStructuredData<JsonPrinter>::GetType(name));
+}
+
+bool HttpStream::Write(const char8 * const name,
+                       const AnyType &value) {
+    return (storeBody) ? (storedData.Write(name, value)) : (SenderStructuredData<JsonPrinter>::Write(name, value));
+}
+
+bool HttpStream::Copy(StructuredDataI &destination) {
+    return (storeBody) ? (storedData.Copy(destination)) : (SenderStructuredData<JsonPrinter>::Copy(destination));
+}
+
+bool HttpStream::AddToCurrentNode(Reference node) {
+    return (storeBody) ? (storedData.AddToCurrentNode(node)) : (SenderStructuredData<JsonPrinter>::AddToCurrentNode(node));
+}
+
+bool HttpStream::MoveToRoot() {
+    return (storeBody) ? (storedData.MoveToRoot()) : (SenderStructuredData<JsonPrinter>::MoveToRoot());
+}
+
+bool HttpStream::MoveToAncestor(uint32 generations) {
+    return (storeBody) ? (storedData.MoveToAncestor(generations)) : (SenderStructuredData<JsonPrinter>::MoveToAncestor(generations));
+}
+
+bool HttpStream::MoveAbsolute(const char8 * const path) {
+    return (storeBody) ? (storedData.MoveAbsolute(path)) : (SenderStructuredData<JsonPrinter>::MoveAbsolute(path));
+}
+
+bool HttpStream::MoveRelative(const char8 * const path) {
+    return (storeBody) ? (storedData.MoveRelative(path)) : (SenderStructuredData<JsonPrinter>::MoveRelative(path));
+}
+
+bool HttpStream::MoveToChild(const uint32 childIdx) {
+    return (storeBody) ? (storedData.MoveToChild(childIdx)) : (SenderStructuredData<JsonPrinter>::MoveToChild(childIdx));
+}
+
+bool HttpStream::CreateAbsolute(const char8 * const path) {
+    return (storeBody) ? (storedData.CreateAbsolute(path)) : (SenderStructuredData<JsonPrinter>::CreateAbsolute(path));
+
+}
+
+bool HttpStream::CreateRelative(const char8 * const path) {
+    return (storeBody) ? (storedData.CreateRelative(path)) : (SenderStructuredData<JsonPrinter>::CreateRelative(path));
+}
+
+bool HttpStream::Delete(const char8 * const name) {
+    return (storeBody) ? (storedData.Delete(name)) : (SenderStructuredData<JsonPrinter>::Delete(name));
+}
+
+const char8 *HttpStream::GetName() {
+    return (storeBody) ? (storedData.GetName()) : (SenderStructuredData<JsonPrinter>::GetName());
+}
+
+const char8 *HttpStream::GetChildName(const uint32 index) {
+    return (storeBody) ? (storedData.GetChildName(index)) : (SenderStructuredData<JsonPrinter>::GetChildName(index));
+}
+
+uint32 HttpStream::GetNumberOfChildren() {
+    return (storeBody) ? (storedData.GetNumberOfChildren()) : (SenderStructuredData<JsonPrinter>::GetNumberOfChildren());
 }
 
 }

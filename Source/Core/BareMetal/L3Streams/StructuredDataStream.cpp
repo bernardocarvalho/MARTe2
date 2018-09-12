@@ -79,7 +79,7 @@ bool StructuredDataStream::Load(const char8 *varName) {
 }
 
 bool StructuredDataStream::Commit(const char8 *varName) {
-    (void) Delete(varName);
+    (void) DeleteStream(varName);
     bool ret = data->Write(varName, this->Buffer());
     if (ret) {
         leafName = varName;
@@ -87,7 +87,7 @@ bool StructuredDataStream::Commit(const char8 *varName) {
     return ret;
 }
 
-bool StructuredDataStream::Delete(const char8 *varName) {
+bool StructuredDataStream::DeleteStream(const char8 *varName) {
     return data->Delete(varName);
 }
 

@@ -220,15 +220,15 @@ bool StructuredDataStreamTTest::TestDelete() {
     ret &= test.Switch("A.B.C");
 
     ret &= test.Load("var");
-    ret &= test.Delete("var");
+    ret &= test.DeleteStream("var");
 
     ret &= !test.Load("var");
-    ret &= !test.Delete("var");
+    ret &= !test.DeleteStream("var");
 
     //delete a node
     if (ret) {
         ret = test.Switch("A");
-        ret &= test.Delete("B");
+        ret &= test.DeleteStream("B");
         ConfigurationDatabase*cdb = test.GetData();
         ret &= cdb->MoveAbsolute("A");
         ret &= (cdb->GetNumberOfChildren() == 0);
@@ -270,11 +270,11 @@ bool StructuredDataStreamTTest::TestGetCurrentPath() {
     test.GetCurrentPath(path);
     ret &= path == "A.B.var";
 
-    ret&=test.Delete("var");
+    ret&=test.DeleteStream("var");
     test.GetCurrentPath(path);
     ret &= path == "A.B";
 
-    ret&=test.Delete("C");
+    ret&=test.DeleteStream("C");
     test.GetCurrentPath(path);
     ret &= path == "A.B";
 

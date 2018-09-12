@@ -53,7 +53,7 @@ public:
 
     virtual bool Commit(const char8 *varName);
 
-    virtual bool Delete(const char8 *varName);
+    virtual bool DeleteStream(const char8 *varName);
 
     virtual void GetCurrentPath(StreamString &path);
 
@@ -136,7 +136,7 @@ bool StructuredDataStreamT<structuredData>::Load(const char8 *varName) {
 
 template<class structuredData>
 bool StructuredDataStreamT<structuredData>::Commit(const char8 *varName) {
-    (void) Delete(varName);
+    (void) DeleteStream(varName);
     bool ret = data->Write(varName, this->Buffer());
     if (ret) {
         leafName = varName;
@@ -145,7 +145,7 @@ bool StructuredDataStreamT<structuredData>::Commit(const char8 *varName) {
 }
 
 template<class structuredData>
-bool StructuredDataStreamT<structuredData>::Delete(const char8 *varName) {
+bool StructuredDataStreamT<structuredData>::DeleteStream(const char8 *varName) {
     bool ret = data->Delete(varName);
     if (ret) {
         leafName = "";

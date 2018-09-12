@@ -212,3 +212,12 @@ TEST(HttpStreamGTest, TestGetUrl) {
     ASSERT_TRUE(test.TestGetUrl());
 }
 
+TEST(HttpStreamGTest, TestWriteHeader_StrucuredDataStored) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_StrucuredDataStored());
+}
+
+TEST(HttpStreamGTest, TestWriteHeader_StrucuredDataOnline) {
+    HttpStreamTest test;
+    ASSERT_TRUE(test.TestWriteHeader_StrucuredDataOnline());
+}

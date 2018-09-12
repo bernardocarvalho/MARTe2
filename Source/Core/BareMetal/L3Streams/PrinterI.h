@@ -42,9 +42,13 @@ namespace MARTe{
 
 class PrinterI {
 public:
+    PrinterI();
+
     PrinterI(BufferedStreamI & streamIn);
+
     virtual ~PrinterI();
 
+    virtual void SetStream(BufferedStreamI & streamIn);
 
     virtual bool PrintOpenMatrix()=0;
 
@@ -73,7 +77,6 @@ public:
     virtual bool PrintVariable(AnyType var)=0;
 
 
-protected:
     BufferedStreamI *stream;
 
 };

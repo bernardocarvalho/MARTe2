@@ -50,6 +50,7 @@ namespace MARTe {
 HttpService::HttpService() :
         MultiClientService(*(embeddedMethod = new EmbeddedServiceMethodBinderT<HttpService>(*this, &HttpService::ServerCycle))) {
     port = 0u;
+    listenMaxConnections = 0u;
 }
 
 HttpService::~HttpService() {
@@ -75,30 +76,44 @@ bool HttpService::Initialise(StructuredDataI &data) {
             listenMaxConnections = 255;
             REPORT_ERROR(ErrorManagement::Information, "ListenMaxConnections not specified: using default %d", listenMaxConnections);
         }
-
-        StreamString webRootPath;
         if (!data.Read("WebRoot", webRootPath)) {
-            if (ReferenceContainer::Size() > 0u) {
-                webRoot = this->Find("WebRoot");
-
+            webRoot = this->Find("WebRoot");
+            ret = webRoot.IsValid();
+            if (ret) {
+                REPORT_ERROR(ErrorManagement::Information, "WebRoot not specified: using default this.WebRoot");
+            }
+            else {
+                REPORT_ERROR(ErrorManagement::InitialisationError, "Please define a valid WebRoot path or add a WebRoot node in this container");
             }
         }
-        else {
-            webRoot = ObjectRegistryDatabase::Instance()->Find(webRootPath.Buffer());
-        }
-        ret = webRoot.IsValid();
-        if (!ret) {
-            REPORT_ERROR(ErrorManagement::InitialisationError, "WebRoot invalid or not specified");
-        }
-    }
-
-    if(ret){
-
-        //TODO open ecc ecc
-        ret = (server.Listen(port, listenMaxConnections));
     }
 
     return ret;
+}
+
+ErrorManagement::ErrorType HttpService::Start() {
+    ErrorManagement::ErrorType err = ErrorManagement::NoError;
+
+    if (!webRoot.IsValid()) {
+        webRoot = ObjectRegistryDatabase::Instance()->Find(webRootPath.Buffer());
+        err = !(webRoot.IsValid());
+        if (!err.ErrorsCleared()) {
+            REPORT_ERROR(ErrorManagement::Information, "Invalid WebRoot path %s", webRootPath.Buffer());
+        }
+    }
+
+    if (err.ErrorsCleared()) {
+        err = !(server.Open());
+
+        if (err.ErrorsCleared()) {
+            err = !(server.Listen(port, listenMaxConnections));
+
+            if (err.ErrorsCleared()) {
+                err = MultiClientService::Start();
+            }
+        }
+    }
+    return err;
 }
 
 ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
@@ -253,13 +268,15 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             }
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {
-            bool completed=ClientService(commClient);
-            if (completed) {
-                err= MARTe::ErrorManagement::Completed;
-            }
-            else {
-                err= MARTe::ErrorManagement::FatalError;
-            }
+            err=ClientService(commClient);
+            /*if (isCompletedOrError) {
+             //return false because completed
+             err= MARTe::ErrorManagement::Completed;
+             }
+             else {
+             //return false because of a error
+             err= MARTe::ErrorManagement::FatalError;
+             }*/
         }
     }
 

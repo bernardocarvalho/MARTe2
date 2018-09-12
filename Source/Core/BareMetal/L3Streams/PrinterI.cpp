@@ -39,16 +39,23 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+namespace MARTe {
+
+PrinterI::PrinterI() {
+    stream = NULL;
+}
 
 PrinterI::PrinterI(BufferedStreamI & streamIn) {
-    stream=&streamIn;
-
+    stream = &streamIn;
 }
 
 PrinterI::~PrinterI() {
     // Auto-generated destructor stub for PrinterI
     // TODO Verify if manual additions are needed
+}
+
+void PrinterI::SetStream(BufferedStreamI & streamIn) {
+    stream = &streamIn;
 }
 
 }

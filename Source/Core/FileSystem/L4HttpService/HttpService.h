@@ -52,6 +52,8 @@ public:
 
     virtual bool Initialise(StructuredDataI &data);
 
+    virtual ErrorManagement::ErrorType Start();
+
     ErrorManagement::ErrorType ServerCycle(MARTe::ExecutionInfo &information);
 
     ErrorManagement::ErrorType ClientService(TCPSocket *commClient);
@@ -66,10 +68,6 @@ protected:
 
     uint32 listenMaxConnections;
 
-    /** verboseLevel = 0 means no diagnostics
-     1 enables warnings (default)
-     5 shows important informations 10 all information */
-    uint32 verboseLevel;
 
     /** http://server:port server that will provide port allocation and relay of http */
     StreamString httpRelayURL;
@@ -81,6 +79,7 @@ protected:
 
     EmbeddedServiceMethodBinderI *embeddedMethod;
 
+    StreamString webRootPath;
 };
 
 }

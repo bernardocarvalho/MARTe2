@@ -24,7 +24,8 @@
 #
 #############################################################
 
-OBJSX=	HttpStreamTest.x
+OBJSX=	HttpStreamTest.x\
+    HttpServiceTest.x
 
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..
@@ -39,6 +40,8 @@ INCLUDES += -I../../../../Source/Core/BareMetal/L3Streams
 INCLUDES += -I../../../../Source/Core/BareMetal/L4Configuration
 INCLUDES += -I../../../../Source/Core/BareMetal/L4HttpService
 INCLUDES += -I../../../../Source/Core/BareMetal/L4Logger
+INCLUDES += -I../../../../Source/Core/BareMetal/L4Messages
+INCLUDES += -I../../../../Source/Core/BareMetal/L5GAMs
 INCLUDES += -I../../../../Source/Core/Scheduler/L1Portability
 INCLUDES += -I../../../../Source/Core/Scheduler/L3Services
 INCLUDES += -I../../../../Source/Core/Scheduler/L4LoggerService
