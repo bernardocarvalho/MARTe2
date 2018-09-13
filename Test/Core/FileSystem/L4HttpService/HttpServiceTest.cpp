@@ -24,7 +24,7 @@
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
-
+#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
@@ -37,14 +37,25 @@
 #include "RealTimeApplication.h"
 #include "StandardParser.h"
 #include "StringHelper.h"
+#include "MemoryDataSourceI.h"
+
+#include "MemoryMapInputBroker.h"
+#include "MemoryMapSynchronisedInputBroker.h"
+#include "MemoryMapOutputBroker.h"
+#include "MemoryMapSynchronisedOutputBroker.h"
+
+#include "HttpInterface.h"
+#include "HttpStream.h"
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
 class HttpServiceTestService: public HttpService {
 public:
+    CLASS_REGISTER_DECLARATION()
 
-    HttpServiceTestService();
+HttpServiceTestService    ();
 
     virtual ~HttpServiceTestService();
 
@@ -59,9 +70,14 @@ public:
     uint32 GetListenMaxConnections();
 };
 
-/*---------------------------------------------------------------------------*/
-/*                           Method definitions                              */
-/*---------------------------------------------------------------------------*/
+HttpServiceTestService::HttpServiceTestService() {
+
+}
+
+HttpServiceTestService::~HttpServiceTestService() {
+
+}
+
 uint32 HttpServiceTestService::GetPort() {
     return port;
 }
@@ -82,7 +98,397 @@ uint32 HttpServiceTestService::GetListenMaxConnections() {
     return listenMaxConnections;
 }
 
-#if 0
+CLASS_REGISTER(HttpServiceTestService, "1.0")
+
+class HttpServiceTestGAM: public GAM {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpServiceTestGAM    ();
+
+    virtual ~HttpServiceTestGAM();
+
+    virtual bool Execute();
+
+    virtual bool Setup();
+
+};
+
+HttpServiceTestGAM::HttpServiceTestGAM() {
+
+}
+
+HttpServiceTestGAM::~HttpServiceTestGAM() {
+
+}
+
+bool HttpServiceTestGAM::Execute() {
+
+    return true;
+}
+
+bool HttpServiceTestGAM::Setup() {
+    return true;
+}
+
+CLASS_REGISTER(HttpServiceTestGAM, "1.0")
+
+class HttpServiceTestDS: public MemoryDataSourceI {
+
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpServiceTestDS    ();
+
+    virtual ~HttpServiceTestDS();
+
+    const char8 *GetBrokerName(StructuredDataI &data,const SignalDirection direction);
+
+    virtual bool PrepareNextState(const char8 * const currentStateName,
+            const char8 * const nextStateName);
+
+    virtual bool Synchronise();
+
+};
+
+HttpServiceTestDS::HttpServiceTestDS() {
+
+}
+
+HttpServiceTestDS::~HttpServiceTestDS() {
+
+}
+
+const char8 *HttpServiceTestDS::GetBrokerName(StructuredDataI &data,
+                                              const SignalDirection direction) {
+    const char8* brokerName = NULL_PTR(const char8 *);
+
+    if (direction == InputSignals) {
+
+        float32 frequency = 0.F;
+        if (data.Read("Frequency", frequency)) {
+            if (frequency > 0.) {
+                brokerName = "MemoryMapSynchronisedInputBroker";
+            }
+        }
+        uint32 trigger = 0u;
+        if (data.Read("Trigger", trigger)) {
+            if (trigger > 0u) {
+                brokerName = "MemoryMapSynchronisedInputBroker";
+            }
+        }
+        if (brokerName == NULL_PTR(const char8 *)) {
+            brokerName = "MemoryMapInputBroker";
+        }
+    }
+
+    if (direction == OutputSignals) {
+
+        float32 frequency = 0.F;
+        if (data.Read("Frequency", frequency)) {
+            if (frequency > 0.) {
+                brokerName = "MemoryMapSynchronisedOutputBroker";
+            }
+        }
+        uint32 trigger = 0u;
+        if (data.Read("Trigger", trigger)) {
+            if (trigger > 0u) {
+                brokerName = "MemoryMapSynchronisedOutputBroker";
+            }
+        }
+        if (brokerName == NULL_PTR(const char8 *)) {
+            brokerName = "MemoryMapOutputBroker";
+        }
+    }
+
+    return brokerName;
+}
+
+bool HttpServiceTestDS::PrepareNextState(const char8 * const currentStateName,
+                                         const char8 * const nextStateName) {
+    return true;
+}
+
+bool HttpServiceTestDS::Synchronise() {
+    return true;
+}
+
+CLASS_REGISTER(HttpServiceTestDS, "1.0")
+
+class HttpServiceTestWebRoot: public ReferenceContainer, public HttpInterface {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpServiceTestWebRoot    ();
+
+    virtual ~HttpServiceTestWebRoot();
+
+    virtual bool ProcessHttpMessage(HttpStream &hStream);
+
+    virtual ReferenceT<HttpRealmI> GetRealm();
+
+private:
+    void RecCallback(ReferenceT<ReferenceContainer> ref,
+            HttpStream &hStream);
+
+};
+
+HttpServiceTestWebRoot::HttpServiceTestWebRoot() {
+
+}
+
+HttpServiceTestWebRoot::~HttpServiceTestWebRoot() {
+
+}
+
+void HttpServiceTestWebRoot::RecCallback(ReferenceT<ReferenceContainer> ref,
+                                         HttpStream &hStream) {
+
+    if (ref.IsValid()) {
+        const char8* className = ref->GetClassProperties()->GetName();
+        const char8* name = ref->GetName();
+
+        hStream.Printf("%s", "<TR>\n");
+        hStream.Printf("<TD>%s</TD><TD><A HREF=\"%s/\">%s</A></TD>\n", className, name, name);
+        hStream.Printf("%s", "</TR>\n");
+        uint32 numberOfElements = ref->Size();
+        for (uint32 i = 0u; i < numberOfElements; i++) {
+            ReferenceT<ReferenceContainer> child = ref->Get(i);
+            RecCallback(ref, hStream);
+        }
+    }
+
+}
+
+bool HttpServiceTestWebRoot::ProcessHttpMessage(HttpStream &hStream) {
+
+    hStream.SetSize(0);
+    AnyType at[]={"text/html"};
+    hStream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at);
+    hStream.SetSize(0);
+
+    hStream.Printf("<html><head><TITLE>%s</TITLE>"
+                   "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                   "HttpServiceTestWebRoot", "HttpServiceTestWebRoot");
+    hStream.Printf("%s","<TABLE>\n");
+    uint32 numberOfElements = Size();
+    for (uint32 i = 0u; i < numberOfElements; i++) {
+        ReferenceT<ReferenceContainer> ref = Get(i);
+        RecCallback(ref, hStream);
+    }
+    hStream.Printf("%s", "</TABLE>\n");
+    hStream.Printf("%s", "</UL></BODY>\n");
+    hStream.Printf("%s", "</html>\n");
+
+    hStream.WriteHeader(true);
+    return true;
+}
+
+ReferenceT<HttpRealmI> HttpServiceTestWebRoot::GetRealm() {
+    ReferenceT<HttpRealmI> ref;
+    return ref;
+
+}
+CLASS_REGISTER(HttpServiceTestWebRoot, "1.0")
+
+class HttpServiceTestClassLister: public ReferenceContainer, public HttpInterface {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpServiceTestClassLister    ();
+
+    virtual ~HttpServiceTestClassLister();
+
+    virtual bool ProcessHttpMessage(HttpStream &hStream);
+
+    virtual ReferenceT<HttpRealmI> GetRealm();
+
+};
+
+HttpServiceTestClassLister::HttpServiceTestClassLister() {
+
+}
+
+HttpServiceTestClassLister::~HttpServiceTestClassLister() {
+
+}
+
+ReferenceT<HttpRealmI> HttpServiceTestClassLister::GetRealm() {
+    ReferenceT<HttpRealmI> ref;
+    return ref;
+}
+
+bool HttpServiceTestClassLister::ProcessHttpMessage(HttpStream &hStream) {
+
+    StreamString className;
+    if (hStream.Switch("InputCommands")) {
+        hStream.Load("Class");
+        className = hStream.Buffer();
+    }
+
+    printf("\nclass name = %s\n", className.Buffer());
+    hStream.SetSize(0);
+    AnyType at[]={"text/html"};
+    hStream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at);
+    hStream.SetSize(0);
+
+    {
+        hStream.Printf("<HTML>\n"
+                       "<HEAD><TITLE>%s</TITLE></HEAD>\n"
+                       "<STYLE type=\"text/css\">\n"
+                       "  BODY { background: black; color: green}\n"
+                       "  A:link { color: red }\n"
+                       "  A:visited { color: maroon }\n"
+                       "  A:active { color: fuchsia }\n"
+                       "</STYLE>\n"
+                       "<H1>%s</H1><UL>\n",
+                       "HttpServiceTestClassLister", "HttpServiceTestClassLister");
+
+        hStream.Printf("%s", "B = Object can be built by name; A = Allocated objects; D = code from DLL ;S = structure public\n");
+        hStream.Printf("%s", "<TABLE border=2>");
+        hStream.Printf("%s", "<TR>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "Flags");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "Name");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "Version");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "Size");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "Allocated");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "<TD>");
+        hStream.Printf("%s", "</TD>");
+        hStream.Printf("%s", "</TR>");
+
+        ClassRegistryDatabase *crdb = ClassRegistryDatabase::Instance();
+
+        uint32 nClasses = crdb->GetSize();
+        for (uint32 i = 0u; i < nClasses; i++) {
+
+            ClassRegistryItem *item = (ClassRegistryItem *) (crdb->Peek(i));
+            if (item != NULL) {
+
+                hStream.Printf("%s","<TR>");
+
+                hStream.Printf("%s","<TD>");
+                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                if (item->GetObjectBuilder() != NULL) {
+                    hStream.Printf("%s","B");
+                }
+                if (item->GetLoadableLibrary() != NULL) {
+                    hStream.Printf("%s","L");
+                }
+                if (item->GetNumberOfInstances() > 0) {
+                    hStream.Printf("%s","A");
+                }
+                if (item->GetIntrospection() != NULL) {
+                    hStream.Printf("%s","S");
+                }
+
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","<TD align=left>");
+
+                ClassProperties properties;
+                item->GetClassPropertiesCopy(properties);
+
+                hStream.Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
+                hStream.Printf("%s",properties.GetName());
+
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","<TD>");
+
+                hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+                hStream.Printf("%s",properties.GetVersion());
+
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","<TD>");
+
+                hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+                hStream.Printf("%i",properties.GetSize());
+
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","<TD>");
+                if (item->GetNumberOfInstances() > 0) {
+
+                    hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+
+                    hStream.Printf("%i",item->GetNumberOfInstances());
+                }
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","<TD>");
+                Introspection *introspection=(Introspection *)(item->GetIntrospection());
+                if (introspection !=NULL) {
+
+                    uint32 numberOfMembers=introspection->GetNumberOfMembers();
+                    if(numberOfMembers>0u) {
+                        if (StringHelper::Compare(className.Buffer(),properties.GetName())==0) {
+
+                            hStream.Printf("%s","<TABLE>");
+
+                            for(uint32 j=0u; j<numberOfMembers; j++) {
+                                const IntrospectionEntry introEntry=(*introspection)[j];
+                                hStream.Printf("%s","<TR>");
+
+                                hStream.Printf("%s","<TD>");
+                                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                                hStream.Printf("%s %s",introEntry.GetMemberTypeName(),introEntry.GetMemberModifiers());
+                                hStream.Printf("%s","</TD>");
+
+                                hStream.Printf("%s","<TD>");
+                                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                                hStream.Printf("%s",introEntry.GetMemberName());
+                                for (uint32 k = 0;k <introEntry.GetNumberOfDimensions(); k++) {
+                                    hStream.Printf("[%i]",introEntry.GetNumberOfElements(k));
+                                }
+                                hStream.Printf("%s","</TD>");
+
+                                hStream.Printf("%s","</TR>");
+                            }
+
+                            hStream.Printf("%s","</TABLE>");
+                        }
+                        else {
+                            hStream.Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
+                            StreamString urlT;
+                            hStream.GetUrl(urlT);
+                            printf("\nurl = %s, prop = %s\n", urlT.Buffer(),properties.GetName());
+                            StreamString className=properties.GetName();
+                            hStream.Printf("<A HREF=/%s?Class=%s NAME=+>",urlT.Buffer(),className.Buffer());
+                            hStream.Printf("%s","+");
+                            hStream.Printf("%s","</A>");
+                        }
+                    }
+                }
+
+                //hStream.Printf("%30s %20s %x\n",item->ClassName(),item->Version(),item->Size());
+                hStream.Printf("%s","</TD>");
+                hStream.Printf("%s","</TR>");
+
+            }
+        }
+
+        hStream.Printf("%s", "</TABLE>");
+    }
+
+    hStream.Printf("%s", "</BODY></HTML>\n");
+    //copy to the client
+    hStream.WriteHeader(true);
+
+    return true;
+}
+
+CLASS_REGISTER(HttpServiceTestClassLister, "1.0")
+
+/*---------------------------------------------------------------------------*/
+/*                           Method definitions                              */
+/*---------------------------------------------------------------------------*/
+
 /**
  * Helper function to setup a MARTe execution environment
  */
@@ -112,40 +518,47 @@ static bool InitialiseMemoryMapInputBrokerEnviroment(const char8 * const config)
     }
     return ok;
 }
-#endif
 
 const char8 *config = ""
         "$Application = {"
         "   Class = RealTimeApplication"
-        "   +Functions = {"
-        "       Class = ReferenceContainer"
-        "       WebRoot = {"
-        "           Class = ReferenceContainer"
+        "       +WebRoot = {"
+        "           Class = HttpServiceTestWebRoot"
+        "           +ClassLister = {"
+        "               Class = HttpServiceTestClassLister"
+        "           }"
         "       }"
         "       +HttpServerTest = {"
         "           Class = HttpService"
-        "           WebRoot"
+        "           WebRoot = \"Application.WebRoot\""
+        "           Port=8080"
+        "           ListenMaxConnections = 255"
+        "           Timeout = 0"
+        "           MaxNumberOfThreads=100"
+        "           MinNumberOfThreads=1"
         "       }"
+        "   +Functions = {"
+        "       Class = ReferenceContainer"
         "       +GAM1 = {"
-        "           Class = IOGAM"
+        "           Class = HttpServiceTestGAM"
         "             InputSignals = {"
         "                Counter = {"
-        "                    DataSource = Timer"
+        "                    DataSource = Input"
         "                    Type = uint32"
         "                }"
         "                Time = {"
-        "                    DataSource = Timer"
+        "                    DataSource = Input"
         "                    Type = uint32"
         "                    Frequency = 1000"
         "                }"
         "             }"
         "             OutputSignals = {"
         "                CounterOnDDB = {"
-        "                    DataSource = Timer"
+        "                    DataSource = DDB1"
         "                    Type = uint32"
         "                }"
         "                TimeOnDDB = {"
-        "                    DataSource = Timer"
+        "                    DataSource = DDB1"
         "                    Type = uint32"
         "                }"
         "             }"
@@ -160,11 +573,8 @@ const char8 *config = ""
         "        +Timings = {"
         "            Class = TimingDataSource"
         "        }"
-        "        +LoggerDataSource = {"
-        "            Class = LoggerDataSource"
-        "        }"
-        "        +Timer = {"
-        "            Class = LinuxTimer"
+        "        +Input = {"
+        "            Class = HttpServiceTestDS"
         "        }"
         "    }"
         "    +States = {"
@@ -186,15 +596,6 @@ const char8 *config = ""
         "         TimingDataSource = Timings"
         "     }"
         "}";
-
-HttpServiceTestService::HttpServiceTestService() :
-        HttpService() {
-
-}
-
-HttpServiceTestService::~HttpServiceTestService() {
-
-}
 
 HttpServiceTest::HttpServiceTest() {
     // Auto-generated constructor stub for HttpServiceTest
@@ -448,7 +849,20 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
 }
 
 bool HttpServiceTest::TestServerCycle() {
-    return true;
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    while (1)
+        ;
+
+    return ret;
 }
 
 bool HttpServiceTest::TestClientService() {

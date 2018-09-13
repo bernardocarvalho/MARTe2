@@ -37,6 +37,7 @@
 #include "StreamString.h"
 #include "ReferenceT.h"
 #include "EmbeddedServiceMethodBinderT.h"
+#include "FastPollingMutexSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
@@ -80,6 +81,7 @@ protected:
     EmbeddedServiceMethodBinderI *embeddedMethod;
 
     StreamString webRootPath;
+
 };
 
 }

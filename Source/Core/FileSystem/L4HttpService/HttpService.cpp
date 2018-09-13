@@ -51,6 +51,7 @@ HttpService::HttpService() :
         MultiClientService(*(embeddedMethod = new EmbeddedServiceMethodBinderT<HttpService>(*this, &HttpService::ServerCycle))) {
     port = 0u;
     listenMaxConnections = 0u;
+
 }
 
 HttpService::~HttpService() {
@@ -117,7 +118,7 @@ ErrorManagement::ErrorType HttpService::Start() {
 }
 
 ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
-    ErrorManagement::ErrorType err = (commClient == NULL);
+    ErrorManagement::ErrorType err = !(commClient == NULL);
 
     if (err.ErrorsCleared()) {
         commClient->SetBlocking(true);
@@ -132,7 +133,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                 err=ErrorManagement::CommunicationError;
                 REPORT_ERROR(ErrorManagement::CommunicationError, "Error while reading HTTP header");
             }
-            ReferenceT<HttpInterface> hi;
+            ReferenceT<HttpInterface> hi=webRoot;
             ReferenceT<HttpRealmI> realm;
             bool pagePrepared = false;
 
@@ -238,6 +239,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                 if (err.ErrorsCleared()) {
                     if (!hstream.KeepAlive()) {
                         err=ErrorManagement::Completed;
+                        delete commClient;
                     }
                 }
             }
@@ -253,30 +255,22 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
     if (information.GetStage() == MARTe::ExecutionInfo::StartupStage) {
     }
     if (information.GetStage() == MARTe::ExecutionInfo::MainStage) {
-        TCPSocket *commClient = NULL;
+
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::WaitRequestStageSpecific) {
-            //wait for the next connection
-            if(commClient!=NULL) {
-                delete commClient;
-            }
-            commClient = new TCPSocket();
-            if (server.WaitConnection(msecTimeout, commClient) == NULL) {
+            TCPSocket *newClient = new TCPSocket();
+            if (server.WaitConnection(msecTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
             }
             else {
+                information.SetThreadSpecificContext((void*)newClient);
                 err= MARTe::ErrorManagement::NoError;
             }
+
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {
-            err=ClientService(commClient);
-            /*if (isCompletedOrError) {
-             //return false because completed
-             err= MARTe::ErrorManagement::Completed;
-             }
-             else {
-             //return false because of a error
-             err= MARTe::ErrorManagement::FatalError;
-             }*/
+            TCPSocket *newClient = (TCPSocket *)(information.GetThreadSpecificContext());
+            err=ClientService(newClient);
+
         }
     }
 

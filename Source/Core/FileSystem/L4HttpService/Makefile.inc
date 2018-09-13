@@ -26,6 +26,7 @@
 
 OBJSX=	HttpStream.x\
     HttpClient.x\
+    HttpInterface.x\
     HttpService.x
         
 PACKAGE=Core/FileSystem

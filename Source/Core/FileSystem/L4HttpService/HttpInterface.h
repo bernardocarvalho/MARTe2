@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MultiStream.h"
+#include "HttpStream.h"
 #include "HttpRealmI.h"
 #include "ReferenceT.h"
 /*---------------------------------------------------------------------------*/
@@ -46,7 +46,7 @@ public:
 
     virtual ~HttpInterface();
 
-    virtual bool ProcessHttpMessage(MultiStream &hStream) = 0;
+    virtual bool ProcessHttpMessage(HttpStream &hStream) = 0;
 
     virtual ReferenceT<HttpRealmI> GetRealm()=0;
 
