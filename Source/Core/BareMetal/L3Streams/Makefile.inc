@@ -36,12 +36,11 @@ OBJSX=	BufferedStreamI.x \
 		IOBufferJsonPrint.x \
 		IOBufferXMLPrint.x \
 		JsonPrinter.x\
-		MultiStream.x\
 		PrinterI.x\
-		SenderStructuredData.x\
 		SingleBufferedStream.x \
 		StandardPrinter.x\
 		StreamMemoryReference.x \
+		StreamStructuredData.x\
 		StreamString.x \
 		StreamStringIOBuffer.x\
 		XMLPrinter.x

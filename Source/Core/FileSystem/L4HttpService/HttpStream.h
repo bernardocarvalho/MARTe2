@@ -36,7 +36,8 @@
 #include "StructuredDataStreamT.h"
 #include "DoubleBufferedStream.h"
 #include "JsonPrinter.h"
-#include "SenderStructuredData.h"
+#include "StreamStructuredData.h"
+#include "ProtocolI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
@@ -44,42 +45,13 @@
 namespace MARTe {
 using namespace HttpDefinition;
 
-class HttpStream: public StructuredDataStreamT<ConfigurationDatabase>, public SenderStructuredData<JsonPrinter>{
+class HttpStream: public StreamString, public StreamStructuredData<JsonPrinter>{
 public:
     HttpStream();
 
     HttpStream(DoubleBufferedStream &clientBufferedStreamIn, bool store=true);
 
     virtual ~HttpStream();
-
-    //normally is write reply header
-    bool WriteHeader(bool bodyCompleted,
-                     HSHttpCommand command=HSHCReplyOK,
-                     const char8 * url=NULL);
-
-    //bool WriteStructuredDataOnSocket();
-
-    bool CompleteReadOperation(BufferedStreamI *s,
-                               TimeoutType msecTimeout = TTInfiniteWait);
-
-    bool ReadHeader();
-
-    bool SecurityCheck(ReferenceT<HttpRealmI> realm);
-
-    bool KeepAlive() const;
-
-    void SetKeepAlive(bool isKeepAlive);
-
-    HSHttpCommand GetHttpCommand() const;
-
-    void SetUnmatchedUrl(const char8 *unMatchedUrlIn);
-
-    void GetUnmatchedUrl(StreamString& unmatchedUrlOut);
-
-    void GetPath(StreamString& pathOut);
-
-    void GetUrl(StreamString& urlOut);
-
 
     /**
      * @brief Reads a previously stored AnyType. The node with this name has to be a child of the current node.
@@ -220,99 +192,18 @@ public:
 
 
 
+
+
 protected:
 
-    DoubleBufferedStream *socketStream;
+    DoubleBufferedStream *outputStream;
 
-    /**
-     * How much data is still waiting in the
-     * input stream from the client
-     */
-    int32 unreadInput;
-
-    /** The Http return code */
-    uint32 httpErrorCode;
-
-    HSHttpCommand httpCommand;
-
-
-    /**
-     * 1000 means v1.0 2100 means v2.1
-     */
-    uint32 httpVersion;
-
-    /**
-     * True if communication should continue after transaction
-     */
-    bool keepAlive;
-
-    /**
-     * The last time the body has been updated
-     */
-    uint64 lastUpdateTime;
-
-    /**
-     * The requested page URL
-     */
-    StreamString url;
-
-    /**
-     * The URL with . instead of \/
-     */
-    StreamString path;
-
-    /**
-     * The remainder of url not matched in the search
-     */
-    StreamString unMatchedUrl;
 
 
     ConfigurationDatabase storedData;
 
     bool storeBody;
-private:
-    /**
-     * Handles a post request
-     */
 
-    /***********************/
-    /* used in ReadHeader  */
-    /***********************/
-    bool RetrieveHttpCommand(StreamString &command,
-                             StreamString &line);
-
-    char8 BuildUrl(StreamString &line);
-
-    bool StoreCommands(StreamString &line);
-
-    bool StoreOutputOptions();
-
-    bool StoreInputOptions();
-
-    /*****************************************/
-    /* used in ReadHeader to handle the post */
-    /*****************************************/
-
-    bool HandlePost(StreamString &contentType,
-                    StreamString &content);
-
-    bool HandlePostMultipartFormData(StreamString &contentType,
-                                     StreamString &content);
-
-    bool HandlePostApplicationForm(StreamString &contentType,
-                                   StreamString &content);
-
-    bool HandlePostHeader(StreamString &line,
-                          StreamString &content,
-                          StreamString &name,
-                          StreamString &filename);
-
-    bool HandlePostContent(StreamString &line,
-                           StreamString &boundary,
-                           StreamString &name,
-                           StreamString &filename,
-                           StreamString &value,
-                           bool &headerHandled);
 
 };
 

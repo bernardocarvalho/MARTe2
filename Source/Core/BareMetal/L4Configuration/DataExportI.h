@@ -1,7 +1,7 @@
 /**
- * @file HttpInterface.h
- * @brief Header file for class HttpInterface
- * @date 27 ago 2018
+ * @file DataExportI.h
+ * @brief Header file for class DataExportI
+ * @date 14 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class HttpInterface
+ * @details This header file contains the declaration of the class DataExportI
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef HTTPINTERFACE_H_
-#define HTTPINTERFACE_H_
+#ifndef DATAEXPORTI_H_
+#define DATAEXPORTI_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,31 +31,31 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "HttpStream.h"
-#include "HttpRealmI.h"
-#include "ReferenceT.h"
+#include "StructuredDataI.h"
+#include "BufferedStreamI.h"
+#include "ProtocolI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
 
-class HttpInterface {
+class DataExportI {
 public:
-    HttpInterface();
+    DataExportI();
 
-    virtual ~HttpInterface();
+    virtual ~DataExportI();
 
-    virtual bool ProcessHttpMessage(HttpStream &hStream) = 0;
+    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol)=0;
 
-    virtual ReferenceT<HttpRealmI> GetRealm()=0;
-
+    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol)=0;
 };
 
 }
+
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* SOURCE_CORE_BAREMETAL_L4HTTPSERVICE_HTTPINTERFACE_H_ */
+#endif /* DATAEXPORTI_H_ */
 

@@ -1,7 +1,7 @@
 /**
- * @file HttpInterface.cpp
- * @brief Source file for class HttpInterface
- * @date 27 ago 2018
+ * @file ProtocolI.h
+ * @brief Header file for class ProtocolI
+ * @date 14 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,39 +16,45 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This source file contains the definition of all the methods for
- * the class HttpInterface (public, protected, and private). Be aware that some 
- * methods, such as those inline could be defined on the header file, instead.
+ * @details This header file contains the declaration of the class ProtocolI
+ * with all of its public, protected and private members. It may also include
+ * definitions for inline methods which need to be visible to the compiler.
  */
 
+#ifndef PROTOCOLI_H_
+#define PROTOCOLI_H_
+
 /*---------------------------------------------------------------------------*/
-/*                         Standard header includes                          */
+/*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-/*                         Project header includes                           */
+/*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-
-#include "HttpInterface.h"
-
+#include "ConfigurationDatabase.h"
 /*---------------------------------------------------------------------------*/
-/*                           Static definitions                              */
-/*---------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------*/
-/*                           Method definitions                              */
+/*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
 
-HttpInterface::HttpInterface() {
-    // Auto-generated constructor stub for HttpInterface
-    // TODO Verify if manual additions are needed
+class ProtocolI: public ConfigurationDatabase {
+public:
+    ProtocolI();
+    virtual ~ProtocolI();
+
+    virtual bool ReadHeader()=0;
+
+    virtual bool WriteHeader(bool isMessageCompleted=true,
+                         int32 command=0,
+                         const char8 * id=NULL)=0;
+
+};
 }
 
-HttpInterface::~HttpInterface() {
-    // Auto-generated destructor stub for HttpInterface
-    // TODO Verify if manual additions are needed
-}
+/*---------------------------------------------------------------------------*/
+/*                        Inline method definitions                          */
+/*---------------------------------------------------------------------------*/
 
-}
+#endif /* PROTOCOLI_H_ */
+

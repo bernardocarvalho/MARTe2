@@ -25,9 +25,8 @@
 #############################################################
 
 OBJSX=	HttpStream.x\
-    HttpClient.x\
-    HttpInterface.x\
-    HttpService.x
+    HttpService.x\
+    HttpProtocol.x
         
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..

@@ -27,6 +27,7 @@
 OBJSX=	AnyObject.x \
 		AnyTypeCreator.x \
 		ConfigurationDatabase.x\
+		DataExportI.x\
 		FloatToInteger.x \
 		IntegerToFloat.x \
 		JsonParser.x \
@@ -37,6 +38,7 @@ OBJSX=	AnyObject.x \
 		TokenInfo.x \
 		Token.x \
 		ParserI.x \
+		ProtocolI.x\
 		StandardParser.x \
 		ValidateBasicType.x \
 		XMLParser.x

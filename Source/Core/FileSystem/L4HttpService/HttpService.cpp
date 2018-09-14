@@ -32,9 +32,10 @@
 #include "HttpService.h"
 #include "ObjectRegistryDatabase.h"
 #include "HttpStream.h"
+#include "HttpProtocol.h"
 #include "Select.h"
 #include "HttpRealmI.h"
-#include "HttpInterface.h"
+#include "DataExportI.h"
 #include "ReferenceContainerFilterNameAndType.h"
 #include "AdvancedErrorManagement.h"
 /*---------------------------------------------------------------------------*/
@@ -51,7 +52,7 @@ HttpService::HttpService() :
         MultiClientService(*(embeddedMethod = new EmbeddedServiceMethodBinderT<HttpService>(*this, &HttpService::ServerCycle))) {
     port = 0u;
     listenMaxConnections = 0u;
-
+    textMode = 1u;
 }
 
 HttpService::~HttpService() {
@@ -86,6 +87,10 @@ bool HttpService::Initialise(StructuredDataI &data) {
             else {
                 REPORT_ERROR(ErrorManagement::InitialisationError, "Please define a valid WebRoot path or add a WebRoot node in this container");
             }
+        }
+        if (!data.Read("IsTextMode", textMode)) {
+            textMode = 1u;
+            REPORT_ERROR(ErrorManagement::Information, "IsTextMode unspecified: using default %d", textMode);
         }
     }
 
@@ -123,35 +128,41 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
     if (err.ErrorsCleared()) {
         commClient->SetBlocking(true);
         HttpStream hstream(*commClient);
+        HttpProtocol hprotocol(*commClient, hstream);
 
         Select sel;
         (void)sel.AddReadHandle(*commClient);
         //give the possibility to stop the thread
-        if(sel.WaitUntil(1000u)) {
+        if(sel.WaitUntil(1000u)>0) {
 
-            if (!hstream.ReadHeader()) {
+            //todo from here is possible to understand if
+            //you want plain text or data
+            if (!hprotocol.ReadHeader()) {
                 err=ErrorManagement::CommunicationError;
                 REPORT_ERROR(ErrorManagement::CommunicationError, "Error while reading HTTP header");
             }
-            ReferenceT<HttpInterface> hi=webRoot;
-            ReferenceT<HttpRealmI> realm;
+            ReferenceT<DataExportI> hi=webRoot;
+            //ReferenceT<HttpRealmI> realm;
             bool pagePrepared = false;
 
             if (err.ErrorsCleared()) {
+                if(hprotocol.TextMode()>=0) {
+                    textMode=hprotocol.TextMode();
+                }
                 StreamString path;
-                hstream.GetPath(path);
+                hprotocol.GetPath(path);
                 if (path.Size() > 0) {
                     // search for destination
                     uint32 occurrences=1u;
                     uint32 mode= ReferenceContainerFilterMode::PATH;
-                    ReferenceContainerFilterNameAndType<HttpInterface> filter(occurrences, mode, path.Buffer());
+                    ReferenceContainerFilterNameAndType<DataExportI> filter(occurrences, mode, path.Buffer());
                     ReferenceContainer results;
                     webRoot->Find(results, filter);
                     if(results.Size()>0u) {
                         uint32 last=results.Size()-1u;
                         hi=results.Get(last);
                     }
-
+#if 0
                     if(hi.IsValid()) {
                         realm=hi->GetRealm();
                     }
@@ -163,23 +174,29 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                             }
                         }
                     }
+#endif
+                    if(!hi.IsValid()) {
+                        hi = webRoot;
+                    }
 
                     // save remainder of address
                     uint32 remAddrIndex=filter.GetRemainedAddrIndex();
                     StreamString urlTemp;
-                    hstream.GetUrl(urlTemp);
+                    hprotocol.GetUrl(urlTemp);
                     StreamString unmatchedUrl=&urlTemp.Buffer()[remAddrIndex];
 
                     uint32 newUrlLastCharIdx=(unmatchedUrl.Size()-1u);
                     if (unmatchedUrl.Buffer()[newUrlLastCharIdx] == '/') {
                         unmatchedUrl.SetSize(newUrlLastCharIdx);
                     }
-                    hstream.SetUnmatchedUrl(unmatchedUrl.BufferReference());
+                    hprotocol.SetUnmatchedUrl(unmatchedUrl.BufferReference());
                 }
 
                 if (hi.IsValid()) {
-                    // check security
-                    //            GCRTemplate<HttpRealm> realm = searchFilter.GetRealm();
+                    //check security
+                    //GCRTemplate<HttpRealm> realm = searchFilter.GetRealm();
+                    //TODO security stuff
+#if 0
                     if (realm.IsValid()) {
                         if (!hstream.SecurityCheck(realm)) {
                             AnyType args[]= {"Content-Type"};
@@ -212,38 +229,49 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                             pagePrepared = true;
                         }
                     }
+#endif
 
                     if ((!pagePrepared) && (err.ErrorsCleared())) {
-                        pagePrepared = hi->ProcessHttpMessage(hstream);
+                        if(textMode>0u) {
+                            pagePrepared = hi->GetAsText(hstream, hprotocol);
+                        }
+                        else {
+                            pagePrepared = hi->GetAsStructuredData(hstream, hprotocol);
+                        }
+
                     }
                 }
             }
             if (err.ErrorsCleared()) {
 
                 if (!pagePrepared) {
-                    AnyType args[]= {"text/html"};
-                    hstream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", args);
+                    if(!hprotocol.MoveAbsolute("OutputHttpOtions")){
+                        hprotocol.CreateAbsolute("OutputHttpOtions");
+                        hprotocol.Write("Content-Type","text/html");
+                    }
 
-                    if (!hstream.KeepAlive()) {
-                        args[0]="Close";
-
-                        hstream.SwitchPrintAndCommit("OutputHttpOtions", "Connection", "%s", args);
+                    if (!hprotocol.KeepAlive()) {
+                        hprotocol.Write("Connection","Close");
 
                         hstream.Printf("%s", "<HTML>Page Not Found!</HTML>");
-                        if(!hstream.WriteHeader(true)) {
+                        if(!hprotocol.WriteHeader(true)) {
                             err=ErrorManagement::CommunicationError;
                             REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                         }
+
                     }
                 }
                 if (err.ErrorsCleared()) {
-                    if (!hstream.KeepAlive()) {
+                    if (!hprotocol.KeepAlive()) {
                         err=ErrorManagement::Completed;
+                        REPORT_ERROR(ErrorManagement::Information, "Connection closed");
                         delete commClient;
                     }
                 }
             }
         }
+        sel.RemoveReadHandle(*commClient);
+
     }
 
     return err;
@@ -258,6 +286,7 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
 
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::WaitRequestStageSpecific) {
             TCPSocket *newClient = new TCPSocket();
+            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
             if (server.WaitConnection(msecTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
             }

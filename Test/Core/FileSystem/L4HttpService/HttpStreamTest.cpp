@@ -941,6 +941,7 @@ static void clientJobWrite(HttpStreamTest &tt) {
         test.SetSize(0);
         test.Printf("%s", "ciaobellooo\n");
         tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+
     }
 
     tt.eventSem.Post();
@@ -979,7 +980,7 @@ static void clientJobWrite2(HttpStreamTest &tt) {
 
         test.SetSize(0);
         test.Printf("%s", "bellooo\n");
-        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(true, tt.command, "localhost");
     }
 
     tt.eventSem.Post();
@@ -1035,8 +1036,7 @@ static void clientJobWriteStructuredStored(HttpStreamTest &tt) {
         test.Write("var3", var3);
 
         //test.WriteStructuredDataOnSocket();
-
-        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(true, tt.command, "localhost");
 
     }
 
@@ -1190,7 +1190,7 @@ static void clientJobWriteStructuredOnline(HttpStreamTest &tt) {
         test.SetSize(0);
         test.Printf("%s", "bellooo");
 
-        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(false, tt.command, "localhost");
         test.CreateAbsolute("A.B.C");
         uint32 var1 = 1u;
         test.Write("var1", var1);

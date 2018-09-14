@@ -82,6 +82,9 @@ protected:
 
     StreamString webRootPath;
 
+
+    uint8 textMode;
+
 };
 
 }

@@ -44,7 +44,7 @@
 #include "MemoryMapOutputBroker.h"
 #include "MemoryMapSynchronisedOutputBroker.h"
 
-#include "HttpInterface.h"
+#include "DataExportI.h"
 #include "HttpStream.h"
 
 /*---------------------------------------------------------------------------*/
@@ -215,7 +215,7 @@ bool HttpServiceTestDS::Synchronise() {
 
 CLASS_REGISTER(HttpServiceTestDS, "1.0")
 
-class HttpServiceTestWebRoot: public ReferenceContainer, public HttpInterface {
+class HttpServiceTestWebRoot: public ReferenceContainer, public DataExportI {
 public:
     CLASS_REGISTER_DECLARATION()
 
@@ -223,13 +223,13 @@ HttpServiceTestWebRoot    ();
 
     virtual ~HttpServiceTestWebRoot();
 
-    virtual bool ProcessHttpMessage(HttpStream &hStream);
+    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol);
 
-    virtual ReferenceT<HttpRealmI> GetRealm();
+    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol);
 
 private:
     void RecCallback(ReferenceT<ReferenceContainer> ref,
-            HttpStream &hStream);
+                     BufferedStreamI *hStream);
 
 };
 
@@ -242,15 +242,15 @@ HttpServiceTestWebRoot::~HttpServiceTestWebRoot() {
 }
 
 void HttpServiceTestWebRoot::RecCallback(ReferenceT<ReferenceContainer> ref,
-                                         HttpStream &hStream) {
+                                         BufferedStreamI *hStream) {
 
     if (ref.IsValid()) {
         const char8* className = ref->GetClassProperties()->GetName();
         const char8* name = ref->GetName();
 
-        hStream.Printf("%s", "<TR>\n");
-        hStream.Printf("<TD>%s</TD><TD><A HREF=\"%s/\">%s</A></TD>\n", className, name, name);
-        hStream.Printf("%s", "</TR>\n");
+        hStream->Printf("%s", "<TR>\n");
+        hStream->Printf("<TD>%s</TD><TD><A HREF=\"%s/\">%s</A></TD>\n", className, name, name);
+        hStream->Printf("%s", "</TR>\n");
         uint32 numberOfElements = ref->Size();
         for (uint32 i = 0u; i < numberOfElements; i++) {
             ReferenceT<ReferenceContainer> child = ref->Get(i);
@@ -260,38 +260,41 @@ void HttpServiceTestWebRoot::RecCallback(ReferenceT<ReferenceContainer> ref,
 
 }
 
-bool HttpServiceTestWebRoot::ProcessHttpMessage(HttpStream &hStream) {
+bool HttpServiceTestWebRoot::GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol) {
+    return false;
+}
 
-    hStream.SetSize(0);
-    AnyType at[]={"text/html"};
-    hStream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at);
-    hStream.SetSize(0);
+bool HttpServiceTestWebRoot::GetAsText(BufferedStreamI &stream, ProtocolI &protocol) {
+    BufferedStreamI *hStream = (&stream);
 
-    hStream.Printf("<html><head><TITLE>%s</TITLE>"
-                   "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
-                   "HttpServiceTestWebRoot", "HttpServiceTestWebRoot");
-    hStream.Printf("%s","<TABLE>\n");
+    hStream->SetSize(0);
+    if(!protocol.MoveAbsolute("OutputHttpOtions")){
+        protocol.CreateAbsolute("OutputHttpOtions");
+        protocol.Write("Content-Type", "text/html");
+    }
+
+    hStream->SetSize(0);
+
+    hStream->Printf("<html><head><TITLE>%s</TITLE>"
+                    "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                    "HttpServiceTestWebRoot", "HttpServiceTestWebRoot");
+    hStream->Printf("%s", "<TABLE>\n");
     uint32 numberOfElements = Size();
     for (uint32 i = 0u; i < numberOfElements; i++) {
         ReferenceT<ReferenceContainer> ref = Get(i);
         RecCallback(ref, hStream);
     }
-    hStream.Printf("%s", "</TABLE>\n");
-    hStream.Printf("%s", "</UL></BODY>\n");
-    hStream.Printf("%s", "</html>\n");
+    hStream->Printf("%s", "</TABLE>\n");
+    hStream->Printf("%s", "</UL></BODY>\n");
+    hStream->Printf("%s", "</html>\n");
 
-    hStream.WriteHeader(true);
+    protocol.WriteHeader(true);
     return true;
 }
 
-ReferenceT<HttpRealmI> HttpServiceTestWebRoot::GetRealm() {
-    ReferenceT<HttpRealmI> ref;
-    return ref;
-
-}
 CLASS_REGISTER(HttpServiceTestWebRoot, "1.0")
 
-class HttpServiceTestClassLister: public ReferenceContainer, public HttpInterface {
+class HttpServiceTestClassLister: public ReferenceContainer, public DataExportI {
 public:
     CLASS_REGISTER_DECLARATION()
 
@@ -299,9 +302,9 @@ HttpServiceTestClassLister    ();
 
     virtual ~HttpServiceTestClassLister();
 
-    virtual bool ProcessHttpMessage(HttpStream &hStream);
+    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol);
 
-    virtual ReferenceT<HttpRealmI> GetRealm();
+    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol);
 
 };
 
@@ -313,58 +316,60 @@ HttpServiceTestClassLister::~HttpServiceTestClassLister() {
 
 }
 
-ReferenceT<HttpRealmI> HttpServiceTestClassLister::GetRealm() {
-    ReferenceT<HttpRealmI> ref;
-    return ref;
+bool HttpServiceTestClassLister::GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol) {
+    printf("\nCall Struct\n");
+    return false;
 }
 
-bool HttpServiceTestClassLister::ProcessHttpMessage(HttpStream &hStream) {
+bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &protocol) {
+    printf("\nCall Text\n");
+    BufferedStreamI *hStream = (&stream);
 
     StreamString className;
-    if (hStream.Switch("InputCommands")) {
-        hStream.Load("Class");
-        className = hStream.Buffer();
-    }
+    protocol.MoveAbsolute("InputCommands");
+    protocol.Read("Class", className);
+
 
     printf("\nclass name = %s\n", className.Buffer());
-    hStream.SetSize(0);
-    AnyType at[]={"text/html"};
-    hStream.SwitchPrintAndCommit("OutputHttpOtions", "Content-Type", "%s", at);
-    hStream.SetSize(0);
+    hStream->SetSize(0);
+    if(!protocol.MoveAbsolute("OutputHttpOtions")){
+        protocol.CreateAbsolute("OutputHttpOtions");
+        protocol.Write("Content-Type", "text/html");
+    }
 
     {
-        hStream.Printf("<HTML>\n"
-                       "<HEAD><TITLE>%s</TITLE></HEAD>\n"
-                       "<STYLE type=\"text/css\">\n"
-                       "  BODY { background: black; color: green}\n"
-                       "  A:link { color: red }\n"
-                       "  A:visited { color: maroon }\n"
-                       "  A:active { color: fuchsia }\n"
-                       "</STYLE>\n"
-                       "<H1>%s</H1><UL>\n",
-                       "HttpServiceTestClassLister", "HttpServiceTestClassLister");
+        hStream->Printf("<HTML>\n"
+                        "<HEAD><TITLE>%s</TITLE></HEAD>\n"
+                        "<STYLE type=\"text/css\">\n"
+                        "  BODY { background: black; color: green}\n"
+                        "  A:link { color: red }\n"
+                        "  A:visited { color: maroon }\n"
+                        "  A:active { color: fuchsia }\n"
+                        "</STYLE>\n"
+                        "<H1>%s</H1><UL>\n",
+                        "HttpServiceTestClassLister", "HttpServiceTestClassLister");
 
-        hStream.Printf("%s", "B = Object can be built by name; A = Allocated objects; D = code from DLL ;S = structure public\n");
-        hStream.Printf("%s", "<TABLE border=2>");
-        hStream.Printf("%s", "<TR>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "Flags");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "Name");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "Version");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "Size");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "Allocated");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "<TD>");
-        hStream.Printf("%s", "</TD>");
-        hStream.Printf("%s", "</TR>");
+        hStream->Printf("%s", "B = Object can be built by name; A = Allocated objects; D = code from DLL ;S = structure public\n");
+        hStream->Printf("%s", "<TABLE border=2>");
+        hStream->Printf("%s", "<TR>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "Flags");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "Name");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "Version");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "Size");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "Allocated");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "<TD>");
+        hStream->Printf("%s", "</TD>");
+        hStream->Printf("%s", "</TR>");
 
         ClassRegistryDatabase *crdb = ClassRegistryDatabase::Instance();
 
@@ -374,54 +379,54 @@ bool HttpServiceTestClassLister::ProcessHttpMessage(HttpStream &hStream) {
             ClassRegistryItem *item = (ClassRegistryItem *) (crdb->Peek(i));
             if (item != NULL) {
 
-                hStream.Printf("%s","<TR>");
+                hStream->Printf("%s","<TR>");
 
-                hStream.Printf("%s","<TD>");
-                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                hStream->Printf("%s","<TD>");
+                hStream->Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
                 if (item->GetObjectBuilder() != NULL) {
-                    hStream.Printf("%s","B");
+                    hStream->Printf("%s","B");
                 }
                 if (item->GetLoadableLibrary() != NULL) {
-                    hStream.Printf("%s","L");
+                    hStream->Printf("%s","L");
                 }
                 if (item->GetNumberOfInstances() > 0) {
-                    hStream.Printf("%s","A");
+                    hStream->Printf("%s","A");
                 }
                 if (item->GetIntrospection() != NULL) {
-                    hStream.Printf("%s","S");
+                    hStream->Printf("%s","S");
                 }
 
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","<TD align=left>");
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","<TD align=left>");
 
                 ClassProperties properties;
                 item->GetClassPropertiesCopy(properties);
 
-                hStream.Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
-                hStream.Printf("%s",properties.GetName());
+                hStream->Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
+                hStream->Printf("%s",properties.GetName());
 
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","<TD>");
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","<TD>");
 
-                hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
-                hStream.Printf("%s",properties.GetVersion());
+                hStream->Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+                hStream->Printf("%s",properties.GetVersion());
 
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","<TD>");
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","<TD>");
 
-                hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
-                hStream.Printf("%i",properties.GetSize());
+                hStream->Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+                hStream->Printf("%i",properties.GetSize());
 
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","<TD>");
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","<TD>");
                 if (item->GetNumberOfInstances() > 0) {
 
-                    hStream.Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
+                    hStream->Printf("%s","<SPAN STYLE=\"color: darkred;background-color: black;\">");
 
-                    hStream.Printf("%i",item->GetNumberOfInstances());
+                    hStream->Printf("%i",item->GetNumberOfInstances());
                 }
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","<TD>");
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","<TD>");
                 Introspection *introspection=(Introspection *)(item->GetIntrospection());
                 if (introspection !=NULL) {
 
@@ -429,56 +434,56 @@ bool HttpServiceTestClassLister::ProcessHttpMessage(HttpStream &hStream) {
                     if(numberOfMembers>0u) {
                         if (StringHelper::Compare(className.Buffer(),properties.GetName())==0) {
 
-                            hStream.Printf("%s","<TABLE>");
+                            hStream->Printf("%s","<TABLE>");
 
                             for(uint32 j=0u; j<numberOfMembers; j++) {
                                 const IntrospectionEntry introEntry=(*introspection)[j];
-                                hStream.Printf("%s","<TR>");
+                                hStream->Printf("%s","<TR>");
 
-                                hStream.Printf("%s","<TD>");
-                                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
-                                hStream.Printf("%s %s",introEntry.GetMemberTypeName(),introEntry.GetMemberModifiers());
-                                hStream.Printf("%s","</TD>");
+                                hStream->Printf("%s","<TD>");
+                                hStream->Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                                hStream->Printf("%s %s",introEntry.GetMemberTypeName(),introEntry.GetMemberModifiers());
+                                hStream->Printf("%s","</TD>");
 
-                                hStream.Printf("%s","<TD>");
-                                hStream.Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
-                                hStream.Printf("%s",introEntry.GetMemberName());
+                                hStream->Printf("%s","<TD>");
+                                hStream->Printf("%s","<SPAN STYLE=\"color: green;background-color: black;\">");
+                                hStream->Printf("%s",introEntry.GetMemberName());
                                 for (uint32 k = 0;k <introEntry.GetNumberOfDimensions(); k++) {
-                                    hStream.Printf("[%i]",introEntry.GetNumberOfElements(k));
+                                    hStream->Printf("[%i]",introEntry.GetNumberOfElements(k));
                                 }
-                                hStream.Printf("%s","</TD>");
+                                hStream->Printf("%s","</TD>");
 
-                                hStream.Printf("%s","</TR>");
+                                hStream->Printf("%s","</TR>");
                             }
 
-                            hStream.Printf("%s","</TABLE>");
+                            hStream->Printf("%s","</TABLE>");
                         }
                         else {
-                            hStream.Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
+                            hStream->Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
                             StreamString urlT;
-                            hStream.GetUrl(urlT);
+                            //protocol.GetUrl(urlT);
                             printf("\nurl = %s, prop = %s\n", urlT.Buffer(),properties.GetName());
                             StreamString className=properties.GetName();
-                            hStream.Printf("<A HREF=/%s?Class=%s NAME=+>",urlT.Buffer(),className.Buffer());
-                            hStream.Printf("%s","+");
-                            hStream.Printf("%s","</A>");
+                            hStream->Printf("<A HREF=/%s?Class=%s NAME=+>",urlT.Buffer(),className.Buffer());
+                            hStream->Printf("%s","+");
+                            hStream->Printf("%s","</A>");
                         }
                     }
                 }
 
-                //hStream.Printf("%30s %20s %x\n",item->ClassName(),item->Version(),item->Size());
-                hStream.Printf("%s","</TD>");
-                hStream.Printf("%s","</TR>");
+                //hStream->Printf("%30s %20s %x\n",item->ClassName(),item->Version(),item->Size());
+                hStream->Printf("%s","</TD>");
+                hStream->Printf("%s","</TR>");
 
             }
         }
 
-        hStream.Printf("%s", "</TABLE>");
+        hStream->Printf("%s", "</TABLE>");
     }
 
-    hStream.Printf("%s", "</BODY></HTML>\n");
+    hStream->Printf("%s", "</BODY></HTML>\n");
     //copy to the client
-    hStream.WriteHeader(true);
+    protocol.WriteHeader(true);
 
     return true;
 }
