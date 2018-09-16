@@ -831,46 +831,15 @@ bool ConfigurationDatabaseTest::TestMoveToBrotherState() {
     return ok;
 }
 
-#include <stdio.h>
 bool ConfigurationDatabaseTest::TestSetCurrentNodeAsRootNode() {
     ConfigurationDatabase cdb;
-    /* bool ok = cdb.CreateAbsolute("A");
-     ok &= cdb.CreateAbsolute("A.B");
-     ok &= cdb.CreateAbsolute("A.B.C");
-     ok &= cdb.CreateAbsolute("A.B.D");
-     ok &= cdb.MoveAbsolute("A.B");
-     cdb.SetCurrentNodeAsRootNode();
-     ok &= cdb.MoveToRoot();
-     ok &= cdb.MoveRelative("C");
-     return ok;*/
-
-    uint32 nodes = 3000;
-    uint32 n;
-    StreamString *a = new StreamString[nodes];
-    for (n = 0; (n < nodes); n++) {
-        a[n].Printf("%d", n);
-    }
-    uint64 now = HighResolutionTimer::Counter();
-    bool ok = true;
-    for (n = 0; (n < nodes); n++) {
-        ok &= cdb.CreateAbsolute(a[n].Buffer());
-    }
-    printf("Tree creation took %f [%d]\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok);
-
-    cdb.MoveToRoot();
-    now = HighResolutionTimer::Counter();
-    for (n = 0; n < nodes; n++) {
-        ok &= cdb.MoveToChild(n);
-        ok &= cdb.MoveToAncestor(1u);
-    }
-    printf("MoveToChild took %f [%d]\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok);
-    cdb.MoveToRoot();
-    now = HighResolutionTimer::Counter();
-    cdb.MoveToChild(0u);
-    for (n = 1; (n < nodes) && (ok); n++) {
-        ok &= cdb.MoveToBrother();
-    }
-    printf("MoveToBrother took %f [%d] %d\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok, n);
-
+    bool ok = cdb.CreateAbsolute("A");
+    ok &= cdb.CreateAbsolute("A.B");
+    ok &= cdb.CreateAbsolute("A.B.C");
+    ok &= cdb.CreateAbsolute("A.B.D");
+    ok &= cdb.MoveAbsolute("A.B");
+    cdb.SetCurrentNodeAsRootNode();
+    ok &= cdb.MoveToRoot();
+    ok &= cdb.MoveRelative("C");
     return ok;
 }
