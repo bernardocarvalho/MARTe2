@@ -32,6 +32,7 @@ CircularBufferThreadInputDataSource.cpp
 CircularStaticList.h
 CompilerTypes.h
 ConfigurationDatabase.cpp
+ConfigurationDatabaseNode.cpp
 ConsoleLogger.cpp
 CString.h
 DataSourceI.cpp

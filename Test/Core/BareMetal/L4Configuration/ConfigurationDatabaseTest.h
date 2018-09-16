@@ -234,6 +234,16 @@ public:
     bool TestMoveToChild();
 
     /**
+     * @brief Tests the MoveToBrother method
+     */
+    bool TestMoveToBrother();
+
+    /**
+     * @brief Tests the MoveToNextBrother method does not lose state after copying
+     */
+    bool TestMoveToBrotherState();
+
+    /**
      * @brief Tests the SetCurrentNodeAsRootNode method
      */
     bool TestSetCurrentNodeAsRootNode();

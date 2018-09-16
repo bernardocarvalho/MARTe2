@@ -359,7 +359,9 @@ bool ConfigurationDatabaseTest::TestRead_Object() {
     char8 outBuff[64];
     testDestination.member5_to.nestedMember2_to = outBuff;
 
-    TypeDescriptor destinationDes(false, ClassRegistryDatabase::Instance()->Find("TestIntrospectionObjectTo")->GetClassProperties()->GetUniqueIdentifier());
+    TypeDescriptor destinationDes(
+            false,
+            ClassRegistryDatabase::Instance()->Find("TestIntrospectionObjectTo")->GetClassProperties()->GetUniqueIdentifier());
     AnyType destination(destinationDes, 0u, &testDestination);
 
     source.MoveToRoot();
@@ -463,7 +465,9 @@ bool ConfigurationDatabaseTest::TestWrite_Object() {
     sourceTest.member5_from.nestedMember1_from = &member5Ref;
     sourceTest.member5_from.nestedMember2_from = 12345;
 
-    TypeDescriptor sourceDes(false, ClassRegistryDatabase::Instance()->Find("TestIntrospectionObjectFrom")->GetClassProperties()->GetUniqueIdentifier());
+    TypeDescriptor sourceDes(
+            false,
+            ClassRegistryDatabase::Instance()->Find("TestIntrospectionObjectFrom")->GetClassProperties()->GetUniqueIdentifier());
     AnyType source(sourceDes, 0u, &sourceTest);
 
     ConfigurationDatabase destination;
@@ -761,15 +765,112 @@ bool ConfigurationDatabaseTest::TestMoveToChild() {
     return ok;
 }
 
-bool ConfigurationDatabaseTest::TestSetCurrentNodeAsRootNode() {
+bool ConfigurationDatabaseTest::TestMoveToBrother() {
     ConfigurationDatabase cdb;
-    bool ok = cdb.CreateAbsolute("A");
-    ok &= cdb.CreateAbsolute("A.B");
+    bool ok = cdb.CreateAbsolute("A.B");
     ok &= cdb.CreateAbsolute("A.B.C");
     ok &= cdb.CreateAbsolute("A.B.D");
-    ok &= cdb.MoveAbsolute("A.B");
-    cdb.SetCurrentNodeAsRootNode();
-    ok &= cdb.MoveToRoot();
-    ok &= cdb.MoveRelative("C");
+    ok &= cdb.CreateAbsolute("A.B.E");
+    ok &= cdb.CreateAbsolute("A.B.F.G");
+    ok &= cdb.CreateAbsolute("A.B.H.I");
+    ok &= cdb.MoveAbsolute("A.B.C");
+    ok &= cdb.MoveToBrother();
+    StreamString nodeName = "D";
+    ok &= (nodeName == cdb.GetName());
+    ok &= cdb.MoveToBrother();
+    ok &= cdb.MoveToBrother();
+    nodeName = "F";
+    ok &= (nodeName == cdb.GetName());
+    ok &= cdb.MoveRelative("G");
+    ok &= !cdb.MoveToBrother();
+    ok &= cdb.MoveToAncestor(1u);
+    ok &= cdb.MoveToBrother();
+    nodeName = "H";
+    ok &= (nodeName == cdb.GetName());
+    ok &= cdb.CreateAbsolute("A.B.C.H");
+    ok &= cdb.CreateAbsolute("A.B.C.I");
+    ok &= cdb.CreateAbsolute("A.B.C.J");
+    ok &= !cdb.MoveToBrother();
+    ok &= cdb.MoveToAncestor(1u);
+    ok &= cdb.MoveToBrother();
+    nodeName = "D";
+    ok &= (nodeName == cdb.GetName());
+    ok &= cdb.CreateRelative("K");
+    ok &= !cdb.MoveToBrother();
+    ok &= cdb.MoveToAncestor(1u);
+    ok &= cdb.MoveToBrother();
+    nodeName = "E";
+    ok &= (nodeName == cdb.GetName());
+    return ok;
+}
+
+bool ConfigurationDatabaseTest::TestMoveToBrotherState() {
+    ConfigurationDatabase cdb;
+    bool ok = cdb.CreateAbsolute("A.B.C.F");
+    ok &= cdb.CreateAbsolute("A.B.C.G");
+    ok &= cdb.CreateAbsolute("A.B.C.H");
+    ok &= cdb.CreateAbsolute("A.B.D.I");
+    ok &= cdb.CreateAbsolute("A.B.D.J");
+    ok &= cdb.CreateAbsolute("A.B.D.L");
+    ok &= cdb.CreateAbsolute("A.B.E.L");
+    ok &= cdb.CreateAbsolute("A.B.E.N");
+    ok &= cdb.CreateAbsolute("A.B.E.M");
+    ok &= cdb.MoveAbsolute("A.B.C");
+
+    ConfigurationDatabase cdbABC = cdb;
+    ok &= cdbABC.MoveToBrother();
+    StreamString nodeName = "D";
+    ok &= (nodeName == cdbABC.GetName());
+    ok &= cdbABC.MoveToBrother();
+    nodeName = "E";
+    ok &= (nodeName == cdbABC.GetName());
+
+    ok &= cdb.MoveToBrother();
+    nodeName = "D";
+    ok &= (nodeName == cdb.GetName());
+    return ok;
+}
+
+#include <stdio.h>
+bool ConfigurationDatabaseTest::TestSetCurrentNodeAsRootNode() {
+    ConfigurationDatabase cdb;
+    /* bool ok = cdb.CreateAbsolute("A");
+     ok &= cdb.CreateAbsolute("A.B");
+     ok &= cdb.CreateAbsolute("A.B.C");
+     ok &= cdb.CreateAbsolute("A.B.D");
+     ok &= cdb.MoveAbsolute("A.B");
+     cdb.SetCurrentNodeAsRootNode();
+     ok &= cdb.MoveToRoot();
+     ok &= cdb.MoveRelative("C");
+     return ok;*/
+
+    uint32 nodes = 3000;
+    uint32 n;
+    StreamString *a = new StreamString[nodes];
+    for (n = 0; (n < nodes); n++) {
+        a[n].Printf("%d", n);
+    }
+    uint64 now = HighResolutionTimer::Counter();
+    bool ok = true;
+    for (n = 0; (n < nodes); n++) {
+        ok &= cdb.CreateAbsolute(a[n].Buffer());
+    }
+    printf("Tree creation took %f [%d]\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok);
+
+    cdb.MoveToRoot();
+    now = HighResolutionTimer::Counter();
+    for (n = 0; n < nodes; n++) {
+        ok &= cdb.MoveToChild(n);
+        ok &= cdb.MoveToAncestor(1u);
+    }
+    printf("MoveToChild took %f [%d]\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok);
+    cdb.MoveToRoot();
+    now = HighResolutionTimer::Counter();
+    cdb.MoveToChild(0u);
+    for (n = 1; (n < nodes) && (ok); n++) {
+        ok &= cdb.MoveToBrother();
+    }
+    printf("MoveToBrother took %f [%d] %d\n", (HighResolutionTimer::Counter() - now) * HighResolutionTimer::Period(), ok, n);
+
     return ok;
 }
