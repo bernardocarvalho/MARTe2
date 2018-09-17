@@ -96,7 +96,7 @@ bool ConfigurationDatabase::Write(const char8 * const name, const AnyType &value
         ok = (StringHelper::Length(name) > 0u);
         if (ok) {
             AnyType existentType = GetType(name);
-            if (existentType.GetTypeDescriptor().type != VoidType.type) {
+            if (existentType.GetTypeDescriptor() != voidAnyType.GetTypeDescriptor()) {
                 ok = Delete(name);
             }
         }
@@ -411,6 +411,15 @@ ReferenceT<ReferenceContainer> ConfigurationDatabase::GetCurrentNode() const {
 
 void ConfigurationDatabase::SetCurrentNodeAsRootNode() {
     rootNode = currentNode;
+}
+
+void ConfigurationDatabase::Purge(ReferenceContainer &purgeList) {
+    if (currentNode.IsValid()) {
+        currentNode->Purge(purgeList);
+    }
+    if (rootNode.IsValid()) {
+        rootNode->Purge(purgeList);
+    }
 }
 
 CLASS_REGISTER(ConfigurationDatabase, "1.0")

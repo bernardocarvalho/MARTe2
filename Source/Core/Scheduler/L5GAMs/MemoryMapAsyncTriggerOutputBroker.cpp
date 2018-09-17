@@ -168,10 +168,10 @@ bool MemoryMapAsyncTriggerOutputBroker::InitWithTriggerParameters(const SignalDi
             uint32 samples;
             ok = dataSourceIn.GetFunctionSignalSamples(OutputSignals, 0u, s, samples);
             if (ok) {
-                ok = (samples == 1u);
+                ok = (samples > 0u);
             }
             if (!ok) {
-                REPORT_ERROR(ErrorManagement::ParametersError, "The number of samples on each signal shall be == 1.");
+                REPORT_ERROR(ErrorManagement::ParametersError, "The number of samples on each signal shall be positive.");
             }
         }
     }
@@ -334,7 +334,8 @@ bool MemoryMapAsyncTriggerOutputBroker::Execute() {
     return ret;
 }
 
-ErrorManagement::ErrorType MemoryMapAsyncTriggerOutputBroker::BufferLoop(const ExecutionInfo & info) {
+/*lint -e{1764} EmbeddedServiceMethodBinderI callback method pointer prototype requires a non constant ExecutionInfo*/
+ErrorManagement::ErrorType MemoryMapAsyncTriggerOutputBroker::BufferLoop(ExecutionInfo & info) {
     ErrorManagement::ErrorType err;
     bool ret = true;
     if (info.GetStage() == ExecutionInfo::MainStage) {
@@ -421,7 +422,7 @@ bool MemoryMapAsyncTriggerOutputBroker::FlushAllTriggers() {
         ret = (fastSem.FastLock() == ErrorManagement::NoError);
         waitForBufferLoop = bufferLoopExecuting;
         fastSem.FastUnLock();
-        Sleep::Sec(1e-3);
+        Sleep::Sec(1e-3F);
     }
     if (ret) {
         ret = (fastSem.FastLock() == ErrorManagement::NoError);
