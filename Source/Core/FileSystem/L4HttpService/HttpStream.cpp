@@ -88,7 +88,6 @@ bool HttpStream::AddToCurrentNode(Reference node) {
 bool HttpStream::MoveToRoot() {
     bool ret = (storeBody) ? (storedData.MoveToRoot()) : (StreamStructuredData<JsonPrinter>::MoveToRoot());
     if ((ret) && (storeBody)) {
-        SetSize(0);
         Printf("%J!", storedData);
     }
     return ret;

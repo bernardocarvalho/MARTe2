@@ -143,10 +143,10 @@ int32 CompareNoCaseSensN(const char8* const string1,
             uint8 c1=static_cast<uint8>(string1[i]);
             uint8 c2=static_cast<uint8>(string2[i]);
             if((c1>=static_cast<uint8>('A')) && (c1<=static_cast<uint8>('Z'))) {
-                c1+=32;
+                c1+=32u;
             }
             if((c2>=static_cast<uint8>('A')) && (c2<=static_cast<uint8>('Z'))) {
-                c2+=32;
+                c2+=32u;
             }
             if (c1 > c2) {
                 ret = 2;

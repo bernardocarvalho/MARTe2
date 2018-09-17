@@ -182,14 +182,14 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
                     // save remainder of address
                     uint32 remAddrIndex=filter.GetRemainedAddrIndex();
                     StreamString urlTemp;
-                    hprotocol.GetUrl(urlTemp);
+                    hprotocol.GetId(urlTemp);
                     StreamString unmatchedUrl=&urlTemp.Buffer()[remAddrIndex];
 
                     uint32 newUrlLastCharIdx=(unmatchedUrl.Size()-1u);
                     if (unmatchedUrl.Buffer()[newUrlLastCharIdx] == '/') {
                         unmatchedUrl.SetSize(newUrlLastCharIdx);
                     }
-                    hprotocol.SetUnmatchedUrl(unmatchedUrl.BufferReference());
+                    hprotocol.SetUnmatchedId(unmatchedUrl.BufferReference());
                 }
 
                 if (hi.IsValid()) {
@@ -245,33 +245,40 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
             if (err.ErrorsCleared()) {
 
                 if (!pagePrepared) {
-                    if(!hprotocol.MoveAbsolute("OutputHttpOtions")){
+                    if(!hprotocol.MoveAbsolute("OutputHttpOtions")) {
                         hprotocol.CreateAbsolute("OutputHttpOtions");
-                        hprotocol.Write("Content-Type","text/html");
-                    }
 
+                    }
+                    hprotocol.Write("Content-Type","text/html");
                     if (!hprotocol.KeepAlive()) {
                         hprotocol.Write("Connection","Close");
 
                         hstream.Printf("%s", "<HTML>Page Not Found!</HTML>");
-                        if(!hprotocol.WriteHeader(true)) {
+                        hstream.Seek(0);
+                        if(!hprotocol.WriteHeader(true, HSHCReplyOK)) {
                             err=ErrorManagement::CommunicationError;
                             REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                         }
 
                     }
                 }
-                if (err.ErrorsCleared()) {
-                    if (!hprotocol.KeepAlive()) {
-                        err=ErrorManagement::Completed;
-                        REPORT_ERROR(ErrorManagement::Information, "Connection closed");
-                        delete commClient;
-                    }
-                }
             }
         }
-        sel.RemoveReadHandle(*commClient);
+        if (err.ErrorsCleared()) {
+            if (!hprotocol.KeepAlive()) {
+                err=ErrorManagement::Completed;
+                REPORT_ERROR(ErrorManagement::Information, "Connection closed");
+                commClient->Close();
+                delete commClient;
+            }
 
+        }
+        else {
+            REPORT_ERROR(ErrorManagement::Information, "Communication Error");
+            commClient->Close();
+            delete commClient;
+
+        }
     }
 
     return err;
@@ -286,7 +293,6 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
 
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::WaitRequestStageSpecific) {
             TCPSocket *newClient = new TCPSocket();
-            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
             if (server.WaitConnection(msecTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
             }
@@ -294,11 +300,12 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
                 information.SetThreadSpecificContext((void*)newClient);
                 err= MARTe::ErrorManagement::NoError;
             }
+            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
 
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {
-            TCPSocket *newClient = (TCPSocket *)(information.GetThreadSpecificContext());
-            err=ClientService(newClient);
+            TCPSocket *newClient = (TCPSocket *) (information.GetThreadSpecificContext());
+            err = ClientService(newClient);
 
         }
     }

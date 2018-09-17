@@ -287,8 +287,9 @@ bool HttpServiceTestWebRoot::GetAsText(BufferedStreamI &stream, ProtocolI &proto
     hStream->Printf("%s", "</TABLE>\n");
     hStream->Printf("%s", "</UL></BODY>\n");
     hStream->Printf("%s", "</html>\n");
+    hStream->Seek(0);
 
-    protocol.WriteHeader(true);
+    protocol.WriteHeader(true, (int32)HSHCReplyOK, NULL);
     return true;
 }
 
@@ -461,7 +462,7 @@ bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &p
                         else {
                             hStream->Printf("%s","<SPAN STYLE=\"color: red;background-color: black;\">");
                             StreamString urlT;
-                            //protocol.GetUrl(urlT);
+                            protocol.GetId(urlT);
                             printf("\nurl = %s, prop = %s\n", urlT.Buffer(),properties.GetName());
                             StreamString className=properties.GetName();
                             hStream->Printf("<A HREF=/%s?Class=%s NAME=+>",urlT.Buffer(),className.Buffer());
@@ -482,8 +483,10 @@ bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &p
     }
 
     hStream->Printf("%s", "</BODY></HTML>\n");
+    hStream->Seek(0);
+
     //copy to the client
-    protocol.WriteHeader(true);
+    protocol.WriteHeader(true, (int32)HSHCReplyOK, NULL);
 
     return true;
 }

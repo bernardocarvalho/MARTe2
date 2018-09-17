@@ -48,10 +48,10 @@ public:
 
     virtual ~HttpProtocol();
 
-    bool ReadHeader();
+    virtual bool ReadHeader();
 
-    bool WriteHeader(bool isMessageCompleted=true,
-                         int32 command=0,
+    virtual bool WriteHeader(bool isMessageCompleted=true,
+                         int32 command=(int32)HSHCReplyOK,
                          const char8 * id=NULL);
 
     //void SetPayload(BufferedStreamI &payloadIn)
@@ -65,15 +65,15 @@ public:
 
     void SetKeepAlive(bool isKeepAlive);
 
-    HSHttpCommand GetHttpCommand() const;
+    int32 GetHttpCommand() const;
 
-    void SetUnmatchedUrl(const char8 *unMatchedUrlIn);
+    virtual void SetUnmatchedId(const char8 *unMatchedIdIn);
 
-    void GetUnmatchedUrl(StreamString& unmatchedUrlOut);
+    virtual void GetUnmatchedId(StreamString& unmatchedIdOut);
 
-    void GetPath(StreamString& pathOut);
+    virtual void GetPath(StreamString& pathOut);
 
-    void GetUrl(StreamString& urlOut);
+    virtual void GetId(StreamString& idOut);
 
     uint8 TextMode();
 
@@ -90,9 +90,9 @@ protected:
     int32 unreadInput;
 
     /** The Http return code */
-    uint32 httpErrorCode;
+    int32 httpErrorCode;
 
-    HSHttpCommand httpCommand;
+    int32 httpCommand;
 
     /**
      * 1000 means v1.0 2100 means v2.1

@@ -45,9 +45,17 @@ public:
 
     virtual bool ReadHeader()=0;
 
-    virtual bool WriteHeader(bool isMessageCompleted=true,
-                         int32 command=0,
-                         const char8 * id=NULL)=0;
+    virtual bool WriteHeader(bool isMessageCompleted,
+                         int32 command,
+                         const char8 * id)=0;
+
+    virtual void SetUnmatchedId(const char8 *unMatchedIdIn)=0;
+
+    virtual void GetUnmatchedId(StreamString& unmatchedIdOut)=0;
+
+    virtual void GetPath(StreamString& pathOut)=0;
+
+    virtual void GetId(StreamString& idOut)=0;
 
 };
 }

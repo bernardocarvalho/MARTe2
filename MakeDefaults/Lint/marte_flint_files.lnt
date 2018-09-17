@@ -75,6 +75,7 @@ HeapI.h
 HeapManager.cpp
 HighResolutionTimer.h
 HighResolutionTimerCalibrator.cpp
+HttpDefinition.cpp
 IOBuffer.cpp
 IOBufferFloatPrint.cpp
 IOBufferIntegerPrint.cpp
@@ -150,6 +151,7 @@ Reference.cpp
 Reference.h
 ReferenceContainer.cpp
 ReferenceContainerFilter.cpp
+ReferenceContainerFilterNameAndType.h
 ReferenceContainerFilterObjectName.cpp
 ReferenceContainerFilterReferences.cpp
 ReferenceContainerNode.cpp

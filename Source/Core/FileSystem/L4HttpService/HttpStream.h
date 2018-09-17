@@ -190,15 +190,9 @@ public:
      */
     virtual uint32 GetNumberOfChildren();
 
-
-
-
-
 protected:
 
     DoubleBufferedStream *outputStream;
-
-
 
     ConfigurationDatabase storedData;
 

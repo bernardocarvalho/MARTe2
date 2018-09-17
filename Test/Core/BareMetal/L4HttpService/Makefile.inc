@@ -25,7 +25,7 @@
 #############################################################
 
 
-OBJSX=	UrlAddressTest.x
+OBJSX= HttpDefinitionTest.x
 					
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

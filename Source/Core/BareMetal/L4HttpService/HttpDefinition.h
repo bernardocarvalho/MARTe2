@@ -39,65 +39,75 @@
 namespace MARTe {
 namespace HttpDefinition {
 /** read while available (no content length specified)*/
-enum HSReadMode {
-    HTTPNoContentLengthSpecified = -2
-};
+static const int32 HTTPNoContentLengthSpecified = -2;
 
 /** the status of HttpStream */
-enum HSOperatingMode {
-    /** operates on the string both read and write */
-    HSOMWriteToString = 0x0,
+//HSOperatingMode
+/** operates on the string both read and write */
+static const int32 HSOMWriteToString = 0x0;
 
-    /** final mode: only write, and use the client direct stream */
-    HSOMWriteToClient = 0x1,
+/** final mode: only write, and use the client direct stream */
+static const int32 HSOMWriteToClient = 0x1;
 
-    /** operates read and write with CDB  */
-    HSOMWriteToCDB = 0x2,
+/** operates read and write with CDB  */
+static const int32 HSOMWriteToCDB = 0x2;
 
-    /** no more reading or writing   */
-    HSOMCompleted = 0x4
-};
+/** no more reading or writing   */
+static const int32 HSOMCompleted = 0x4;
 
 /** the command requested via HTTP */
-enum HSHttpCommand {
-    /** none */
-    HSHCNone = 0,
+//HSHttpCommand
+/** none */
+static const int32 HSHCNone = 0;
 
-    /** HTTP GET */
-    HSHCGet = 1,
+/** HTTP GET */
+static const int32 HSHCGet = 1;
 
-    /** HTTP PUT */
-    HSHCPut = 2,
+/** HTTP PUT */
+static const int32 HSHCPut = 2;
 
-    /** HTTP POST */
-    HSHCPost = 3,
+/** HTTP POST */
+static const int32 HSHCPost = 3;
 
-    /** HTTP HEAD */
-    HSHCHead = 4,
+/** HTTP HEAD */
+static const int32 HSHCHead = 4;
 
-    /** HTTP REPLY */
-    HSHCReply = 0x10000000,
+/** HTTP REPLY */
+static const int32 HSHCReply = 0x10000000;
 
-    /** HTTP REPLY OK*/
-    HSHCReplyOK = HSHCReply + 200,
+/** HTTP REPLY OK*/
+static const int32 HSHCReplyOK = (HSHCReply + 200);
 
-    /** HTTP REPLY AUTH REQUIURED*/
-    HSHCReplyAUTH = HSHCReply + 401
+/** HTTP REPLY AUTH REQUIURED*/
+static const int32 HSHCReplyAUTH = (HSHCReply + 401);
 
-};
+
+// UrlProtocols
+/** NONE  */
+static const int32 URLP_NONE = 0;
+
+/** HTTP  */
+static const int32 URLP_HTTP = 1;
+
+/** FTP */
+static const int32 URLP_FTP = 2;
+
+/** FILE */
+static const int32 URLP_FILE = 3;
+
 
 /** create a HSHttpCommand relative toa reply with a specfic ErrorCode */
-static inline HSHttpCommand GenerateReplyCode(uint32 httpErrorCode) {
-    return static_cast<HSHttpCommand>(httpErrorCode + static_cast<uint32>(HSHCReply));
+static inline int32 GenerateReplyCode(const int32 httpErrorCode) {
+    return (httpErrorCode + HSHCReply);
 }
 
 /** create a HSHttpCommand relative toa reply with a specfic ErrorCode */
-static inline bool IsReplyCode(HSHttpCommand command,
-                               uint32 &httpErrorCode) {
+static inline bool IsReplyCode(const int32 command,
+                               int32 &httpErrorCode) {
 
-    bool ret=(command >= HSHCReply);
+    bool ret = (command >= HSHCReply);
     if (ret) {
-        httpErrorCode = static_cast<uint32>(command) - static_cast<uint32>(HSHCReply);
+        httpErrorCode = command - HSHCReply;
     }
     return ret;
 }
@@ -105,68 +115,72 @@ static inline bool IsReplyCode(HSHttpCommand command,
 /**
  * @return the HTTP string corresponding to the error code
  */
-static inline const char8 *GetErrorCodeString(uint32 httpErrorCode) {
+static inline const char8 *GetErrorCodeString(const int32 httpErrorCode) {
     const char8 *ret = "Unknown code";
 
     switch (httpErrorCode) {
-    case 200u: {
+    case 200: {
         ret = "OK";
     }
         break;
-    case 201u: {
+    case 201: {
         ret = "CREATED";
     }
         break;
-    case 202u: {
+    case 202: {
         ret = "Accepted";
     }
         break;
-    case 203u: {
+    case 203: {
         ret = "Partial Information";
     }
         break;
-    case 204u: {
+    case 204: {
         ret = "No Response";
     }
         break;
-    case 400u: {
+    case 400: {
         ret = "Bad request";
     }
         break;
-    case 401u: {
+    case 401: {
         ret = "Unauthorized";
     }
         break;
-    case 402u: {
+    case 402: {
         ret = "PaymentRequired";
     }
         break;
-    case 403u: {
+    case 403: {
         ret = "Forbidden";
     }
         break;
-    case 404u: {
+    case 404: {
         ret = "Not found";
     }
         break;
-    case 500u: {
+    case 500: {
         ret = "Internal Error";
     }
         break;
-    case 501u: {
+    case 501: {
         ret = "Not implemented";
     }
         break;
-    case 301u: {
+    case 301: {
         ret = "Moved";
     }
         break;
-    case 302u: {
+    case 302: {
         ret = "Found";
     }
         break;
-    case 303u: {
+    case 303: {
         ret = "Method";
+    }
+        break;
+    default: {
+
     }
     }
 
@@ -174,28 +188,14 @@ static inline const char8 *GetErrorCodeString(uint32 httpErrorCode) {
 }
 
 
-enum UrlProtocols {
-    /** NONE  */
-    URLP_NONE = 0,
 
-    /** HTTP  */
-    URLP_HTTP = 1,
+bool HttpEncode(BufferedStreamI &converted,
+                const char8 * const original);
 
-    /** FTP */
-    URLP_FTP = 2,
+int32 HexDecode(const char8 c);
 
-    /** FILE */
-    URLP_FILE = 3
-};
-
-
-
-
-bool HttpEncode(BufferedStreamI &converted, const char8 *original);
-
-int32 HexDecode(char8 c);
-
-bool HttpDecode(BufferedStreamI &destination, BufferedStreamI &source);
+bool HttpDecode(BufferedStreamI &destination,
+                BufferedStreamI &source);
 
 }
 }

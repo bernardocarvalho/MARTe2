@@ -25,8 +25,7 @@
 #############################################################
 
 OBJSX=HttpDefinition.x\
-    HttpRealmI.x\
-    UrlAddress.x\
+    HttpRealmI.x
 
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

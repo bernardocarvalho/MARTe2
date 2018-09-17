@@ -46,7 +46,7 @@ public:
     virtual ~HttpRealmI();
 
     virtual bool Validate(const char8 * key,
-                          HttpDefinition::HSHttpCommand command,
+                          int32 command,
                           uint32 ipNumber) = 0;
 
     virtual bool DigestSecurityNeeded() = 0;

@@ -23,7 +23,7 @@
 #############################################################
 
 
-OBJSX=  UrlAddressGTest.x
+OBJSX=  HttpDefinitionGTest.x
 
 
 PACKAGE=GTest/BareMetal

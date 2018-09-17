@@ -368,9 +368,13 @@ int32 Select::WaitUntil(const TimeoutType &timeout) {
             /*lint -e{9114} .Justification: Removes the warning "implicit conversion of integer cvalue expression [MISRA C++ Rule 5-0-3]". */
             timeoutLinux.tv_sec = static_cast<int64>(timeout.GetTimeoutMSec()) / 1000;
             retSel = select(highestHandle + 1, &readHandle, &writeHandle, &exceptionHandle, &timeoutLinux);
+            //retSel = select(highestHandle + 1, &readHandle, NULL, NULL, &timeoutLinux);
+
         }
         else {
             retSel = select(highestHandle + 1, &readHandle, &writeHandle, &exceptionHandle, static_cast<timeval *>(NULL));
+            //retSel = select(highestHandle + 1, &readHandle, NULL, NULL, NULL);
+
         }
     }
     return retSel;
