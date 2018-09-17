@@ -88,6 +88,11 @@ public:
     inline void FastListInsertSingle(T &p);
 
     /**
+     * @brief @see LinkedListHolder::FastListAppendSingle()
+     */
+    inline void FastListAppendSingle(T * const p);
+
+    /**
      * @brief @see LinkedListHolder::ListInsert()
      */
     inline void ListInsert(T * const p);
@@ -210,6 +215,11 @@ void LinkedListHolderT<T, canDestroy>::CleanUp() {
 template <class T, bool canDestroy>
 void LinkedListHolderT<T, canDestroy>::FastListInsertSingle(T &p) {
     LinkedListHolder::FastListInsertSingle(p);
+}
+
+template <class T, bool canDestroy>
+void LinkedListHolderT<T, canDestroy>::FastListAppendSingle(T * const p) {
+    LinkedListHolder::FastListAppendSingle(p);
 }
 
 template <class T, bool canDestroy>

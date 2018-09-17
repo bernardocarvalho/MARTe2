@@ -40,9 +40,9 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
-    class Iterator;
-    class SearchFilter;
-    class SortFilter;
+class Iterator;
+class SearchFilter;
+class SortFilter;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -79,7 +79,7 @@ public:
     /**
      * @brief Constructor.
      */
-    LinkedListHolder(const bool destroyIn=true);
+    LinkedListHolder(const bool destroyIn = true);
 
     /**
      * @brief Destructor.
@@ -108,6 +108,16 @@ public:
     inline void FastListInsertSingle(LinkedListable &p);
 
     /**
+     * @brief Append \p to the end of the list.
+     * @details This method will cache the tail and directly append to it every the method is called.
+     * Note than if any of the other methods that change the list is called, this will invalidate the tail
+     *  and it will be recomputed (which might be time consuming).
+     * @param[in] p the LinkedListable object to append.
+     * @pre \a p must be a single LinkedListable element.
+     */
+    inline void FastListAppendSingle(LinkedListable * const p);
+
+    /**
      * @brief Inserts at the beginning of the list \a p. \a p can be a single element or an entire list.
      * @param[in] p a pointer to the LinkedListable to insert.
      */
@@ -120,8 +130,7 @@ public:
      * @param[in] p the pointer to the LinkedListable to insert.
      * @param[in] sorter implements the comparison criteria for the sorting.
      */
-    void ListInsert(LinkedListable * const p,
-                    SortFilter * const sorter);
+    void ListInsert(LinkedListable * const p, SortFilter * const sorter);
 
     /**
      * @brief Inserts a list in the specified position of the list.
@@ -129,8 +138,7 @@ public:
      * @param[in] q the pointer to the LinkedListable to be inserted.
      * @param[in] index is the position in the list where \a p must be inserted.
      */
-    void ListInsert(LinkedListable * const q,
-                    const uint32 index);
+    void ListInsert(LinkedListable * const q, const uint32 index);
 
     /**
      * @brief Adds an element at the end of this list.
@@ -231,6 +239,11 @@ private:
     LinkedListable llhRoot;
 
     /**
+     * List last element
+     */
+    LinkedListable *llhTail;
+
+    /**
      * List size
      */
     uint32 llhSize;
@@ -248,6 +261,16 @@ void LinkedListHolder::FastListInsertSingle(LinkedListable &p) {
     llhRoot.SetNext(&p);
 }
 
+void LinkedListHolder::FastListAppendSingle(LinkedListable * const p) {
+    if ((llhSize == 0u) || (llhTail == NULL_PTR(LinkedListable const *))) {
+        ListAdd(p);
+    }
+    else {
+        llhSize++;
+        llhTail->SetNext(p);
+    }
+    llhTail = p;
+}
 }
 #endif /* LINKEDLISTHOLDER_H_ */
 

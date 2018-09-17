@@ -54,6 +54,7 @@ void LinkedListHolder::CleanUp() {
 
 void LinkedListHolder::Reset() {
     llhRoot.SetNext(NULL_PTR(LinkedListable *));
+    llhTail = NULL_PTR(LinkedListable *);
     llhSize = 0u;
 }
 
@@ -61,6 +62,7 @@ LinkedListHolder::LinkedListHolder(const bool destroyIn) {
     llhSize = 0u;
     destroy = destroyIn;
     llhRoot.SetNext(NULL_PTR(LinkedListable *));
+    llhTail = NULL_PTR(LinkedListable *);
 }
 
 /*lint -e{1551} the only reason why this could throw an exception is if
@@ -85,61 +87,66 @@ uint32 LinkedListHolder::ListSize() const {
 
 /*lint -e{429} . Justification: A possible pointer to allocated memory will be freed by LinkedListHolder::CleanUp in the destructor.*/
 void LinkedListHolder::ListInsert(LinkedListable * const p) {
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
 
         llhSize += p->Size();
         llhRoot.Insert(p);
+        llhTail = NULL_PTR(LinkedListable *);
     }
 }
 
 /*lint -e{429} . Justification: A possible pointer to allocated memory will be freed by LinkedListHolder::CleanUp in the destructor.*/
 void LinkedListHolder::ListInsert(LinkedListable * const p,
                                   SortFilter * const sorter) {
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
 
         llhSize += p->Size();
         llhRoot.Insert(p, sorter);
+        llhTail = NULL_PTR(LinkedListable *);
     }
 }
 
 void LinkedListHolder::ListInsert(LinkedListable * const q,
                                   uint32 index) {
-    if (q != NULL) {
+    if (q != NULL_PTR(LinkedListable *)) {
 
         LinkedListable *p = &llhRoot;
-        while ((p->Next() != NULL) && (index > 0u)) {
+        while ((p->Next() != NULL_PTR(LinkedListable *)) && (index > 0u)) {
             p = p->Next();
             index--;
         }
         llhSize += q->Size();
         p->Insert(q);
+        llhTail = NULL_PTR(LinkedListable *);
     }
 }
 
 void LinkedListHolder::ListAdd(LinkedListable * const p) {
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
 
         llhSize++;
         llhRoot.Add(p);
+        llhTail = NULL_PTR(LinkedListable *);
     }
 }
 
 void LinkedListHolder::ListAddL(LinkedListable * const p) {
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
 
         llhSize += p->Size();
         llhRoot.AddL(p);
+        llhTail = NULL_PTR(LinkedListable *);
     }
 }
 
 bool LinkedListHolder::ListSearch(const LinkedListable * const p) {
 
-    return (llhRoot.Next() == NULL) ? false : llhRoot.Next()->Search(p);
+    return (llhRoot.Next() == NULL_PTR(LinkedListable *)) ? false : llhRoot.Next()->Search(p);
 }
 
 LinkedListable *LinkedListHolder::ListSearch(SearchFilter * const filter) {
 
-    return (llhRoot.Next() == NULL) ? NULL_PTR(LinkedListable *) : llhRoot.Next()->Search(filter);
+    return (llhRoot.Next() == NULL_PTR(LinkedListable *)) ? NULL_PTR(LinkedListable *) : llhRoot.Next()->Search(filter);
 }
 
 bool LinkedListHolder::ListExtract(LinkedListable * const p) {
@@ -150,15 +157,17 @@ bool LinkedListHolder::ListExtract(LinkedListable * const p) {
         llhSize--;
         ret = true;
     }
+    llhTail = NULL_PTR(LinkedListable *);
 
     return ret;
 }
 
 LinkedListable *LinkedListHolder::ListExtract(SearchFilter * const filter) {
     LinkedListable *p = llhRoot.Extract(filter);
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
         llhSize--;
     }
+    llhTail = NULL_PTR(LinkedListable *);
     return p;
 }
 
@@ -169,21 +178,23 @@ bool LinkedListHolder::ListDelete(LinkedListable * const p) {
         llhSize--;
         ret = true;
     }
+    llhTail = NULL_PTR(LinkedListable *);
     return ret;
 }
 
 bool LinkedListHolder::ListDelete(SearchFilter * const filter) {
     uint32 deleted = llhRoot.Delete(filter);
     llhSize -= deleted;
+    llhTail = NULL_PTR(LinkedListable *);
     return (deleted > 0u);
 }
 
 bool LinkedListHolder::ListSafeDelete(SearchFilter * const filter) {
     uint32 deleted = 0u;
-    if (filter != NULL) {
+    if (filter != NULL_PTR(SearchFilter *)) {
 
         LinkedListable *p = List();
-        while (p != NULL) {
+        while (p != NULL_PTR(LinkedListable *)) {
             if (filter->Test(p)) {
                 if (ListExtract(p)) {
                     delete p;
@@ -200,30 +211,33 @@ bool LinkedListHolder::ListSafeDelete(SearchFilter * const filter) {
             }
         }
     }
+    llhTail = NULL_PTR(LinkedListable *);
+
     return (deleted > 0u);
 }
 
 void LinkedListHolder::ListBSort(SortFilter * const sorter) {
     llhRoot.BSort(sorter);
+    llhTail = NULL_PTR(LinkedListable *);
 }
 
 LinkedListable *LinkedListHolder::ListPeek(const uint32 index) {
-    return (llhRoot.Next() == NULL) ? (NULL_PTR(LinkedListable *)) : (llhRoot.Next()->Peek(index));
+    return (llhRoot.Next() == NULL_PTR(LinkedListable *)) ? (NULL_PTR(LinkedListable *)) : (llhRoot.Next()->Peek(index));
 }
 
 LinkedListable *LinkedListHolder::ListExtract(uint32 index) {
 
     LinkedListable *ret = NULL_PTR(LinkedListable *);
     LinkedListable *p = &llhRoot;
-    while ((p != NULL) && (index > 0u)) {
+    while ((p != NULL_PTR(LinkedListable *)) && (index > 0u)) {
         p = p->Next();
         index--;
     }
 
-    if (p != NULL) {
+    if (p != NULL_PTR(LinkedListable *)) {
 
         LinkedListable *q = p->Next();
-        if (q != NULL) {
+        if (q != NULL_PTR(LinkedListable *)) {
             llhSize--;
             p->SetNext(q->Next());
             q->SetNext(NULL_PTR(LinkedListable *));
@@ -231,13 +245,14 @@ LinkedListable *LinkedListHolder::ListExtract(uint32 index) {
         ret = q;
 
     }
-
+    llhTail = NULL_PTR(LinkedListable *);
     return ret;
 }
 
 void LinkedListHolder::ListIterate(Iterator * const it) {
-    if (llhRoot.Next() != NULL) {
+    if (llhRoot.Next() != NULL_PTR(LinkedListable *)) {
         llhRoot.Next()->Iterate(it);
     }
+    llhTail = NULL_PTR(LinkedListable *);
 }
 }

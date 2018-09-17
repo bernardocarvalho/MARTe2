@@ -129,7 +129,7 @@ bool ReferenceContainer::Insert(Reference ref,
         ReferenceContainerNode *newItem = new ReferenceContainerNode();
         if (newItem->SetReference(ref)) {
             if (position == -1) {
-                list.ListAdd(newItem);
+                list.FastListAppendSingle(newItem);
             }
             else {
                 list.ListInsert(newItem, static_cast<uint32>(position));
