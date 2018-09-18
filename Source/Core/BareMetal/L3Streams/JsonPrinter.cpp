@@ -89,23 +89,25 @@ bool JsonPrinter::PrintCloseVector() {
     return stream->Printf("%s", "]");
 }
 
-bool JsonPrinter::PrintOpenBlock(const char8 *blockName) {
+bool JsonPrinter::PrintOpenBlock(const char8 *const blockName) {
     return stream->Printf("\"%s\": {", blockName);
 }
 
-bool JsonPrinter::PrintCloseBlock(const char8 *blockName) {
+/*lint -e{715} parameter not used in this function*/
+bool JsonPrinter::PrintCloseBlock(const char8 *const blockName) {
     return stream->Printf("%s", "}");
 }
 
-bool JsonPrinter::PrintOpenAssignment(const char8 *varName) {
+bool JsonPrinter::PrintOpenAssignment(const char8 *const varName) {
     return stream->Printf("\"%s\": ", varName);
 }
 
-bool JsonPrinter::PrintCloseAssignment(const char8 *varName) {
+/*lint -e{715} parameter not used in this function*/
+bool JsonPrinter::PrintCloseAssignment(const char8 *const varName) {
     return true;
 }
 
-bool JsonPrinter::PrintVariable(AnyType var) {
+bool JsonPrinter::PrintVariable(const AnyType &var) {
     return stream->Printf("%#J!", var);
 }
 }

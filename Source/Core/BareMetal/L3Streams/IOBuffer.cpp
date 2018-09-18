@@ -41,6 +41,10 @@
 
 namespace MARTe {
 
+static bool PrintToStream(IOBuffer & iobuff,
+                          const AnyType & parIn,
+                          const FormatDescriptor &fd);
+
 /*lint -e526 . Justification: The following functions are not defined here. */
 
 // These functions are implemented in IOBufferIntegerPrint.cpp
@@ -641,60 +645,140 @@ static bool PrintStream(IOBuffer & iobuff,
  *   The object represented by \a parIn must be introspectable
  */
 static bool PrintObjectIntrospection(IOBuffer & iobuff,
-                                     const AnyType & parIn) {
+                                     const AnyType & parIn,
+                                     const FormatDescriptor &fd) {
 
     TypeDescriptor descriptor = parIn.GetTypeDescriptor();
     const ClassRegistryItem *item = ClassRegistryDatabase::Instance()->Peek(descriptor.structuredDataIdCode);
 
-    bool ret = false;
+    bool ret = (item != NULL);
 
-    if (item != NULL) {
+    if (ret) {
         const ClassProperties *properties = item->GetClassProperties();
-        const char8* data = NULL_PTR(const char8*);
         // print the class name
-        if (properties != NULL) {
-            data = properties->GetName();
-            AnyType printClassName[] = {data, "= {", voidAnyType};
-            if (iobuff.PrintFormatted("\r\n%s %s\r\n", &printClassName[0])) {
-                const Introspection *introspection = item->GetIntrospection();
-                if (introspection != NULL) {
-                    ret = true;
+        ret = (properties != NULL);
+        if (ret) {
+            const char8 *propName = properties->GetName();
+            AnyType noneType = voidAnyType;
+            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            if (ret) {
+                //AnyType printClassName[] = {data, "= {", voidAnyType};
+                ret = PrintOpenBlock(iobuff, propName, fd);
+            }
+            if (ret) {
+                AnyType noneType = voidAnyType;
+                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                const Introspection *introspection = NULL_PTR(const Introspection *);
+
+                if (ret) {
+                    introspection = item->GetIntrospection();
+                    ret = (introspection != NULL);
+                }
+                if (ret) {
                     uint32 numberOfMembers = introspection->GetNumberOfMembers();
                     for (uint32 i = 0u; (i < numberOfMembers) && (ret); i++) {
                         IntrospectionEntry memberIntrospection = (*introspection)[i];
-                        data = memberIntrospection.GetMemberName();
-                        AnyType printMemberName[] = {data, "= {", voidAnyType};
-                        if (!iobuff.PrintFormatted("    %s %s\r\n", &printMemberName[0])) {
-                            ret = false;
-                        }
+                        const char8* memberName = memberIntrospection.GetMemberName();
+                        const char8* data = NULL_PTR(const char8*);
+
                         if (ret) {
-                            data = memberIntrospection.GetMemberTypeName();
-                            AnyType printType[] = {"type =", data, voidAnyType};
-                            if (!iobuff.PrintFormatted("        %s %s\r\n", &printType[0])) {
-                                ret = false;
+                            //AnyType printClassName[] = {data, "= {", voidAnyType};
+                            AnyType noneType = voidAnyType;
+                            ret = iobuff.PrintFormatted("    ", &noneType);
+                            if (ret) {
+                                ret = PrintOpenBlock(iobuff, memberName, fd);
                             }
                         }
                         if (ret) {
-                            data = memberIntrospection.GetMemberModifiers();
-                            AnyType printModifiers[] = {"modifiers =", data, voidAnyType};
-                            if (!iobuff.PrintFormatted("        %s \"%s\"\r\n", &printModifiers[0])) {
-                                ret = false;
+                            AnyType noneType = voidAnyType;
+                            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                        }
+                        if (ret) {
+                            AnyType noneType = voidAnyType;
+                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            if (ret) {
+                                data = memberIntrospection.GetMemberTypeName();
+                                ret = PrintOpenAssignment(iobuff, "type", fd);
+                                AnyType printType[] = { data, voidAnyType };
+                                if (!iobuff.PrintFormatted(" %#s", &printType[0])) {
+                                    ret = false;
+                                }
+                                if (ret) {
+                                    ret = PrintCloseAssignment(iobuff, "type", fd);
+                                }
+                                if (ret) {
+                                    ret = PrintVariableSeparator(iobuff, fd);
+                                }
+                                if (ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                                }
                             }
                         }
                         if (ret) {
-                            data = memberIntrospection.GetMemberAttributes();
-                            AnyType printAttributes[] = {"attributes =", data, voidAnyType};
-                            if (!iobuff.PrintFormatted("        %s \"%s\"\r\n    }\r\n", &printAttributes[0])) {
-                                ret = false;
+                            AnyType noneType = voidAnyType;
+                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            if (ret) {
+                                data = memberIntrospection.GetMemberModifiers();
+                                ret = PrintOpenAssignment(iobuff, "modifiers", fd);
+                                AnyType printType[] = { data, voidAnyType };
+                                if (!iobuff.PrintFormatted(" %#s", &printType[0])) {
+                                    ret = false;
+                                }
+                                if (ret) {
+                                    ret = PrintCloseAssignment(iobuff, "modifiers", fd);
+                                }
+                                if (ret) {
+                                    ret = PrintVariableSeparator(iobuff, fd);
+                                }
+                                if (ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                                }
                             }
                         }
+                        if (ret) {
+                            AnyType noneType = voidAnyType;
+                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            if (ret) {
+                                data = memberIntrospection.GetMemberAttributes();
+                                ret = PrintOpenAssignment(iobuff, "attributes", fd);
+                                AnyType printType[] = { data, voidAnyType };
+                                if (!iobuff.PrintFormatted(" %#s", &printType[0])) {
+                                    ret = false;
+                                }
+                                if (ret) {
+                                    ret = PrintCloseAssignment(iobuff, "attributes", fd);
+                                }
+                                if (ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n    ", &noneType));
+                                }
+                            }
+                            if (ret) {
+                                ret = PrintCloseBlock(iobuff, memberName, fd);
+                            }
+                        }
+
+                        if (ret) {
+                            if (i < (numberOfMembers - 1u)) {
+                                PrintBlockSeparator(iobuff, fd);
+                            }
+                            if (ret) {
+                                AnyType noneType = voidAnyType;
+                                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                            }
+                        }
+
                     }
-                    AnyType printClose[] = {"}", voidAnyType};
-                    if (!iobuff.PrintFormatted("%s\r\n", &printClose[0])) {
-                        ret = false;
+                    if (ret) {
+                        ret = PrintCloseBlock(iobuff, propName, fd);
+                    }
+                    if (ret) {
+                        AnyType noneType = voidAnyType;
+                        ret = (iobuff.PrintFormatted("\r\n", &noneType));
                     }
                 }
-                REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "PrintObjectIntrospection: The object is not introspectable");
             }
         }
         else {
@@ -812,43 +896,66 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
  *   The object represented by parIn must be introspectable.
  */
 static bool PrintObject(IOBuffer & iobuff,
-                        const AnyType & parIn) {
+                        const AnyType & parIn,
+                        const FormatDescriptor &fd) {
 
     char8* dataPointer = reinterpret_cast<char8 *>(parIn.GetDataPointer());
     TypeDescriptor descriptor = parIn.GetTypeDescriptor();
     const ClassRegistryItem *item = ClassRegistryDatabase::Instance()->Peek(descriptor.structuredDataIdCode);
 
-    bool ret = false;
+    bool ret = (item != NULL);
 
-    if (item != NULL) {
+    if (ret) {
         const ClassProperties *properties = item->GetClassProperties();
-        const char8* data = NULL_PTR(const char8*);
+        ret = (properties != NULL);
         // print the class name
-        if (properties != NULL) {
-            data = properties->GetName();
-            AnyType printClassName[] = {"Class =", data, voidAnyType};
-            if (iobuff.PrintFormatted("\r\n%s %s\r\n", &printClassName[0])) {
+        if (ret) {
+            //data = properties->GetName();
+            AnyType noneType = voidAnyType;
+            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            if (ret) {
+                ret = PrintOpenAssignment(iobuff, "Class", fd);
+            }
+            const char8 *propName = properties->GetName();
+            if (ret) {
+                AnyType printClassName[] = { propName, voidAnyType };
+                ret = iobuff.PrintFormatted(" %#s", &printClassName[0]);
+            }
+            if (ret) {
+                ret = PrintCloseAssignment(iobuff, "Class", fd);
+            }
+            if (ret) {
                 const Introspection *introspection = item->GetIntrospection();
                 if (introspection != NULL) {
-                    ret = true;
                     uint32 numberOfMembers = introspection->GetNumberOfMembers();
+                    if(numberOfMembers>0u) {
+                        ret=PrintVariableSeparator(iobuff, fd);
+                        if(ret) {
+                            AnyType noneType = voidAnyType;
+                            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                        }
+                    }
                     for (uint32 i = 0u; (i < numberOfMembers) && (ret); i++) {
                         IntrospectionEntry memberIntrospection = (*introspection)[i];
                         // the member name
-                        data = memberIntrospection.GetMemberName();
+                        const char8 * memberName = memberIntrospection.GetMemberName();
 
-                        AnyType printMemberName[] = {data, "= ", voidAnyType};
-                        if (!iobuff.PrintFormatted("%s %s", &printMemberName[0])) {
-                            ret = false;
-                        }
                         if (ret) {
                             uint32 byteOffset = memberIntrospection.GetMemberByteOffset();
                             TypeDescriptor memberDescriptor = memberIntrospection.GetMemberTypeDescriptor();
                             bool isMemberStructured = memberDescriptor.isStructuredData;
                             if (isMemberStructured) {
-                                AnyType printOpen[] = {"{", voidAnyType};
-                                if (!iobuff.PrintFormatted("%s\r\n", &printOpen[0])) {
-                                    ret = false;
+                                ret=PrintOpenBlock(iobuff, memberName, fd);
+                                if(ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                                }
+                            }
+                            else {
+                                ret=PrintOpenAssignment(iobuff, memberName, fd);
+                                if(ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted(" ", &noneType));
                                 }
                             }
                             if (ret) {
@@ -870,13 +977,39 @@ static bool PrintObject(IOBuffer & iobuff,
                                     member.SetNumberOfElements(j, memberIntrospection.GetNumberOfElements(j));
                                 }
                                 member.SetNumberOfDimensions(memberIntrospection.GetNumberOfDimensions());
-                                ret = iobuff.PrintFormatted("%!\r\n", &member);
+                                FormatDescriptor newFd;
+                                const char8* anyFormat="#!";
+                                ret=newFd.InitialiseFromString(anyFormat);
+                                if(ret) {
+                                    uint32 desGrammar=fd.desiredGrammar;
+                                    newFd.desiredGrammar=desGrammar;
+                                    ret = PrintToStream(iobuff, member, newFd);
+                                }
                             }
                             if (isMemberStructured) {
-                                AnyType printClose[] = {"}", voidAnyType};
-                                if (!iobuff.PrintFormatted("%s\r\n", &printClose[0])) {
-                                    ret = false;
+                                ret=PrintCloseBlock(iobuff, memberName, fd);
+                                if(ret) {
+                                    if(i<numberOfMembers-1u) {
+                                        ret=PrintBlockSeparator(iobuff, fd);
+                                    }
                                 }
+                                if(ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                                }
+                            }
+                            else {
+                                ret=PrintCloseAssignment(iobuff, memberName, fd);
+                                if(ret) {
+                                    if(i<numberOfMembers-1u) {
+                                        ret=PrintVariableSeparator(iobuff, fd);
+                                    }
+                                }
+                                if(ret) {
+                                    AnyType noneType = voidAnyType;
+                                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                                }
+
                             }
                         }
                     }
@@ -915,7 +1048,7 @@ static bool PrintToStreamScalar(IOBuffer & iobuff,
         bool isStructured = (par.GetTypeDescriptor()).isStructuredData;
         if (isStructured) {
             if (fd.desiredAction == PrintInfo) {
-                ret = PrintObjectIntrospection(iobuff, parIn);
+                ret = PrintObjectIntrospection(iobuff, parIn, fd);
             }
             else {
                 if (fd.desiredAction != PrintAnything) {
@@ -923,7 +1056,7 @@ static bool PrintToStreamScalar(IOBuffer & iobuff,
                         REPORT_ERROR_STATIC_0(ErrorManagement::Warning, "IOBuffer: Type mismatch: a struct will be printed");
                     }
                 }
-                ret = PrintObject(iobuff, parIn);
+                ret = PrintObject(iobuff, parIn, fd);
             }
         }
         else {

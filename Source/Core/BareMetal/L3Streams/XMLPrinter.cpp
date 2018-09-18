@@ -89,23 +89,23 @@ bool XMLPrinter::PrintCloseVector(){
     return stream->Printf("%s", "]");
 }
 
-bool XMLPrinter::PrintOpenBlock(const char8 *blockName){
+bool XMLPrinter::PrintOpenBlock(const char8 *const blockName){
     return stream->Printf("<%s>", blockName);
 }
 
-bool XMLPrinter::PrintCloseBlock(const char8 *blockName){
+bool XMLPrinter::PrintCloseBlock(const char8 *const blockName){
     return stream->Printf("</%s>",blockName);
 }
 
-bool XMLPrinter::PrintOpenAssignment(const char8 *varName){
+bool XMLPrinter::PrintOpenAssignment(const char8 *const varName){
     return stream->Printf("<%s>", varName);
 }
 
-bool XMLPrinter::PrintCloseAssignment(const char8 *varName){
+bool XMLPrinter::PrintCloseAssignment(const char8 *const varName){
     return stream->Printf("</%s>", varName);
 }
 
-bool XMLPrinter::PrintVariable(AnyType var){
+bool XMLPrinter::PrintVariable(const AnyType &var){
     return stream->Printf("%#X!", var);
 }
 }

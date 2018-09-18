@@ -40,7 +40,7 @@
 
 namespace MARTe {
 namespace HttpDefinition {
-static const char8 *Http2Convert = " #%<>";
+static const char8 *Http2Convert = " #%<>&~,$+=:/?";
 
 bool HttpEncode(BufferedStreamI &converted,
                 const char8 * const original) {
@@ -52,7 +52,9 @@ bool HttpEncode(BufferedStreamI &converted,
             char8 c = *copy;
             copy=&copy[1];
             if (StringHelper::SearchChar(Http2Convert, c)!=NULL) {
-                ret=converted.Printf("%%%2x", c);
+                const char8* perc="%";
+                uint8 num=static_cast<uint8>(c);
+                ret=converted.Printf("%s%2x", perc, num);
             }
             else {
                 uint32 size=1u;
@@ -93,13 +95,13 @@ bool HttpDecode(BufferedStreamI &destination,
                 char8 buffer[2];
                 uint32 size = 2u;
                 (void) source.Read(&buffer[0], size);
-                if (size > 0) {
+                if (size > 0u) {
                     c = static_cast<char8>((HexDecode(buffer[0]) * 16) + HexDecode(buffer[1]));
                 }
             }
             uint32 sizeW = 1u;
             ret = destination.Write(&c, sizeW);
-            sizeR = 1;
+            sizeR = 1u;
         }
     }
     return ret;

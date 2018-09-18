@@ -42,7 +42,7 @@
 namespace MARTe {
 
 PrinterI::PrinterI() {
-    stream = NULL;
+    stream = NULL_PTR(BufferedStreamI*);
 }
 
 PrinterI::PrinterI(BufferedStreamI & streamIn) {
@@ -50,8 +50,7 @@ PrinterI::PrinterI(BufferedStreamI & streamIn) {
 }
 
 PrinterI::~PrinterI() {
-    // Auto-generated destructor stub for PrinterI
-    // TODO Verify if manual additions are needed
+    stream = NULL_PTR(BufferedStreamI*);
 }
 
 void PrinterI::SetStream(BufferedStreamI & streamIn) {

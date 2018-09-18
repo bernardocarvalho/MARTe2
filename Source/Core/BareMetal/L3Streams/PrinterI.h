@@ -66,15 +66,15 @@ public:
 
     virtual bool PrintCloseVector()=0;
 
-    virtual bool PrintOpenBlock(const char8 *blockName)=0;
+    virtual bool PrintOpenBlock(const char8 * const blockName)=0;
 
-    virtual bool PrintCloseBlock(const char8 *blockName)=0;
+    virtual bool PrintCloseBlock(const char8 *const blockName)=0;
 
-    virtual bool PrintOpenAssignment(const char8 *varName)=0;
+    virtual bool PrintOpenAssignment(const char8 *const varName)=0;
 
-    virtual bool PrintCloseAssignment(const char8 *varName)=0;
+    virtual bool PrintCloseAssignment(const char8 *const varName)=0;
 
-    virtual bool PrintVariable(AnyType var)=0;
+    virtual bool PrintVariable(const AnyType &var)=0;
 
 
     BufferedStreamI *stream;

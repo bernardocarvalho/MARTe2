@@ -66,15 +66,15 @@ public:
 
     virtual bool PrintCloseVector();
 
-    virtual bool PrintOpenBlock(const char8 *blockName);
+    virtual bool PrintOpenBlock(const char8 *const blockName);
 
-    virtual bool PrintCloseBlock(const char8 *blockName);
+    virtual bool PrintCloseBlock(const char8 *const blockName);
 
-    virtual bool PrintOpenAssignment(const char8 *varName);
+    virtual bool PrintOpenAssignment(const char8 *const varName);
 
-    virtual bool PrintCloseAssignment(const char8 *varName);
+    virtual bool PrintCloseAssignment(const char8 *const varName);
 
-    virtual bool PrintVariable(AnyType var);
+    virtual bool PrintVariable(const AnyType &var);
 
 };
 

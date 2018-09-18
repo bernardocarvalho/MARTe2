@@ -90,6 +90,7 @@ IntrospectionT.h
 Iterator.h
 IteratorT.h
 JsonParser.cpp
+JsonPrinter.cpp
 LexicalAnalyzer.cpp
 LinkedListHolder.cpp
 LinkedListHolderT.h
@@ -139,6 +140,7 @@ OperatingSystemCallbacksI.h
 ParserI.cpp
 Processor.cpp
 ProcessorType.cpp
+PrinterI.cpp
 QueuedMessageI.cpp
 QueueingMessageFilter.cpp
 QueuedReplyMessageCatcherFilter.cpp
@@ -173,6 +175,7 @@ SortFilterT.h
 StandardHeap.h
 StandardHeap_Generic.cpp
 StandardParser.cpp
+StandardPrinter.cpp
 StateMachine.cpp
 StateMachineEvent.cpp
 StaticList.h

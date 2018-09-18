@@ -31,12 +31,16 @@ OBJSX=	AdvancedErrorManagementTest.x \
 	CharBufferTest.x \
 	DoubleBufferedStreamTest.x \
 	IOBufferTest.x \
+	JsonPrinterTest.x\
+	PrinterITest.x\
 	SenderStructuredDataTest.x\
 	SingleBufferedStreamTest.x \
+	StandardPrinterTest.x\
 	StreamMemoryReferenceTest.x \
 	StreamStringIOBufferTest.x \
 	StreamStringTest.x \
-	StreamTestHelper.x
+	StreamTestHelper.x\
+	XMLPrinterTest.x
 		
 PACKAGE=Core/BareMetal
 ROOT_DIR=../../../..

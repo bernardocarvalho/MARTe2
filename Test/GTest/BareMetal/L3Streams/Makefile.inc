@@ -30,11 +30,15 @@ OBJSX=  AdvancedErrorManagementGTest.x \
 	CharBufferGTest.x \
 	DoubleBufferedStreamGTest.x \
 	IOBufferGTest.x \
+	JsonPrinterGTest.x\
+	PrinterIGTest.x\
 	SenderStructuredDataGTest.x\
 	SingleBufferedStreamGTest.x \
+	StandardPrinterGTest.x\
 	StreamMemoryReferenceGTest.x \
 	StreamStringGTest.x \
-	StreamStringIOBufferGTest.x
+	StreamStringIOBufferGTest.x\
+	XMLPrinterGTest.x
 
 
 PACKAGE=GTest/BareMetal

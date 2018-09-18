@@ -88,23 +88,25 @@ bool StandardPrinter::PrintCloseVector(){
     return stream->Printf("%s", "}");
 }
 
-bool StandardPrinter::PrintOpenBlock(const char8 *blockName){
+bool StandardPrinter::PrintOpenBlock(const char8 *const blockName){
     return stream->Printf("%s = {", blockName);
 }
 
-bool StandardPrinter::PrintCloseBlock(const char8 *blockName){
+/*lint -e{715} parameter not used in this function*/
+bool StandardPrinter::PrintCloseBlock(const char8 *const blockName){
     return stream->Printf("%s", "}");
 }
 
-bool StandardPrinter::PrintOpenAssignment(const char8 *varName){
+bool StandardPrinter::PrintOpenAssignment(const char8 *const varName){
     return stream->Printf("%s =", varName);
 }
 
-bool StandardPrinter::PrintCloseAssignment(const char8 *varName){
+/*lint -e{715} parameter not used in this function*/
+bool StandardPrinter::PrintCloseAssignment(const char8 *const varName){
     return true;
 }
 
-bool StandardPrinter::PrintVariable(AnyType var){
+bool StandardPrinter::PrintVariable(const AnyType &var){
     return stream->Printf("%#!", var);
 }
 }
