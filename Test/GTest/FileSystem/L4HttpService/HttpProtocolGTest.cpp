@@ -1,0 +1,225 @@
+/**
+ * @file HttpProtocolGTest.cpp
+ * @brief Source file for class HttpProtocolGTest
+ * @date 17 set 2018
+ * @author pc
+ *
+ * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
+ * the Development of Fusion Energy ('Fusion for Energy').
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
+ * by the European Commission - subsequent versions of the EUPL (the "Licence")
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+ *
+ * @warning Unless required by applicable law or agreed to in writing, 
+ * software distributed under the Licence is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the Licence permissions and limitations under the Licence.
+
+ * @details This source file contains the definition of all the methods for
+ * the class HttpProtocolGTest (public, protected, and private). Be aware that some 
+ * methods, such as those inline could be defined on the header file, instead.
+ */
+
+/*---------------------------------------------------------------------------*/
+/*                         Standard header includes                          */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+
+
+#include <limits.h>
+#include "gtest/gtest.h"
+
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+#include "HttpProtocolTest.h"
+
+/*---------------------------------------------------------------------------*/
+/*                           Static definitions                              */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                           Method definitions                              */
+/*---------------------------------------------------------------------------*/
+TEST(HttpProtocolGTest, TestConstructor) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestConstructor());
+}
+
+
+TEST(HttpProtocolGTest, TestReadHeader_Get1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Get1());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Get2_Commands) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Get2_Commands());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Put1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Put1());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Post1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post1());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Post2_Multiform) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post2_Multiform());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Head) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Head());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Reply) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Reply());
+}
+
+TEST(HttpProtocolGTest, TestCompleteReadOperation) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestCompleteReadOperation());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Get1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Get1());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Get2) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Get2());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Put1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Put1());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Put2) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Put2());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Head1) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Head1());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Head2) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Head2());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Post) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Post());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Reply) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Reply());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_Reply2) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_Reply2());
+}
+
+TEST(HttpProtocolGTest, TestSecurityCheck) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestSecurityCheck());
+}
+
+TEST(HttpProtocolGTest, TestKeepAliveDefault) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestKeepAliveDefault());
+}
+
+TEST(HttpProtocolGTest, TestKeepAliveTrue) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestKeepAlive(true));
+}
+
+
+TEST(HttpProtocolGTest, TestKeepAliveFalse) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestKeepAlive(false));
+}
+
+
+TEST(HttpProtocolGTest, TestSetKeepAliveTrue) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestSetKeepAlive(true));
+}
+
+TEST(HttpProtocolGTest, TestSetKeepAliveFalse) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestSetKeepAlive(false));
+}
+
+TEST(HttpProtocolGTest, TestGetHttpCommandGet) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCGet));
+}
+
+TEST(HttpProtocolGTest, TestGetHttpCommandPut) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPut));
+}
+
+TEST(HttpProtocolGTest, TestGetHttpCommandHead) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCHead));
+}
+
+TEST(HttpProtocolGTest, TestGetHttpCommandPost) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPost));
+}
+
+TEST(HttpProtocolGTest, TestGetHttpCommandReply) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetHttpCommand(HSHCReply));
+}
+
+TEST(HttpProtocolGTest, TestSetUnmatchedId) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestSetUnmatchedId());
+}
+
+TEST(HttpProtocolGTest, TestGetUnmatchedId) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetUnmatchedId());
+}
+
+TEST(HttpProtocolGTest, TestGetPath) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetPath());
+}
+
+TEST(HttpProtocolGTest, TestGetId) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetId());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_StrucuredDataStored) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_StrucuredDataStored());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_StrucuredDataOnline) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_StrucuredDataOnline());
+}
+
