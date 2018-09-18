@@ -169,6 +169,13 @@ public:
     virtual bool MoveToChild(const uint32 childIdx) = 0;
 
     /**
+     * @brief Moves the current node to the next node at the same level (brother).
+     * @return true if the move was successful and the current node is now the brother node. If unsuccessful the current node
+     * is not changed.
+     */
+    virtual bool MoveToBrother() = 0;
+
+    /**
      * @brief Create a new series of nodes based on the provided absolute path.
      * @param[in] path the path of nodes to be created.
      * @return true if the nodes were successfully created and if the path does not already exist.

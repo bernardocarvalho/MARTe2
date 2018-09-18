@@ -33,6 +33,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "AnyObject.h"
+#include "ConfigurationDatabaseNode.h"
 #include "TypeConversion.h"
 #include "StructuredDataI.h"
 #include "ReferenceT.h"
@@ -146,6 +147,11 @@ ConfigurationDatabase    ();
     virtual bool MoveToChild(const uint32 childIdx);
 
     /**
+     * @see StructuredDataI::MoveToNextBrother
+     */
+    virtual bool MoveToBrother();
+
+    /**
      * @see StructuredDataI::CreateAbsolute
      */
     virtual bool CreateAbsolute(const char8 * const path);
@@ -211,7 +217,6 @@ ConfigurationDatabase    ();
      */
     void SetCurrentNodeAsRootNode();
 
-
     /**
      * @see ReferenceContainer::Purge()
      */
@@ -229,12 +234,12 @@ private:
     /**
      * The current node to where the database is pointing.
      */
-    ReferenceT<ReferenceContainer> currentNode;
+    ReferenceT<ConfigurationDatabaseNode> currentNode;
 
     /**
      * The root node of the database.
      */
-    ReferenceT<ReferenceContainer> rootNode;
+    ReferenceT<ConfigurationDatabaseNode> rootNode;
 
     /**
      * The shared mutex semaphore.

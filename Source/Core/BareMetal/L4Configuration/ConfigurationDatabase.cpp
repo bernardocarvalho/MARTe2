@@ -50,7 +50,7 @@ namespace MARTe {
 ConfigurationDatabase::ConfigurationDatabase() :
         Object() {
     mux.Create();
-    ReferenceT<ReferenceContainer> rootContainer(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<ConfigurationDatabaseNode> rootContainer(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     rootNode = rootContainer;
     currentNode = rootNode;
 }
@@ -273,10 +273,19 @@ bool ConfigurationDatabase::MoveToChild(const uint32 childIdx) {
     return ok;
 }
 
+bool ConfigurationDatabase::MoveToBrother() {
+    ReferenceT<ReferenceContainer> ref = currentNode->GetBrother();
+    if (ref.IsValid()) {
+        currentNode = ref;
+    }
+    return ref.IsValid();
+}
+
 bool ConfigurationDatabase::MoveToAncestor(const uint32 generations) {
     bool ok = (generations != 0u);
     if (ok) {
-        ReferenceContainerFilterReferences filter(1, ReferenceContainerFilterMode::RECURSIVE | ReferenceContainerFilterMode::PATH, currentNode);
+        ReferenceContainerFilterReferences filter(
+                1, ReferenceContainerFilterMode::RECURSIVE | ReferenceContainerFilterMode::PATH, currentNode);
         ReferenceContainer resultPath;
         rootNode->Find(resultPath, filter);
         ok = (resultPath.Size() > 0u);
@@ -313,8 +322,10 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
             //Check if a node with this name already exists
             bool found = false;
             Reference foundReference;
+            Reference foundReferencePrev;
             uint32 i;
             for (i = 0u; (i < currentNode->Size()) && (!found); i++) {
+                foundReferencePrev = foundReference;
                 foundReference = currentNode->Get(i);
                 found = (StringHelper::Compare(foundReference->GetName(), token.Buffer()) == 0);
             }
@@ -323,10 +334,15 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
                 currentNode = foundReference;
             }
             else {
-                ReferenceT<ReferenceContainer> container(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+                ReferenceT<ConfigurationDatabaseNode> container(GlobalObjectsDatabase::Instance()->GetStandardHeap());
                 container->SetName(token.Buffer());
                 ok = currentNode->Insert(container);
                 if (ok) {
+                    ReferenceT<ConfigurationDatabaseNode> lastAddedChild = currentNode->GetLastAddedChild();
+                    if (lastAddedChild.IsValid()) {
+                        lastAddedChild->SetBrother(container);
+                    }
+                    currentNode->SetLastAddedChild(container);
                     currentNode = container;
                     created = true;
                 }
@@ -414,7 +430,10 @@ void ConfigurationDatabase::SetCurrentNodeAsRootNode() {
 }
 
 void ConfigurationDatabase::Purge(ReferenceContainer &purgeList) {
+    ReferenceT<ReferenceContainer> emptyReference;
     if (currentNode.IsValid()) {
+        currentNode->SetLastAddedChild(emptyReference);
+        currentNode->SetBrother(emptyReference);
         currentNode->Purge(purgeList);
     }
     if (rootNode.IsValid()) {
