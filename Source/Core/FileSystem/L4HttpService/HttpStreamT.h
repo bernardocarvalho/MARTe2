@@ -1,7 +1,7 @@
 /**
- * @file HttpStream.h
- * @brief Header file for class HttpStream
- * @date 17 ago 2018
+ * @file HttpStreamTTT.h
+ * @brief Header file for class HttpStreamTTT
+ * @date 19 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class HttpStream
+ * @details This header file contains the declaration of the class HttpStreamTTT
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef HTTPSTREAM_H_
-#define HTTPSTREAM_H_
+#ifndef HTTPSTREAMT_H_
+#define HTTPSTREAMT_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -33,9 +33,10 @@
 /*---------------------------------------------------------------------------*/
 #include "HttpRealmI.h"
 #include "ConfigurationDatabase.h"
-#include "StructuredDataStreamT.h"
 #include "DoubleBufferedStream.h"
 #include "JsonPrinter.h"
+#include "StandardPrinter.h"
+#include "XMLPrinter.h"
 #include "StreamStructuredData.h"
 #include "ProtocolI.h"
 /*---------------------------------------------------------------------------*/
@@ -43,15 +44,18 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
-using namespace HttpDefinition;
 
-class HttpStream: public StreamString, public StreamStructuredData<JsonPrinter>{
+template<class Printer>
+class HttpStreamT: public StreamString, public StreamStructuredData<Printer> {
 public:
-    HttpStream();
+    HttpStreamT();
 
-    HttpStream(DoubleBufferedStream &clientBufferedStreamIn, bool store=true);
+    HttpStreamT(DoubleBufferedStream &clientBufferedStreamIn,
+                bool store = true);
 
-    virtual ~HttpStream();
+    void SetStoreMode(bool store);
+
+    virtual ~HttpStreamT();
 
     /**
      * @brief Reads a previously stored AnyType. The node with this name has to be a child of the current node.
@@ -62,7 +66,8 @@ public:
      * @pre
      *   GetType(name).GetTypeDescriptor() != VoidType
      */
-    virtual bool Read(const char8 * const name, const AnyType &value);
+    virtual bool Read(const char8 * const name,
+                      const AnyType &value);
 
     /**
      * @brief Gets the type of a previously stored AnyType.
@@ -81,7 +86,8 @@ public:
      *   name != NULL &&
      *   StringHelper::Length(name) > 0
      */
-    virtual bool Write(const char8 * const name, const AnyType &value);
+    virtual bool Write(const char8 * const name,
+                       const AnyType &value);
 
     /**
      * @brief Copies the content of the current node to the provided destination.
@@ -198,7 +204,6 @@ protected:
 
     bool storeBody;
 
-
 };
 
 }
@@ -207,6 +212,127 @@ protected:
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
+namespace MARTe {
 
-#endif /* SOURCE_CORE_BAREMETAL_L4CONFIGURATION_HTTPSTREAM_H_ */
+//#define NULL_PTR(x) NULL
+template<class Printer>
+HttpStreamT<Printer>::HttpStreamT(DoubleBufferedStream &clientBufferedStreamIn,
+                                  bool store) :
+        StreamString(),
+        StreamStructuredData<JsonPrinter>() {
+    outputStream = &clientBufferedStreamIn;
+    storeBody = store;
+    StreamStructuredData<JsonPrinter>::SetStream(*outputStream);
+
+}
+
+template<class Printer>
+HttpStreamT<Printer>::~HttpStreamT() {
+    // Auto-generated destructor stub for HttpStreamT
+    // TODO Verify if manual additions are needed
+}
+
+template<class Printer>
+void HttpStreamT<Printer>::SetStoreMode(bool store) {
+    storeBody = store;
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::Read(const char8 * const name,
+                                const AnyType &value) {
+    //use a special node
+    return (storeBody) ? (storedData.Read(name, value)) : (StreamStructuredData<JsonPrinter>::Read(name, value));
+}
+
+template<class Printer>
+AnyType HttpStreamT<Printer>::GetType(const char8 * const name) {
+    return (storeBody) ? (storedData.GetType(name)) : (StreamStructuredData<JsonPrinter>::GetType(name));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::Write(const char8 * const name,
+                                 const AnyType &value) {
+    return (storeBody) ? (storedData.Write(name, value)) : (StreamStructuredData<JsonPrinter>::Write(name, value));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::Copy(StructuredDataI &destination) {
+    return (storeBody) ? (storedData.Copy(destination)) : (StreamStructuredData<JsonPrinter>::Copy(destination));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::AddToCurrentNode(Reference node) {
+    return (storeBody) ? (storedData.AddToCurrentNode(node)) : (StreamStructuredData<JsonPrinter>::AddToCurrentNode(node));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::MoveToRoot() {
+    bool ret = (storeBody) ? (storedData.MoveToRoot()) : (StreamStructuredData<JsonPrinter>::MoveToRoot());
+    if ((ret) && (storeBody)) {
+        Printf("%J!", storedData);
+    }
+    return ret;
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::MoveToAncestor(uint32 generations) {
+    return (storeBody) ? (storedData.MoveToAncestor(generations)) : (StreamStructuredData<JsonPrinter>::MoveToAncestor(generations));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::MoveAbsolute(const char8 * const path) {
+    return (storeBody) ? (storedData.MoveAbsolute(path)) : (StreamStructuredData<JsonPrinter>::MoveAbsolute(path));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::MoveRelative(const char8 * const path) {
+    return (storeBody) ? (storedData.MoveRelative(path)) : (StreamStructuredData<JsonPrinter>::MoveRelative(path));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::MoveToChild(const uint32 childIdx) {
+    return (storeBody) ? (storedData.MoveToChild(childIdx)) : (StreamStructuredData<JsonPrinter>::MoveToChild(childIdx));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::CreateAbsolute(const char8 * const path) {
+    return (storeBody) ? (storedData.CreateAbsolute(path)) : (StreamStructuredData<JsonPrinter>::CreateAbsolute(path));
+
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::CreateRelative(const char8 * const path) {
+    return (storeBody) ? (storedData.CreateRelative(path)) : (StreamStructuredData<JsonPrinter>::CreateRelative(path));
+}
+
+template<class Printer>
+bool HttpStreamT<Printer>::Delete(const char8 * const name) {
+    return (storeBody) ? (storedData.Delete(name)) : (StreamStructuredData<JsonPrinter>::Delete(name));
+}
+
+template<class Printer>
+const char8 *HttpStreamT<Printer>::GetName() {
+    return (storeBody) ? (storedData.GetName()) : (StreamStructuredData<JsonPrinter>::GetName());
+}
+
+template<class Printer>
+const char8 *HttpStreamT<Printer>::GetChildName(const uint32 index) {
+    return (storeBody) ? (storedData.GetChildName(index)) : (StreamStructuredData<JsonPrinter>::GetChildName(index));
+}
+
+template<class Printer>
+uint32 HttpStreamT<Printer>::GetNumberOfChildren() {
+    return (storeBody) ? (storedData.GetNumberOfChildren()) : (StreamStructuredData<JsonPrinter>::GetNumberOfChildren());
+}
+
+typedef HttpStreamT<JsonPrinter> HttpJsonStream;
+
+typedef HttpStreamT<XMLPrinter> HttpXMLStream;
+
+typedef HttpStreamT<StandardPrinter> HttpStandardStream;
+
+
+}
+
+#endif /* HTTPSTREAMT_H_ */
 

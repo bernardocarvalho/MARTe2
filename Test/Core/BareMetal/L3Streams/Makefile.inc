@@ -33,13 +33,13 @@ OBJSX=	AdvancedErrorManagementTest.x \
 	IOBufferTest.x \
 	JsonPrinterTest.x\
 	PrinterITest.x\
-	SenderStructuredDataTest.x\
 	SingleBufferedStreamTest.x \
 	StandardPrinterTest.x\
 	StreamMemoryReferenceTest.x \
 	StreamStringIOBufferTest.x \
 	StreamStringTest.x \
 	StreamTestHelper.x\
+	StreamStructuredDataTest.x\
 	XMLPrinterTest.x
 		
 PACKAGE=Core/BareMetal

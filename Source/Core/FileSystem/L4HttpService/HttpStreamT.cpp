@@ -1,7 +1,7 @@
 /**
- * @file SenderStructuredDataTest.cpp
- * @brief Source file for class SenderStructuredDataTest
- * @date 07 set 2018
+ * @file HttpStreamT.cpp
+ * @brief Source file for class HttpStreamT
+ * @date 19 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class SenderStructuredDataTest (public, protected, and private). Be aware that some 
+ * the class HttpStreamT (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -25,12 +25,11 @@
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
 
-#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "SenderStructuredDataTest.h"
+#include "HttpStreamT.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */

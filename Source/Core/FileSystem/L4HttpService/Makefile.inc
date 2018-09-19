@@ -24,7 +24,7 @@
 #
 #############################################################
 
-OBJSX=	HttpStream.x\
+OBJSX=	HttpStreamT.x\
     HttpService.x\
     HttpProtocol.x
         

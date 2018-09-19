@@ -1,6 +1,6 @@
 /**
- * @file SenderStructuredDataTest.h
- * @brief Header file for class SenderStructuredDataTest
+ * @file StreamStructuredDataTest.h
+ * @brief Header file for class StreamStructuredDataTest
  * @date 07 set 2018
  * @author pc
  *
@@ -16,7 +16,7 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class SenderStructuredDataTest
+ * @details This header file contains the declaration of the class StreamStructuredDataTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
@@ -34,7 +34,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "SenderStructuredData.h"
+#include "StreamStructuredData.h"
 #include "StandardPrinter.h"
 #include "JsonPrinter.h"
 #include "XMLPrinter.h"
@@ -46,13 +46,13 @@
 
 using namespace MARTe;
 
-struct SenderStructuredDataTestWriteStruct {
+struct StreamStructuredDataTestWriteStruct {
     AnyType *toWrite;
     const char8 ** varnames;
     StreamString desResult;
 };
 
-struct SenderStructuredDataTestAddToCurrentNodeStruct {
+struct StreamStructuredDataTestAddToCurrentNodeStruct {
     Reference toAdd;
     const char8 ** movements;
     bool *expected;
@@ -62,42 +62,42 @@ struct SenderStructuredDataTestAddToCurrentNodeStruct {
 };
 
 template<class Printer>
-class SenderStructuredDataTest {
+class StreamStructuredDataTest {
 public:
-    SenderStructuredDataTest();
-    virtual ~SenderStructuredDataTest();
+    StreamStructuredDataTest();
+    virtual ~StreamStructuredDataTest();
 
     bool TestRead();
 
     bool TestGetType();
 
-    bool TestWrite(SenderStructuredDataTestWriteStruct *table);
+    bool TestWrite(StreamStructuredDataTestWriteStruct *table);
 
     bool TestCopy();
 
-    bool TestAddToCurrentNode(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestAddToCurrentNode(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToRoot(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestMoveToRoot(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToAncestor(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestMoveToAncestor(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestMoveAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestMoveRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestMoveToChild(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestMoveToChild(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestCreateAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestCreateAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestCreateRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestCreateRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
     bool TestDelete();
 
-    bool TestGetName(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestGetName(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestGetChildName(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestGetChildName(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
-    bool TestGetNumberOfChildren(SenderStructuredDataTestAddToCurrentNodeStruct *table);
+    bool TestGetNumberOfChildren(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
 };
 /*---------------------------------------------------------------------------*/
@@ -105,39 +105,39 @@ public:
 /*---------------------------------------------------------------------------*/
 
 template<class Printer>
-SenderStructuredDataTest<Printer>::SenderStructuredDataTest() {
-    // Auto-generated constructor stub for SenderStructuredDataTest
+StreamStructuredDataTest<Printer>::StreamStructuredDataTest() {
+    // Auto-generated constructor stub for StreamStructuredDataTest
     // TODO Verify if manual additions are needed
 }
 
 template<class Printer>
-SenderStructuredDataTest<Printer>::~SenderStructuredDataTest() {
-    // Auto-generated destructor stub for SenderStructuredDataTest
+StreamStructuredDataTest<Printer>::~StreamStructuredDataTest() {
+    // Auto-generated destructor stub for StreamStructuredDataTest
     // TODO Verify if manual additions are needed
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestRead() {
+bool StreamStructuredDataTest<Printer>::TestRead() {
     StreamString string;
-    SenderStructuredData<StandardPrinter> test(string);
+    StreamStructuredData<StandardPrinter> test(string);
 
     uint32 x;
     return !test.Read("boh", x);
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetType() {
+bool StreamStructuredDataTest<Printer>::TestGetType() {
     StreamString string;
-    SenderStructuredData<StandardPrinter> test(string);
+    StreamStructuredData<StandardPrinter> test(string);
 
     return test.GetType("boh").IsVoid();
 
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestWrite(SenderStructuredDataTestWriteStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestWrite(StreamStructuredDataTestWriteStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = true;
     uint32 i = 0u;
@@ -157,19 +157,19 @@ bool SenderStructuredDataTest<Printer>::TestWrite(SenderStructuredDataTestWriteS
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestCopy() {
+bool StreamStructuredDataTest<Printer>::TestCopy() {
     StreamString string;
-    SenderStructuredData<StandardPrinter> test(string);
-    SenderStructuredData<StandardPrinter> copy(string);
+    StreamStructuredData<StandardPrinter> test(string);
+    StreamStructuredData<StandardPrinter> copy(string);
 
     //copy not supported
     return !test.Copy(copy);
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestAddToCurrentNode(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestAddToCurrentNode(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -188,9 +188,9 @@ bool SenderStructuredDataTest<Printer>::TestAddToCurrentNode(SenderStructuredDat
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToRoot(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestMoveToRoot(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -213,9 +213,9 @@ bool SenderStructuredDataTest<Printer>::TestMoveToRoot(SenderStructuredDataTestA
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToAncestor(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestMoveToAncestor(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -238,14 +238,14 @@ bool SenderStructuredDataTest<Printer>::TestMoveToAncestor(SenderStructuredDataT
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestMoveAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     return TestAddToCurrentNode(table);
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestMoveRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -264,9 +264,9 @@ bool SenderStructuredDataTest<Printer>::TestMoveRelative(SenderStructuredDataTes
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestMoveToChild(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestMoveToChild(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -285,9 +285,9 @@ bool SenderStructuredDataTest<Printer>::TestMoveToChild(SenderStructuredDataTest
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestCreateAbsolute(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestCreateAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = true;
 
@@ -306,9 +306,9 @@ bool SenderStructuredDataTest<Printer>::TestCreateAbsolute(SenderStructuredDataT
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestCreateRelative(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestCreateRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = true;
 
@@ -327,17 +327,17 @@ bool SenderStructuredDataTest<Printer>::TestCreateRelative(SenderStructuredDataT
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestDelete() {
+bool StreamStructuredDataTest<Printer>::TestDelete() {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     return !test.Delete("boh");
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetName(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestGetName(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -355,9 +355,9 @@ bool SenderStructuredDataTest<Printer>::TestGetName(SenderStructuredDataTestAddT
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetChildName(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestGetChildName(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 
@@ -375,10 +375,10 @@ bool SenderStructuredDataTest<Printer>::TestGetChildName(SenderStructuredDataTes
 }
 
 template<class Printer>
-bool SenderStructuredDataTest<Printer>::TestGetNumberOfChildren(SenderStructuredDataTestAddToCurrentNodeStruct *table) {
+bool StreamStructuredDataTest<Printer>::TestGetNumberOfChildren(StreamStructuredDataTestAddToCurrentNodeStruct *table) {
 
     StreamString string;
-    SenderStructuredData<Printer> test(string);
+    StreamStructuredData<Printer> test(string);
 
     bool ret = test.AddToCurrentNode(table->toAdd);
 

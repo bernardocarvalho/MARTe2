@@ -654,29 +654,37 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
     bool ret = (item != NULL);
 
     if (ret) {
+        /*lint -e{613} NULL pointer checked*/
         const ClassProperties *properties = item->GetClassProperties();
         // print the class name
         ret = (properties != NULL);
         if (ret) {
             const char8 *propName = properties->GetName();
-            AnyType noneType = voidAnyType;
-            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            {
+                AnyType noneType = voidAnyType;
+                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            }
             if (ret) {
                 //AnyType printClassName[] = {data, "= {", voidAnyType};
                 ret = PrintOpenBlock(iobuff, propName, fd);
             }
             if (ret) {
-                AnyType noneType = voidAnyType;
-                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                {
+                    AnyType noneType = voidAnyType;
+                    ret = (iobuff.PrintFormatted("\r\n", &noneType));
+                }
                 const Introspection *introspection = NULL_PTR(const Introspection *);
 
                 if (ret) {
+                    /*lint -e{613} NULL pointer checked*/
                     introspection = item->GetIntrospection();
                     ret = (introspection != NULL);
                 }
                 if (ret) {
+                    /*lint -e{613} NULL pointer checked*/
                     uint32 numberOfMembers = introspection->GetNumberOfMembers();
                     for (uint32 i = 0u; (i < numberOfMembers) && (ret); i++) {
+                        /*lint -e{613} NULL pointer checked*/
                         IntrospectionEntry memberIntrospection = (*introspection)[i];
                         const char8* memberName = memberIntrospection.GetMemberName();
                         const char8* data = NULL_PTR(const char8*);
@@ -694,8 +702,10 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
                             ret = (iobuff.PrintFormatted("\r\n", &noneType));
                         }
                         if (ret) {
-                            AnyType noneType = voidAnyType;
-                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            {
+                                AnyType noneType = voidAnyType;
+                                ret = iobuff.PrintFormatted("        ", &noneType);
+                            }
                             if (ret) {
                                 data = memberIntrospection.GetMemberTypeName();
                                 ret = PrintOpenAssignment(iobuff, "type", fd);
@@ -716,8 +726,10 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
                             }
                         }
                         if (ret) {
-                            AnyType noneType = voidAnyType;
-                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            {
+                                AnyType noneType = voidAnyType;
+                                ret = iobuff.PrintFormatted("        ", &noneType);
+                            }
                             if (ret) {
                                 data = memberIntrospection.GetMemberModifiers();
                                 ret = PrintOpenAssignment(iobuff, "modifiers", fd);
@@ -738,8 +750,10 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
                             }
                         }
                         if (ret) {
-                            AnyType noneType = voidAnyType;
-                            ret = iobuff.PrintFormatted("        ", &noneType);
+                            {
+                                AnyType noneType = voidAnyType;
+                                ret = iobuff.PrintFormatted("        ", &noneType);
+                            }
                             if (ret) {
                                 data = memberIntrospection.GetMemberAttributes();
                                 ret = PrintOpenAssignment(iobuff, "attributes", fd);
@@ -762,7 +776,7 @@ static bool PrintObjectIntrospection(IOBuffer & iobuff,
 
                         if (ret) {
                             if (i < (numberOfMembers - 1u)) {
-                                PrintBlockSeparator(iobuff, fd);
+                                ret = PrintBlockSeparator(iobuff, fd);
                             }
                             if (ret) {
                                 AnyType noneType = voidAnyType;
@@ -906,13 +920,16 @@ static bool PrintObject(IOBuffer & iobuff,
     bool ret = (item != NULL);
 
     if (ret) {
+        /*lint -e{613} NULL pointer checked*/
         const ClassProperties *properties = item->GetClassProperties();
         ret = (properties != NULL);
         // print the class name
         if (ret) {
-            //data = properties->GetName();
-            AnyType noneType = voidAnyType;
-            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            {
+                //data = properties->GetName();
+                AnyType noneType = voidAnyType;
+                ret = (iobuff.PrintFormatted("\r\n", &noneType));
+            }
             if (ret) {
                 ret = PrintOpenAssignment(iobuff, "Class", fd);
             }
@@ -925,6 +942,7 @@ static bool PrintObject(IOBuffer & iobuff,
                 ret = PrintCloseAssignment(iobuff, "Class", fd);
             }
             if (ret) {
+                /*lint -e{613} NULL pointer checked*/
                 const Introspection *introspection = item->GetIntrospection();
                 if (introspection != NULL) {
                     uint32 numberOfMembers = introspection->GetNumberOfMembers();
@@ -936,6 +954,7 @@ static bool PrintObject(IOBuffer & iobuff,
                         }
                     }
                     for (uint32 i = 0u; (i < numberOfMembers) && (ret); i++) {
+                        /*lint -e{613} NULL pointer checked*/
                         IntrospectionEntry memberIntrospection = (*introspection)[i];
                         // the member name
                         const char8 * memberName = memberIntrospection.GetMemberName();
@@ -989,7 +1008,7 @@ static bool PrintObject(IOBuffer & iobuff,
                             if (isMemberStructured) {
                                 ret=PrintCloseBlock(iobuff, memberName, fd);
                                 if(ret) {
-                                    if(i<numberOfMembers-1u) {
+                                    if(i<(numberOfMembers-1u)) {
                                         ret=PrintBlockSeparator(iobuff, fd);
                                     }
                                 }
@@ -1001,7 +1020,7 @@ static bool PrintObject(IOBuffer & iobuff,
                             else {
                                 ret=PrintCloseAssignment(iobuff, memberName, fd);
                                 if(ret) {
-                                    if(i<numberOfMembers-1u) {
+                                    if(i<(numberOfMembers-1u)) {
                                         ret=PrintVariableSeparator(iobuff, fd);
                                     }
                                 }

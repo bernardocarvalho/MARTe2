@@ -111,7 +111,7 @@ public:
 
     bool TestSetKeepAlive(bool isKeepAlive);
 
-    bool TestGetHttpCommand(HSHttpCommand commandIn);
+    bool TestGetHttpCommand(int32 commandIn);
 
     bool TestSetUnmatchedId();
 
@@ -127,7 +127,7 @@ public:
 
     bool retVal;
 
-    HSHttpCommand command;
+    int32 command;
 
     bool isKeepAlive;
 

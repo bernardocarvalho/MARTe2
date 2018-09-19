@@ -41,7 +41,6 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
-using namespace HttpDefinition;
 class HttpProtocol: public ProtocolI {
 public:
     HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn, BufferedStreamI &payloadIn);
@@ -51,7 +50,7 @@ public:
     virtual bool ReadHeader();
 
     virtual bool WriteHeader(bool isMessageCompleted=true,
-                         int32 command=(int32)HSHCReplyOK,
+                         int32 command=HttpDefinition::HSHCReplyOK,
                          const char8 * id=NULL);
 
     //void SetPayload(BufferedStreamI &payloadIn)

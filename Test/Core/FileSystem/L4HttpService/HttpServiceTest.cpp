@@ -45,7 +45,7 @@
 #include "MemoryMapSynchronisedOutputBroker.h"
 
 #include "DataExportI.h"
-#include "HttpStream.h"
+#include "HttpStreamT.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -289,7 +289,7 @@ bool HttpServiceTestWebRoot::GetAsText(BufferedStreamI &stream, ProtocolI &proto
     hStream->Printf("%s", "</html>\n");
     hStream->Seek(0);
 
-    protocol.WriteHeader(true, (int32)HSHCReplyOK, NULL);
+    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, NULL);
     return true;
 }
 
@@ -486,7 +486,7 @@ bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &p
     hStream->Seek(0);
 
     //copy to the client
-    protocol.WriteHeader(true, (int32)HSHCReplyOK, NULL);
+    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, NULL);
 
     return true;
 }

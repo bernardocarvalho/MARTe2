@@ -31,7 +31,7 @@
 
 #include "HttpService.h"
 #include "ObjectRegistryDatabase.h"
-#include "HttpStream.h"
+#include "HttpStreamT.h"
 #include "HttpProtocol.h"
 #include "Select.h"
 #include "HttpRealmI.h"
@@ -127,7 +127,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 
     if (err.ErrorsCleared()) {
         commClient->SetBlocking(true);
-        HttpStream hstream(*commClient);
+        HttpJsonStream hstream(*commClient);
         HttpProtocol hprotocol(*commClient, hstream);
 
         Select sel;
@@ -255,7 +255,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket *commClient) {
 
                         hstream.Printf("%s", "<HTML>Page Not Found!</HTML>");
                         hstream.Seek(0);
-                        if(!hprotocol.WriteHeader(true, HSHCReplyOK)) {
+                        if(!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyOK)) {
                             err=ErrorManagement::CommunicationError;
                             REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                         }

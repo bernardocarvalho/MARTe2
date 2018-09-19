@@ -170,27 +170,27 @@ TEST(HttpProtocolGTest, TestSetKeepAliveFalse) {
 
 TEST(HttpProtocolGTest, TestGetHttpCommandGet) {
     HttpProtocolTest test;
-    ASSERT_TRUE(test.TestGetHttpCommand(HSHCGet));
+    ASSERT_TRUE(test.TestGetHttpCommand(HttpDefinition::HSHCGet));
 }
 
 TEST(HttpProtocolGTest, TestGetHttpCommandPut) {
     HttpProtocolTest test;
-    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPut));
+    ASSERT_TRUE(test.TestGetHttpCommand(HttpDefinition::HSHCPut));
 }
 
 TEST(HttpProtocolGTest, TestGetHttpCommandHead) {
     HttpProtocolTest test;
-    ASSERT_TRUE(test.TestGetHttpCommand(HSHCHead));
+    ASSERT_TRUE(test.TestGetHttpCommand(HttpDefinition::HSHCHead));
 }
 
 TEST(HttpProtocolGTest, TestGetHttpCommandPost) {
     HttpProtocolTest test;
-    ASSERT_TRUE(test.TestGetHttpCommand(HSHCPost));
+    ASSERT_TRUE(test.TestGetHttpCommand(HttpDefinition::HSHCPost));
 }
 
 TEST(HttpProtocolGTest, TestGetHttpCommandReply) {
     HttpProtocolTest test;
-    ASSERT_TRUE(test.TestGetHttpCommand(HSHCReply));
+    ASSERT_TRUE(test.TestGetHttpCommand(HttpDefinition::HSHCReply));
 }
 
 TEST(HttpProtocolGTest, TestSetUnmatchedId) {

@@ -76,6 +76,8 @@ HeapManager.cpp
 HighResolutionTimer.h
 HighResolutionTimerCalibrator.cpp
 HttpDefinition.cpp
+HttpProtocol.cpp
+HttpStreamT.h
 IOBuffer.cpp
 IOBufferFloatPrint.cpp
 IOBufferIntegerPrint.cpp
@@ -184,6 +186,7 @@ StreamI.h
 StreamMemoryReference.cpp
 StreamString.cpp
 StreamStringIOBuffer.cpp
+StreamStructuredData.h
 StringHelper.cpp
 StringHelperExtras_Generic.cpp
 StringHelper_CLIB_Generic.cpp

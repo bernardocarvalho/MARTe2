@@ -1,7 +1,7 @@
 /**
- * @file SenderStructuredData.cpp
- * @brief Source file for class SenderStructuredData
- * @date 06 set 2018
+ * @file ProtocolI.cpp
+ * @brief Source file for class ProtocolI
+ * @date 14 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class SenderStructuredData (public, protected, and private). Be aware that some 
+ * the class ProtocolI (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,7 +29,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "SenderStructuredData.h"
+#include "ProtocolI.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -39,14 +39,16 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe{
+namespace MARTe {
 
-NodeName::NodeName() {
-    isClosed = 0u;
-    numberOfVariables = 0u;
+ProtocolI::ProtocolI():ConfigurationDatabase() {
+    // Auto-generated constructor stub for ProtocolI
+    // TODO Verify if manual additions are needed
 }
 
-NodeName::~NodeName() {
-
+ProtocolI::~ProtocolI() {
+    // Auto-generated destructor stub for ProtocolI
+    // TODO Verify if manual additions are needed
 }
+
 }
