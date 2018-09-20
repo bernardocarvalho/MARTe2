@@ -573,12 +573,23 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignalsDatabase(Configurati
                 uint32 numberOfSignals = signalDatabase.GetNumberOfChildren();
                 ReferenceT<ReferenceContainer> signalList = signalDatabase.GetCurrentNode();
                 uint32 j = 0u;
+                uint32 k = 0u;
+                ConfigurationDatabase signalDatabaseSignals = signalDatabase;
+                if (numberOfSignals > 0u) {
+                    ret = signalDatabaseSignals.MoveToChild(0u);
+                }
                 //...then for each signal...
                 while ((j < numberOfSignals) && (ret)) {
                     const char8 *signalName = signalList->Get(j)->GetName();
                     if (StringHelper::Compare(signalName, "Locked") != 0) {
                         ConfigurationDatabase signalDatabaseBeforeFlatten = signalDatabase;
-                        ret = signalDatabase.MoveToChild(j);
+                        while ((k < j) && (ret)) {
+                            ret = signalDatabaseSignals.MoveToBrother();
+                            k++;
+                        }
+                        signalDatabase = signalDatabaseSignals;
+
+                        //ret = signalDatabase.MoveToChild(j);
                         if (ret) {
                             //resolve the full signal properties (recursing if need to signal namespace and introspection)
                             ret = FlattenSignal(isFunctionsDatabase, signalName, signalLocalDatabase, signalNumber);
@@ -605,6 +616,9 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignalsDatabase(Configurati
                             }
                             numberOfSignals--;
                             j--;
+                            signalDatabaseSignals = signalDatabase;
+                            ret = signalDatabaseSignals.MoveToChild(0u);
+                            k = 0u;
                         }
                     }
                     j++;
@@ -650,14 +664,26 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignal(const bool isFunctio
     if (!signalTypeDefined) {
         uint32 numberOfElements = signalDatabase.GetNumberOfChildren();
         uint32 n;
+        uint32 k = 0u;
+        ConfigurationDatabase signalDatabaseElements = signalDatabase;
+        if (numberOfElements > 0u) {
+            ret = signalDatabaseElements.MoveToChild(0u);
+        }
         ReferenceT<ReferenceContainer> elementsList = signalDatabase.GetCurrentNode();
-        for (n = 0u; (n < numberOfElements); n++) {
+        for (n = 0u; (n < numberOfElements) && (ret); n++) {
             StreamString elementName = signalDatabase.GetChildName(n);
             //If this element is a node then recurse
             // "MemberAliases" and "Defaults" the only node can be found in a signal. Mark it as a keyword.
             if (elementsList->Get(n)->IsReferenceContainer()) {
                 ConfigurationDatabase signalDatabaseBeforeMove = signalDatabase;
-                ret = signalDatabase.MoveToChild(n);
+
+                while ((k < n) && (ret)) {
+                    ret = signalDatabaseElements.MoveToBrother();
+                    k++;
+                }
+                signalDatabase = signalDatabaseElements;
+
+                //ret = signalDatabase.MoveToChild(n);
                 if (StringHelper::Compare(elementName.Buffer(), "MemberAliases") != 0) {
                     if (StringHelper::Compare(elementName.Buffer(), "Defaults") != 0) {
                         foundANode = true;
@@ -885,10 +911,20 @@ bool RealTimeApplicationConfigurationBuilder::ResolveDataSources(const SignalDir
         //Go to each function
         uint32 numberOfFunctions = functionsDatabase.GetNumberOfChildren();
         uint32 i;
-        ConfigurationDatabase functionsDatabaseBeforeMove = functionsDatabase;
+        uint32 k = 0u;
+        ConfigurationDatabase functionsDatabaseChilds1 = functionsDatabase;
+        if (numberOfFunctions > 0u) {
+            ret = functionsDatabaseChilds1.MoveToChild(0u);
+        }
+        //ConfigurationDatabase functionsDatabaseBeforeMove = functionsDatabase;
         for (i = 0u; (i < numberOfFunctions) && (ret); i++) {
-            functionsDatabase = functionsDatabaseBeforeMove;
-            ret = functionsDatabase.MoveToChild(i);
+            //functionsDatabase = functionsDatabaseBeforeMove;
+            //ret = functionsDatabase.MoveToChild(i);
+            while ((k < i) && (ret)) {
+                ret = functionsDatabaseChilds1.MoveToBrother();
+                k++;
+            }
+            functionsDatabase = functionsDatabaseChilds1;
             StreamString functionName;
             if (ret) {
                 // read the qualified name just for error reporting
@@ -905,11 +941,21 @@ bool RealTimeApplicationConfigurationBuilder::ResolveDataSources(const SignalDir
                 //...and for each signal...
                 uint32 numberOfSignals = functionsDatabase.GetNumberOfChildren();
                 //ReferenceT<ReferenceContainer> signalsContainer = functionsDatabase.GetCurrentNode();
-                ConfigurationDatabase functionsDatabaseBeforeSignalMove = functionsDatabase;
+                //ConfigurationDatabase functionsDatabaseBeforeSignalMove = functionsDatabase;
+                uint32 z = 0u;
+                ConfigurationDatabase functionsDatabaseChilds2 = functionsDatabase;
+                if (numberOfSignals > 0u) {
+                    ret = functionsDatabaseChilds2.MoveToChild(0u);
+                }
                 for (uint32 s = 0u; (s < numberOfSignals) && (ret); s++) {
-                    functionsDatabase = functionsDatabaseBeforeSignalMove;
+                    //functionsDatabase = functionsDatabaseBeforeSignalMove;
                     //functionsDatabase.SetCurrentNode(signalsContainer->Get(s));
-                    ret = functionsDatabase.MoveToChild(s);
+                    //ret = functionsDatabase.MoveToChild(s);
+                    while ((z < s) && (ret)) {
+                        ret = functionsDatabaseChilds2.MoveToBrother();
+                        z++;
+                    }
+                    functionsDatabase = functionsDatabaseChilds2;
                     //...extract the DataSource name...
                     StreamString dataSourceName;
                     if (ret) {
@@ -1129,12 +1175,12 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
                     //that you cannot complete the properties of an existent signal!
                     /*ret = (!isDsLocked);*/
                     /*if (ret) {*/
-                        ret = dataSourcesDatabase.Write(properties[p], elementSignalDatabase);
+                    ret = dataSourcesDatabase.Write(properties[p], elementSignalDatabase);
                     /*}*/
                     /*else {
-                        REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "Cannot complete the signal %s in GAM %s because the related DataSource is locked", originalSignalName.Buffer(),
-                                            functionName.Buffer());
-                    }*/
+                     REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "Cannot complete the signal %s in GAM %s because the related DataSource is locked", originalSignalName.Buffer(),
+                     functionName.Buffer());
+                     }*/
                 }
             }
             p++;

@@ -259,6 +259,7 @@ void LinkedListHolder::FastListInsertSingle(LinkedListable &p) {
     llhSize++;
     p.SetNext(llhRoot.Next());
     llhRoot.SetNext(&p);
+    llhTail = NULL_PTR(LinkedListable *);
 }
 
 void LinkedListHolder::FastListAppendSingle(LinkedListable * const p) {
