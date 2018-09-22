@@ -999,9 +999,12 @@ bool RealTimeApplicationConfigurationBuilder::FindDataSourceNumber(StreamString 
         bool done = false;
         uint32 n;
         ConfigurationDatabase dataSourcesDatabaseBeforeMove = dataSourcesDatabase;
+        if (numberOfDataSources > 0u) {
+            ret = dataSourcesDatabase.MoveToChild(0u);
+        }
         for (n = 0u; (n < numberOfDataSources) && (ret) && (!done); n++) {
-            dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-            ret = dataSourcesDatabase.MoveToChild(n);
+            //dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
+            //ret = dataSourcesDatabase.MoveToChild(n);
             dataSourceNumber = dataSourcesDatabase.GetName();
             StreamString qualifiedName;
             if (ret) {
@@ -1009,6 +1012,9 @@ bool RealTimeApplicationConfigurationBuilder::FindDataSourceNumber(StreamString 
             }
             if (ret) {
                 done = (StringHelper::Compare(qualifiedName.Buffer(), dataSourceName.Buffer()) == 0);
+                if (n != (numberOfDataSources - 1u)) {
+                    ret = dataSourcesDatabase.MoveToBrother();
+                }
             }
         }
         if ((numberOfDataSources > 0u) && (ret)) {
@@ -1068,9 +1074,12 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
     uint32 n;
     uint32 foundSignalId = 0u;
     ConfigurationDatabase dataSourcesDatabaseBeforeMove = dataSourcesDatabase;
+    if (numberOfSignals > 0u) {
+        ret = dataSourcesDatabase.MoveToChild(0u);
+    }
     for (n = 0u; (n < numberOfSignals) && (ret) && (!signalAlreadyExists); n++) {
-        dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-        ret = dataSourcesDatabase.MoveToChild(n);
+        /*dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
+         ret = dataSourcesDatabase.MoveToChild(n);*/
         foundSignalId = n;
         StreamString dataSourceSignalName;
         if (ret) {
@@ -1078,13 +1087,20 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
         }
         if (ret) {
             signalAlreadyExists = (StringHelper::Compare(signalName.Buffer(), dataSourceSignalName.Buffer()) == 0);
+            if (n != (numberOfSignals - 1u)) {
+                ret = dataSourcesDatabase.MoveToBrother();
+            }
         }
     }
 
     if (ret) {
-        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
+        if (numberOfSignals > 0u) {
             dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-            ret = dataSourcesDatabase.MoveToChild(n);
+            ret = dataSourcesDatabase.MoveToChild(0u);
+        }
+        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
+            /*dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
+             ret = dataSourcesDatabase.MoveToChild(n);*/
             StreamString dataSourceSignalName;
             if (ret) {
                 ret = dataSourcesDatabase.Read("QualifiedName", dataSourceSignalName);
@@ -1110,7 +1126,12 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
                     }
                 }
             }
-            if (!ret) {
+            if (ret) {
+                if (n != (numberOfSignals - 1u)) {
+                    ret = dataSourcesDatabase.MoveToBrother();
+                }
+            }
+            else {
                 REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "The data source assigned to the signal %s in %s is incompatible", originalSignalName.Buffer(), functionName.Buffer());
             }
         }
@@ -1244,33 +1265,49 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
     }
     if (ret) {
         uint32 i;
-        ConfigurationDatabase dataSourcesDatabaseBeforeMove = dataSourcesDatabase;
+        if (numberOfDataSources > 0u) {
+            ret = dataSourcesDatabase.MoveToChild(0u);
+        }
+        ConfigurationDatabase dataSource = dataSourcesDatabase;
+        ConfigurationDatabase lastDataSource = dataSource;
         for (i = 0u; (i < numberOfDataSources) && (ret); i++) {
             StreamString dataSourceName;
-            dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-            ret = dataSourcesDatabase.MoveToChild(i);
+            if (i > 0u) {
+                dataSource = lastDataSource;
+                ret = dataSource.MoveToBrother();
+                lastDataSource = dataSource;
+            }
+            /*dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
+             ret = dataSourcesDatabase.MoveToChild(i);*/
 
             if (ret) {
-                ret = dataSourcesDatabase.Read("QualifiedName", dataSourceName);
+                ret = dataSource.Read("QualifiedName", dataSourceName);
             }
             if (ret) {
-                ret = dataSourcesDatabase.MoveRelative("Signals");
+                ret = dataSource.MoveRelative("Signals");
             }
             uint32 numberOfSignals = 0u;
             if (ret) {
-                numberOfSignals = dataSourcesDatabase.GetNumberOfChildren();
+                numberOfSignals = dataSource.GetNumberOfChildren();
             }
             uint32 s = 0u;
-            ConfigurationDatabase dataSourcesDatabaseBeforeSignalMove = dataSourcesDatabase;
+            ConfigurationDatabase dataSourceSignals = dataSource;
+            if (numberOfSignals > 0u) {
+                ret = dataSourceSignals.MoveToChild(0u);
+            }
             while ((s < numberOfSignals) && (ret)) {
-                dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMove;
-                ret = dataSourcesDatabase.MoveToChild(s);
-                StreamString signalId = dataSourcesDatabase.GetName();
+                /*dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMove;
+                 ret = dataSourcesDatabase.MoveToChild(s);*/
+                if (s > 0u) {
+                    ret = dataSourceSignals.MoveToBrother();
+                }
+                ConfigurationDatabase dataSourcesDatabaseBeforeSignalMove = dataSourceSignals;
+                StreamString signalId = dataSourceSignals.GetName();
 
                 //The QualifiedName must be known
                 StreamString signalName;
                 if (ret) {
-                    ret = dataSourcesDatabase.Read("QualifiedName", signalName);
+                    ret = dataSourceSignals.Read("QualifiedName", signalName);
                     if (ret) {
                         ret = (signalName.Size() > 0u);
                     }
@@ -1279,25 +1316,28 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                     }
                 }
                 StreamString type;
-                bool typeDef = dataSourcesDatabase.Read("Type", type);
+                bool typeDef = dataSourceSignals.Read("Type", type);
                 if (typeDef) {
                     typeDef = (type.Size() > 0u);
                 }
 
                 bool signalFound = false;
                 if (ret) {
-                    dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMove;
+                    //dataSourcesDatabaseSignals = dataSourcesDatabase;
 
                     // check if it is a partial definition. Delete if the type is not specified, error otherwise (empty node)
-                    ConfigurationDatabase dataSourcesDatabaseBeforeSignalMoveOther = dataSourcesDatabase;
+                    ConfigurationDatabase dataSourcesDatabaseSignalsOther = dataSource;
+                    if (numberOfSignals > 0u) {
+                        ret = dataSourcesDatabaseSignalsOther.MoveToChild(0u);
+                    }
                     for (uint32 k = 0u; (k < numberOfSignals) && (!signalFound) && (ret); k++) {
                         if (k != s) {
                             char8 terminator;
-                            ret = dataSourcesDatabase.MoveToChild(k);
+                            //ret = dataSourcesDatabase.MoveToChild(k);
                             StreamString otherSName;
                             //The QualifiedName must be known
                             if (ret) {
-                                ret = dataSourcesDatabase.Read("QualifiedName", otherSName);
+                                ret = dataSourcesDatabaseSignalsOther.Read("QualifiedName", otherSName);
                                 if (ret) {
                                     ret = otherSName.Seek(0LLU);
                                 }
@@ -1320,8 +1360,13 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                                     token2 = "";
                                 }
                             }
-                            if (ret) {
-                                dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                            /*if (ret) {
+                             dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                             }*/
+                        }
+                        if (ret) {
+                            if (k != (numberOfSignals - 1u)) {
+                                ret = dataSourcesDatabaseSignalsOther.MoveToBrother();
                             }
                         }
                     }
@@ -1332,10 +1377,21 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                     if (signalFound) {
                         ret = !typeDef;
                         if (ret) {
-                            ret = dataSourcesDatabase.Delete(signalId.Buffer());
+                            //ret = dataSourceSignals.Delete(signalId.Buffer());
+                            ret = dataSource.Delete(signalId.Buffer());
                             //resume
                             if (ret) {
-                                numberOfSignals = dataSourcesDatabase.GetNumberOfChildren();
+                                //numberOfSignals = dataSourceSignals.GetNumberOfChildren();
+                                numberOfSignals = dataSource.GetNumberOfChildren();
+                                dataSourceSignals = dataSource;
+                                if (numberOfSignals > 0u) {
+                                    if (s > 0u) {
+                                        ret = dataSourceSignals.MoveToChild(s - 1u);
+                                    }
+                                    else {
+                                        ret = dataSourceSignals.MoveToChild(0u);
+                                    }
+                                }
                                 s--;
                                 validSignalFound = true;
                             }
@@ -1347,10 +1403,11 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                     }
                     else {
                         ret = typeDef;
-                        if (ret) {
-                            ret = dataSourcesDatabase.MoveRelative(signalId.Buffer());
-                        }
-                        else {
+                        if (!ret) {
+                            //if (ret) {
+                            //ret = dataSourcesDatabaseSignals.MoveRelative(signalId.Buffer());
+                            //}
+                            //else {
                             REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Undefined type for signal %s in %s", signalName.Buffer(), dataSourceName.Buffer());
 
                         }
@@ -1359,9 +1416,9 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                 if (!validSignalFound) {
                     uint32 numberOfElements = 0u;
                     if (ret) {
-                        if (!dataSourcesDatabase.Read("NumberOfElements", numberOfElements)) {
+                        if (!dataSourceSignals.Read("NumberOfElements", numberOfElements)) {
                             numberOfElements = 1u;
-                            ret = dataSourcesDatabase.Write("NumberOfElements", numberOfElements);
+                            ret = dataSourceSignals.Write("NumberOfElements", numberOfElements);
                         }
                         else {
                             ret = numberOfElements > 0u;
@@ -1375,14 +1432,14 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                     //If the number of dimensions is > 1 then the NumberOfElements must also be defined.
                     uint32 numberOfDimensions = 0u;
                     if (ret) {
-                        if (!dataSourcesDatabase.Read("NumberOfDimensions", numberOfDimensions)) {
+                        if (!dataSourceSignals.Read("NumberOfDimensions", numberOfDimensions)) {
                             numberOfDimensions = 0u;
                             if (numberOfElements > 1u) {
                                 REPORT_ERROR_STATIC(ErrorManagement::Warning, "NumberOfDimensions is not defined for signal: %s in %s with NumberOfElements > 1, assuming it as 1 (vector)",
                                                     signalName.Buffer(), dataSourceName.Buffer());
                                 numberOfDimensions = 1u;
                             }
-                            ret = dataSourcesDatabase.Write("NumberOfDimensions", numberOfDimensions);
+                            ret = dataSourceSignals.Write("NumberOfDimensions", numberOfDimensions);
                         }
                     }
 
@@ -1395,12 +1452,12 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                     uint32 signalNumberOfBytes = 0u;
                     if (ret) {
                         signalNumberOfBytes = ((numberOfElements * signalTypeDescriptor.numberOfBits) / 8u);
-                        ret = dataSourcesDatabase.Write("ByteSize", signalNumberOfBytes);
+                        ret = dataSourceSignals.Write("ByteSize", signalNumberOfBytes);
                     }
 
                     if (ret) {
                         StreamString defaultVal;
-                        if (!dataSourcesDatabase.Read("Default", defaultVal)) {
+                        if (!dataSourceSignals.Read("Default", defaultVal)) {
                             REPORT_ERROR_STATIC(ErrorManagement::Warning, "Default value is not defined for signal: %s in %s, by default it will be zeroed", signalName.Buffer(),
                                                 dataSourceName.Buffer());
                         }
@@ -1444,11 +1501,11 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                                         if (ret) {
                                             ret = cdb.Read("Default", at);
                                             if (ret) {
-                                                ret = dataSourcesDatabase.Delete("Default");
+                                                ret = dataSourceSignals.Delete("Default");
                                             }
                                             if (ret) {
                                                 // write the default value as a value and not a string anymore!
-                                                ret = dataSourcesDatabase.Write("Default", at);
+                                                ret = dataSourceSignals.Write("Default", at);
                                             }
                                         }
                                         if (ret) {
