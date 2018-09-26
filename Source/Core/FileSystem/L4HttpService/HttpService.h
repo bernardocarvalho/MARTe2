@@ -57,17 +57,17 @@ public:
 
     ErrorManagement::ErrorType ServerCycle(MARTe::ExecutionInfo &information);
 
-    ErrorManagement::ErrorType ClientService(TCPSocket *commClient);
+    ErrorManagement::ErrorType ClientService(TCPSocket * const commClient);
 
 protected:
     /** The server socket */
     TCPSocket server;
 
     /** The port this server is listening to */
-    uint32 port;
+    uint16 port;
 
 
-    uint32 listenMaxConnections;
+    int32 listenMaxConnections;
 
 
     /** http://server:port server that will provide port allocation and relay of http */
@@ -78,7 +78,9 @@ protected:
     ReferenceT<ReferenceContainer> webRoot;
 
 
-    EmbeddedServiceMethodBinderI *embeddedMethod;
+    //EmbeddedServiceMethodBinderI *embeddedMethod;
+
+    EmbeddedServiceMethodBinderT<HttpService> embeddedMethod;
 
     StreamString webRootPath;
 

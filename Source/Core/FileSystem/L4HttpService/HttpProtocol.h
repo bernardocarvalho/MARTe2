@@ -43,30 +43,31 @@
 namespace MARTe {
 class HttpProtocol: public ProtocolI {
 public:
-    HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn, BufferedStreamI &payloadIn);
+    HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
+                 BufferedStreamI &payloadIn);
 
     virtual ~HttpProtocol();
 
     virtual bool ReadHeader();
 
-    virtual bool WriteHeader(bool isMessageCompleted=true,
-                         int32 command=HttpDefinition::HSHCReplyOK,
-                         const char8 * id=NULL);
+    virtual bool WriteHeader(const bool isMessageCompleted,
+                             const int32 command,
+                             const char8 * const id);
 
     //void SetPayload(BufferedStreamI &payloadIn)
 
-    bool CompleteReadOperation(BufferedStreamI *s,
+    bool CompleteReadOperation(BufferedStreamI * const streamout,
                                TimeoutType msecTimeout = TTInfiniteWait);
 
     bool SecurityCheck(ReferenceT<HttpRealmI> realm);
 
     bool KeepAlive() const;
 
-    void SetKeepAlive(bool isKeepAlive);
+    void SetKeepAlive(const bool isKeepAlive);
 
     int32 GetHttpCommand() const;
 
-    virtual void SetUnmatchedId(const char8 *unMatchedIdIn);
+    virtual void SetUnmatchedId(const char8 * const unMatchedIdIn);
 
     virtual void GetUnmatchedId(StreamString& unmatchedIdOut);
 
@@ -74,11 +75,10 @@ public:
 
     virtual void GetId(StreamString& idOut);
 
-    uint8 TextMode();
+    int8 TextMode() const;
 
 protected:
     DoubleBufferedStream *outputStream;
-
 
     BufferedStreamI* payload;
 
@@ -123,7 +123,6 @@ protected:
      */
     StreamString unMatchedUrl;
 
-
     ConfigurationDatabase options;
 
     int8 textMode;
@@ -157,8 +156,7 @@ private:
     bool HandlePostMultipartFormData(StreamString &contentType,
                                      StreamString &content);
 
-    bool HandlePostApplicationForm(StreamString &contentType,
-                                   StreamString &content);
+    bool HandlePostApplicationForm(StreamString &content);
 
     bool HandlePostHeader(StreamString &line,
                           StreamString &content,

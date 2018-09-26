@@ -91,6 +91,11 @@ TEST(HttpProtocolGTest, TestCompleteReadOperation) {
     ASSERT_TRUE(test.TestCompleteReadOperation());
 }
 
+TEST(HttpProtocolGTest, TestCompleteReadOperation_ClipSize) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestCompleteReadOperation_ClipSize());
+}
+
 TEST(HttpProtocolGTest, TestWriteHeader_Get1) {
     HttpProtocolTest test;
     ASSERT_TRUE(test.TestWriteHeader_Get1());
@@ -223,3 +228,27 @@ TEST(HttpProtocolGTest, TestWriteHeader_StrucuredDataOnline) {
     ASSERT_TRUE(test.TestWriteHeader_StrucuredDataOnline());
 }
 
+TEST(HttpProtocolGTest, TestTextMode_True) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestTextMode(0));
+}
+
+TEST(HttpProtocolGTest, TestTextMode_False) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestTextMode(1));
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_False_FailGetLine) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_False_FailGetLine());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_False_PostNoContentType) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_False_PostNoContentType());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_False_PostNoContentLength) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_False_PostNoContentLength());
+}

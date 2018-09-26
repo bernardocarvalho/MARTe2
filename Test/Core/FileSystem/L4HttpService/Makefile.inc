@@ -24,7 +24,7 @@
 #
 #############################################################
 
-OBJSX=	HttpServiceTest.x HttpProtocolTest.x
+OBJSX=	HttpServiceTest.x HttpProtocolTest.x HttpStreamTTest.x
 
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..

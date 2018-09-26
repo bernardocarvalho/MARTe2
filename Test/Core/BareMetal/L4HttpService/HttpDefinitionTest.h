@@ -49,6 +49,11 @@ public:
 
     bool TestHttpDecode();
 
+    bool TestIsReplyCode();
+
+    bool TestGenerateReplyCode();
+
+    bool TestGetErrorCodeString();
 };
 
 /*---------------------------------------------------------------------------*/

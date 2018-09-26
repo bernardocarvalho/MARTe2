@@ -42,15 +42,14 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
-using namespace HttpDefinition;
 
 //#define NULL_PTR(x) NULL
 
 HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
                            BufferedStreamI &payloadIn) :
         ProtocolI() {
-    httpCommand = HSHCNone;
-    httpVersion = 1000;
+    httpCommand = HttpDefinition::HSHCNone;
+    httpVersion = 1000u;
     httpErrorCode = 200;
     keepAlive = true;
     outputStream = &clientBufferedStreamIn;
@@ -58,15 +57,18 @@ HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
     /** unknown information length */
     unreadInput = -1;
     payload = &payloadIn;
+    textMode = -1;
 
 }
 
 HttpProtocol::~HttpProtocol() {
     // Auto-generated destructor stub for HttpProtocol
     // TODO Verify if manual additions are needed
+    outputStream = NULL_PTR(DoubleBufferedStream*);
+    payload = NULL_PTR(BufferedStreamI*);
 }
 
-bool HttpProtocol::CompleteReadOperation(BufferedStreamI *streamout,
+bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
                                          TimeoutType msecTimeout) {
 
     bool ret = true;
@@ -79,7 +81,7 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI *streamout,
         uint64 startCounter = HighResolutionTimer::Counter();
 
         // convert the stop time
-        uint64 maxTicks = startCounter + static_cast<uint64>((msecTimeout.GetTimeoutMSec() / 1000.0) * HighResolutionTimer::Frequency());
+        uint64 maxTicks = startCounter + ((static_cast<uint64>(msecTimeout.GetTimeoutMSec())* HighResolutionTimer::Frequency())/1000ULL);
 
         uint32 bufferSize = 1024u;
         char8 *buffer = new char8[bufferSize];
@@ -87,7 +89,7 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI *streamout,
         uint32 sizeToRead = bufferSize;
 
         if (unreadInput > 0) {
-            sizeToRead = unreadInput;
+            sizeToRead = static_cast<uint32>(unreadInput);
             //clip the size
             if (sizeToRead > bufferSize) {
                 sizeToRead = bufferSize;
@@ -103,13 +105,13 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI *streamout,
                 if (streamout!=NULL_PTR(BufferedStreamI *)) {
                     uint32 sizeToWrite = readSize;
                     //complete write?
-                    streamout->Write(buffer, sizeToWrite, msecTimeout);
+                    (void)streamout->Write(buffer, sizeToWrite, msecTimeout);
                 }
                 sizeToRead = bufferSize;
 
                 if (unreadInput > 0) {
-                    unreadInput -= readSize;
-                    sizeToRead = unreadInput;
+                    unreadInput -= static_cast<int32>(readSize);
+                    sizeToRead = static_cast<uint32>(unreadInput);
                     //clip the size
                     if (sizeToRead > bufferSize) {
                         sizeToRead = bufferSize;
@@ -145,15 +147,17 @@ bool HttpProtocol::ReadHeader() {
         REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading a line from socket");
     }
     if (ret) {
-        line.Seek(0ull);
-        StreamString command;
-        //check the arrived command
-        (void) line.GetToken(command, " \n\t", terminator, " \n\t");
-        ret = RetrieveHttpCommand(command, line);
+        ret = line.Seek(0ull);
+        if (ret) {
+            StreamString command;
+            //check the arrived command
+            (void) line.GetToken(command, " \n\t", terminator, " \n\t");
+            ret = RetrieveHttpCommand(command, line);
+        }
     }
 
-    // if httpCommand is a HSHCReply then the version has already been calculated
-    if (HSHCReply > httpCommand) {
+    // if httpCommand is a HttpDefinition::HSHCReply then the version has already been calculated
+    if (HttpDefinition::HSHCReply > httpCommand) {
 
         if (ret) {
             // extract the uri and build a path based n that
@@ -175,17 +179,18 @@ bool HttpProtocol::ReadHeader() {
             StreamString version;
             ret = line.GetToken(version, " \n\t", terminator, " \n\t");
             if (ret) {
-                float32 fVersion = 0.f;
+                float32 fVersion = 0.F;
                 //skip HTTP
                 const char8 *fVersionStr = &(version.Buffer()[5u]);
                 if (!TypeConvert(fVersion, fVersionStr)) {
-                    fVersion = 0.0f;
+                    fVersion = 0.0F;
                 }
-                if (fVersion == 0.0f) {
+                if (fVersion <= 0.0F) {
                     httpVersion = 1000u;
                 }
                 else {
-                    httpVersion = static_cast<uint32>(fVersion * 1000.0);
+                    /*lint -e{9122} allowed cast from float to integer*/
+                    httpVersion = static_cast<uint32>(fVersion * 1000.0F);
                 }
             }
         }
@@ -200,7 +205,7 @@ bool HttpProtocol::ReadHeader() {
         // now evaluate options
         // first check what policy to follow: if dataSize is available and connection keep-alive,
         // then do not shut the connection and load only the specified size
-        keepAlive = (httpVersion >= 1100);
+        keepAlive = (httpVersion >= 1100u);
         StreamString connection;
         if (Read("Connection", connection)) {
             if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "keep-alive", 10u) == 0) {
@@ -209,10 +214,13 @@ bool HttpProtocol::ReadHeader() {
             else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "closed", 6u) == 0) {
                 keepAlive = false;
             }
+            else {
+
+            }
 
         }
         if (!Read("Content-Length", unreadInput)) {
-            unreadInput = HTTPNoContentLengthSpecified;
+            unreadInput = HttpDefinition::HTTPNoContentLengthSpecified;
         }
 
         if (!Read("Content-Type", contentType)) {
@@ -229,8 +237,8 @@ bool HttpProtocol::ReadHeader() {
             expectStr = "";
         }
         if (expectStr == "100-continue") {
-            outputStream->Printf("%s", "HTTP/1.1 100 Continue\r\n");
-            outputStream->Flush();
+            (void) outputStream->Printf("%s", "HTTP/1.1 100 Continue\r\n");
+            (void) outputStream->Flush();
         }
         ret = MoveToRoot();
         if (ret) {
@@ -250,7 +258,7 @@ bool HttpProtocol::ReadHeader() {
 
     if (ret) {
         //If it post read the body
-        if (httpCommand == HSHCPost) {
+        if (httpCommand == HttpDefinition::HSHCPost) {
             ret = (contentType.Size() > 0u);
             if (!ret) {
                 REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "If using POST the Content-Type MUST be specified");
@@ -268,9 +276,6 @@ bool HttpProtocol::ReadHeader() {
                 if (!MoveRelative("InputCommands")) {
                     (void) Delete("InputCommands");
                     ret = CreateRelative("InputCommands");
-                    if (!ret) {
-                        REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node InputCommands");
-                    }
                 }
 
                 if (ret) {
@@ -278,26 +283,23 @@ bool HttpProtocol::ReadHeader() {
                     char8 buffer[1024];
                     while ((unreadInput > 0) && (ret)) {
                         uint32 bufferReadSize = 1024u;
-                        ret = outputStream->Read(buffer, bufferReadSize);
+                        ret = outputStream->Read(&buffer[0], bufferReadSize);
                         if (!ret) {
                             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading from socket in POST section");
                         }
 
                         if (ret) {
                             if (bufferReadSize > 0u) {
-                                ret = (postContent.Write(buffer, bufferReadSize));
+                                ret = (postContent.Write(&buffer[0], bufferReadSize));
                                 if (!ret) {
                                     REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed updating content buffer in POST section");
                                 }
                             }
-                            unreadInput -= bufferReadSize;
+                            unreadInput -= static_cast<int32>(bufferReadSize);
                         }
                     }
                     if (ret) {
                         ret = (HandlePost(contentType, postContent));
-                        if (!ret) {
-                            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Error handling the post");
-                        }
                     }
                     if (ret) {
                         ret = MoveToRoot();
@@ -311,21 +313,23 @@ bool HttpProtocol::ReadHeader() {
     return ret;
 }
 
-bool HttpProtocol::WriteHeader(bool isMessageCompleted,
-                               int32 command,
-                               const char8 * id) {
+bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
+                               const int32 command,
+                               const char8 * const id) {
 
     //if sending something with bodyCompleted=false
     //remember to write Transfer-Encoding: chunked in options
 
-// complete transaction with remote host
-    CompleteReadOperation(NULL_PTR(BufferedStreamI*));
+    // complete transaction with remote host
+    if (!CompleteReadOperation(NULL_PTR(BufferedStreamI*))) {
+        REPORT_ERROR(ErrorManagement::Warning, "Failed CompleteReadOperation");
+    }
 
-// if it is a reply get errorCode
-// otherwise mark the httpCommand as none
-    bool isReply = IsReplyCode(command, httpErrorCode);
+    // if it is a reply get errorCode
+    // otherwise mark the httpCommand as none
+    bool isReply = HttpDefinition::IsReplyCode(command, httpErrorCode);
     if (!isReply) {
-        httpCommand = HSHCNone;
+        httpCommand = HttpDefinition::HSHCNone;
     }
 
     // saves all the pending changes
@@ -342,30 +346,30 @@ bool HttpProtocol::WriteHeader(bool isMessageCompleted,
     }
 
     if (isReply) {
-        if (!outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, GetErrorCodeString(httpErrorCode))) {
+        if (!outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, HttpDefinition::GetErrorCodeString(httpErrorCode))) {
             //REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
         }
     }
-    else if (command == HSHCGet) {
+    else if (command == HttpDefinition::HSHCGet) {
         if (!outputStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
         }
     }
-    else if (command == HSHCPut) {
+    else if (command == HttpDefinition::HSHCPut) {
         if (!outputStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
         }
     }
-    else if (command == HSHCPost) {
+    else if (command == HttpDefinition::HSHCPost) {
         if (!outputStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
         }
     }
-    else if (command == HSHCHead) {
+    else if (command == HttpDefinition::HSHCHead) {
         if (!outputStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
             ret = false;
@@ -378,9 +382,11 @@ bool HttpProtocol::WriteHeader(bool isMessageCompleted,
 
     if (ret) {
 
-        MoveToRoot();
-        if (!MoveRelative("OutputHttpOtions")) {
-            ret = CreateRelative("OutputHttpOtions");
+        ret = MoveToRoot();
+        if (ret) {
+            if (!MoveRelative("OutputHttpOtions")) {
+                ret = CreateRelative("OutputHttpOtions");
+            }
         }
         if (ret) {
             if (isMessageCompleted) {
@@ -397,13 +403,16 @@ bool HttpProtocol::WriteHeader(bool isMessageCompleted,
                 else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "close", 6u) == 0) {
                     keepAlive = false;
                 }
-            }
-            else{
-                if(keepAlive){
-                    Write("Connection", "keep-alive");
+                else {
+
                 }
-                else{
-                    Write("Connection", "keep-alive");
+            }
+            else {
+                if (keepAlive) {
+                    ret = Write("Connection", "keep-alive");
+                }
+                else {
+                    ret = Write("Connection", "keep-alive");
                 }
             }
             // write all options
@@ -419,28 +428,31 @@ bool HttpProtocol::WriteHeader(bool isMessageCompleted,
                 }
             }
             if (ret) {
-                outputStream->Printf("%s", "\r\n");
-                // return to root
-                MoveToRoot();
+                ret = outputStream->Printf("%s", "\r\n");
+                if (ret) {
+                    // return to root
+                    ret = MoveToRoot();
+                }
 
                 // send out the body
-
-                uint32 toWrite = payload->Size();
-                if (toWrite > 0u) {
-                    char8 *buff = new char8[toWrite];
-                    if (buff != NULL) {
-                        ret=payload->Read(buff, toWrite);
-                    }
-                    if (ret) {
-                        ret = outputStream->Write(buff, toWrite);
+                if (ret) {
+                    uint32 toWrite = static_cast<uint32>(payload->Size());
+                    if (toWrite > 0u) {
+                        char8 *buff = new char8[toWrite];
+                        if (buff != NULL) {
+                            ret=payload->Read(buff, toWrite);
+                        }
+                        if (ret) {
+                            ret = outputStream->Write(buff, toWrite);
+                        }
+                        delete[] buff;
                     }
                 }
             }
             if (ret) {
                 //flush the stream
-                outputStream->Flush();
+                ret = outputStream->Flush();
             }
-            return ret;
         }
     }
 
@@ -454,44 +466,45 @@ bool HttpProtocol::RetrieveHttpCommand(StreamString &command,
 
     bool ret = true;
     if (command == "GET") {
-        httpCommand = HSHCGet;
+        httpCommand = HttpDefinition::HSHCGet;
     }
     else if (command == "PUT") {
-        httpCommand = HSHCPut;
+        httpCommand = HttpDefinition::HSHCPut;
     }
     else if (command == "POST") {
-        httpCommand = HSHCPost;
+        httpCommand = HttpDefinition::HSHCPost;
     }
     else if (command == "HEAD") {
-        httpCommand = HSHCHead;
+        httpCommand = HttpDefinition::HSHCHead;
     }
-    else if (StringHelper::CompareN(command.Buffer(), "HTTP", 4) == 0) {
+    else if (StringHelper::CompareN(command.Buffer(), "HTTP", 4u) == 0) {
         // in a reply there is no command
         // it starts with HTTP ...
-        float32 fVersion = 0.0;
+        float32 fVersion = 0.0F;
         const char8* versionStr = &(command.Buffer()[5u]);
         if (!TypeConvert(fVersion, versionStr)) {
-            fVersion = 0.0;
+            fVersion = 0.0F;
         }
 
         //convert the version
-        if (fVersion == 0.0) {
+        if (fVersion <= 0.0F) {
             httpVersion = 1000u;
         }
         else {
-            httpVersion = static_cast<uint32>(fVersion * 1000.0);
+            /*lint -e{9122} allowed cast from float to integer*/
+            httpVersion = static_cast<uint32>(fVersion * 1000.0F);
         }
 
         //convert to the error code
         StreamString errorCode;
         (void) line.GetToken(errorCode, " \n\t", terminator, " \n\t");
-        uint32 errorCodeInt;
+        int32 errorCodeInt;
         if (!TypeConvert(errorCodeInt, errorCode.Buffer())) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed converting the error code of the reply %s to an integer", errorCode.Buffer());
             ret = false;
         }
         else {
-            httpCommand = GenerateReplyCode(errorCodeInt);
+            httpCommand = HttpDefinition::GenerateReplyCode(errorCodeInt);
         }
 
     }
@@ -505,33 +518,41 @@ bool HttpProtocol::RetrieveHttpCommand(StreamString &command,
 char8 HttpProtocol::BuildUrl(StreamString &line) {
 
     StreamString tempUrl;
-    char8 terminator;
+    char8 terminator = '\n';
     //get the url
     (void) line.GetToken(tempUrl, " \n?", terminator, " \n?");
-    tempUrl.Seek(0);
-    StreamString decoded;
-    //decode the url
-    HttpDecode(decoded, tempUrl);
-    decoded.Seek(0);
-    bool ok = true;
-    StreamString urlPart;
-    char8 saveTerm;
-    //build url and path
-    url.SetSize(0);
-    path.SetSize(0);
-    while (ok) {
-        urlPart = "";
-        ok = decoded.GetToken(urlPart, "\\/", saveTerm);
-        if (ok) {
-            url += urlPart.Buffer();
-            path += urlPart.Buffer();
-            if (saveTerm != '\0') {
-                url += saveTerm;
-                path += '.';
+    bool ret = tempUrl.Seek(0ULL);
+    if (ret) {
+        StreamString decoded;
+        //decode the url
+        (void) HttpDefinition::HttpDecode(decoded, tempUrl);
+        ret = decoded.Seek(0ULL);
+        if (ret) {
+            bool ok = true;
+            StreamString urlPart;
+            char8 saveTerm;
+            //build url and path
+            ret = url.SetSize(0ULL);
+            if (ret) {
+                ret = path.SetSize(0ULL);
+            }
+            if (ret) {
+                while (ok) {
+                    urlPart = "";
+                    ok = decoded.GetToken(urlPart, "\\/", saveTerm);
+                    if (ok) {
+                        url += urlPart.Buffer();
+                        path += urlPart.Buffer();
+                        if (saveTerm != '\0') {
+                            url += saveTerm;
+                            path += '.';
+                        }
+                    }
+                }
             }
         }
+        unMatchedUrl = url;
     }
-    unMatchedUrl = url;
     return terminator;
 }
 
@@ -551,28 +572,41 @@ bool HttpProtocol::StoreCommands(StreamString &line) {
     }
 
     if (ret) {
-        commands.Seek(0ull);
-        StreamString command;
-        char8 terminator;
-        while ((commands.GetToken(command, "&", terminator)) && (ret)) {
-            command.Seek(0ull);
-            if (command.Size() > 3u) {
-                StreamString variable;
-                StreamString value;
-                ret = command.GetToken(variable, "=", terminator);
+        ret = commands.Seek(0ull);
+        if (ret) {
+            StreamString command;
+            while ((commands.GetToken(command, "&", terminator)) && (ret)) {
+                ret = command.Seek(0ull);
                 if (ret) {
-                    //get until the end
-                    (void) command.GetToken(value, "", terminator);
-                    StreamString decodedValue;
-                    StreamString decodedVariable;
-                    value.Seek(0ull);
-                    variable.Seek(0ull);
-                    HttpDecode(decodedValue, value);
-                    HttpDecode(decodedVariable, variable);
-                    ret = Write(decodedVariable.Buffer(), decodedValue.Buffer());
+                    if (command.Size() > 3u) {
+                        StreamString variable;
+                        StreamString value;
+                        ret = command.GetToken(variable, "=", terminator);
+                        if (ret) {
+                            //get until the end
+                            (void) command.GetToken(value, "", terminator);
+                            StreamString decodedValue;
+                            StreamString decodedVariable;
+                            ret = value.Seek(0ull);
+                            if (ret) {
+                                ret = variable.Seek(0ull);
+                            }
+                            if (ret) {
+                                ret = HttpDefinition::HttpDecode(decodedValue, value);
+                            }
+                            if (ret) {
+                                ret = HttpDefinition::HttpDecode(decodedVariable, variable);
+                            }
+                            if (ret) {
+                                ret = Write(decodedVariable.Buffer(), decodedValue.Buffer());
+                            }
+                        }
+                    }
+                }
+                if (ret) {
+                    ret = command.SetSize(0ULL);
                 }
             }
-            command.SetSize(0);
         }
     }
     return ret;
@@ -614,24 +648,29 @@ bool HttpProtocol::StoreInputOptions() {
             }
 
             if (ret) {
-                ok = (line.Size() > 0u);
-// parse HTTP Options and add to CDB
+                ok = (line.Size() > 0ull);
+                // parse HTTP Options and add to CDB
                 if (ok) {
-                    line.Seek(0);
-                    StreamString key;
-                    StreamString value;
-                    ret = line.GetToken(key, " \t:", terminator);
+                    ret = line.Seek(0ull);
                     if (ret) {
-                        (void) line.GetToken(value, " \t", terminator);
-                        // any other part separated by spaces add to the token
-                        // use a space as separator
-                        if (line.Size() > line.Position()) {
-                            uint32 sizeW = 1u;
-                            char8 space = ' ';
-                            value.Write(&space, sizeW);
+                        StreamString key;
+                        StreamString value;
+                        ret = line.GetToken(key, " \t:", terminator);
+                        if (ret) {
+                            (void) line.GetToken(value, " \t", terminator);
+                            // any other part separated by spaces add to the token
+                            // use a space as separator
+                            uint64 linePosition = line.Position();
+                            if (line.Size() > linePosition) {
+                                uint32 sizeW = 1u;
+                                char8 space = ' ';
+                                ret = value.Write(&space, sizeW);
+                            }
+                            if (ret) {
+                                (void) line.GetToken(value, "", terminator);
+                                ret = Write(key.Buffer(), value.Buffer());
+                            }
                         }
-                        (void) line.GetToken(value, "", terminator);
-                        ret = Write(key.Buffer(), value.Buffer());
                     }
                 }
             }
@@ -645,19 +684,19 @@ bool HttpProtocol::HandlePostHeader(StreamString &line,
                                     StreamString &content,
                                     StreamString &name,
                                     StreamString &filename) {
-    const char8 *temp = NULL;
+    const char8 *temp = NULL_PTR(const char8 *);
 
     bool ret = true;
     //read the name (it is in the form name="_NAME_")
     const char8* nameTemp = StringHelper::SearchString(line.Buffer(), "name=\"");
-    if (nameTemp != NULL) {
+    if (nameTemp != NULL_PTR(const char8*)) {
         name = &nameTemp[StringHelper::Length("name=\"")];
         temp = name.Buffer();
         uint32 count = 0u;
         while (temp[count] != '\"') {
             count++;
         }
-        name.SetSize(count);
+        ret = name.SetSize(static_cast<uint64>(count));
     }
     else {
         nameTemp = StringHelper::SearchString(line.Buffer(), "name=");
@@ -666,38 +705,44 @@ bool HttpProtocol::HandlePostHeader(StreamString &line,
             name = &nameTemp[StringHelper::Length("name=")];
         }
     }
-    //Check if the content is a file
-    const char8* filenameTemp = StringHelper::SearchString(line.Buffer(), "filename=\"");
-    if (filenameTemp != NULL) {
-        filename = &filenameTemp[StringHelper::Length("filename=\"")];
-        temp = filename.Buffer();
-        uint32 count = 0u;
-        while (temp[count] != '\"') {
-            count++;
-        }
-        filename.SetSize(count);
-    }
-    if (filename.Size() > 0u) {
-        StreamString key = name;
-        key += ":filename";
-
-        //Write the filename
-        ret = Write(key.Buffer(), filename.Buffer());
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the filename");
+    if (ret) {
+        //Check if the content is a file
+        const char8* filenameTemp = StringHelper::SearchString(line.Buffer(), "filename=\"");
+        if (filenameTemp != NULL) {
+            filename = &filenameTemp[StringHelper::Length("filename=\"")];
+            temp = filename.Buffer();
+            uint32 count = 0u;
+            while (temp[count] != '\"') {
+                count++;
+            }
+            ret=filename.SetSize(static_cast<uint64>(count));
         }
         if (ret) {
-            //Check the file mime type
-            line.SetSize(0);
-            if (content.GetLine(line)) {
-                const char8* fcTypeTemp = StringHelper::SearchString(line.Buffer(), "Content-Type: ");
-                if (fcTypeTemp != NULL) {
-                    StreamString fcType = &fcTypeTemp[StringHelper::Length("Content-Type: ")];
-                    key = name;
-                    key += ":Content-Type";
-                    ret = Write(key.Buffer(), fcType.Buffer());
-                    if (!ret) {
-                        REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the file content type");
+            if (filename.Size() > 0ull) {
+                StreamString key = name;
+                key += ":filename";
+
+                //Write the filename
+                ret = Write(key.Buffer(), filename.Buffer());
+                if (!ret) {
+                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the filename");
+                }
+                if (ret) {
+                    //Check the file mime type
+                    ret = line.SetSize(0ull);
+                    if (ret) {
+                        if (content.GetLine(line)) {
+                            const char8* fcTypeTemp = StringHelper::SearchString(line.Buffer(), "Content-Type: ");
+                            if (fcTypeTemp != NULL_PTR(const char8*)) {
+                                StreamString fcType = &fcTypeTemp[StringHelper::Length("Content-Type: ")];
+                                key = name;
+                                key += ":Content-Type";
+                                ret = Write(key.Buffer(), fcType.Buffer());
+                                if (!ret) {
+                                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the file content type");
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -715,7 +760,7 @@ bool HttpProtocol::HandlePostContent(StreamString &line,
 
     bool ret = true;
     //search for the boundary end
-    if (StringHelper::SearchString(line.Buffer(), boundary.Buffer()) != NULL) {
+    if (StringHelper::SearchString(line.Buffer(), boundary.Buffer()) != NULL_PTR(const char8*)) {
 
         //reset...new blank line is new handler
         headerHandled = false;
@@ -725,10 +770,16 @@ bool HttpProtocol::HandlePostContent(StreamString &line,
             REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the content");
         }
         if (ret) {
-            value.SetSize(0);
-            line.SetSize(0);
-            filename.SetSize(0);
-            name.SetSize(0);
+            ret = value.SetSize(0ull);
+            if (ret) {
+                ret = line.SetSize(0ull);
+            }
+            if (ret) {
+                ret = filename.SetSize(0ull);
+            }
+            if (ret) {
+                ret = name.SetSize(0ull);
+            }
         }
     }
     //if not boundary store in value
@@ -755,80 +806,106 @@ bool HttpProtocol::HandlePostMultipartFormData(StreamString &contentType,
         //Store the boundary identifier
         StreamString parsedBoundary = &parsedBoundaryTemp[StringHelper::Length("boundary=")];
         //Check if the boundary contains quotes and remove if so
-        if (parsedBoundary.Size() > 1u) {
+        if (parsedBoundary.Size() > 1ull) {
             // remove the ""
-            if ((parsedBoundary[0] == '\"') && parsedBoundary[parsedBoundary.Size() - 1] == '\"') {
-                parsedBoundary = (parsedBoundary.Buffer() + 1u);
-                parsedBoundary.SetSize(parsedBoundary.Size() - 1);
+            uint32 finalIndex = static_cast<uint32>(parsedBoundary.Size() - 1u);
+            if ((parsedBoundary[0u] == '\"')) {
+                if ((parsedBoundary[finalIndex] == '\"')) {
+                    parsedBoundary = (&(parsedBoundary.Buffer()[1]));
+                    ret = parsedBoundary.SetSize(static_cast<uint64>(finalIndex));
+                }
             }
         }
-        //add the prefix
-        StreamString boundary = "--";
-        boundary += parsedBoundary;
+        if (ret) {
+            //add the prefix
+            StreamString boundary = "--";
+            boundary += parsedBoundary;
 
-        //The header is not written in the cdb
-        bool headerHandled = false;
-        //The contents (after the header are stored in this field
-        StreamString value;
+            //The header is not written in the cdb
+            bool headerHandled = false;
+            //The contents (after the header are stored in this field
+            StreamString value;
 
-        content.Seek(0);
-        StreamString line;
-        //The cdb name key
-        StreamString name = "Unknown";
-        //If a filename is received
-        StreamString filename;
-        while ((content.GetLine(line)) && (ret)) {
-            //The header is handled when an empty line is detected
-            headerHandled |= (line.Size() == 0);
-            if (line.Size() > 0u) {
-                //While the header is not handled (separated from main content by empty line)
-                //look for name and filename
-                if (!headerHandled) {
-                    //store name and filename
-                    ret = HandlePostHeader(line, content, name, filename);
+            ret = content.Seek(0ull);
+            if (ret) {
+                StreamString line;
+                //The cdb name key
+                StreamString name = "Unknown";
+                //If a filename is received
+                StreamString filename;
+                while ((content.GetLine(line)) && (ret)) {
+                    //The header is handled when an empty line is detected
+                    bool lineEmpty = (line.Size() == 0ull);
+                    headerHandled = (headerHandled || lineEmpty);
+                    if (line.Size() > 0ull) {
+                        //While the header is not handled (separated from main content by empty line)
+                        //look for name and filename
+                        if (!headerHandled) {
+                            //store name and filename
+                            ret = HandlePostHeader(line, content, name, filename);
+                        }
+                        //if the header is handled
+                        else {
+                            //parse and store the actual message content
+                            ret = HandlePostContent(line, boundary, name, filename, value, headerHandled);
+                        }
+                        if (ret) {
+                            ret = line.SetSize(0ull);
+                        }
+                    }
                 }
-                //if the header is handled
-                else {
-                    //parse and store the actual message content
-                    ret = HandlePostContent(line, boundary, name, filename, value, headerHandled);
-                }
-                line.SetSize(0);
             }
         }
     }
     return ret;
 }
 
-bool HttpProtocol::HandlePostApplicationForm(StreamString &contentType,
-                                             StreamString &content) {
+bool HttpProtocol::HandlePostApplicationForm(StreamString &content) {
 
     bool ret = true;
     StreamString line;
 
     if (content.GetLine(line)) {
-        line.Seek(0);
-
-        StreamString command;
-        char8 terminator;
-        while (line.GetToken(command, "&", terminator)) {
-            command.Seek(0);
-            if (command.Size() > 3u) {
-                StreamString variable;
-                StreamString value;
-                ret = command.GetToken(variable, "=", terminator);
+        ret = line.Seek(0ull);
+        if (ret) {
+            StreamString command;
+            char8 terminator;
+            while (line.GetToken(command, "&", terminator)) {
+                ret = command.Seek(0ull);
                 if (ret) {
-                    (void) command.GetToken(value, ";", terminator);
-                    value.Seek(0);
-                    variable.Seek(0);
-                    StreamString decodedValue;
-                    StreamString decodedVariable;
-                    HttpDecode(decodedValue, value);
-                    HttpDecode(decodedVariable, variable);
-                    decodedValue.Seek(0);
-                    ret = Write(decodedVariable.Buffer(), decodedValue.Buffer());
+                    if (command.Size() > 3ull) {
+                        StreamString variable;
+                        StreamString value;
+                        ret = command.GetToken(variable, "=", terminator);
+                        if (ret) {
+                            (void) command.GetToken(value, ";", terminator);
+                            ret = value.Seek(0ull);
+                            if (ret) {
+                                ret = variable.Seek(0ull);
+                            }
+                            if (ret) {
+                                StreamString decodedValue;
+                                StreamString decodedVariable;
+                                if (ret) {
+                                    ret = HttpDefinition::HttpDecode(decodedValue, value);
+                                    if (ret) {
+                                        ret = HttpDefinition::HttpDecode(decodedVariable, variable);
+                                    }
+                                    if (ret) {
+                                        ret = decodedValue.Seek(0ull);
+                                    }
+                                }
+                                if (ret) {
+                                    ret = Write(decodedVariable.Buffer(), decodedValue.Buffer());
+                                }
+                            }
+                        }
+                    }
+                }
+                if (ret) {
+                    ret=command.SetSize(0ull);
                 }
             }
-            command.SetSize(0);
         }
     }
 
@@ -838,29 +915,30 @@ bool HttpProtocol::HandlePostApplicationForm(StreamString &contentType,
 bool HttpProtocol::HandlePost(StreamString &contentType,
                               StreamString &content) {
     //Write the raw content
-    content.Seek(0);
-    StreamString key = "rawPost";
-
-    //we are in InputCommands
-    bool ret = Write(key.Buffer(), content.Buffer());
-    if (!ret) {
-        REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the raw post content");
-    }
-
+    bool ret = content.Seek(0ull);
     if (ret) {
-        content.Seek(0);
+        StreamString key = "rawPost";
 
-        //Check if it is a "multipart/form-data"
-        if (StringHelper::SearchString(contentType.Buffer(), "multipart/form-data") != NULL) {
-            ret = HandlePostMultipartFormData(contentType, content);
+        //we are in InputCommands
+        ret = Write(key.Buffer(), content.Buffer());
+        if (!ret) {
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the raw post content");
         }
-        else if (StringHelper::SearchString(contentType.Buffer(), "application/x-www-form-urlencoded") != NULL) {
-            //read the content. Key values encoded as in a GET url
-            ret = HandlePostApplicationForm(contentType, content);
-        }
-        else {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Content-type handler for: %s not found", contentType.Buffer());
-            ret = false;
+
+        if (ret) {
+            ret = content.Seek(0ull);
+            if (ret) {
+                //Check if it is a "multipart/form-data"
+                if (StringHelper::SearchString(contentType.Buffer(), "multipart/form-data") != NULL) {
+                    ret = HandlePostMultipartFormData(contentType, content);
+                }
+                else if (StringHelper::SearchString(contentType.Buffer(), "application/x-www-form-urlencoded") != NULL) {
+                    //read the content. Key values encoded as in a GET url
+                    ret = HandlePostApplicationForm(content);
+                }
+                else {
+                }
+            }
         }
     }
     return ret;
@@ -875,9 +953,9 @@ bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
         StreamString authorisationKey;
         if (MoveRelative("InputHttpOptions")) {
             if (Read("Authorization", authorisationKey)) {
-                BasicSocket* socket = dynamic_cast<BasicSocket *>(outputStream);
-                if (socket != NULL) {
-                    ret = realm->Validate(authorisationKey.Buffer(), httpCommand, (socket->GetSource()).GetAddressAsNumber());
+                BasicSocket* mySocket = dynamic_cast<BasicSocket *>(outputStream);
+                if (mySocket != NULL_PTR(BasicSocket*)) {
+                    ret = realm->Validate(authorisationKey.Buffer(), httpCommand, (mySocket->GetSource()).GetAddressAsNumber());
                 }
             }
             (void) MoveToAncestor(1u);
@@ -890,7 +968,7 @@ bool HttpProtocol::KeepAlive() const {
     return keepAlive;
 }
 
-void HttpProtocol::SetKeepAlive(bool isKeepAlive) {
+void HttpProtocol::SetKeepAlive(const bool isKeepAlive) {
     keepAlive = isKeepAlive;
 }
 
@@ -899,7 +977,7 @@ int32 HttpProtocol::GetHttpCommand() const {
 
 }
 
-void HttpProtocol::SetUnmatchedId(const char8 *unMatchedIdIn) {
+void HttpProtocol::SetUnmatchedId(const char8 * const unMatchedIdIn) {
     unMatchedUrl = unMatchedIdIn;
 }
 
@@ -915,7 +993,7 @@ void HttpProtocol::GetId(StreamString& idOut) {
     idOut = url;
 }
 
-uint8 HttpProtocol::TextMode() {
+int8 HttpProtocol::TextMode() const {
     return textMode;
 }
 

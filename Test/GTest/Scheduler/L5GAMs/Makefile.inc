@@ -25,10 +25,12 @@ PACKAGE=GTest/Scheduler
 ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
-OBJSX=  CircularBufferThreadInputDataSourceGTest.x \
-    GAMSchedulerGTest.x \
+OBJSX=  GAMSchedulerGTest.x \
     MemoryMapAsyncOutputBrokerGTest.x\
     MemoryMapAsyncTriggerOutputBrokerGTest.x
+
+#CircularBufferThreadInputDataSourceGTest.x
+
 		 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

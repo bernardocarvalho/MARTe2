@@ -54,3 +54,18 @@ TEST(HttpDefinitionGTest,TestHttpDecode) {
     HttpDefinitionTest target;
     ASSERT_TRUE(target.TestHttpDecode());
 }
+
+TEST(HttpDefinitionGTest,TestIsReplyCode) {
+    HttpDefinitionTest target;
+    ASSERT_TRUE(target.TestIsReplyCode());
+}
+
+TEST(HttpDefinitionGTest,TestGenerateReplyCode) {
+    HttpDefinitionTest target;
+    ASSERT_TRUE(target.TestGenerateReplyCode());
+}
+
+TEST(HttpDefinitionGTest,TestGetErrorCodeString) {
+    HttpDefinitionTest target;
+    ASSERT_TRUE(target.TestGetErrorCodeString());
+}

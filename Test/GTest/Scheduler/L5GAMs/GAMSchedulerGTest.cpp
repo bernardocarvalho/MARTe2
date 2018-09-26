@@ -68,12 +68,12 @@ TEST(GAMSchedulerGTest,TestIntegrated) {
     GAMSchedulerTest test;
     ASSERT_TRUE(test.TestIntegrated());
 }
-
+/*
 TEST(GAMSchedulerGTest,TestIntegrated_TriggerErrorMessage) {
     GAMSchedulerTest test;
     ASSERT_TRUE(test.TestIntegrated_TriggerErrorMessage());
 }
-
+*/
 TEST(GAMSchedulerGTest,TestPurge) {
     GAMSchedulerTest test;
     ASSERT_TRUE(test.TestPurge());

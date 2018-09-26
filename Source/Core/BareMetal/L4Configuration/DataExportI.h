@@ -49,6 +49,9 @@ public:
     virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol)=0;
 
     virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol)=0;
+
+    virtual bool IsDirectStream();
+
 };
 
 }

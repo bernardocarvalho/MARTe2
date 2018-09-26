@@ -67,6 +67,7 @@ public:
 
     bool TestCompleteReadOperation();
 
+    bool TestCompleteReadOperation_ClipSize();
 
     bool TestWriteHeader();
 
@@ -121,6 +122,14 @@ public:
 
     bool TestGetId();
 
+    bool TestTextMode(int8 textMode);
+
+    bool TestReadHeader_False_FailGetLine();
+
+    bool TestReadHeader_False_PostNoContentType();
+
+    bool TestReadHeader_False_PostNoContentLength();
+
 
 
     EventSem eventSem;
@@ -130,6 +139,8 @@ public:
     int32 command;
 
     bool isKeepAlive;
+
+    int8 textMode;
 
 };
 

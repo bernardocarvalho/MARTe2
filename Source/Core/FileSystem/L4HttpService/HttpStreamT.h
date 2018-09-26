@@ -34,24 +34,28 @@
 #include "HttpRealmI.h"
 #include "ConfigurationDatabase.h"
 #include "DoubleBufferedStream.h"
+/*lint -e{766} this module is used*/
 #include "JsonPrinter.h"
+/*lint -e{766} this module is used*/
 #include "StandardPrinter.h"
+/*lint -e{766} this module is used*/
 #include "XMLPrinter.h"
 #include "StreamStructuredData.h"
+/*lint -e{766} this module is used*/
 #include "ProtocolI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
-
+/*lint -esym(9107, MARTe::HttpStreamT*) [MISRA C++ Rule 3-1-1] required for template implementation*/
 template<class Printer>
 class HttpStreamT: public StreamString, public StreamStructuredData<Printer> {
 public:
     HttpStreamT();
 
     HttpStreamT(DoubleBufferedStream &clientBufferedStreamIn,
-                bool store = true);
+                const bool store = true);
 
     void SetStoreMode(bool store);
 
@@ -95,6 +99,7 @@ public:
      * @param[out] destination where the database will be copied to.
      * @return true if the copy is successful.
      */
+    /*lint -e{1511} the BufferedStreamI::Copy has a different interface*/
     virtual bool Copy(StructuredDataI &destination);
 
     /**
@@ -120,6 +125,7 @@ public:
      * @pre
      *   generations > 0
      */
+    /*lint -e{952} the generations parameter cannot be declared const because it is inherited)*/
     virtual bool MoveToAncestor(uint32 generations);
 
     /**
@@ -217,7 +223,7 @@ namespace MARTe {
 //#define NULL_PTR(x) NULL
 template<class Printer>
 HttpStreamT<Printer>::HttpStreamT(DoubleBufferedStream &clientBufferedStreamIn,
-                                  bool store) :
+                                  const bool store) :
         StreamString(),
         StreamStructuredData<JsonPrinter>() {
     outputStream = &clientBufferedStreamIn;
@@ -230,6 +236,7 @@ template<class Printer>
 HttpStreamT<Printer>::~HttpStreamT() {
     // Auto-generated destructor stub for HttpStreamT
     // TODO Verify if manual additions are needed
+    outputStream = NULL_PTR(DoubleBufferedStream *);
 }
 
 template<class Printer>
@@ -269,11 +276,12 @@ template<class Printer>
 bool HttpStreamT<Printer>::MoveToRoot() {
     bool ret = (storeBody) ? (storedData.MoveToRoot()) : (StreamStructuredData<JsonPrinter>::MoveToRoot());
     if ((ret) && (storeBody)) {
-        Printf("%J!", storedData);
+        ret=Printf("%J!", *reinterpret_cast<StructuredDataI*>(&storedData));
     }
     return ret;
 }
 
+/*lint -e{952} the generations parameter cannot be declared const because it is inherited)*/
 template<class Printer>
 bool HttpStreamT<Printer>::MoveToAncestor(uint32 generations) {
     return (storeBody) ? (storedData.MoveToAncestor(generations)) : (StreamStructuredData<JsonPrinter>::MoveToAncestor(generations));
@@ -325,10 +333,17 @@ uint32 HttpStreamT<Printer>::GetNumberOfChildren() {
     return (storeBody) ? (storedData.GetNumberOfChildren()) : (StreamStructuredData<JsonPrinter>::GetNumberOfChildren());
 }
 
+
+/*lint -esym(751, MARTe::HttpJsonStream) -esym(756, MARTe::HttpJsonStream) this symbol could be not referenced*/
+/*lint -esym(756, MARTe::HttpJsonStream) -esym(756, MARTe::HttpJsonStream) this symbol could be not referenced*/
 typedef HttpStreamT<JsonPrinter> HttpJsonStream;
 
+/*lint -esym(751, MARTe::HttpXMLStream) this symbol could be not referenced*/
+/*lint -esym(756, MARTe::HttpXMLStream) this symbol could be not referenced*/
 typedef HttpStreamT<XMLPrinter> HttpXMLStream;
 
+/*lint -esym(751, MARTe::HttpStandardStream) -esym(756, MARTe::HttpJsonStream) this symbol could be not referenced*/
+/*lint -esym(756, MARTe::HttpStandardStream) -esym(756, MARTe::HttpJsonStream) this symbol could be not referenced*/
 typedef HttpStreamT<StandardPrinter> HttpStandardStream;
 
 

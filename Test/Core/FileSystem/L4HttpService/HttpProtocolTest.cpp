@@ -105,9 +105,6 @@ HttpProtocolTest::~HttpProtocolTest() {
     // TODO Verify if manual additions are needed
 }
 
-
-
-
 bool HttpProtocolTest::TestConstructor() {
     TCPSocket client;
 
@@ -156,7 +153,6 @@ static void clientJobGet1(HttpProtocolTest &tt) {
     Threads::EndThread();
 }
 
-
 bool HttpProtocolTest::TestReadHeader_Get1() {
     InternetHost source(4443, "127.0.0.1");
     InternetHost destination(4444, "127.0.0.1");
@@ -182,7 +178,7 @@ bool HttpProtocolTest::TestReadHeader_Get1() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -231,7 +227,6 @@ bool HttpProtocolTest::TestReadHeader_Get1() {
 
     return ret;
 }
-
 
 static void clientJobGet2(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
@@ -286,7 +281,7 @@ bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -347,11 +342,6 @@ bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
     return ret;
 }
 
-
-
-
-
-
 static void clientJobPut1(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
@@ -405,7 +395,7 @@ bool HttpProtocolTest::TestReadHeader_Put1() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -494,13 +484,12 @@ bool HttpProtocolTest::TestReadHeader_Post1() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-
     HttpJsonStream stream(newSocket);
     HttpProtocol test(newSocket, stream);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -642,7 +631,7 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -709,9 +698,6 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
     return ret;
 }
 
-
-
-
 static void clientJobHead(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
@@ -760,7 +746,7 @@ bool HttpProtocolTest::TestReadHeader_Head() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -852,7 +838,7 @@ bool HttpProtocolTest::TestReadHeader_Reply() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -931,7 +917,7 @@ bool HttpProtocolTest::TestCompleteReadOperation() {
 
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -947,8 +933,82 @@ bool HttpProtocolTest::TestCompleteReadOperation() {
     return ret;
 }
 
+static void clientJobReply_BigBody(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
 
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
 
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 4444);
+    if (ret) {
+        socket.Printf("%s", "HTTP/1.1 200 OK\n");
+        socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
+        socket.Printf("%s", "Server: Apache/2.2.14 (Win32)\n");
+        socket.Printf("%s", "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\n");
+        socket.Printf("%s", "Content-Length: 3072\n");
+        socket.Printf("%s", "Content-Type: text/html\n");
+        socket.Printf("%s", "Connection: Closed\n\n");
+        char8 buffer[3072];
+        MemoryOperationsHelper::Set(buffer, 'x', 3072);
+        buffer[3071] = 0;
+        socket.Printf("%s", (const char8*) buffer);
+        socket.Printf("%s", "\n");
+        socket.Flush();
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestCompleteReadOperation_ClipSize() {
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobReply_BigBody, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpJsonStream stream(newSocket);
+    HttpProtocol test(newSocket, stream);
+
+    bool ret = test.ReadHeader();
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained);
+    }
+
+    eventSem.Wait();
+
+    ret &= remained.Size() == 3072;
+    for (uint32 i = 0u; (i < 3071) && (ret); i++) {
+        ret = remained[i] == 'x';
+    }
+    ret &= remained[3072] == 0;
+    //printf("remained %s %lld\n", remained.Buffer(), remained.Size());
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
 
 static void clientJobWrite(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
@@ -1002,7 +1062,6 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         HttpJsonStream stream(socket);
         HttpProtocol test(socket, stream);
 
-
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Transfer-Encoding", "chunked");
 
@@ -1027,8 +1086,6 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
     socket.Close();
     Threads::EndThread();
 }
-
-
 
 bool HttpProtocolTest::TestWriteHeader() {
 
@@ -1061,7 +1118,7 @@ bool HttpProtocolTest::TestWriteHeader() {
 
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1119,7 +1176,7 @@ bool HttpProtocolTest::TestWriteHeader2() {
         ret = test.CompleteReadOperation(&remained, 10);
     }
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1175,8 +1232,6 @@ bool HttpProtocolTest::TestWriteHeader2() {
 
 }
 
-
-
 bool HttpProtocolTest::TestWriteHeader_Get1() {
     retVal = true;
     eventSem.Reset();
@@ -1190,7 +1245,6 @@ bool HttpProtocolTest::TestWriteHeader_Get2() {
     command = HttpDefinition::HSHCGet;
     return TestWriteHeader2();
 }
-
 
 bool HttpProtocolTest::TestWriteHeader_Put1() {
     retVal = true;
@@ -1207,8 +1261,6 @@ bool HttpProtocolTest::TestWriteHeader_Put2() {
     return TestWriteHeader2();
 
 }
-
-
 
 bool HttpProtocolTest::TestWriteHeader_Head1() {
     retVal = true;
@@ -1247,10 +1299,6 @@ bool HttpProtocolTest::TestWriteHeader_Reply2() {
     command = HttpDefinition::HSHCReplyOK;
     return TestWriteHeader2();
 }
-
-
-
-
 
 static void clientJobWriteStructuredStored(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
@@ -1343,7 +1391,7 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
         ret = test.CompleteReadOperation(&remained, 10);
     }
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1512,7 +1560,7 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
         ret = test.CompleteReadOperation(&remained, 10);
     }
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1590,8 +1638,6 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
     return (ret && retVal);
 }
 
-
-
 static void clientJobAuth(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
@@ -1654,7 +1700,7 @@ bool HttpProtocolTest::TestSecurityCheck() {
 
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1692,7 +1738,7 @@ bool HttpProtocolTest::TestKeepAliveDefault() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1766,7 +1812,7 @@ bool HttpProtocolTest::TestKeepAlive(bool isKeepAliveIn) {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1831,7 +1877,7 @@ bool HttpProtocolTest::TestGetHttpCommand(int32 commandIn) {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1889,7 +1935,7 @@ bool HttpProtocolTest::TestGetUnmatchedId() {
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
-    ConfigurationDatabase *cdb = (ConfigurationDatabase *)(&test);
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
 
     cdb->MoveToRoot();
     StreamString output;
@@ -1917,4 +1963,236 @@ bool HttpProtocolTest::TestGetPath() {
 bool HttpProtocolTest::TestGetId() {
     return TestReadHeader_Get1();
 }
+
+static void clientJobGetTextMode(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 4444);
+    if (ret) {
+        socket.Printf("GET /docs/index.html?TextMode=%d", tt.textMode);
+        socket.Printf("%s", " HTTP/1.1\n");
+        socket.Printf("%s", "Host: www.nowhere123.com\n");
+        socket.Printf("%s", "Accept: image/gif, image/jpeg, */*\n");
+        socket.Printf("%s", "Accept-Language: en-us\n");
+        socket.Printf("%s", "Accept-Encoding: gzip, deflate\n");
+        socket.Printf("%s", "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\n");
+        socket.Printf("%s", "\n");
+        socket.Flush();
+    }
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestTextMode(int8 textMode) {
+    this->textMode = textMode;
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobGetTextMode, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpJsonStream stream(newSocket);
+    HttpProtocol test(newSocket, stream);
+
+    bool ret = test.TextMode() == -1;
+
+    ret &= test.ReadHeader();
+    eventSem.Wait();
+
+    ret &= test.TextMode() == textMode;
+
+    newSocket.Close();
+    socket.Close();
+
+    return ret;
+}
+
+bool HttpProtocolTest::TestReadHeader_False_FailGetLine() {
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    HttpJsonStream stream(socket);
+    HttpProtocol test(socket, stream);
+
+    bool ret = !test.ReadHeader();
+
+    return ret;
+}
+
+static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+
+        HttpJsonStream stream(socket);
+        HttpProtocol test(socket, stream);
+
+        test.CreateAbsolute("OutputHttpOtions");
+        test.Write("Transfer-Encoding", "chunked");
+
+        stream.SetSize(0);
+        stream.Printf("%s", "ciao");
+        stream.Seek(0);
+
+        tt.retVal = test.WriteHeader(true, HttpDefinition::HSHCPost, "localhost");
+
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_False_PostNoContentType() {
+    retVal = true;
+    eventSem.Reset();
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobWritePostNoContentType, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpJsonStream stream(newSocket);
+    HttpProtocol test(newSocket, stream);
+
+    bool ret = !test.ReadHeader();
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained);
+    }
+
+    eventSem.Wait();
+
+    //ret&=!retVal;
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
+}
+
+
+static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    if (tt.retVal) {
+        HttpJsonStream stream(socket);
+        HttpProtocol test(socket, stream);
+        test.CreateAbsolute("OutputHttpOtions");
+        test.Write("Content-Type", "application/x-www-form-urlencoded");
+        test.MoveToRoot();
+
+        stream.SetSize(0);
+        stream.Printf("%s", "ciaobellooo\n");
+        stream.Seek(0);
+        tt.retVal = test.WriteHeader(false, HttpDefinition::HSHCPost, "localhost");
+
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength(){
+    retVal = true;
+    eventSem.Reset();
+
+    InternetHost source(4443, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(4444, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobWritePostNoContentLength, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    HttpJsonStream stream(newSocket);
+    HttpProtocol test(newSocket, stream);
+
+    bool ret = !test.ReadHeader();
+    StreamString remained;
+    if (ret) {
+        ret = test.CompleteReadOperation(&remained);
+    }
+
+    eventSem.Wait();
+
+    //ret&=!retVal;
+    newSocket.Close();
+    socket.Close();
+    return (ret && retVal);
+}
+
 

@@ -75,7 +75,7 @@ TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
 }
-
+/*
 TEST(HttpServiceGTest, TestServerCycle) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestServerCycle());
@@ -85,7 +85,7 @@ TEST(HttpServiceGTest, TestClientService) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestClientService());
 }
-
+*/
 TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestInitialise_DefaultPort());

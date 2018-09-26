@@ -25,6 +25,7 @@
 #############################################################
 
 OBJSX=	AdvancedErrorManagementTest.x \
+        Base64EncoderTest.x\
         BitSetToIntegerTest.x \
 	BufferedStreamIOBufferTest.x \
 	BufferedStreamITest.x \
