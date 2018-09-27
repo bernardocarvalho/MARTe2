@@ -31,8 +31,8 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StructuredDataI.h"
-#include "BufferedStreamI.h"
+#include "StreamStructuredDataI.h"
+#include "StreamI.h"
 #include "ProtocolI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
@@ -46,11 +46,9 @@ public:
 
     virtual ~DataExportI();
 
-    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol)=0;
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol)=0;
 
-    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol)=0;
-
-    virtual bool IsDirectStream();
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol)=0;
 
 };
 

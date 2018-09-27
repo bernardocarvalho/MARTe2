@@ -1846,6 +1846,16 @@ void IOBuffer::SetBufferReadOnlyReferencedMemory(const char8 * const buffer,
     Empty();
 }
 
+
+bool IOBuffer::Refill() {
+    return NoMoreDataToRead();
+}
+
+bool IOBuffer::Flush() {
+    return NoMoreSpaceToWrite();
+}
+
+
 bool IOBuffer::NoMoreSpaceToWrite() {
     return false;
 }

@@ -40,6 +40,7 @@ OBJSX=	BufferedStreamI.x \
 		SingleBufferedStream.x \
 		StandardPrinter.x\
 		StreamMemoryReference.x \
+		StreamStructuredDataI.x\
 		StreamStructuredData.x\
 		StreamString.x \
 		StreamStringIOBuffer.x\

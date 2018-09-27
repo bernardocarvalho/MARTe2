@@ -95,18 +95,6 @@ public:
     BufferedStreamIOBuffer(OperatingSystemCallbacksI * const s);
 
     /**
-     * @brief User friendly function which simply calls NoMoreDataToRead.
-     * @return whatever NoMoreDataToRead returns.
-     */
-    inline bool Refill();
-
-    /**
-     * @brief User friendly function which simply calls NoMoreSpaceToWrite.
-     * @return whatever NoMoreSpaceToWrite returns.
-     */
-    inline bool Flush();
-
-    /**
      * @brief Adjusts the position of the stream.
      * @details This function is called from the stream after a read operation because the position was shifted
      * forward (+bufferSize) due to the refill. Calls Seek moving the cursor back (-UsedAmountLeft).
@@ -173,13 +161,6 @@ private:
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-bool BufferedStreamIOBuffer::Refill() {
-    return NoMoreDataToRead();
-}
-
-bool BufferedStreamIOBuffer::Flush() {
-    return NoMoreSpaceToWrite();
-}
 
 TimeoutType BufferedStreamIOBuffer::GetTimeout() const {
     return timeout;

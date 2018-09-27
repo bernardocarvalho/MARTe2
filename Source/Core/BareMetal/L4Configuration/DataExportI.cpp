@@ -51,9 +51,5 @@ DataExportI::~DataExportI() {
     // TODO Verify if manual additions are needed
 }
 
-bool DataExportI::IsDirectStream(){
-    return true;
-}
-
 
 }

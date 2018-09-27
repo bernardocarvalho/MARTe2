@@ -415,6 +415,20 @@ public:
      */
     bool SkipTokens(uint32 count,
             const char8 * terminator);
+
+
+    /**
+     * @brief User friendly function which simply calls NoMoreDataToRead.
+     * @return whatever NoMoreDataToRead returns.
+     */
+    virtual bool Refill();
+
+    /**
+     * @brief User friendly function which simply calls NoMoreSpaceToWrite.
+     * @return whatever NoMoreSpaceToWrite returns.
+     */
+    virtual bool Flush();
+
 protected:
 
     /**

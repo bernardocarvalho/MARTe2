@@ -32,7 +32,7 @@
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 
-#include "StructuredDataI.h"
+#include "StreamStructuredDataI.h"
 #include "LinkedListable.h"
 #include "ReferenceContainer.h"
 #include "BufferedStreamI.h"
@@ -61,11 +61,17 @@ public:
 };
 
 template<class Printer>
-class StreamStructuredData: public StructuredDataI {
+class StreamStructuredData: public StreamStructuredDataI {
+
 public:
+
+    StreamStructuredData();
+
     StreamStructuredData(BufferedStreamI &streamIn);
 
     virtual ~StreamStructuredData();
+
+    virtual void SetStream(BufferedStreamI &streamIn);
 
     /**
      * @brief Reads a previously stored AnyType. The node with this name has to be a child of the current node.
@@ -208,18 +214,6 @@ public:
 
 protected:
 
-    StreamStructuredData();
-
-    virtual void SetStream(BufferedStreamI &streamIn);
-
-    BufferedStreamI *stream;
-
-    //accelerators
-    SingleBufferedStream *streamSingle;
-    DoubleBufferedStream *streamDouble;
-
-    uint32 bufferType;
-
     StreamString currentPath;
     ReferenceT<NodeName> treeDescriptor;
     ReferenceT<NodeName> currentNode;
@@ -246,16 +240,6 @@ StreamStructuredData<Printer>::StreamStructuredData(BufferedStreamI &streamIn) :
 
     currentNode = treeDescriptor;
 
-    //accelerators
-    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
-    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
-    bufferType = 0u;
-    if (streamSingle != NULL) {
-        bufferType=1u;
-    }
-    if (streamDouble != NULL) {
-        bufferType=2u;
-    }
     blockCloseState = false;
 }
 
@@ -268,31 +252,13 @@ StreamStructuredData<Printer>::StreamStructuredData() :
 
     currentNode = treeDescriptor;
 
-    //accelerators
-    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
-    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
-    bufferType = 0u;
-    streamSingle = NULL;
-    streamDouble = NULL;
-
     blockCloseState = false;
 }
 
 template<class Printer>
 void StreamStructuredData<Printer>::SetStream(BufferedStreamI &streamIn) {
-    stream = &streamIn;
+    StreamStructuredDataI::SetStream(streamIn);
     printer.SetStream(streamIn);
-
-    //accelerators
-    streamSingle = dynamic_cast<SingleBufferedStream *>(stream);
-    streamDouble = dynamic_cast<DoubleBufferedStream *>(stream);
-    bufferType = 0u;
-    if (streamSingle != NULL) {
-        bufferType=1u;
-    }
-    if (streamDouble != NULL) {
-        bufferType=2u;
-    }
 }
 
 template<class Printer>
@@ -334,12 +300,10 @@ bool StreamStructuredData<Printer>::Write(const char8 * const name,
     }
 
     if (ret) {
-        if (bufferType == 1u) {
-            streamSingle->FlushAndResync();
+        if (ret) {
+            stream->Flush();
         }
-        else if (bufferType == 2u) {
-            streamDouble->Flush();
-        }
+
         currentNode->numberOfVariables++;
     }
     return ret;
@@ -390,12 +354,7 @@ bool StreamStructuredData<Printer>::MoveToRoot() {
         currentNode = treeDescriptor;
     }
     if (ret) {
-        if (bufferType == 1u) {
-            streamSingle->FlushAndResync();
-        }
-        else if (bufferType == 2u) {
-            streamDouble->Flush();
-        }
+        stream->Flush();
     }
 
     return ret;
@@ -448,12 +407,7 @@ bool StreamStructuredData<Printer>::MoveToAncestor(uint32 generations) {
             currentPath = currentPathTmp;
         }
         if (ret) {
-            if (bufferType == 1u) {
-                streamSingle->FlushAndResync();
-            }
-            else if (bufferType == 2u) {
-                streamDouble->Flush();
-            }
+            stream->Flush();
         }
     }
     return ret;
@@ -552,11 +506,8 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
                 }
             }
             if (ret) {
-                if (bufferType == 1u) {
-                    streamSingle->FlushAndResync();
-                }
-                else if (bufferType == 2u) {
-                    streamDouble->Flush();
+                if (ret) {
+                    stream->Flush();
                 }
             }
         }
@@ -595,11 +546,8 @@ bool StreamStructuredData<Printer>::MoveToChild(const uint32 childIdx) {
             currentNode = child;
         }
         if (ret) {
-            if (bufferType == 1u) {
-                streamSingle->FlushAndResync();
-            }
-            else if (bufferType == 2u) {
-                streamDouble->Flush();
+            if (ret) {
+                stream->Flush();
             }
         }
     }

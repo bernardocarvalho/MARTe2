@@ -46,8 +46,9 @@ public:
     virtual bool ReadHeader()=0;
 
     virtual bool WriteHeader(const bool isMessageCompleted,
-                         const int32 command,
-                         const char8 * const id)=0;
+                             const int32 command,
+                             BufferedStreamI *payload,
+                             const char8 * const id)=0;
 
     virtual void SetUnmatchedId(const char8 *unMatchedIdIn)=0;
 

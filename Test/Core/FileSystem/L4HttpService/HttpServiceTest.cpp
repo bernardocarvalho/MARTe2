@@ -45,8 +45,8 @@
 #include "MemoryMapSynchronisedOutputBroker.h"
 
 #include "DataExportI.h"
-#include "HttpStreamT.h"
-
+#include "HttpDefinition.h"
+#include "HttpProtocol.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -223,13 +223,13 @@ HttpServiceTestWebRoot    ();
 
     virtual ~HttpServiceTestWebRoot();
 
-    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol);
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
 
-    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol);
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
 private:
     void RecCallback(ReferenceT<ReferenceContainer> ref,
-                     BufferedStreamI *hStream);
+            BufferedStreamI *hStream);
 
 };
 
@@ -260,15 +260,19 @@ void HttpServiceTestWebRoot::RecCallback(ReferenceT<ReferenceContainer> ref,
 
 }
 
-bool HttpServiceTestWebRoot::GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol) {
+bool HttpServiceTestWebRoot::GetAsStructuredData(StreamStructuredDataI &data,
+                                                 ProtocolI &protocol) {
     return false;
 }
 
-bool HttpServiceTestWebRoot::GetAsText(BufferedStreamI &stream, ProtocolI &protocol) {
-    BufferedStreamI *hStream = (&stream);
+bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
+                                       ProtocolI &protocol) {
+
+    StreamString hString;
+    StreamString *hStream = (&hString);
 
     hStream->SetSize(0);
-    if(!protocol.MoveAbsolute("OutputHttpOtions")){
+    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
         protocol.CreateAbsolute("OutputHttpOtions");
         protocol.Write("Content-Type", "text/html");
     }
@@ -289,7 +293,7 @@ bool HttpServiceTestWebRoot::GetAsText(BufferedStreamI &stream, ProtocolI &proto
     hStream->Printf("%s", "</html>\n");
     hStream->Seek(0);
 
-    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, NULL);
+    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
     return true;
 }
 
@@ -303,9 +307,9 @@ HttpServiceTestClassLister    ();
 
     virtual ~HttpServiceTestClassLister();
 
-    virtual bool GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol);
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
 
-    virtual bool GetAsText(BufferedStreamI &stream, ProtocolI &protocol);
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
 };
 
@@ -317,23 +321,25 @@ HttpServiceTestClassLister::~HttpServiceTestClassLister() {
 
 }
 
-bool HttpServiceTestClassLister::GetAsStructuredData(StructuredDataI &data, ProtocolI &protocol) {
+bool HttpServiceTestClassLister::GetAsStructuredData(StreamStructuredDataI &data,
+                                                     ProtocolI &protocol) {
     printf("\nCall Struct\n");
     return false;
 }
 
-bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &protocol) {
+bool HttpServiceTestClassLister::GetAsText(StreamI &stream,
+                                           ProtocolI &protocol) {
     printf("\nCall Text\n");
-    BufferedStreamI *hStream = (&stream);
+    StreamString hString;
+    StreamString *hStream = (&hString);
 
     StreamString className;
     protocol.MoveAbsolute("InputCommands");
     protocol.Read("Class", className);
 
-
     printf("\nclass name = %s\n", className.Buffer());
     hStream->SetSize(0);
-    if(!protocol.MoveAbsolute("OutputHttpOtions")){
+    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
         protocol.CreateAbsolute("OutputHttpOtions");
         protocol.Write("Content-Type", "text/html");
     }
@@ -486,17 +492,69 @@ bool HttpServiceTestClassLister::GetAsText(BufferedStreamI &stream, ProtocolI &p
     hStream->Seek(0);
 
     //copy to the client
-    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, NULL);
+    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
 
     return true;
 }
 
 CLASS_REGISTER(HttpServiceTestClassLister, "1.0")
 
+class HttpServiceTestClassTest1: public ReferenceContainer, public DataExportI {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpServiceTestClassTest1    ();
+
+    virtual ~HttpServiceTestClassTest1();
+
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
+
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
+
+};
+
+HttpServiceTestClassTest1::HttpServiceTestClassTest1() {
+
+}
+
+HttpServiceTestClassTest1::~HttpServiceTestClassTest1() {
+
+}
+
+bool HttpServiceTestClassTest1::GetAsStructuredData(StreamStructuredDataI &data,
+                                                    ProtocolI &protocol) {
+    return true;
+}
+
+bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
+                                          ProtocolI &protocol) {
+    StreamString hString;
+    StreamString *hStream = (&hString);
+
+    hStream->SetSize(0);
+    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
+        protocol.CreateAbsolute("OutputHttpOtions");
+        protocol.Write("Content-Type", "text/html");
+    }
+
+    hStream->SetSize(0);
+
+    hStream->Printf("<html><head><TITLE>%s</TITLE>"
+                    "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                    "HttpServiceTestClassTest1", "HttpServiceTestClassTest1");
+    hStream->Printf("%s", "</UL></BODY>\n");
+    hStream->Printf("%s", "</html>\n");
+    hStream->Seek(0);
+
+    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    return true;
+}
+CLASS_REGISTER(HttpServiceTestClassTest1, "1.0")
+
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
-#if 0
+//#if 0
 /**
  * Helper function to setup a MARTe execution environment
  */
@@ -526,7 +584,7 @@ static bool InitialiseMemoryMapInputBrokerEnviroment(const char8 * const config)
     }
     return ok;
 }
-#endif
+//#endif
 
 const char8 *config = ""
         "$Application = {"
@@ -536,13 +594,16 @@ const char8 *config = ""
         "           +ClassLister = {"
         "               Class = HttpServiceTestClassLister"
         "           }"
+        "           +Test1 = {"
+        "               Class = HttpServiceTestClassTest1"
+        "           }"
         "       }"
         "       +HttpServerTest = {"
         "           Class = HttpService"
         "           WebRoot = \"Application.WebRoot\""
-        "           Port=8080"
+        "           Port=4444"
         "           ListenMaxConnections = 255"
-        "           Timeout = 0"
+        "           Timeout = 1000"
         "           MaxNumberOfThreads=100"
         "           MinNumberOfThreads=1"
         "       }"
@@ -858,7 +919,7 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
 }
 
 bool HttpServiceTest::TestServerCycle() {
-    /*
+
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
     ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
@@ -869,13 +930,42 @@ bool HttpServiceTest::TestServerCycle() {
         }
     }
 
-    while (1)
-        ;
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    socket.Connect("127.0.0.1", 4444);
+
+    HttpProtocol stream(socket);
+
+    StreamString payload;
+
+    socket.Printf("%s", "GET /Test1/ HTTP/1.1\r\n");
+    socket.Printf("%s", "Host: localhost:4444\r\n");
+    socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+    socket.Printf("%s", "Accept: text/html\r\n");
+    socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+    socket.Printf("%s", "Connection: close\r\n\r\n");
+    socket.Flush();
+
+    stream.ReadHeader();
+    StreamString respBody;
+    stream.CompleteReadOperation(&respBody);
+
+    printf("\n%s\n", respBody.Buffer());
+
+
+    if (ret) {
+        ret = test->Stop();
+    }
 
     return ret;
-    */
 
-    return true;
+    //return true;
 }
 
 bool HttpServiceTest::TestClientService() {

@@ -43,8 +43,7 @@
 namespace MARTe {
 class HttpProtocol: public ProtocolI {
 public:
-    HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
-                 BufferedStreamI &payloadIn);
+    HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn);
 
     virtual ~HttpProtocol();
 
@@ -52,9 +51,8 @@ public:
 
     virtual bool WriteHeader(const bool isMessageCompleted,
                              const int32 command,
+                             BufferedStreamI *payload,
                              const char8 * const id);
-
-    //void SetPayload(BufferedStreamI &payloadIn)
 
     bool CompleteReadOperation(BufferedStreamI * const streamout,
                                TimeoutType msecTimeout = TTInfiniteWait);
@@ -79,8 +77,6 @@ public:
 
 protected:
     DoubleBufferedStream *outputStream;
-
-    BufferedStreamI* payload;
 
     /**
      * How much data is still waiting in the

@@ -34,8 +34,9 @@
 #include "TCPSocket.h"
 #include "Threads.h"
 #include "GlobalObjectsDatabase.h"
-#include "HttpStreamT.h"
-
+#include "HttpDefinition.h"
+#include "StreamStructuredData.h"
+#include "JsonPrinter.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -108,8 +109,8 @@ HttpProtocolTest::~HttpProtocolTest() {
 bool HttpProtocolTest::TestConstructor() {
     TCPSocket client;
 
-    HttpJsonStream stream(client);
-    HttpProtocol test(client, stream);
+    StreamString stream;
+    HttpProtocol test(client);
 
     bool ret = test.KeepAlive();
     StreamString path;
@@ -172,8 +173,8 @@ bool HttpProtocolTest::TestReadHeader_Get1() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     eventSem.Wait();
@@ -276,8 +277,8 @@ bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -389,8 +390,8 @@ bool HttpProtocolTest::TestReadHeader_Put1() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     eventSem.Wait();
@@ -484,8 +485,8 @@ bool HttpProtocolTest::TestReadHeader_Post1() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -626,8 +627,8 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -741,8 +742,8 @@ bool HttpProtocolTest::TestReadHeader_Head() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -833,8 +834,8 @@ bool HttpProtocolTest::TestReadHeader_Reply() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -906,8 +907,8 @@ bool HttpProtocolTest::TestCompleteReadOperation() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     StreamString remained;
@@ -987,8 +988,8 @@ bool HttpProtocolTest::TestCompleteReadOperation_ClipSize() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     StreamString remained;
@@ -1025,8 +1026,8 @@ static void clientJobWrite(HttpProtocolTest &tt) {
     tt.eventSem.Reset();
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
-        HttpJsonStream stream(socket);
-        HttpProtocol test(socket, stream);
+        StreamString stream;
+        HttpProtocol test(socket);
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
@@ -1034,7 +1035,7 @@ static void clientJobWrite(HttpProtocolTest &tt) {
         stream.SetSize(0);
         stream.Printf("%s", "ciaobellooo\n");
         stream.Seek(0);
-        tt.retVal = test.WriteHeader(true, tt.command, "localhost");
+        tt.retVal = test.WriteHeader(true, tt.command, &stream, "localhost");
 
     }
 
@@ -1059,8 +1060,8 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
 
-        HttpJsonStream stream(socket);
-        HttpProtocol test(socket, stream);
+        StreamString stream;
+        HttpProtocol test(socket);
 
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Transfer-Encoding", "chunked");
@@ -1069,7 +1070,7 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         stream.SetSize(0);
         stream.Printf("%s", "ciao");
         stream.Seek(0);
-        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        tt.retVal = test.WriteHeader(false, tt.command, &stream, "localhost");
         tt.eventSem.Wait();
         tt.eventSem.Reset();
 
@@ -1079,7 +1080,7 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         stream.SetSize(0);
         stream.Printf("%s", "bellooo\n");
         stream.Seek(0);
-        tt.retVal &= test.WriteHeader(true, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(true, tt.command, &stream, "localhost");
     }
 
     tt.eventSem.Post();
@@ -1107,8 +1108,8 @@ bool HttpProtocolTest::TestWriteHeader() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     StreamString remained;
@@ -1166,8 +1167,8 @@ bool HttpProtocolTest::TestWriteHeader2() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
 
@@ -1315,43 +1316,39 @@ static void clientJobWriteStructuredStored(HttpProtocolTest &tt) {
     tt.eventSem.Reset();
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
-        HttpJsonStream stream(socket);
-        HttpProtocol test(socket, stream);
+        StreamStructuredData<JsonPrinter> stream;
+        StreamString string;
+        stream.SetStream(string);
+        HttpProtocol test(socket);
 
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
-        stream.SetSize(0);
-        stream.Printf("%s", "ciao");
-        stream.Seek(0);
-        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        string.SetSize(0);
+        string.Printf("%s", "ciao");
+        string.Seek(0);
+        tt.retVal = test.WriteHeader(false, tt.command, &string, "localhost");
         tt.eventSem.Wait();
         tt.eventSem.Reset();
         test.Delete("Transfer-Encoding");
         test.MoveToRoot();
 
-        stream.SetSize(0);
-        stream.Printf("%s", "bellooo\n");
-
+        string.SetSize(0);
+        string.Printf("%s", "bellooo");
         stream.CreateAbsolute("A.B.C");
-        stream.CreateAbsolute("A.D");
-        stream.CreateAbsolute("A.E.F");
-        stream.MoveAbsolute("A.B.C");
         uint32 var1 = 1u;
         stream.Write("var1", var1);
-
-        stream.MoveAbsolute("A.D");
+        stream.CreateAbsolute("A.D");
         uint32 var2 = 2u;
         stream.Write("var2", var2);
-
-        stream.MoveAbsolute("A.E.F");
+        stream.CreateAbsolute("A.E.F");
         uint32 var3 = 3u;
         stream.Write("var3", var3);
         stream.MoveToRoot();
 
-        stream.Seek(0);
+        string.Seek(0);
         //test.WriteStructuredDataOnSocket();
-        tt.retVal &= test.WriteHeader(true, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(true, tt.command, &string, "localhost");
 
     }
 
@@ -1381,8 +1378,8 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
 
@@ -1426,48 +1423,48 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
     printf("%s\n", remained.Buffer());
     printf("|%s||%s|\n", remained2.Buffer(), "bellooo\n"
            "\"A\": {\r\n"
-           "    \"B\": {\r\n"
-           "        \"C\": {\r\n"
-           "            \"var1\": +1\r\n"
-           "        }\r\n"
-           "    },\r\n"
-           "    \"D\": {\r\n"
-           "        \"var2\": +2\r\n"
-           "    },\r\n"
-           "    \"E\": {\r\n"
-           "        \"F\": {\r\n"
-           "            \"var3\": +3\r\n"
-           "        }\r\n"
-           "    }\r\n"
-           "}\r\n");
+           "\"B\": {\r\n"
+           "\"C\": {\r\n"
+           "\"var1\": +1\r\n"
+           "}\r\n"
+           "},\r\n"
+           "\"D\": {\r\n"
+           "\"var2\": +2\r\n"
+           "},\r\n"
+           "\"E\": {\r\n"
+           "\"F\": {\r\n"
+           "\"var3\": +3\r\n"
+           "}\r\n"
+           "}\r\n"
+           "}");
 
     if (ret) {
         ret = cdb->MoveAbsolute("InputHttpOptions");
         StreamString par;
         ret &= cdb->Read("Content-Length", par);
-        ret &= (par == "200");
+        ret &= (par == "111");
         par.SetSize(0);
     }
     if (ret) {
 
         ret = (remained == "ciao");
         if (ret) {
-            ret = (remained2 == "bellooo\n"
-                    "\"A\": {\r\n"
-                    "    \"B\": {\r\n"
-                    "        \"C\": {\r\n"
-                    "            \"var1\": +1\r\n"
-                    "        }\r\n"
-                    "    },\r\n"
-                    "    \"D\": {\r\n"
-                    "        \"var2\": +2\r\n"
-                    "    },\r\n"
-                    "    \"E\": {\r\n"
-                    "        \"F\": {\r\n"
-                    "            \"var3\": +3\r\n"
-                    "        }\r\n"
-                    "    }\r\n"
-                    "}\r\n");
+            ret = (remained2 == "bellooo\n\r"
+                    "\"A\": {\n\r"
+                    "\"B\": {\n\r"
+                    "\"C\": {\n\r"
+                    "\"var1\": +1\n\r"
+                    "}\n\r"
+                    "},\n\r"
+                    "\"D\": {\n\r"
+                    "\"var2\": +2\n\r"
+                    "},\n\r"
+                    "\"E\": {\n\r"
+                    "\"F\": {\n\r"
+                    "\"var3\": +3\n\r"
+                    "}\n\r"
+                    "}\n\r"
+                    "}");
         }
     }
     newSocket.Close();
@@ -1490,27 +1487,29 @@ static void clientJobWriteStructuredOnline(HttpProtocolTest &tt) {
     tt.eventSem.Reset();
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
-        HttpJsonStream stream(socket, false);
-        HttpProtocol test(socket, stream);
+        StreamStructuredData<JsonPrinter> stream;
+        HttpProtocol test(socket);
 
+        stream.SetStream(socket);
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
 
-        stream.SetSize(0);
-        stream.Printf("%s", "ciao");
-        stream.Seek(0);
-        tt.retVal = test.WriteHeader(false, tt.command, "localhost");
+        StreamString string;
+        string.SetSize(0);
+        string.Printf("%s", "ciao");
+        string.Seek(0);
+        tt.retVal = test.WriteHeader(false, tt.command, &string, "localhost");
         tt.eventSem.Wait();
         tt.eventSem.Reset();
         test.Delete("Transfer-Encoding");
         test.MoveToRoot();
 
-        stream.SetSize(0);
-        stream.Printf("%s", "bellooo");
-        stream.Seek(0);
+        string.SetSize(0);
+        string.Printf("%s", "bellooo");
+        string.Seek(0);
 
-        tt.retVal &= test.WriteHeader(false, tt.command, "localhost");
+        tt.retVal &= test.WriteHeader(false, tt.command, &string, "localhost");
         stream.CreateAbsolute("A.B.C");
         uint32 var1 = 1u;
         stream.Write("var1", var1);
@@ -1550,8 +1549,8 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
 
@@ -1686,8 +1685,8 @@ bool HttpProtocolTest::TestSecurityCheck() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     if (ret) {
@@ -1732,8 +1731,8 @@ bool HttpProtocolTest::TestKeepAliveDefault() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.ReadHeader();
     eventSem.Wait();
@@ -1807,8 +1806,8 @@ bool HttpProtocolTest::TestKeepAlive(bool isKeepAliveIn) {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -1832,8 +1831,8 @@ bool HttpProtocolTest::TestKeepAlive(bool isKeepAliveIn) {
 bool HttpProtocolTest::TestSetKeepAlive(bool isKeepAlive) {
     TCPSocket newSocket;
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     test.SetKeepAlive(isKeepAlive);
     return test.KeepAlive() == isKeepAlive;
 }
@@ -1872,8 +1871,8 @@ bool HttpProtocolTest::TestGetHttpCommand(int32 commandIn) {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -1901,8 +1900,8 @@ bool HttpProtocolTest::TestGetHttpCommand(int32 commandIn) {
 
 bool HttpProtocolTest::TestSetUnmatchedId() {
     TCPSocket newSocket;
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     test.SetUnmatchedId("pippo");
     StreamString ret;
     test.GetUnmatchedId(ret);
@@ -1930,8 +1929,8 @@ bool HttpProtocolTest::TestGetUnmatchedId() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
     bool ret = test.ReadHeader();
     eventSem.Wait();
 
@@ -2014,8 +2013,8 @@ bool HttpProtocolTest::TestTextMode(int8 textMode) {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = test.TextMode() == -1;
 
@@ -2039,8 +2038,8 @@ bool HttpProtocolTest::TestReadHeader_False_FailGetLine() {
     socket.SetSource(source);
     socket.SetDestination(destination);
 
-    HttpJsonStream stream(socket);
-    HttpProtocol test(socket, stream);
+    StreamString stream;
+    HttpProtocol test(socket);
 
     bool ret = !test.ReadHeader();
 
@@ -2063,8 +2062,8 @@ static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
 
-        HttpJsonStream stream(socket);
-        HttpProtocol test(socket, stream);
+        StreamString stream;
+        HttpProtocol test(socket);
 
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Transfer-Encoding", "chunked");
@@ -2073,7 +2072,7 @@ static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
         stream.Printf("%s", "ciao");
         stream.Seek(0);
 
-        tt.retVal = test.WriteHeader(true, HttpDefinition::HSHCPost, "localhost");
+        tt.retVal = test.WriteHeader(true, HttpDefinition::HSHCPost, &stream, "localhost");
 
     }
 
@@ -2104,8 +2103,8 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentType() {
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = !test.ReadHeader();
     StreamString remained;
@@ -2121,10 +2120,8 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentType() {
     return (ret && retVal);
 }
 
-
 static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
-
 
     InternetHost source(4443, "127.0.0.1");
     InternetHost destination(4444, "127.0.0.1");
@@ -2138,8 +2135,8 @@ static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     tt.eventSem.Reset();
     tt.retVal = socket.Connect("127.0.0.1", 4444);
     if (tt.retVal) {
-        HttpJsonStream stream(socket);
-        HttpProtocol test(socket, stream);
+        StreamString stream;
+        HttpProtocol test(socket);
         test.CreateAbsolute("OutputHttpOtions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
@@ -2147,7 +2144,7 @@ static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
         stream.SetSize(0);
         stream.Printf("%s", "ciaobellooo\n");
         stream.Seek(0);
-        tt.retVal = test.WriteHeader(false, HttpDefinition::HSHCPost, "localhost");
+        tt.retVal = test.WriteHeader(false, HttpDefinition::HSHCPost, &stream, "localhost");
 
     }
 
@@ -2156,7 +2153,7 @@ static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     Threads::EndThread();
 }
 
-bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength(){
+bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength() {
     retVal = true;
     eventSem.Reset();
 
@@ -2178,8 +2175,8 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength(){
 
     socket.WaitConnection(TTInfiniteWait, &newSocket);
 
-    HttpJsonStream stream(newSocket);
-    HttpProtocol test(newSocket, stream);
+    StreamString stream;
+    HttpProtocol test(newSocket);
 
     bool ret = !test.ReadHeader();
     StreamString remained;
@@ -2194,5 +2191,4 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength(){
     socket.Close();
     return (ret && retVal);
 }
-
 

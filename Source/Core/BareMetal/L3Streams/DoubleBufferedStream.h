@@ -167,7 +167,7 @@ public:
      * @brief Flushes the write buffer.
      * @return true if the Flush of the buffer succeeds.
      */
-    inline bool Flush();
+    virtual bool Flush();
 
     /**
      * @brief Gets the timeout value for read/write operations.
@@ -223,16 +223,7 @@ private:
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-bool DoubleBufferedStream::Flush() {
 
-    bool ret = true;
-    // some data in writeBuffer
-    // we can flush in all cases then
-    if (writeBuffer.UsedSize() > 0u) {
-        ret = writeBuffer.Flush();
-    }
-    return ret;
-}
 
 }
 #endif /* DOUBLEBUFFEREDSTREAM_H_ */

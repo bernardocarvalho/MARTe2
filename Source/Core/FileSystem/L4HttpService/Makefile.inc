@@ -24,8 +24,7 @@
 #
 #############################################################
 
-OBJSX=	HttpStreamT.x\
-    HttpService.x\
+OBJSX=	HttpService.x\
     HttpProtocol.x
         
 PACKAGE=Core/FileSystem

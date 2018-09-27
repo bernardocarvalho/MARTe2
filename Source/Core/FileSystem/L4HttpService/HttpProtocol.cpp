@@ -43,10 +43,11 @@
 
 namespace MARTe {
 
+const uint32 COPY_BUF_LEN = 1024u;
+
 //#define NULL_PTR(x) NULL
 
-HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
-                           BufferedStreamI &payloadIn) :
+HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn) :
         ProtocolI() {
     httpCommand = HttpDefinition::HSHCNone;
     httpVersion = 1000u;
@@ -56,7 +57,6 @@ HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn,
     lastUpdateTime = 0ull;
     /** unknown information length */
     unreadInput = -1;
-    payload = &payloadIn;
     textMode = -1;
 
 }
@@ -65,7 +65,6 @@ HttpProtocol::~HttpProtocol() {
     // Auto-generated destructor stub for HttpProtocol
     // TODO Verify if manual additions are needed
     outputStream = NULL_PTR(DoubleBufferedStream*);
-    payload = NULL_PTR(BufferedStreamI*);
 }
 
 bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
@@ -83,7 +82,7 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
         // convert the stop time
         uint64 maxTicks = startCounter + ((static_cast<uint64>(msecTimeout.GetTimeoutMSec())* HighResolutionTimer::Frequency())/1000ULL);
 
-        uint32 bufferSize = 1024u;
+        uint32 bufferSize = COPY_BUF_LEN;
         char8 *buffer = new char8[bufferSize];
         uint32 readSize = 1u;
         uint32 sizeToRead = bufferSize;
@@ -280,9 +279,9 @@ bool HttpProtocol::ReadHeader() {
 
                 if (ret) {
                     StreamString postContent;
-                    char8 buffer[1024];
+                    char8 buffer[COPY_BUF_LEN];
                     while ((unreadInput > 0) && (ret)) {
-                        uint32 bufferReadSize = 1024u;
+                        uint32 bufferReadSize = COPY_BUF_LEN;
                         ret = outputStream->Read(&buffer[0], bufferReadSize);
                         if (!ret) {
                             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading from socket in POST section");
@@ -315,6 +314,7 @@ bool HttpProtocol::ReadHeader() {
 
 bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
                                const int32 command,
+                               BufferedStreamI *payload,
                                const char8 * const id) {
 
     //if sending something with bodyCompleted=false
@@ -390,7 +390,11 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
         }
         if (ret) {
             if (isMessageCompleted) {
-                ret = Write("Content-Length", payload->Size());
+                uint32 payloadSize = 0u;
+                if (payload != NULL_PTR(BufferedStreamI*)) {
+                    payloadSize = static_cast<uint32>(payload->Size());
+                }
+                ret = Write("Content-Length", payloadSize);
             }
             //todo else write the other streaming parameter
         }
@@ -436,16 +440,23 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
 
                 // send out the body
                 if (ret) {
-                    uint32 toWrite = static_cast<uint32>(payload->Size());
-                    if (toWrite > 0u) {
-                        char8 *buff = new char8[toWrite];
-                        if (buff != NULL) {
-                            ret=payload->Read(buff, toWrite);
+                    if (payload != NULL_PTR(BufferedStreamI*)) {
+                        uint32 toWrite = static_cast<uint32>(payload->Size());
+                        char8 buff[COPY_BUF_LEN];
+                        while (toWrite > 0u) {
+                            uint32 wSize = toWrite;
+                            if (wSize > COPY_BUF_LEN) {
+                                wSize = COPY_BUF_LEN;
+                            }
+
+                            if (buff != NULL) {
+                                ret=payload->Read(&buff[0], wSize);
+                            }
+                            if (ret) {
+                                ret = outputStream->Write(&buff[0], wSize);
+                            }
+                            toWrite -= wSize;
                         }
-                        if (ret) {
-                            ret = outputStream->Write(buff, toWrite);
-                        }
-                        delete[] buff;
                     }
                 }
             }
@@ -903,7 +914,7 @@ bool HttpProtocol::HandlePostApplicationForm(StreamString &content) {
                     }
                 }
                 if (ret) {
-                    ret=command.SetSize(0ull);
+                    ret = command.SetSize(0ull);
                 }
             }
         }

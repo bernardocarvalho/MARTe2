@@ -31,13 +31,14 @@
 
 #include "HttpService.h"
 #include "ObjectRegistryDatabase.h"
-#include "HttpStreamT.h"
 #include "HttpProtocol.h"
 #include "Select.h"
 #include "HttpRealmI.h"
 #include "DataExportI.h"
 #include "ReferenceContainerFilterNameAndType.h"
 #include "AdvancedErrorManagement.h"
+#include "StreamStructuredData.h"
+#include "JsonPrinter.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -131,8 +132,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
     if (err.ErrorsCleared()) {
         err=!(commClient->SetBlocking(true));
         if (err.ErrorsCleared()) {
-            HttpJsonStream hstream(*commClient);
-            HttpProtocol hprotocol(*commClient, hstream);
+            HttpProtocol hprotocol(*commClient);
 
             Select sel;
             err=!(sel.AddReadHandle(*commClient));
@@ -242,10 +242,12 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                                 if (err.ErrorsCleared()) {
                                     //if(!pagePrepared) {
                                     if(textMode>0u) {
-                                        pagePrepared = hi->GetAsText(hstream, hprotocol);
+                                        pagePrepared = hi->GetAsText(*commClient, hprotocol);
                                     }
                                     else {
-                                        pagePrepared = hi->GetAsStructuredData(hstream, hprotocol);
+                                        StreamStructuredData<JsonPrinter> sdata;
+                                        sdata.SetStream(*commClient);
+                                        pagePrepared = hi->GetAsStructuredData(sdata, hprotocol);
                                     }
                                     //}
                                 }
@@ -264,6 +266,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                             if (err.ErrorsCleared()) {
 
                                 if (!hprotocol.KeepAlive()) {
+                                    StreamString hstream;
                                     err=!(hprotocol.Write("Connection","Close"));
                                     if (err.ErrorsCleared()) {
                                         err=!(hstream.Printf("%s", "<HTML>Page Not Found!</HTML>"));
@@ -272,7 +275,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                                         err=!(hstream.Seek(0ULL));
                                     }
                                     if (err.ErrorsCleared()) {
-                                        if(!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, NULL_PTR(const char8*))) {
+                                        if(!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, &hstream, NULL_PTR(const char8*))) {
                                             err=ErrorManagement::CommunicationError;
                                             REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
                                         }
@@ -284,15 +287,16 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                 }
                 if (err.ErrorsCleared()) {
                     if (!hprotocol.KeepAlive()) {
-                        err=ErrorManagement::Completed;
                         REPORT_ERROR(ErrorManagement::Information, "Connection closed");
                         err=!(commClient->Close());
+                        if(err.ErrorsCleared()){
+                            err=ErrorManagement::Completed;
+                        }
                         delete commClient;
                     }
 
                 }
                 else {
-                    REPORT_ERROR(ErrorManagement::Information, "Communication Error");
                     err=!(commClient->Close());
                     delete commClient;
 
@@ -317,6 +321,7 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             TCPSocket *newClient = new TCPSocket();
             if (server.WaitConnection(msecTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
+                delete newClient;
             }
             else {
                 information.SetThreadSpecificContext(reinterpret_cast<void*>(newClient));
