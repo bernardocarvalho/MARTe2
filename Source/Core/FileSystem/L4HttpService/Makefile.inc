@@ -25,7 +25,8 @@
 #############################################################
 
 OBJSX=	HttpService.x\
-    HttpProtocol.x
+    HttpProtocol.x\
+    HttpChunkedStream.x
         
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..

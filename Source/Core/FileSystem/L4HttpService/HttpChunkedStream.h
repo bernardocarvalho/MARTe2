@@ -1,7 +1,7 @@
 /**
- * @file HttpService.h
- * @brief Header file for class HttpService
- * @date 24 ago 2018
+ * @file HttpChunkedStream.h
+ * @brief Header file for class HttpChunkedStream
+ * @date 28 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class HttpService
+ * @details This header file contains the declaration of the class HttpChunkedStream
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef HTTPSERVICE_H_
-#define HTTPSERVICE_H_
+#ifndef HTTPCHUNKEDSTREAM_H_
+#define HTTPCHUNKEDSTREAM_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,65 +31,37 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MultiClientService.h"
-#include "MessageI.h"
-#include "HttpChunkedStream.h"
-#include "StreamString.h"
-#include "ReferenceT.h"
-#include "EmbeddedServiceMethodBinderT.h"
-#include "FastPollingMutexSem.h"
+#include "TCPSocket.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe{
 
-class HttpService: public MultiClientService, public MessageI {
+class HttpChunkedStream: public TCPSocket{
+
 public:
-    CLASS_REGISTER_DECLARATION()
+    /**
+     * @brief Default constructor. NOOP.
+     */
+    HttpChunkedStream();
 
-    HttpService();
-    virtual ~HttpService();
+    /**
+     * @brief Destructor.
+     */
+    virtual ~HttpChunkedStream();
 
-    virtual bool Initialise(StructuredDataI &data);
 
-    virtual ErrorManagement::ErrorType Start();
+    virtual bool Flush();
 
-    ErrorManagement::ErrorType ServerCycle(MARTe::ExecutionInfo &information);
 
-    ErrorManagement::ErrorType ClientService(HttpChunkedStream * const commClient);
+    bool FinalChunk();
+
+    void SetChunkMode(bool chunkModeIn);
 
 protected:
-    /** The server socket */
-    TCPSocket server;
 
-    /** The port this server is listening to */
-    uint16 port;
-
-
-    int32 listenMaxConnections;
-
-
-    /** http://server:port server that will provide port allocation and relay of http */
-    StreamString httpRelayURL;
-
-    /** Where the web pages are contained.
-     It will use the URL to search in the container */
-    ReferenceT<ReferenceContainer> webRoot;
-
-
-    //EmbeddedServiceMethodBinderI *embeddedMethod;
-
-    EmbeddedServiceMethodBinderT<HttpService> embeddedMethod;
-
-    StreamString webRootPath;
-
-
-    uint8 textMode;
-
-    TimeoutType acceptTimeout;
-
-    uint32 chunkSize;
+    bool chunkMode;
 };
 
 }
@@ -98,5 +70,5 @@ protected:
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* HTTPSERVICE_H_ */
+#endif /* SOURCE_CORE_FILESYSTEM_L4HTTPSERVICE_HTTPCHUNKEDSTREAM_H_ */
 

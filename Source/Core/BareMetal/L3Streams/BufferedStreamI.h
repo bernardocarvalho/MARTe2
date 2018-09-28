@@ -409,6 +409,9 @@ public:
 
     inline bool Refill();
 
+    inline void SetCalibReadParam(uint32 calibReadIn);
+
+    inline void SetCalibWriteParam(uint32 calibWriteIn);
 protected:
 
     /**
@@ -422,6 +425,10 @@ protected:
      * @return a pointer to the write buffer.
      */
     virtual IOBuffer *GetWriteBuffer() = 0;
+
+    uint32 calibReadParam;
+
+    uint32 calibWriteParam;
 
 };
 }
@@ -561,6 +568,13 @@ bool BufferedStreamI::Refill() {
     return ret;
 }
 
+void BufferedStreamI::SetCalibReadParam(uint32 calibReadIn) {
+    calibReadParam = calibReadIn;
+}
+
+void BufferedStreamI::SetCalibWriteParam(uint32 calibWriteIn) {
+    calibWriteParam = calibWriteIn;
+}
 }
 #endif /* BUFFEREDSTREAMI_H_ */
 

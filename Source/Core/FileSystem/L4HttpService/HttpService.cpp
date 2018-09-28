@@ -56,6 +56,7 @@ HttpService::HttpService() :
     port = 0u;
     listenMaxConnections = 0;
     textMode = 1u;
+    chunkSize = 0u;
 }
 
 /*lint -e{1551} no exception will be thrown by the destructor*/
@@ -68,6 +69,13 @@ HttpService::~HttpService() {
 bool HttpService::Initialise(StructuredDataI &data) {
     bool ret = MultiClientService::Initialise(data);
     if (ret) {
+        uint32 acceptTimeoutTemp;
+        if (!data.Read("AcceptTimeout", acceptTimeoutTemp)) {
+            acceptTimeoutTemp = 1000;
+            REPORT_ERROR(ErrorManagement::Information, "AcceptTimeout not specified, using defauld %d ms", acceptTimeoutTemp);
+        }
+        acceptTimeout = acceptTimeoutTemp;
+
         if (!data.Read("Port", port)) {
             port = 80u;
             REPORT_ERROR(ErrorManagement::Information, "Port not specified: using default %d", port);
@@ -95,6 +103,12 @@ bool HttpService::Initialise(StructuredDataI &data) {
         if (!data.Read("IsTextMode", textMode)) {
             textMode = 1u;
             REPORT_ERROR(ErrorManagement::Information, "IsTextMode unspecified: using default %d", textMode);
+        }
+
+        if (!data.Read("ChunkSize", chunkSize)) {
+            chunkSize = 32u;
+            REPORT_ERROR(ErrorManagement::Information, "ChunkSize not specified: using default %d", chunkSize);
+
         }
     }
 
@@ -126,12 +140,13 @@ ErrorManagement::ErrorType HttpService::Start() {
     return err;
 }
 
-ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClient) {
+ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const commClient) {
     ErrorManagement::ErrorType err = !(commClient == NULL);
 
     if (err.ErrorsCleared()) {
         err=!(commClient->SetBlocking(true));
         if (err.ErrorsCleared()) {
+            commClient->SetChunkMode(false);
             HttpProtocol hprotocol(*commClient);
 
             Select sel;
@@ -208,13 +223,13 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                                 if (realm.IsValid()) {
                                     if (!hstream.SecurityCheck(realm)) {
                                         AnyType args[]= {"Content-Type"};
-                                        hstream.SwitchPrintAndCommit("OutputHttpOtions", "text/html", "%s", args);
+                                        hstream.SwitchPrintAndCommit("OutputHttpOptions", "text/html", "%s", args);
 
                                         StreamString realmMsg;
                                         realm->GetAuthenticationRequest(realmMsg);
                                         args[0]=realmMsg.Buffer();
 
-                                        hstream.SwitchPrintAndCommit("OutputHttpOtions", "WWW-Authenticate", "%s", args);
+                                        hstream.SwitchPrintAndCommit("OutputHttpOptions", "WWW-Authenticate", "%s", args);
 
                                         hstream.Printf("%s","<HTML><HEAD>\n"
                                                 "<TITLE>401 Authorization Required</TITLE>\n"
@@ -240,14 +255,37 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
 #endif
 
                                 if (err.ErrorsCleared()) {
-                                    //if(!pagePrepared) {
-                                    if(textMode>0u) {
-                                        pagePrepared = hi->GetAsText(*commClient, hprotocol);
+                                    int32 replyCode=hi->GetReplyCode(hprotocol);
+
+                                    if(!hprotocol.MoveAbsolute("OutputHttpOptions")) {
+                                        err=!(hprotocol.CreateAbsolute("OutputHttpOptions"));
                                     }
-                                    else {
-                                        StreamStructuredData<JsonPrinter> sdata;
-                                        sdata.SetStream(*commClient);
-                                        pagePrepared = hi->GetAsStructuredData(sdata, hprotocol);
+                                    if (err.ErrorsCleared()) {
+                                        err=!(hprotocol.Write("Transfer-Encoding","chunked"));
+                                    }
+                                    if (err.ErrorsCleared()) {
+                                        err=!(hprotocol.Write("Content-Type","text/html"));
+                                    }
+                                    if (err.ErrorsCleared()) {
+
+                                        //empty string... go in chunked mode
+                                        StreamString hstream;
+                                        hprotocol.WriteHeader(false, replyCode, &hstream, NULL_PTR(const char8*));
+
+                                        commClient->SetChunkMode(true);
+                                        //if(!pagePrepared) {
+                                        if(textMode>0u) {
+                                            pagePrepared = hi->GetAsText(*commClient, hprotocol);
+                                        }
+                                        else {
+                                            StreamStructuredData<JsonPrinter> sdata;
+                                            sdata.SetStream(*commClient);
+                                            pagePrepared = hi->GetAsStructuredData(sdata, hprotocol);
+                                        }
+
+                                        commClient->Flush();
+                                        commClient->FinalChunk();
+                                        //hprotocol.SetKeepAlive(false);
                                     }
                                     //}
                                 }
@@ -257,8 +295,8 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                     if (err.ErrorsCleared()) {
 
                         if (!pagePrepared) {
-                            if(!hprotocol.MoveAbsolute("OutputHttpOtions")) {
-                                err=!(hprotocol.CreateAbsolute("OutputHttpOtions"));
+                            if(!hprotocol.MoveAbsolute("OutputHttpOptions")) {
+                                err=!(hprotocol.CreateAbsolute("OutputHttpOptions"));
                             }
                             if (err.ErrorsCleared()) {
                                 err=!(hprotocol.Write("Content-Type","text/html"));
@@ -289,7 +327,7 @@ ErrorManagement::ErrorType HttpService::ClientService(TCPSocket * const commClie
                     if (!hprotocol.KeepAlive()) {
                         REPORT_ERROR(ErrorManagement::Information, "Connection closed");
                         err=!(commClient->Close());
-                        if(err.ErrorsCleared()){
+                        if(err.ErrorsCleared()) {
                             err=ErrorManagement::Completed;
                         }
                         delete commClient;
@@ -318,19 +356,22 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
         /*lint -e{429} the newClient pointer will be freed within the thread*/
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::WaitRequestStageSpecific) {
             /*lint -e{429} the newClient pointer will be freed within the thread*/
-            TCPSocket *newClient = new TCPSocket();
-            if (server.WaitConnection(msecTimeout, newClient) == NULL) {
+            HttpChunkedStream *newClient = new HttpChunkedStream();
+            newClient->SetChunkMode(false);
+            newClient->SetCalibWriteParam(0u);
+            newClient->SetBufferSize(32u, chunkSize);
+            if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
                 delete newClient;
             }
             else {
                 information.SetThreadSpecificContext(reinterpret_cast<void*>(newClient));
                 err= MARTe::ErrorManagement::NoError;
+                REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
             }
-            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {
-            TCPSocket *newClient = reinterpret_cast<TCPSocket *>(information.GetThreadSpecificContext());
+            HttpChunkedStream *newClient = reinterpret_cast<HttpChunkedStream *>(information.GetThreadSpecificContext());
             err = ClientService(newClient);
 
         }

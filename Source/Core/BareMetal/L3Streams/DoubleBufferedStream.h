@@ -196,7 +196,6 @@ protected:
      */
     virtual IOBuffer *GetWriteBuffer();
 
-private:
 
     /**
      * The read buffer. It is used as
@@ -216,6 +215,7 @@ private:
      * Set to true if the buffer sizes could be successfully set
      */
     bool bufferSizeSet;
+
 
 };
 

@@ -227,6 +227,8 @@ HttpServiceTestWebRoot    ();
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
+    virtual int32 GetReplyCode(StructuredDataI &data);
+
 private:
     void RecCallback(ReferenceT<ReferenceContainer> ref,
             BufferedStreamI *hStream);
@@ -272,10 +274,10 @@ bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
     StreamString *hStream = (&hString);
 
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
-        protocol.CreateAbsolute("OutputHttpOtions");
-        protocol.Write("Content-Type", "text/html");
+    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
+        protocol.CreateAbsolute("OutputHttpOptions");
     }
+    protocol.Write("Content-Type", "text/html");
 
     hStream->SetSize(0);
 
@@ -293,8 +295,15 @@ bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
     hStream->Printf("%s", "</html>\n");
     hStream->Seek(0);
 
-    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    uint32 stringSize=hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
+
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
     return true;
+}
+
+int32 HttpServiceTestWebRoot::GetReplyCode(StructuredDataI &data) {
+    return HttpDefinition::HSHCReplyOK;
 }
 
 CLASS_REGISTER(HttpServiceTestWebRoot, "1.0")
@@ -311,6 +320,8 @@ HttpServiceTestClassLister    ();
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
+    virtual int32 GetReplyCode(StructuredDataI &data);
+
 };
 
 HttpServiceTestClassLister::HttpServiceTestClassLister() {
@@ -319,6 +330,10 @@ HttpServiceTestClassLister::HttpServiceTestClassLister() {
 
 HttpServiceTestClassLister::~HttpServiceTestClassLister() {
 
+}
+
+int32 HttpServiceTestClassLister::GetReplyCode(StructuredDataI &data) {
+    return HttpDefinition::HSHCReplyOK;
 }
 
 bool HttpServiceTestClassLister::GetAsStructuredData(StreamStructuredDataI &data,
@@ -339,10 +354,10 @@ bool HttpServiceTestClassLister::GetAsText(StreamI &stream,
 
     printf("\nclass name = %s\n", className.Buffer());
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
-        protocol.CreateAbsolute("OutputHttpOtions");
-        protocol.Write("Content-Type", "text/html");
+    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
+        protocol.CreateAbsolute("OutputHttpOptions");
     }
+    protocol.Write("Content-Type", "text/html");
 
     {
         hStream->Printf("<HTML>\n"
@@ -492,7 +507,9 @@ bool HttpServiceTestClassLister::GetAsText(StreamI &stream,
     hStream->Seek(0);
 
     //copy to the client
-    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    uint32 stringSize=hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
 
     return true;
 }
@@ -510,6 +527,8 @@ HttpServiceTestClassTest1    ();
     virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
+
+    virtual int32 GetReplyCode(StructuredDataI &data);
 
 };
 
@@ -532,23 +551,30 @@ bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
     StreamString *hStream = (&hString);
 
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOtions")) {
-        protocol.CreateAbsolute("OutputHttpOtions");
-        protocol.Write("Content-Type", "text/html");
+    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
+        protocol.CreateAbsolute("OutputHttpOptions");
     }
+    protocol.Write("Content-Type", "text/html");
 
     hStream->SetSize(0);
 
     hStream->Printf("<html><head><TITLE>%s</TITLE>"
                     "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
                     "HttpServiceTestClassTest1", "HttpServiceTestClassTest1");
-    hStream->Printf("%s", "</UL></BODY>\n");
-    hStream->Printf("%s", "</html>\n");
+    hStream->Printf("%s", "</UL></BODY>");
+    hStream->Printf("%s", "</html>");
     hStream->Seek(0);
+    uint32 stringSize=hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
 
-    protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
     return true;
 }
+
+int32 HttpServiceTestClassTest1::GetReplyCode(StructuredDataI &data) {
+    return HttpDefinition::HSHCReplyOK;
+}
+
 CLASS_REGISTER(HttpServiceTestClassTest1, "1.0")
 
 /*---------------------------------------------------------------------------*/
@@ -601,9 +627,10 @@ const char8 *config = ""
         "       +HttpServerTest = {"
         "           Class = HttpService"
         "           WebRoot = \"Application.WebRoot\""
-        "           Port=4444"
+        "           Port=8080"
         "           ListenMaxConnections = 255"
-        "           Timeout = 1000"
+        "           Timeout = 0"
+        "           AcceptTimeout=1000"
         "           MaxNumberOfThreads=100"
         "           MinNumberOfThreads=1"
         "       }"
@@ -918,7 +945,7 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
     return ret;
 }
 
-bool HttpServiceTest::TestServerCycle() {
+bool HttpServiceTest::TestServerCycle_Text() {
 
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
@@ -930,6 +957,10 @@ bool HttpServiceTest::TestServerCycle() {
         }
     }
 
+    while (1)
+        ;
+
+#if 0
     InternetHost source(4444, "127.0.0.1");
     InternetHost destination(4444, "127.0.0.1");
 
@@ -958,14 +989,25 @@ bool HttpServiceTest::TestServerCycle() {
 
     printf("\n%s\n", respBody.Buffer());
 
+    if (ret) {
+        ret =
+        respBody
+        == "<html><head><TITLE>HttpServiceTestClassTest1</TITLE></head><BODY BGCOLOR=\"#ffffff\"><H1>HttpServiceTestClassTest1</H1><UL></UL></BODY></html>";
+    }
 
     if (ret) {
         ret = test->Stop();
     }
 
+    Sleep::Sec(1);
+#endif
     return ret;
 
     //return true;
+}
+
+bool HttpServiceTest::TestServerCycle_TextStreamingMode() {
+    return true;
 }
 
 bool HttpServiceTest::TestClientService() {

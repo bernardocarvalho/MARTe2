@@ -242,11 +242,16 @@ bool Kill(const ThreadIdentifier &threadId) {
             ThreadInformation *threadInfo = ThreadsDatabase::RemoveEntry(threadId);
             if (threadInfo == NULL) {
                 ok = false;
+                REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "Failed ThreadsDatabase::RemoveEntry()");
             }
             else {
                 delete threadInfo;
             }
         }
+        else{
+            REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "Failed ThreadsDatabase::Lock()");
+        }
+
         ThreadsDatabase::UnLock();
 
         if (ok) {

@@ -45,6 +45,10 @@ namespace MARTe {
 
 BufferedStreamI::BufferedStreamI() :
         StreamI() {
+
+    calibReadParam=4u;
+    calibWriteParam=4u;
+
 }
 
 BufferedStreamI::~BufferedStreamI() {

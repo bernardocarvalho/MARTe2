@@ -150,7 +150,7 @@ bool HttpProtocol::ReadHeader() {
         if (ret) {
             StreamString command;
             //check the arrived command
-            (void) line.GetToken(command, " \n\t", terminator, " \n\t");
+            (void) line.GetToken(command, " \r\n\t", terminator, " \r\n\t");
             ret = RetrieveHttpCommand(command, line);
         }
     }
@@ -176,7 +176,7 @@ bool HttpProtocol::ReadHeader() {
         //store the HTTP version
         if (ret) {
             StreamString version;
-            ret = line.GetToken(version, " \n\t", terminator, " \n\t");
+            ret = line.GetToken(version, " \r\n\t", terminator, " \r\n\t");
             if (ret) {
                 float32 fVersion = 0.F;
                 //skip HTTP
@@ -384,8 +384,8 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
 
         ret = MoveToRoot();
         if (ret) {
-            if (!MoveRelative("OutputHttpOtions")) {
-                ret = CreateRelative("OutputHttpOtions");
+            if (!MoveRelative("OutputHttpOptions")) {
+                ret = CreateRelative("OutputHttpOptions");
             }
         }
         if (ret) {
@@ -508,7 +508,7 @@ bool HttpProtocol::RetrieveHttpCommand(StreamString &command,
 
         //convert to the error code
         StreamString errorCode;
-        (void) line.GetToken(errorCode, " \n\t", terminator, " \n\t");
+        (void) line.GetToken(errorCode, " \r\n\t", terminator, " \r\n\t");
         int32 errorCodeInt;
         if (!TypeConvert(errorCodeInt, errorCode.Buffer())) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed converting the error code of the reply %s to an integer", errorCode.Buffer());
@@ -531,7 +531,7 @@ char8 HttpProtocol::BuildUrl(StreamString &line) {
     StreamString tempUrl;
     char8 terminator = '\n';
     //get the url
-    (void) line.GetToken(tempUrl, " \n?", terminator, " \n?");
+    (void) line.GetToken(tempUrl, " \r\n?", terminator, " \r\n?");
     bool ret = tempUrl.Seek(0ULL);
     if (ret) {
         StreamString decoded;
@@ -627,10 +627,10 @@ bool HttpProtocol::StoreOutputOptions() {
     bool ret = MoveToRoot();
     if (ret) {
         //delete existing
-        (void) Delete("OutputHttpOtions");
-        ret = CreateRelative("OutputHttpOtions");
+        (void) Delete("OutputHttpOptions");
+        ret = CreateRelative("OutputHttpOptions");
         if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node OutputHttpOtions");
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node OutputHttpOptions");
         }
     }
     return ret;

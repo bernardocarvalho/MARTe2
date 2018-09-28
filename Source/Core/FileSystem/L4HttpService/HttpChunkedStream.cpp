@@ -1,7 +1,7 @@
 /**
- * @file HttpServiceGTest.cpp
- * @brief Source file for class HttpServiceGTest
- * @date 12 set 2018
+ * @file HttpChunkedStream.cpp
+ * @brief Source file for class HttpChunkedStream
+ * @date 28 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class HttpServiceGTest (public, protected, and private). Be aware that some 
+ * the class HttpChunkedStream (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,15 +29,8 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-
-#include <limits.h>
-#include "gtest/gtest.h"
-
-/*---------------------------------------------------------------------------*/
-/*                         Project header includes                           */
-/*---------------------------------------------------------------------------*/
-#include "HttpServiceTest.h"
-
+#include "HttpChunkedStream.h"
+#include "StreamString.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -45,54 +38,65 @@
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
-TEST(HttpServiceGTest, TestConstructor) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestConstructor());
+
+namespace MARTe {
+
+HttpChunkedStream::HttpChunkedStream() :
+        TCPSocket() {
+    //use always buffer mode
+
+    chunkMode = 0u;
 }
 
-TEST(HttpServiceGTest, TestInitialise) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise());
+HttpChunkedStream::~HttpChunkedStream() {
+    // Auto-generated destructor stub for HttpChunkedStream
+    // TODO Verify if manual additions are needed
 }
 
-TEST(HttpServiceGTest, TestInitialise_DefaultWebRoot) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultWebRoot());
+bool HttpChunkedStream::Flush() {
+
+    bool ret = true;
+    uint32 size = writeBuffer.UsedSize();
+
+    if (chunkMode) {
+        //get the size
+        if (size > 0u) {
+            StreamString totStr;
+            ret = totStr.Printf("%x\r\n", size);
+
+            uint32 totalSize = totStr.Size();
+            if (ret) {
+                ret = OSWrite(totStr.Buffer(), totalSize);
+            }
+        }
+
+    }
+
+    if (ret) {
+        ret = DoubleBufferedStream::Flush();
+    }
+    if (ret) {
+
+        if (chunkMode && (size > 0u)) {
+            uint32 totalSize = 2u;
+            ret = OSWrite("\r\n", totalSize);
+        }
+    }
+
+    return ret;
 }
 
-TEST(HttpServiceGTest, TestInitialise_FalseNoDefaultWebRoot) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_FalseNoDefaultWebRoot());
+bool HttpChunkedStream::FinalChunk() {
+    const char8 *finalChunk = "0\r\n\r\n";
+    uint32 totalSize = StringHelper::Length(finalChunk);
+
+    return OSWrite(finalChunk, totalSize);
+
 }
 
-
-TEST(HttpServiceGTest, TestInitialise_DefaultNListenConnections) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultNListenConnections());
+void HttpChunkedStream::SetChunkMode(bool chunkModeIn) {
+    chunkMode = chunkModeIn;
 }
 
-TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Text) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Text());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_TextStreamingMode) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_TextStreamingMode());
-}
-
-TEST(HttpServiceGTest, TestClientService) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestClientService());
-}
-
-TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultPort());
 }
 

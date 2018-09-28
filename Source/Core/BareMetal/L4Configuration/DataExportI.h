@@ -50,6 +50,8 @@ public:
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol)=0;
 
+    virtual int32 GetReplyCode(StructuredDataI &data)=0;
+
 };
 
 }
