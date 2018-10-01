@@ -1,7 +1,7 @@
 /**
- * @file HttpStreamTest.h
- * @brief Header file for class HttpStreamTest
- * @date 03 set 2018
+ * @file HttpChunkedStreamTest.h
+ * @brief Header file for class HttpChunkedStreamTest
+ * @date 01 ott 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class HttpStreamTest
+ * @details This header file contains the declaration of the class HttpChunkedStreamTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef HTTPSTREAMTEST_H_
-#define HTTPSTREAMTEST_H_
+#ifndef HTTPCHUNKEDSTREAMTEST_H_
+#define HTTPCHUNKEDSTREAMTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "HttpStream.h"
+#include "HttpChunkedStream.h"
 #include "EventSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
@@ -39,86 +39,29 @@
 
 using namespace MARTe;
 
-class HttpStreamTest {
+class HttpChunkedStreamTest {
 public:
-    HttpStreamTest();
-
-    virtual ~HttpStreamTest();
+    HttpChunkedStreamTest();
+    virtual ~HttpChunkedStreamTest();
 
     bool TestConstructor();
 
-    bool TestReadHeader_Get1();
+    bool TestFlush();
 
-    bool TestReadHeader_Get2_Commands();
+    bool TestFinalChunk();
 
-    bool TestReadHeader_Put1();
+    bool TestSetChunkMode();
 
-    bool TestReadHeader_Post1();
+    bool TestIsChunkMode();
 
-    bool TestReadHeader_Post2_Multiform();
-
-    bool TestReadHeader_Head();
-
-    bool TestReadHeader_Reply();
-
-    bool TestCompleteReadOperation();
-
-    bool TestWriteHeader();
-
-    bool TestWriteHeader2();
-
-    bool TestWriteHeader_Get1();
-
-    bool TestWriteHeader_Get2();
-
-    bool TestWriteHeader_Put1();
-
-    bool TestWriteHeader_Put2();
-
-    bool TestWriteHeader_Head1();
-
-    bool TestWriteHeader_Head2();
-
-    bool TestWriteHeader_Post();
-
-    bool TestWriteHeader_Reply();
-
-    bool TestWriteHeader_Reply2();
-
-    bool TestWriteHeader_StrucuredDataStored();
-
-    bool TestWriteHeader_StrucuredDataOnline();
-
-    bool TestSecurityCheck();
-
-    bool TestKeepAliveDefault();
-
-    bool TestKeepAlive(bool isKeepAliveIn);
-
-    bool TestSetKeepAlive(bool isKeepAlive);
-
-    bool TestGetHttpCommand(HSHttpCommand commandIn);
-
-    bool TestSetUnmatchedUrl();
-
-    bool TestGetUnmatchedUrl();
-
-    bool TestGetPath();
-
-    bool TestGetUrl();
 
     EventSem eventSem;
 
-    bool retVal;
-
-    HSHttpCommand command;
-
-    bool isKeepAlive;
 };
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* HTTPSTREAMTEST_H_ */
+#endif /* HTTPCHUNKEDSTREAMTEST_H_ */
 

@@ -1846,15 +1846,20 @@ void IOBuffer::SetBufferReadOnlyReferencedMemory(const char8 * const buffer,
     Empty();
 }
 
-
 bool IOBuffer::Refill() {
     return NoMoreDataToRead();
 }
 
-bool IOBuffer::Flush() {
-    return NoMoreSpaceToWrite();
+bool IOBuffer::Flush(const uint32 neededSize) {
+    bool ret = true;
+    if (neededSize == 0u) {
+        NoMoreSpaceToWrite();
+    }
+    else {
+        NoMoreSpaceToWrite(neededSize);
+    }
+    return ret;
 }
-
 
 bool IOBuffer::NoMoreSpaceToWrite() {
     return false;
@@ -1916,7 +1921,7 @@ bool IOBuffer::WriteAll(const char8 * buffer,
         // if the cursor is at the end call NoMoreSpaceToWrite
         // flushes the buffer or allocates new memory.
         if (amountLeft == 0u) {
-            if (!NoMoreSpaceToWrite(leftSize)) {
+            if (!Flush(leftSize)) {
                 retval = false;
             }
             if (retval) {

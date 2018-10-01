@@ -427,9 +427,8 @@ public:
      * @brief User friendly function which simply calls NoMoreSpaceToWrite.
      * @return whatever NoMoreSpaceToWrite returns.
      */
-    virtual bool Flush();
+    virtual bool Flush(const uint32 neededSize=0u);
 
-protected:
 
     /**
      * @see NoMoreSpaceToWrite(const uint32)
@@ -467,6 +466,7 @@ protected:
      * @return false in this implementation.
      */
     virtual bool NoMoreDataToRead();
+
 
 private:
 

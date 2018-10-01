@@ -107,7 +107,6 @@ namespace MARTe {
 class DLL_API BufferedStreamI: public virtual StreamI {
 
 public:
-
     /**
      * Default constructor
      * @post
@@ -405,9 +404,9 @@ public:
                        const AnyType& par9,
                        const AnyType& par10);
 
-    inline bool Flush();
+    virtual bool Flush();
 
-    inline bool Refill();
+    virtual bool Refill();
 
     inline void SetCalibReadParam(uint32 calibReadIn);
 
@@ -548,24 +547,6 @@ bool BufferedStreamI::Printf(const char8 * const format,
                              const AnyType& par10) {
     AnyType pars[11] = { par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, voidAnyType };
     return PrintFormatted(format, &pars[0]);
-}
-
-bool BufferedStreamI::Flush() {
-    IOBuffer* buff = GetWriteBuffer();
-    bool ret = (buff != NULL_PTR(IOBuffer*));
-    if (ret) {
-        ret = buff->Flush();
-    }
-    return ret;
-}
-
-bool BufferedStreamI::Refill() {
-    IOBuffer* buff = GetReadBuffer();
-    bool ret = (buff != NULL_PTR(IOBuffer*));
-    if (ret) {
-        ret = buff->Refill();
-    }
-    return ret;
 }
 
 void BufferedStreamI::SetCalibReadParam(uint32 calibReadIn) {

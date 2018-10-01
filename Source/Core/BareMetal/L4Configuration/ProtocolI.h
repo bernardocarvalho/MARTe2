@@ -58,6 +58,10 @@ public:
 
     virtual void GetId(StreamString& idOut)=0;
 
+    virtual bool GetInputCommand(const char8 *commandName, AnyType &commandValue)=0;
+
+    virtual bool SetOutputCommand(const char8 *commandName, AnyType &commandValue)=0;
+
 };
 }
 

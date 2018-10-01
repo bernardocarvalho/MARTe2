@@ -295,7 +295,7 @@ bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
     hStream->Printf("%s", "</html>\n");
     hStream->Seek(0);
 
-    uint32 stringSize=hStream->Size();
+    uint32 stringSize = hStream->Size();
     stream.Write(hStream->Buffer(), stringSize);
 
     //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
@@ -508,7 +508,7 @@ bool HttpServiceTestClassLister::GetAsText(StreamI &stream,
 
     //copy to the client
     //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
-    uint32 stringSize=hStream->Size();
+    uint32 stringSize = hStream->Size();
     stream.Write(hStream->Buffer(), stringSize);
 
     return true;
@@ -542,6 +542,16 @@ HttpServiceTestClassTest1::~HttpServiceTestClassTest1() {
 
 bool HttpServiceTestClassTest1::GetAsStructuredData(StreamStructuredDataI &data,
                                                     ProtocolI &protocol) {
+
+    protocol.Write("Content-Type", "text/html");
+    data.CreateAbsolute("NodeA.NodeB");
+    uint32 var1=1;
+    data.Write("var1", var1);
+    data.CreateAbsolute("NodeA.NodeC");
+    int32 var2=-1;
+    data.Write("var2", var2);
+    data.MoveToRoot();
+
     return true;
 }
 
@@ -564,7 +574,7 @@ bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
     hStream->Printf("%s", "</UL></BODY>");
     hStream->Printf("%s", "</html>");
     hStream->Seek(0);
-    uint32 stringSize=hStream->Size();
+    uint32 stringSize = hStream->Size();
     stream.Write(hStream->Buffer(), stringSize);
 
     //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
@@ -627,10 +637,10 @@ const char8 *config = ""
         "       +HttpServerTest = {"
         "           Class = HttpService"
         "           WebRoot = \"Application.WebRoot\""
-        "           Port=8080"
+        "           Port=4444"
         "           ListenMaxConnections = 255"
         "           Timeout = 0"
-        "           AcceptTimeout=1000"
+        "           AcceptTimeout=0xFFFFFFFF"
         "           MaxNumberOfThreads=100"
         "           MinNumberOfThreads=1"
         "       }"
@@ -945,6 +955,22 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
     return ret;
 }
 
+
+bool HttpServiceTest::TestServerCycle_Text_Interactive(){
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    while(1);
+}
+
+
 bool HttpServiceTest::TestServerCycle_Text() {
 
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
@@ -957,10 +983,152 @@ bool HttpServiceTest::TestServerCycle_Text() {
         }
     }
 
-    while (1)
-        ;
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
 
-#if 0
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    socket.Connect("127.0.0.1", 4444);
+
+    HttpProtocol stream(socket);
+
+    StreamString payload;
+
+    socket.Printf("%s", "GET /Test1/ HTTP/1.1\r\n");
+    socket.Printf("%s", "Host: localhost:4444\r\n");
+    socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+    socket.Printf("%s", "Accept: text/html\r\n");
+    socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+    socket.Printf("%s", "Connection: keep-alive\r\n\r\n");
+    socket.Flush();
+
+    stream.ReadHeader();
+    StreamString respBody;
+    stream.CompleteReadOperation(&respBody, 1000);
+
+    printf("\n%s\n", respBody.Buffer());
+
+    if (ret) {
+        ret = respBody == "20\r\n"
+                "<html><head><TITLE>HttpServiceTe\r\n"
+                "20\r\n"
+                "stClassTest1</TITLE></head><BODY\r\n"
+                "20\r\n"
+                " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                "20\r\n"
+                "ceTestClassTest1</H1><UL></UL></\r\n"
+                "C\r\n"
+                "BODY></html>\r\n"
+                "0\r\n\r\n";
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    Sleep::Sec(1);
+    return ret;
+
+    //return true;
+}
+
+bool HttpServiceTest::TestServerCycle_Structured(){
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    /*    while (1)
+     ;
+     */
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    socket.Connect("127.0.0.1", 4444);
+
+    HttpProtocol stream(socket);
+
+    StreamString payload;
+
+    socket.Printf("%s", "GET /Test1/?TextMode=0 HTTP/1.1\r\n");
+    socket.Printf("%s", "Host: localhost:4444\r\n");
+    socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+    socket.Printf("%s", "Accept: text/html\r\n");
+    socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+    socket.Printf("%s", "Connection: keep-alive\r\n\r\n");
+    socket.Flush();
+
+    stream.ReadHeader();
+    StreamString respBody;
+    stream.CompleteReadOperation(&respBody, 1000);
+
+    printf("\n|%s|\n|%s|\n", respBody.Buffer(), "18\r\n\n\r"
+           "\"NodeA\": {\n\r"
+           "\"NodeB\": {\n\r"
+           "C\r\n\n\r"
+           "\"var1\": +1\r\n"
+           "10\r\n\n\r"
+           "},\n\r"
+           "\"NodeC\": {\r\n"
+           "C\r\n\n\r"
+           "\"var2\": -1\r\n"
+           "6\r\n\n\r"
+           "}\n\r"
+           "}\r\n"
+           "0\r\n\r\n");
+
+    if (ret) {
+        ret = respBody == "18\r\n\n\r"
+                "\"NodeA\": {\n\r"
+                "\"NodeB\": {\r\n"
+                "C\r\n\n\r"
+                "\"var1\": +1\r\n"
+                "10\r\n\n\r"
+                "},\n\r"
+                "\"NodeC\": {\r\n"
+                "C\r\n\n\r"
+                "\"var2\": -1\r\n"
+                "6\r\n\n\r"
+                "}\n\r"
+                "}\r\n"
+                "0\r\n\r\n";
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    Sleep::Sec(1);
+    return ret;
+
+}
+
+
+bool HttpServiceTest::TestServerCycle_CloseConnection(){
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
     InternetHost source(4444, "127.0.0.1");
     InternetHost destination(4444, "127.0.0.1");
 
@@ -985,14 +1153,22 @@ bool HttpServiceTest::TestServerCycle_Text() {
 
     stream.ReadHeader();
     StreamString respBody;
-    stream.CompleteReadOperation(&respBody);
+    stream.CompleteReadOperation(&respBody, 1000);
 
     printf("\n%s\n", respBody.Buffer());
 
     if (ret) {
-        ret =
-        respBody
-        == "<html><head><TITLE>HttpServiceTestClassTest1</TITLE></head><BODY BGCOLOR=\"#ffffff\"><H1>HttpServiceTestClassTest1</H1><UL></UL></BODY></html>";
+        ret = respBody == "20\r\n"
+                "<html><head><TITLE>HttpServiceTe\r\n"
+                "20\r\n"
+                "stClassTest1</TITLE></head><BODY\r\n"
+                "20\r\n"
+                " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                "20\r\n"
+                "ceTestClassTest1</H1><UL></UL></\r\n"
+                "C\r\n"
+                "BODY></html>\r\n"
+                "0\r\n\r\n";
     }
 
     if (ret) {
@@ -1000,15 +1176,10 @@ bool HttpServiceTest::TestServerCycle_Text() {
     }
 
     Sleep::Sec(1);
-#endif
     return ret;
 
-    //return true;
 }
 
-bool HttpServiceTest::TestServerCycle_TextStreamingMode() {
-    return true;
-}
 
 bool HttpServiceTest::TestClientService() {
     return true;

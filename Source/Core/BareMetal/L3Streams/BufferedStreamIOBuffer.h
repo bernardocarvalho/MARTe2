@@ -36,6 +36,7 @@
 #include "IOBuffer.h"
 #include "StreamI.h"
 #include "OperatingSystemCallbacksI.h"
+#include "BufferedStreamI.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
@@ -126,7 +127,8 @@ public:
      */
     inline const OperatingSystemCallbacksI* GetStream() const;
 
-protected:
+    virtual bool Flush(const uint32 neededSize=0u);
+
 
     /**
      * @brief Refills the buffer reading from the stream.
@@ -149,6 +151,8 @@ private:
      * The stream that uses this buffer.
      */
     OperatingSystemCallbacksI *stream;
+
+    BufferedStreamI *streamBuffered;
 
     /**
      * The timeout for read and write operations.

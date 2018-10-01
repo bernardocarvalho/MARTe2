@@ -44,8 +44,9 @@ namespace MARTe {
 HttpChunkedStream::HttpChunkedStream() :
         TCPSocket() {
     //use always buffer mode
-
-    chunkMode = 0u;
+    chunkMode = false;
+    calibReadParam = 0u;
+    calibWriteParam = 0u;
 }
 
 HttpChunkedStream::~HttpChunkedStream() {
@@ -96,6 +97,10 @@ bool HttpChunkedStream::FinalChunk() {
 
 void HttpChunkedStream::SetChunkMode(bool chunkModeIn) {
     chunkMode = chunkModeIn;
+}
+
+bool HttpChunkedStream::IsChunkMode() const {
+    return chunkMode;
 }
 
 }

@@ -1008,4 +1008,18 @@ int8 HttpProtocol::TextMode() const {
     return textMode;
 }
 
+bool HttpProtocol::GetInputCommand(const char8 *commandName, AnyType &commandValue){
+
+    bool ret=MoveAbsolute("InputCommands");
+    if(ret){
+        ret=Read(commandName, commandValue);
+    }
+    return ret;
+}
+
+bool HttpProtocol::SetOutputCommand(const char8 *commandName, AnyType &commandValue){
+    return true;
+}
+
+
 }

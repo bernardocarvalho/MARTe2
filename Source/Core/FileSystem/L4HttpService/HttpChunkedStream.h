@@ -59,6 +59,8 @@ public:
 
     void SetChunkMode(bool chunkModeIn);
 
+    bool IsChunkMode() const;
+
 protected:
 
     bool chunkMode;

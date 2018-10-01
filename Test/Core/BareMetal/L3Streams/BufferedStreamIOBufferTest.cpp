@@ -122,30 +122,29 @@ bool BufferedStreamIOBufferTest::TestSetTimeout() {
 bool BufferedStreamIOBufferTest::TestRefill() {
 
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer buffered(&stream);
-
+    BufferedStreamIOBuffer *buffered=stream.GetWriteBufferX();
     uint32 bufferSize = 10;
-    buffered.SetBufferSize(bufferSize);
+    buffered->SetBufferSize(bufferSize);
 
     const char8* toWrite = "HelloWorldThisIsATest";
 
     uint32 writeSize = StringHelper::Length(toWrite);
 
-    buffered.WriteAll(toWrite, writeSize);
+    buffered->WriteAll(toWrite, writeSize);
     stream.Seek(0);
 
     //try to trick with a non empty buffer
     const char8 *trick = "trick";
     uint32 trickSize = StringHelper::Length(trick);
-    buffered.Write(trick, trickSize);
+    buffered->Write(trick, trickSize);
 
-    buffered.Refill();
+    buffered->Refill();
 
-    if (buffered.UsedAmountLeft() != buffered.MaxUsableAmount()) {
+    if (buffered->UsedAmountLeft() != buffered->MaxUsableAmount()) {
         return false;
     }
 
-    return StringHelper::CompareN(buffered.Buffer(), toWrite, bufferSize) == 0;
+    return StringHelper::CompareN(buffered->Buffer(), toWrite, bufferSize) == 0;
 }
 
 bool BufferedStreamIOBufferTest::TestRefill_NULL_Stream() {
@@ -167,19 +166,19 @@ bool BufferedStreamIOBufferTest::TestRefill_NULL_Buffer() {
 
 bool BufferedStreamIOBufferTest::TestFlush() {
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer buffered(&stream);
+    BufferedStreamIOBuffer *buffered=stream.GetWriteBufferX();
 
     uint32 bufferSize = 10;
-    buffered.SetBufferSize(bufferSize);
+    buffered->SetBufferSize(bufferSize);
 
     const char8* toWrite = "Hello";
     uint32 writeSize = StringHelper::Length(toWrite);
 
-    buffered.Write(toWrite, writeSize);
+    buffered->Write(toWrite, writeSize);
 
-    buffered.Flush();
+    buffered->Flush();
     //the buffer now is empty
-    if ((buffered.Position() != 0) || (buffered.UsedSize() != 0)) {
+    if ((buffered->Position() != 0) || (buffered->UsedSize() != 0)) {
         return false;
     }
 
@@ -196,11 +195,12 @@ bool BufferedStreamIOBufferTest::TestFlush_NULL_Stream() {
 }
 
 bool BufferedStreamIOBufferTest::TestFlush_NULL_Buffer() {
-
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer buffered(&stream);
 
-    return !buffered.Flush();
+    BufferedStreamIOBuffer *buffered=stream.GetWriteBufferX();
+    buffered->SetBufferSize(0);
+
+    return !buffered->Flush();
 }
 
 bool BufferedStreamIOBufferTest::TestResync() {

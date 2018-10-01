@@ -202,6 +202,24 @@ bool BufferedStreamI::Copy(BufferedStreamI &stream) {
 
 }
 
+bool BufferedStreamI::Flush() {
+    IOBuffer* buff = GetWriteBuffer();
+    bool ret = (buff != NULL_PTR(IOBuffer*));
+    if (ret) {
+        ret = buff->NoMoreSpaceToWrite();
+    }
+    return ret;
+}
+
+bool BufferedStreamI::Refill() {
+    IOBuffer* buff = GetReadBuffer();
+    bool ret = (buff != NULL_PTR(IOBuffer*));
+    if (ret) {
+        ret = buff->Refill();
+    }
+    return ret;
+}
+
 
 
 }

@@ -57,9 +57,13 @@ public:
 
     bool TestInitialise_DefaultPort();
 
+    bool TestServerCycle_Text_Interactive();
+
     bool TestServerCycle_Text();
 
-    bool TestServerCycle_TextStreamingMode();
+    bool TestServerCycle_Structured();
+
+    bool TestServerCycle_CloseConnection();
 
     bool TestClientService();
 };

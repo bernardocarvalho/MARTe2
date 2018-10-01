@@ -24,7 +24,7 @@
 #
 #############################################################
 
-OBJSX=	HttpServiceTest.x HttpProtocolTest.x
+OBJSX=	HttpServiceTest.x HttpProtocolTest.x HttpChunkedStreamTest.x
 #HttpStreamTTest.x
 
 PACKAGE=Core/FileSystem

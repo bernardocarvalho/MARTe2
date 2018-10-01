@@ -73,7 +73,13 @@ public:
 
     virtual void GetId(StreamString& idOut);
 
+    virtual bool GetInputCommand(const char8 *commandName, AnyType &commandValue);
+
+    virtual bool SetOutputCommand(const char8 *commandName, AnyType &commandValue);
+
     int8 TextMode() const;
+
+
 
 protected:
     DoubleBufferedStream *outputStream;

@@ -1,7 +1,7 @@
 /**
- * @file HttpServiceGTest.cpp
- * @brief Source file for class HttpServiceGTest
- * @date 12 set 2018
+ * @file HttpChunkedStreamGTest.cpp
+ * @brief Source file for class HttpChunkedStreamGTest
+ * @date 01 ott 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class HttpServiceGTest (public, protected, and private). Be aware that some 
+ * the class HttpChunkedStreamGTest (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,14 +29,13 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-
 #include <limits.h>
 #include "gtest/gtest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
-#include "HttpServiceTest.h"
+#include "HttpChunkedStreamTest.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -45,64 +44,28 @@
 /*---------------------------------------------------------------------------*/
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
-TEST(HttpServiceGTest, TestConstructor) {
-    HttpServiceTest test;
+TEST(HttpChunkedStreamGTest, TestConstructor) {
+    HttpChunkedStreamTest test;
     ASSERT_TRUE(test.TestConstructor());
 }
 
-TEST(HttpServiceGTest, TestInitialise) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise());
+TEST(HttpChunkedStreamGTest, TestFlush) {
+    HttpChunkedStreamTest test;
+    ASSERT_TRUE(test.TestFlush());
 }
 
-TEST(HttpServiceGTest, TestInitialise_DefaultWebRoot) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultWebRoot());
+TEST(HttpChunkedStreamGTest, TestFinalChunk) {
+    HttpChunkedStreamTest test;
+    ASSERT_TRUE(test.TestFinalChunk());
 }
 
-TEST(HttpServiceGTest, TestInitialise_FalseNoDefaultWebRoot) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_FalseNoDefaultWebRoot());
+TEST(HttpChunkedStreamGTest, TestSetChunkMode) {
+    HttpChunkedStreamTest test;
+    ASSERT_TRUE(test.TestSetChunkMode());
 }
 
-
-TEST(HttpServiceGTest, TestInitialise_DefaultNListenConnections) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultNListenConnections());
-}
-
-TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Text_Interactive) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Text_Interactive());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Text) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Text());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Structured) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Structured());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_CloseConnection) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_CloseConnection());
-}
-
-TEST(HttpServiceGTest, TestClientService) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestClientService());
-}
-
-TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultPort());
+TEST(HttpChunkedStreamGTest, TestIsChunkMode) {
+    HttpChunkedStreamTest test;
+    ASSERT_TRUE(test.TestIsChunkMode());
 }
 

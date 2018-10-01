@@ -293,33 +293,8 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                         }
                     }
                     if (err.ErrorsCleared()) {
-
                         if (!pagePrepared) {
-                            if(!hprotocol.MoveAbsolute("OutputHttpOptions")) {
-                                err=!(hprotocol.CreateAbsolute("OutputHttpOptions"));
-                            }
-                            if (err.ErrorsCleared()) {
-                                err=!(hprotocol.Write("Content-Type","text/html"));
-                            }
-                            if (err.ErrorsCleared()) {
-
-                                if (!hprotocol.KeepAlive()) {
-                                    StreamString hstream;
-                                    err=!(hprotocol.Write("Connection","Close"));
-                                    if (err.ErrorsCleared()) {
-                                        err=!(hstream.Printf("%s", "<HTML>Page Not Found!</HTML>"));
-                                    }
-                                    if (err.ErrorsCleared()) {
-                                        err=!(hstream.Seek(0ULL));
-                                    }
-                                    if (err.ErrorsCleared()) {
-                                        if(!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, &hstream, NULL_PTR(const char8*))) {
-                                            err=ErrorManagement::CommunicationError;
-                                            REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
-                                        }
-                                    }
-                                }
-                            }
+                            //TODO??
                         }
                     }
                 }
@@ -335,9 +310,9 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
 
                 }
                 else {
-                    err=!(commClient->Close());
+                    (void)(commClient->Close());
                     delete commClient;
-
+                    REPORT_ERROR(ErrorManagement::Information, "client deleted");
                 }
             }
         }
@@ -360,6 +335,7 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             newClient->SetChunkMode(false);
             newClient->SetCalibWriteParam(0u);
             newClient->SetBufferSize(32u, chunkSize);
+            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
             if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
                 err=MARTe::ErrorManagement::Timeout;
                 delete newClient;
@@ -367,7 +343,6 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             else {
                 information.SetThreadSpecificContext(reinterpret_cast<void*>(newClient));
                 err= MARTe::ErrorManagement::NoError;
-                REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
             }
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {
