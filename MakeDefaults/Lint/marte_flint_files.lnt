@@ -78,7 +78,7 @@ HighResolutionTimerCalibrator.cpp
 HttpDefinition.cpp
 HttpProtocol.cpp
 HttpService.cpp
-HttpStreamT.h
+HttpChunkedStream.cpp
 IOBuffer.cpp
 IOBufferFloatPrint.cpp
 IOBufferIntegerPrint.cpp

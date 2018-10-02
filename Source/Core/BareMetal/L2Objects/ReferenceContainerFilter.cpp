@@ -119,7 +119,7 @@ void ReferenceContainerFilter::SetMode(const uint32& modeToSet) {
 
     //set the recursive bit
     if (IsStorePath()) {
-        if (IsSearchAll() || (originallySetOccurrence > 1)) {
+        if (IsSearchAll()) {
             REPORT_ERROR_STATIC_0(ErrorManagement::Warning,
                                   "Cannot use PATH mode to search more than one reference. The filter will match the first occurrence");
             originallySetOccurrence = 1;

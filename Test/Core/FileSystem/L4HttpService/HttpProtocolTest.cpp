@@ -128,8 +128,8 @@ bool HttpProtocolTest::TestConstructor() {
 static void clientJobGet1(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -138,7 +138,7 @@ static void clientJobGet1(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "GET /docs/index.html HTTP/1.1\n");
         socket.Printf("%s", "Host: www.nowhere123.com\n");
@@ -155,15 +155,15 @@ static void clientJobGet1(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Get1() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
@@ -232,8 +232,8 @@ bool HttpProtocolTest::TestReadHeader_Get1() {
 static void clientJobGet2(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -242,7 +242,7 @@ static void clientJobGet2(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "GET /docs/index.html?index=2&page=3 HTTP/1.1\n");
         socket.Printf("%s", "Host: www.nowhere123.com\n");
@@ -259,15 +259,15 @@ static void clientJobGet2(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobGet2, this);
@@ -346,8 +346,8 @@ bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
 static void clientJobPut1(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -356,7 +356,7 @@ static void clientJobPut1(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "PUT /user/1234567890 HTTP/1.1\n");
         socket.Printf("%s", "Host: http://sookocheff.com\n");
@@ -372,15 +372,15 @@ static void clientJobPut1(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Put1() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobPut1, this);
@@ -438,8 +438,8 @@ bool HttpProtocolTest::TestReadHeader_Put1() {
 static void clientJobPost1(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -448,7 +448,7 @@ static void clientJobPost1(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "POST /email_verification/ HTTP/1.1\n");
         socket.Printf("%s", "Host: api.evasrv.com\n");
@@ -467,15 +467,15 @@ static void clientJobPost1(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Post1() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobPost1, this);
@@ -569,8 +569,8 @@ bool HttpProtocolTest::TestReadHeader_Post1() {
 static void clientJobPost2(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -579,7 +579,7 @@ static void clientJobPost2(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "POST /submit.cgi HTTP/1.1\n");
         socket.Printf("%s", "Host: example.com\n");
@@ -589,7 +589,7 @@ static void clientJobPost2(HttpProtocolTest &tt) {
         socket.Printf("%s", "Expect: 100-continue\n");
         socket.Printf("%s", "Content-Type: multipart/form-data; boundary=------------------------d74496d66958873e\n\n");
         socket.Printf("%s", "--------------------------d74496d66958873e\n");
-        socket.Printf("%s", "Content-Disposition: form-data; name=\"person\"\n\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=person\n\n");
         socket.Printf("%s", "anonymous\n");
         socket.Printf("%s", "--------------------------d74496d66958873e\n");
         socket.Printf("%s", "Content-Disposition: form-data; name=\"secret\"; filename=\"file.txt\"\n");
@@ -609,15 +609,15 @@ static void clientJobPost2(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobPost2, this);
@@ -699,11 +699,11 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
     return ret;
 }
 
-static void clientJobHead(HttpProtocolTest &tt) {
+static void clientJobPost3(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -712,7 +712,346 @@ static void clientJobHead(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "POST /submit.cgi HTTP/1.1\n");
+        socket.Printf("%s", "Host: example.com\n");
+        socket.Printf("%s", "User-Agent: curl/7.46.0\n");
+        socket.Printf("%s", "Accept: */*\n");
+        socket.Printf("%s", "Content-Length: 298\n");
+        socket.Printf("%s", "Expect: 100-continue\n");
+        socket.Printf("%s", "Content-Type: multipart/form-data; boundary=\"------------------------d74496d66958873e\"\n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"person\"\n\n");
+        socket.Printf("%s", "anonymous\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"secret\"; filename=\"file.txt\"\n");
+        socket.Printf("%s", "Content-Type: text/plain\n\n");
+        socket.Printf("%s", "contents of the file\n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e--\n\n");
+        socket.Flush();
+    }
+
+    StreamString resp;
+    char8 term;
+    socket.GetToken(resp, "\n", term);
+    printf("response=%s\n", resp.Buffer());
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_Post2_Multiform_WrappedBoundary() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobPost3, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Host", par);
+        ret &= (par == "example.com");
+        par.SetSize(0);
+        ret &= cdb->Read("User-Agent", par);
+        ret &= (par == "curl/7.46.0");
+        par.SetSize(0);
+        ret &= cdb->Read("Accept", par);
+        ret &= (par == "*/*");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "298");
+        par.SetSize(0);
+        ret &= cdb->Read("Expect", par);
+        ret &= (par == "100-continue");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Type", par);
+        ret &= (par == "multipart/form-data; boundary=\"------------------------d74496d66958873e\"");
+    }
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputCommands");
+        StreamString par;
+        ret &= cdb->Read("rawPost", par);
+        par.SetSize(0);
+        ret &= cdb->Read("person", par);
+        ret &= (par == "anonymous");
+        par.SetSize(0);
+        ret &= cdb->Read("secret:filename", par);
+        ret &= (par == "file.txt");
+        par.SetSize(0);
+        ret &= cdb->Read("secret:Content-Type", par);
+        ret &= (par == "text/plain");
+        par.SetSize(0);
+        ret &= cdb->Read("secret", par);
+        ret &= (par == "contents of the file");
+        par.SetSize(0);
+    }
+    if (ret) {
+        StreamString url;
+        test.GetId(url);
+        ret = (url == "submit.cgi");
+        printf("url=%s\n", url.Buffer());
+
+    }
+
+    if (ret) {
+        StreamString path;
+        test.GetPath(path);
+        ret = (path == "submit.cgi");
+        printf("path=%s\n", path.Buffer());
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobPostEmpty(HttpProtocolTest &tt) {
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "POST /submit.cgi HTTP/1.1\n");
+        socket.Printf("%s", "Host: example.com\n");
+        socket.Printf("%s", "User-Agent: curl/7.46.0\n");
+        socket.Printf("%s", "Accept: */*\n");
+        socket.Printf("%s", "Content-Length: 315\n");
+        socket.Printf("%s", "Expect: 100-continue\n");
+        socket.Printf("%s", "Content-Type: multipart/form-data; boundary=------------------------d74496d66958873e\n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"person\"\n\n");
+        socket.Printf("%s", "anonymous\n");
+        socket.Printf("%s", "anonymous2\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"secret\"; filename=\"file.txt\"\n");
+        socket.Printf("%s", "Content-Type: text/plain\n\n");
+        socket.Printf("%s", "contents of the file\n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e--\n\n");
+
+        socket.Flush();
+    }
+
+    StreamString resp;
+    char8 term;
+    socket.GetToken(resp, "\n", term);
+    printf("response=%s\n", resp.Buffer());
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_Post2_MultiformConsecutiveData() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobPostEmpty, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Host", par);
+        ret &= (par == "example.com");
+        par.SetSize(0);
+        ret &= cdb->Read("User-Agent", par);
+        ret &= (par == "curl/7.46.0");
+        par.SetSize(0);
+        ret &= cdb->Read("Accept", par);
+        ret &= (par == "*/*");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "315");
+        par.SetSize(0);
+        ret &= cdb->Read("Expect", par);
+        ret &= (par == "100-continue");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Type", par);
+        ret &= (par == "multipart/form-data; boundary=------------------------d74496d66958873e");
+    }
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputCommands");
+        StreamString par;
+        ret &= cdb->Read("rawPost", par);
+        par.SetSize(0);
+        ret &= cdb->Read("person", par);
+        ret &= (par == "anonymous\nanonymous2");
+        par.SetSize(0);
+        ret &= cdb->Read("secret:filename", par);
+        ret &= (par == "file.txt");
+        par.SetSize(0);
+        ret &= cdb->Read("secret:Content-Type", par);
+        ret &= (par == "text/plain");
+        par.SetSize(0);
+        ret &= cdb->Read("secret", par);
+        ret &= (par == "contents of the file");
+        par.SetSize(0);
+    }
+    if (ret) {
+        StreamString url;
+        test.GetId(url);
+        ret = (url == "submit.cgi");
+        printf("url=%s\n", url.Buffer());
+
+    }
+
+    if (ret) {
+        StreamString path;
+        test.GetPath(path);
+        ret = (path == "submit.cgi");
+        printf("path=%s\n", path.Buffer());
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobPostNoBound(HttpProtocolTest &tt) {
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "POST /submit.cgi HTTP/1.1\n");
+        socket.Printf("%s", "Host: example.com\n");
+        socket.Printf("%s", "User-Agent: curl/7.46.0\n");
+        socket.Printf("%s", "Accept: */*\n");
+        socket.Printf("%s", "Content-Length: 315\n");
+        socket.Printf("%s", "Expect: 100-continue\n");
+        socket.Printf("%s", "Content-Type: multipart/form-data; \n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"person\"\n\n");
+        socket.Printf("%s", "anonymous\n");
+        socket.Printf("%s", "anonymous2\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e\n");
+        socket.Printf("%s", "Content-Disposition: form-data; name=\"secret\"; filename=\"file.txt\"\n");
+        socket.Printf("%s", "Content-Type: text/plain\n\n");
+        socket.Printf("%s", "contents of the file\n\n");
+        socket.Printf("%s", "--------------------------d74496d66958873e--\n\n");
+
+        socket.Flush();
+    }
+
+    StreamString resp;
+    char8 term;
+    socket.GetToken(resp, "\n", term);
+    printf("response=%s\n", resp.Buffer());
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_Post2_FalseMultiformNoParsedBoundary() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobPostNoBound, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = !test.ReadHeader();
+    eventSem.Wait();
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobHead(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "HEAD /bit/thinner-archives-vol-1.zip.torrent HTTP/1.1\n");
         socket.Printf("%s", "Host: www.legaltorrents.com\n\n");
@@ -724,15 +1063,15 @@ static void clientJobHead(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Head() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobHead, this);
@@ -783,8 +1122,8 @@ bool HttpProtocolTest::TestReadHeader_Head() {
 static void clientJobReply(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -793,7 +1132,7 @@ static void clientJobReply(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "HTTP/1.1 200 OK\n");
         socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
@@ -816,15 +1155,15 @@ static void clientJobReply(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestReadHeader_Reply() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobReply, this);
@@ -888,16 +1227,317 @@ bool HttpProtocolTest::TestReadHeader_Reply() {
 
 }
 
-bool HttpProtocolTest::TestCompleteReadOperation() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+static void clientJobReplyInvalidHttpVersion(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "HTTP/ciaone 200 OK\n");
+        socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
+        socket.Printf("%s", "Server: Apache/2.2.14 (Win32)\n");
+        socket.Printf("%s", "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\n");
+        socket.Printf("%s", "Content-Length: 53\n");
+        socket.Printf("%s", "Content-Type: text/html\n\n");
+        socket.Printf("%s", "<html>\n");
+        socket.Printf("%s", "<body>\n");
+        socket.Printf("%s", "<h1>Hello, World!</h1>\n");
+        socket.Printf("%s", "</body>\n");
+        socket.Printf("%s", "</html>\n");
+        socket.Flush();
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_IncompatibleHTTPVersion() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobReplyInvalidHttpVersion, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+    ConfigurationDatabase *cdb = (ConfigurationDatabase *) (&test);
+
+    cdb->MoveToRoot();
+    StreamString output;
+    output.Printf("%@", *cdb);
+    printf("%s\n", output.Buffer());
+
+    if (ret) {
+        ret = cdb->MoveAbsolute("InputHttpOptions");
+        StreamString par;
+        ret &= cdb->Read("Date", par);
+        ret &= (par == "Mon, 27 Jul 2009 12:28:53 GMT");
+        par.SetSize(0);
+        ret &= cdb->Read("Server", par);
+        ret &= (par == "Apache/2.2.14 (Win32)");
+        par.SetSize(0);
+        ret &= cdb->Read("Last-Modified", par);
+        ret &= (par == "Wed, 22 Jul 2009 19:15:56 GMT");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Length", par);
+        ret &= (par == "53");
+        par.SetSize(0);
+        ret &= cdb->Read("Content-Type", par);
+        ret &= (par == "text/html");
+        par.SetSize(0);
+    }
+    if (ret) {
+        StreamString url;
+        test.GetId(url);
+        ret = (url == "");
+        printf("url=%s\n", url.Buffer());
+    }
+
+    if (ret) {
+        StreamString path;
+        test.GetPath(path);
+        ret = (path == "");
+        printf("path=%s\n", path.Buffer());
+    }
+
+    if (ret) {
+        ret = !test.KeepAlive();
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobReplyInvalidHttpVersionNoReply(HttpProtocolTest &tt) {
+
+//tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "GET /docs/index.html HTTP/ciaone\n");
+        socket.Printf("%s", "Host: www.nowhere123.com\n");
+        socket.Printf("%s", "Accept: image/gif, image/jpeg, */*\n");
+        socket.Printf("%s", "Accept-Language: en-us\n");
+        socket.Printf("%s", "Accept-Encoding: gzip, deflate\n");
+        socket.Printf("%s", "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\n");
+        socket.Printf("%s", "\n");
+        socket.Flush();
+    }
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+
+}
+
+bool HttpProtocolTest::TestReadHeader_IncompatibleHTTPVersionNoReply() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobReplyInvalidHttpVersionNoReply, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = test.ReadHeader();
+    eventSem.Wait();
+
+
+    if (ret) {
+        ret = !test.KeepAlive();
+    }
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+static void clientJobReplyInvalidReplyCode(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "HTTP/1.1 ciaone OK\n");
+        socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
+        socket.Printf("%s", "Server: Apache/2.2.14 (Win32)\n");
+        socket.Printf("%s", "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\n");
+        socket.Printf("%s", "Content-Length: 53\n");
+        socket.Printf("%s", "Content-Type: text/html\n\n");
+        socket.Printf("%s", "<html>\n");
+        socket.Printf("%s", "<body>\n");
+        socket.Printf("%s", "<h1>Hello, World!</h1>\n");
+        socket.Printf("%s", "</body>\n");
+        socket.Printf("%s", "</html>\n");
+        socket.Flush();
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestReadHeader_FalseInvalidReplyCode() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobReplyInvalidReplyCode, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+    bool ret = !test.ReadHeader();
+    eventSem.Wait();
+
+    newSocket.Close();
+    socket.Close();
+    return ret;
+}
+
+
+static void clientJobReplyInvalidCommand(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
+    if (ret) {
+        socket.Printf("%s", "HTTX/1.1 200 OK\n");
+        socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
+        socket.Printf("%s", "Server: Apache/2.2.14 (Win32)\n");
+        socket.Printf("%s", "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\n");
+        socket.Printf("%s", "Content-Length: 53\n");
+        socket.Printf("%s", "Content-Type: text/html\n\n");
+        socket.Printf("%s", "<html>\n");
+        socket.Printf("%s", "<body>\n");
+        socket.Printf("%s", "<h1>Hello, World!</h1>\n");
+        socket.Printf("%s", "</body>\n");
+        socket.Printf("%s", "</html>\n");
+        socket.Flush();
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+
+bool HttpProtocolTest::TestReadHeader_FalseInvalidCommand(){
+    InternetHost source(5554, "127.0.0.1");
+       InternetHost destination(5555, "127.0.0.1");
+
+       TCPSocket socket;
+       socket.SetSource(source);
+       socket.SetDestination(destination);
+
+       socket.Open();
+       socket.Listen(5555, 255);
+       //todo launch a thread with the client request
+       eventSem.Reset();
+       Threads::BeginThread((ThreadFunctionType) clientJobReplyInvalidCommand, this);
+       TCPSocket newSocket;
+
+       eventSem.Post();
+
+       socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+       StreamString stream;
+       HttpProtocol test(newSocket);
+       bool ret = !test.ReadHeader();
+       eventSem.Wait();
+
+       newSocket.Close();
+       socket.Close();
+       return ret;
+}
+
+
+bool HttpProtocolTest::TestCompleteReadOperation() {
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobReply, this);
@@ -937,8 +1577,8 @@ bool HttpProtocolTest::TestCompleteReadOperation() {
 static void clientJobReply_BigBody(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -947,7 +1587,7 @@ static void clientJobReply_BigBody(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "HTTP/1.1 200 OK\n");
         socket.Printf("%s", "Date: Mon, 27 Jul 2009 12:28:53 GMT\n");
@@ -970,15 +1610,15 @@ static void clientJobReply_BigBody(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestCompleteReadOperation_ClipSize() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobReply_BigBody, this);
@@ -1014,8 +1654,8 @@ bool HttpProtocolTest::TestCompleteReadOperation_ClipSize() {
 static void clientJobWrite(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1024,11 +1664,11 @@ static void clientJobWrite(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
         StreamString stream;
         HttpProtocol test(socket);
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
 
@@ -1047,8 +1687,8 @@ static void clientJobWrite(HttpProtocolTest &tt) {
 static void clientJobWrite2(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1057,13 +1697,13 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
 
         StreamString stream;
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Transfer-Encoding", "chunked");
 
         test.Write("Content-Type", "application/x-www-form-urlencoded");
@@ -1073,6 +1713,11 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         tt.retVal = test.WriteHeader(false, tt.command, &stream, "localhost");
         tt.eventSem.Wait();
         tt.eventSem.Reset();
+        test.MoveAbsolute("OutputHttpOptions");
+
+        test.Delete("Connection");
+
+        test.Write("Connection", "close");
 
         test.Delete("Transfer-Encoding");
         test.MoveToRoot();
@@ -1080,7 +1725,7 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         stream.SetSize(0);
         stream.Printf("%s", "bellooo\n");
         stream.Seek(0);
-        tt.retVal &= test.WriteHeader(true, tt.command, &stream, "localhost");
+        tt.retVal &= test.WriteHeader(true, tt.command, &stream, NULL);
     }
 
     tt.eventSem.Post();
@@ -1090,15 +1735,15 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
 
 bool HttpProtocolTest::TestWriteHeader() {
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobWrite, this);
@@ -1142,6 +1787,7 @@ bool HttpProtocolTest::TestWriteHeader() {
         ret &= cdb->Read("Content-Type", par);
         ret &= (par == "application/x-www-form-urlencoded");
         par.SetSize(0);
+
     }
     newSocket.Close();
     socket.Close();
@@ -1150,15 +1796,15 @@ bool HttpProtocolTest::TestWriteHeader() {
 }
 
 bool HttpProtocolTest::TestWriteHeader2() {
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     Threads::BeginThread((ThreadFunctionType) clientJobWrite2, this);
     TCPSocket newSocket;
@@ -1215,6 +1861,10 @@ bool HttpProtocolTest::TestWriteHeader2() {
         StreamString par;
         ret &= cdb->Read("Content-Length", par);
         ret &= (par == "8");
+        par.SetSize(0);
+
+        ret &= cdb->Read("Connection", par);
+        ret &= (par == "close");
         par.SetSize(0);
     }
     if (command != HttpDefinition::HSHCPost) {
@@ -1304,8 +1954,8 @@ bool HttpProtocolTest::TestWriteHeader_Reply2() {
 static void clientJobWriteStructuredStored(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1314,14 +1964,14 @@ static void clientJobWriteStructuredStored(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
         StreamStructuredData<JsonPrinter> stream;
         StreamString string;
         stream.SetStream(string);
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         string.SetSize(0);
@@ -1361,15 +2011,15 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
     retVal = true;
     eventSem.Reset();
     command = HttpDefinition::HSHCReplyOK;
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     Threads::BeginThread((ThreadFunctionType) clientJobWriteStructuredStored, this);
     TCPSocket newSocket;
@@ -1475,8 +2125,8 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
 static void clientJobWriteStructuredOnline(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1485,13 +2135,13 @@ static void clientJobWriteStructuredOnline(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
         StreamStructuredData<JsonPrinter> stream;
         HttpProtocol test(socket);
 
         stream.SetStream(socket);
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
 
@@ -1532,15 +2182,15 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
     retVal = true;
     eventSem.Reset();
     command = HttpDefinition::HSHCReplyOK;
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     Threads::BeginThread((ThreadFunctionType) clientJobWriteStructuredOnline, this);
     TCPSocket newSocket;
@@ -1637,11 +2287,11 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
     return (ret && retVal);
 }
 
-static void clientJobAuth(HttpProtocolTest &tt) {
+static void clientJobWriteInvalid(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1650,7 +2300,71 @@ static void clientJobAuth(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
+    if (tt.retVal) {
+        StreamString stream;
+        HttpProtocol test(socket);
+        test.CreateAbsolute("OutputHttpOptions");
+        test.Write("Content-Type", "application/x-www-form-urlencoded");
+        test.MoveToRoot();
+
+        stream.SetSize(0);
+        stream.Printf("%s", "ciaobellooo\n");
+        stream.Seek(0);
+        tt.retVal = test.WriteHeader(true, -10, &stream, "localhost");
+
+    }
+
+    tt.eventSem.Post();
+    socket.Close();
+    Threads::EndThread();
+}
+
+bool HttpProtocolTest::TestWriteHeader_False_InvalidCommand() {
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+
+    socket.Open();
+    socket.Listen(5555, 255);
+    //todo launch a thread with the client request
+    eventSem.Reset();
+    Threads::BeginThread((ThreadFunctionType) clientJobWriteInvalid, this);
+    TCPSocket newSocket;
+
+    eventSem.Post();
+
+    socket.WaitConnection(TTInfiniteWait, &newSocket);
+
+    StreamString stream;
+    HttpProtocol test(newSocket);
+
+    bool ret = !test.ReadHeader();
+
+    newSocket.Close();
+    socket.Close();
+    return (ret && !retVal);
+
+}
+
+static void clientJobAuth(HttpProtocolTest &tt) {
+    //tells to the main process that the thread begins
+
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    tt.eventSem.Wait();
+    tt.eventSem.Reset();
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "GET /docs/index.html HTTP/1.1\n");
         socket.Printf("%s", "Host: www.nowhere123.com\n");
@@ -1664,8 +2378,8 @@ static void clientJobAuth(HttpProtocolTest &tt) {
 }
 
 bool HttpProtocolTest::TestSecurityCheck() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     ReferenceT<HttpStreamTestRealm> realm(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     realm->SetPassw("admin1234");
@@ -1675,7 +2389,7 @@ bool HttpProtocolTest::TestSecurityCheck() {
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobAuth, this);
@@ -1713,15 +2427,15 @@ bool HttpProtocolTest::TestSecurityCheck() {
 }
 
 bool HttpProtocolTest::TestKeepAliveDefault() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
@@ -1757,8 +2471,8 @@ bool HttpProtocolTest::TestKeepAliveDefault() {
 static void clientJobKeepAlive(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1767,7 +2481,7 @@ static void clientJobKeepAlive(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("%s", "GET /docs/index.html HTTP/1.1\n");
         socket.Printf("%s", "Host: www.nowhere123.com\n");
@@ -1788,15 +2502,15 @@ static void clientJobKeepAlive(HttpProtocolTest &tt) {
 bool HttpProtocolTest::TestKeepAlive(bool isKeepAliveIn) {
     isKeepAlive = isKeepAliveIn;
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobKeepAlive, this);
@@ -1839,15 +2553,15 @@ bool HttpProtocolTest::TestSetKeepAlive(bool isKeepAlive) {
 
 bool HttpProtocolTest::TestGetHttpCommand(int32 commandIn) {
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     if (commandIn == HttpDefinition::HSHCGet) {
@@ -1911,15 +2625,15 @@ bool HttpProtocolTest::TestSetUnmatchedId() {
 bool HttpProtocolTest::TestGetUnmatchedId() {
     //normally it is the url
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobGet1, this);
@@ -1966,8 +2680,8 @@ bool HttpProtocolTest::TestGetId() {
 static void clientJobGetTextMode(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -1976,7 +2690,7 @@ static void clientJobGetTextMode(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 5555);
     if (ret) {
         socket.Printf("GET /docs/index.html?TextMode=%d", tt.textMode);
         socket.Printf("%s", " HTTP/1.1\n");
@@ -1995,15 +2709,15 @@ static void clientJobGetTextMode(HttpProtocolTest &tt) {
 
 bool HttpProtocolTest::TestTextMode(int8 textMode) {
     this->textMode = textMode;
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobGetTextMode, this);
@@ -2031,8 +2745,8 @@ bool HttpProtocolTest::TestTextMode(int8 textMode) {
 
 bool HttpProtocolTest::TestReadHeader_False_FailGetLine() {
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
@@ -2049,8 +2763,8 @@ bool HttpProtocolTest::TestReadHeader_False_FailGetLine() {
 static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4444, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5555, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -2059,13 +2773,13 @@ static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
 
         StreamString stream;
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Transfer-Encoding", "chunked");
 
         stream.SetSize(0);
@@ -2085,15 +2799,15 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentType() {
     retVal = true;
     eventSem.Reset();
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobWritePostNoContentType, this);
@@ -2123,8 +2837,8 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentType() {
 static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
 
@@ -2133,11 +2847,11 @@ static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    tt.retVal = socket.Connect("127.0.0.1", 4444);
+    tt.retVal = socket.Connect("127.0.0.1", 5555);
     if (tt.retVal) {
         StreamString stream;
         HttpProtocol test(socket);
-        test.CreateAbsolute("OutputHttpOtions");
+        test.CreateAbsolute("OutputHttpOptions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
 
@@ -2157,15 +2871,15 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength() {
     retVal = true;
     eventSem.Reset();
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(5554, "127.0.0.1");
+    InternetHost destination(5555, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetSource(source);
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(5555, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientJobWritePostNoContentLength, this);
@@ -2190,5 +2904,36 @@ bool HttpProtocolTest::TestReadHeader_False_PostNoContentLength() {
     newSocket.Close();
     socket.Close();
     return (ret && retVal);
+}
+
+bool HttpProtocolTest::TestGetInputCommand() {
+
+    TCPSocket newSocket;
+
+    HttpProtocol test(newSocket);
+
+    bool ret = test.CreateAbsolute("InputCommands");
+    uint32 var1 = 10u;
+
+    ret &= test.Write("var1", var1);
+
+    uint32 var1Read = 0u;
+    test.MoveToRoot();
+    ret &= test.GetInputCommand("var1", var1Read);
+
+    ret &= (var1Read == var1);
+
+    ret &= !test.GetInputCommand("var2", var1Read);
+    return ret;
+
+}
+
+bool HttpProtocolTest::TestSetOutputCommand() {
+    TCPSocket newSocket;
+
+    HttpProtocol test(newSocket);
+    uint32 var1 = 10u;
+    return !test.SetOutputCommand("var1", var1);
+
 }
 

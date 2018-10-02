@@ -60,10 +60,25 @@ public:
 
     bool TestReadHeader_Post2_Multiform();
 
+    bool TestReadHeader_Post2_Multiform_WrappedBoundary();
+
+    bool TestReadHeader_Post2_MultiformConsecutiveData();
+
+    bool TestReadHeader_Post2_FalseMultiformNoParsedBoundary();
 
     bool TestReadHeader_Head();
 
     bool TestReadHeader_Reply();
+
+    bool TestReadHeader_IncompatibleHTTPVersion();
+
+    bool TestReadHeader_IncompatibleHTTPVersionNoReply();
+
+    bool TestReadHeader_FalseInvalidReplyCode();
+
+
+    bool TestReadHeader_FalseInvalidCommand();
+
 
     bool TestCompleteReadOperation();
 
@@ -103,6 +118,8 @@ public:
     bool TestWriteHeader_StrucuredDataOnline();
 
 
+    bool TestWriteHeader_False_InvalidCommand();
+
 
     bool TestSecurityCheck();
 
@@ -130,7 +147,9 @@ public:
 
     bool TestReadHeader_False_PostNoContentLength();
 
+    bool TestGetInputCommand();
 
+    bool TestSetOutputCommand();
 
     EventSem eventSem;
 

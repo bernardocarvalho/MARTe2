@@ -65,7 +65,7 @@ bool HttpChunkedStream::Flush() {
             StreamString totStr;
             ret = totStr.Printf("%x\r\n", size);
 
-            uint32 totalSize = totStr.Size();
+            uint32 totalSize = static_cast<uint32>(totStr.Size());
             if (ret) {
                 ret = OSWrite(totStr.Buffer(), totalSize);
             }
@@ -95,7 +95,7 @@ bool HttpChunkedStream::FinalChunk() {
 
 }
 
-void HttpChunkedStream::SetChunkMode(bool chunkModeIn) {
+void HttpChunkedStream::SetChunkMode(const bool chunkModeIn) {
     chunkMode = chunkModeIn;
 }
 

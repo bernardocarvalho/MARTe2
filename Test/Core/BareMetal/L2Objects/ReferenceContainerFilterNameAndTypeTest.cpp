@@ -95,7 +95,7 @@ bool ReferenceContainerFilterNameAndTypeTest::TestSetConstructor() {
                             ret = ((test.GetMode() & ReferenceContainerFilterMode::PATH) != 0);
                         }
                         if (ret) {
-                            if (occurrence != 0) {
+                            if (occurrence < 0) {
                                 ret = (test.GetOriginalSetOccurrence() == 1);
                             }
                             else {

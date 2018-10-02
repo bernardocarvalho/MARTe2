@@ -50,6 +50,7 @@
 namespace MARTe {
 
 HttpService::HttpService() :
+        /*lint -e{9153} the specialised contructor will be called.*/
         MultiClientService(embeddedMethod),
         MessageI(),
         embeddedMethod(*this, &HttpService::ServerCycle) {
@@ -64,6 +65,7 @@ HttpService::~HttpService() {
     //delete embeddedMethod;
     // Auto-generated destructor stub for HttpService
     // TODO Verify if manual additions are needed
+    server.Close();
 }
 
 bool HttpService::Initialise(StructuredDataI &data) {
@@ -71,7 +73,7 @@ bool HttpService::Initialise(StructuredDataI &data) {
     if (ret) {
         uint32 acceptTimeoutTemp;
         if (!data.Read("AcceptTimeout", acceptTimeoutTemp)) {
-            acceptTimeoutTemp = 1000;
+            acceptTimeoutTemp = 1000u;
             REPORT_ERROR(ErrorManagement::Information, "AcceptTimeout not specified, using defauld %d ms", acceptTimeoutTemp);
         }
         acceptTimeout = acceptTimeoutTemp;
@@ -270,22 +272,27 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
 
                                         //empty string... go in chunked mode
                                         StreamString hstream;
-                                        hprotocol.WriteHeader(false, replyCode, &hstream, NULL_PTR(const char8*));
+                                        err=!(hprotocol.WriteHeader(false, replyCode, &hstream, NULL_PTR(const char8*)));
+                                        if (err.ErrorsCleared()) {
 
-                                        commClient->SetChunkMode(true);
-                                        //if(!pagePrepared) {
-                                        if(textMode>0u) {
-                                            pagePrepared = hi->GetAsText(*commClient, hprotocol);
-                                        }
-                                        else {
-                                            StreamStructuredData<JsonPrinter> sdata;
-                                            sdata.SetStream(*commClient);
-                                            pagePrepared = hi->GetAsStructuredData(sdata, hprotocol);
-                                        }
+                                            commClient->SetChunkMode(true);
+                                            //if(!pagePrepared) {
+                                            if(textMode>0u) {
+                                                pagePrepared = hi->GetAsText(*commClient, hprotocol);
+                                            }
+                                            else {
+                                                StreamStructuredData<JsonPrinter> sdata;
+                                                sdata.SetStream(*commClient);
+                                                pagePrepared = hi->GetAsStructuredData(sdata, hprotocol);
+                                            }
 
-                                        commClient->Flush();
-                                        commClient->FinalChunk();
-                                        //hprotocol.SetKeepAlive(false);
+                                            err=!(commClient->Flush());
+                                            if (err.ErrorsCleared()) {
+
+                                                err=!(commClient->FinalChunk());
+                                            }
+                                            //hprotocol.SetKeepAlive(false);
+                                        }
                                     }
                                     //}
                                 }
@@ -328,21 +335,23 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
     }
     if (information.GetStage() == MARTe::ExecutionInfo::MainStage) {
 
-        /*lint -e{429} the newClient pointer will be freed within the thread*/
+        /*lint -e{593} -e{429} the newClient pointer will be freed within the thread*/
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::WaitRequestStageSpecific) {
             /*lint -e{429} the newClient pointer will be freed within the thread*/
             HttpChunkedStream *newClient = new HttpChunkedStream();
             newClient->SetChunkMode(false);
             newClient->SetCalibWriteParam(0u);
-            newClient->SetBufferSize(32u, chunkSize);
-            REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
-            if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
-                err=MARTe::ErrorManagement::Timeout;
-                delete newClient;
-            }
-            else {
-                information.SetThreadSpecificContext(reinterpret_cast<void*>(newClient));
-                err= MARTe::ErrorManagement::NoError;
+            err = !(newClient->SetBufferSize(32u, chunkSize));
+            if (err.ErrorsCleared()) {
+                REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
+                if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
+                    err=MARTe::ErrorManagement::Timeout;
+                    delete newClient;
+                }
+                else {
+                    information.SetThreadSpecificContext(reinterpret_cast<void*>(newClient));
+                    err= MARTe::ErrorManagement::NoError;
+                }
             }
         }
         if (information.GetStageSpecific() == MARTe::ExecutionInfo::ServiceRequestStageSpecific) {

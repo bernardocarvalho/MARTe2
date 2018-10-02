@@ -51,7 +51,7 @@ public:
 
     virtual bool WriteHeader(const bool isMessageCompleted,
                              const int32 command,
-                             BufferedStreamI *payload,
+                             BufferedStreamI * const payload,
                              const char8 * const id);
 
     bool CompleteReadOperation(BufferedStreamI * const streamout,
@@ -73,9 +73,9 @@ public:
 
     virtual void GetId(StreamString& idOut);
 
-    virtual bool GetInputCommand(const char8 *commandName, AnyType &commandValue);
+    virtual bool GetInputCommand(const char8 * const commandName, const AnyType &commandValue);
 
-    virtual bool SetOutputCommand(const char8 *commandName, AnyType &commandValue);
+    virtual bool SetOutputCommand(const char8 * const commandName, const AnyType &commandValue);
 
     int8 TextMode() const;
 

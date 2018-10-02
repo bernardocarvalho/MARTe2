@@ -427,6 +427,7 @@ public:
      * @brief User friendly function which simply calls NoMoreSpaceToWrite.
      * @return whatever NoMoreSpaceToWrite returns.
      */
+    /*lint -e{1735} this function has the same default parameter of its father.*/
     virtual bool Flush(const uint32 neededSize=0u);
 
 

@@ -57,15 +57,21 @@ public:
 
     bool TestInitialise_DefaultPort();
 
-    bool TestServerCycle_Text_Interactive();
+    bool TestStart();
 
-    bool TestServerCycle_Text();
+    bool TestStart_InvalidWebRoot();
 
-    bool TestServerCycle_Structured();
+    bool TestClientService_Text_Interactive();
 
-    bool TestServerCycle_CloseConnection();
+    bool TestClientService_Text();
 
-    bool TestClientService();
+    bool TestClientService_Structured();
+
+    bool TestClientService_CloseConnection();
+
+    bool TestClientService_InvalidInterface();
+
+    bool TestServerCycle();
 };
 
 

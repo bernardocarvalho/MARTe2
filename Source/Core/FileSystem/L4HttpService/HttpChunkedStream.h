@@ -57,7 +57,7 @@ public:
 
     bool FinalChunk();
 
-    void SetChunkMode(bool chunkModeIn);
+    void SetChunkMode(const bool chunkModeIn);
 
     bool IsChunkMode() const;
 

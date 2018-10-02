@@ -1853,10 +1853,10 @@ bool IOBuffer::Refill() {
 bool IOBuffer::Flush(const uint32 neededSize) {
     bool ret = true;
     if (neededSize == 0u) {
-        NoMoreSpaceToWrite();
+        ret = NoMoreSpaceToWrite();
     }
     else {
-        NoMoreSpaceToWrite(neededSize);
+        ret = NoMoreSpaceToWrite(neededSize);
     }
     return ret;
 }

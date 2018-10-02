@@ -210,7 +210,7 @@ bool HttpProtocol::ReadHeader() {
             if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "keep-alive", 10u) == 0) {
                 keepAlive = true;
             }
-            else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "closed", 6u) == 0) {
+            else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "close", 5u) == 0) {
                 keepAlive = false;
             }
             else {
@@ -314,7 +314,7 @@ bool HttpProtocol::ReadHeader() {
 
 bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
                                const int32 command,
-                               BufferedStreamI *payload,
+                               BufferedStreamI * const payload,
                                const char8 * const id) {
 
     //if sending something with bodyCompleted=false
@@ -342,38 +342,23 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
 
     const char8* urlToUse = id;
     if (urlToUse == NULL) {
-        urlToUse="";
+        urlToUse="/";
     }
 
     if (isReply) {
-        if (!outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, HttpDefinition::GetErrorCodeString(httpErrorCode))) {
-            //REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-            ret = false;
-        }
+        ret=outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, HttpDefinition::GetErrorCodeString(httpErrorCode));
     }
     else if (command == HttpDefinition::HSHCGet) {
-        if (!outputStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
-            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-            ret = false;
-        }
+        ret=outputStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCPut) {
-        if (!outputStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
-            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-            ret = false;
-        }
+        ret=outputStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCPost) {
-        if (!outputStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
-            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-            ret = false;
-        }
+        ret=outputStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCHead) {
-        if (!outputStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion)) {
-            REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Write on socket failed\n");
-            ret = false;
-        }
+        ret=outputStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else {
         REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Command code %i unknown \n", command);
@@ -381,7 +366,6 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
     }
 
     if (ret) {
-
         ret = MoveToRoot();
         if (ret) {
             if (!MoveRelative("OutputHttpOptions")) {
@@ -404,7 +388,7 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
                 if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "keep-alive", 10u) == 0) {
                     keepAlive = true;
                 }
-                else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "close", 6u) == 0) {
+                else if (StringHelper::CompareNoCaseSensN(connection.Buffer(), "close", 5u) == 0) {
                     keepAlive = false;
                 }
                 else {
@@ -416,7 +400,7 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
                     ret = Write("Connection", "keep-alive");
                 }
                 else {
-                    ret = Write("Connection", "keep-alive");
+                    ret = Write("Connection", "close");
                 }
             }
             // write all options
@@ -449,9 +433,7 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
                                 wSize = COPY_BUF_LEN;
                             }
 
-                            if (buff != NULL) {
-                                ret=payload->Read(&buff[0], wSize);
-                            }
+                            ret = payload->Read(&buff[0], wSize);
                             if (ret) {
                                 ret = outputStream->Write(&buff[0], wSize);
                             }
@@ -510,9 +492,9 @@ bool HttpProtocol::RetrieveHttpCommand(StreamString &command,
         StreamString errorCode;
         (void) line.GetToken(errorCode, " \r\n\t", terminator, " \r\n\t");
         int32 errorCodeInt;
-        if (!TypeConvert(errorCodeInt, errorCode.Buffer())) {
+        ret = TypeConvert(errorCodeInt, errorCode.Buffer());
+        if (!ret) {
             REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed converting the error code of the reply %s to an integer", errorCode.Buffer());
-            ret = false;
         }
         else {
             httpCommand = HttpDefinition::GenerateReplyCode(errorCodeInt);
@@ -577,9 +559,7 @@ bool HttpProtocol::StoreCommands(StreamString &line) {
         //delete existing
         (void) Delete("InputCommands");
         ret = CreateRelative("InputCommands");
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node InputCommands");
-        }
+
     }
 
     if (ret) {
@@ -623,19 +603,6 @@ bool HttpProtocol::StoreCommands(StreamString &line) {
     return ret;
 }
 
-bool HttpProtocol::StoreOutputOptions() {
-    bool ret = MoveToRoot();
-    if (ret) {
-        //delete existing
-        (void) Delete("OutputHttpOptions");
-        ret = CreateRelative("OutputHttpOptions");
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node OutputHttpOptions");
-        }
-    }
-    return ret;
-}
-
 bool HttpProtocol::StoreInputOptions() {
 
     bool ret = MoveToRoot();
@@ -645,9 +612,7 @@ bool HttpProtocol::StoreInputOptions() {
 //delete existing
         (void) Delete("InputHttpOptions");
         ret = CreateRelative("InputHttpOptions");
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed to create node InputHttpOptions");
-        }
+
     }
     if (ret) {
         bool ok = true;
@@ -735,9 +700,6 @@ bool HttpProtocol::HandlePostHeader(StreamString &line,
 
                 //Write the filename
                 ret = Write(key.Buffer(), filename.Buffer());
-                if (!ret) {
-                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the filename");
-                }
                 if (ret) {
                     //Check the file mime type
                     ret = line.SetSize(0ull);
@@ -749,9 +711,6 @@ bool HttpProtocol::HandlePostHeader(StreamString &line,
                                 key = name;
                                 key += ":Content-Type";
                                 ret = Write(key.Buffer(), fcType.Buffer());
-                                if (!ret) {
-                                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the file content type");
-                                }
                             }
                         }
                     }
@@ -777,9 +736,6 @@ bool HttpProtocol::HandlePostContent(StreamString &line,
         headerHandled = false;
 
         ret = Write(name.Buffer(), value.Buffer());
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Failed writing the content");
-        }
         if (ret) {
             ret = value.SetSize(0ull);
             if (ret) {
@@ -823,7 +779,7 @@ bool HttpProtocol::HandlePostMultipartFormData(StreamString &contentType,
             if ((parsedBoundary[0u] == '\"')) {
                 if ((parsedBoundary[finalIndex] == '\"')) {
                     parsedBoundary = (&(parsedBoundary.Buffer()[1]));
-                    ret = parsedBoundary.SetSize(static_cast<uint64>(finalIndex));
+                    ret = parsedBoundary.SetSize(static_cast<uint64>(finalIndex-1u));
                 }
             }
         }
@@ -1008,18 +964,20 @@ int8 HttpProtocol::TextMode() const {
     return textMode;
 }
 
-bool HttpProtocol::GetInputCommand(const char8 *commandName, AnyType &commandValue){
+bool HttpProtocol::GetInputCommand(const char8 * const commandName,
+                                   const AnyType &commandValue) {
 
-    bool ret=MoveAbsolute("InputCommands");
-    if(ret){
-        ret=Read(commandName, commandValue);
+    bool ret = MoveAbsolute("InputCommands");
+    if (ret) {
+        ret = Read(commandName, commandValue);
     }
     return ret;
 }
 
-bool HttpProtocol::SetOutputCommand(const char8 *commandName, AnyType &commandValue){
-    return true;
+/*lint -e{715} parameters are not referenced in this implementation*/
+bool HttpProtocol::SetOutputCommand(const char8 * const commandName,
+                                    const AnyType &commandValue) {
+    return false;
 }
-
 
 }

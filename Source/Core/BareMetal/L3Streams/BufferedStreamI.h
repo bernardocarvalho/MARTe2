@@ -103,7 +103,6 @@ namespace MARTe {
  * maximum value of uint64. This also implies that operations like read and
  * write, which increments position and/or size, will not change this value.
  */
-
 class DLL_API BufferedStreamI: public virtual StreamI {
 
 public:
@@ -408,9 +407,9 @@ public:
 
     virtual bool Refill();
 
-    inline void SetCalibReadParam(uint32 calibReadIn);
+    inline void SetCalibReadParam(const uint32 calibReadIn);
 
-    inline void SetCalibWriteParam(uint32 calibWriteIn);
+    inline void SetCalibWriteParam(const uint32 calibWriteIn);
 protected:
 
     /**
@@ -425,8 +424,10 @@ protected:
      */
     virtual IOBuffer *GetWriteBuffer() = 0;
 
+    /*lint -e{9150} I want this parameter to be protected and non virtual to be modified by the children*/
     uint32 calibReadParam;
 
+    /*lint -e{9150} I want this parameter to be protected and non virtual to be modified by the children*/
     uint32 calibWriteParam;
 
 };
@@ -549,11 +550,11 @@ bool BufferedStreamI::Printf(const char8 * const format,
     return PrintFormatted(format, &pars[0]);
 }
 
-void BufferedStreamI::SetCalibReadParam(uint32 calibReadIn) {
+void BufferedStreamI::SetCalibReadParam(const uint32 calibReadIn) {
     calibReadParam = calibReadIn;
 }
 
-void BufferedStreamI::SetCalibWriteParam(uint32 calibWriteIn) {
+void BufferedStreamI::SetCalibWriteParam(const uint32 calibWriteIn) {
     calibWriteParam = calibWriteIn;
 }
 }

@@ -60,8 +60,8 @@ bool HttpChunkedStreamTest::TestConstructor() {
 static void clientWriter(HttpChunkedStreamTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(6665, "127.0.0.1");
+    InternetHost destination(6666, "127.0.0.1");
 
     HttpChunkedStream socket;
     socket.SetChunkMode(true);
@@ -73,7 +73,7 @@ static void clientWriter(HttpChunkedStreamTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 6666);
     if (ret) {
         socket.Printf("%s", "HelloWorld");
 
@@ -87,8 +87,8 @@ static void clientWriter(HttpChunkedStreamTest &tt) {
 }
 
 bool HttpChunkedStreamTest::TestFlush() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(6665, "127.0.0.1");
+    InternetHost destination(6666, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetBlocking(false);
@@ -96,7 +96,7 @@ bool HttpChunkedStreamTest::TestFlush() {
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(6666, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientWriter, this);
@@ -131,8 +131,8 @@ bool HttpChunkedStreamTest::TestFlush() {
 static void clientWriterFinalChunk(HttpChunkedStreamTest &tt) {
     //tells to the main process that the thread begins
 
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(6665, "127.0.0.1");
+    InternetHost destination(6666, "127.0.0.1");
 
     HttpChunkedStream socket;
     socket.SetChunkMode(true);
@@ -144,7 +144,7 @@ static void clientWriterFinalChunk(HttpChunkedStreamTest &tt) {
     socket.Open();
     tt.eventSem.Wait();
     tt.eventSem.Reset();
-    bool ret = socket.Connect("127.0.0.1", 4444);
+    bool ret = socket.Connect("127.0.0.1", 6666);
     if (ret) {
         socket.Printf("%s", "HelloWorld");
         socket.Flush();
@@ -159,8 +159,8 @@ static void clientWriterFinalChunk(HttpChunkedStreamTest &tt) {
 }
 
 bool HttpChunkedStreamTest::TestFinalChunk() {
-    InternetHost source(4443, "127.0.0.1");
-    InternetHost destination(4444, "127.0.0.1");
+    InternetHost source(6665, "127.0.0.1");
+    InternetHost destination(6666, "127.0.0.1");
 
     TCPSocket socket;
     socket.SetBlocking(false);
@@ -168,7 +168,7 @@ bool HttpChunkedStreamTest::TestFinalChunk() {
     socket.SetDestination(destination);
 
     socket.Open();
-    socket.Listen(4444, 255);
+    socket.Listen(6666, 255);
     //todo launch a thread with the client request
     eventSem.Reset();
     Threads::BeginThread((ThreadFunctionType) clientWriterFinalChunk, this);

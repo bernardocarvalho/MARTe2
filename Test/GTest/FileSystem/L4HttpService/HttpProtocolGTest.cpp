@@ -76,6 +76,21 @@ TEST(HttpProtocolGTest, TestReadHeader_Post2_Multiform) {
     ASSERT_TRUE(test.TestReadHeader_Post2_Multiform());
 }
 
+TEST(HttpProtocolGTest, TestReadHeader_Post2_Multiform_WrappedBoundary) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post2_Multiform_WrappedBoundary());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Post2_MultiformConsecutiveData) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post2_MultiformConsecutiveData());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_Post2_FalseMultiformNoParsedBoundary) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_Post2_FalseMultiformNoParsedBoundary());
+}
+
 TEST(HttpProtocolGTest, TestReadHeader_Head) {
     HttpProtocolTest test;
     ASSERT_TRUE(test.TestReadHeader_Head());
@@ -84,6 +99,16 @@ TEST(HttpProtocolGTest, TestReadHeader_Head) {
 TEST(HttpProtocolGTest, TestReadHeader_Reply) {
     HttpProtocolTest test;
     ASSERT_TRUE(test.TestReadHeader_Reply());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_IncompatibleHTTPVersion) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_IncompatibleHTTPVersion());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_IncompatibleHTTPVersionNoReply) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_IncompatibleHTTPVersionNoReply());
 }
 
 TEST(HttpProtocolGTest, TestCompleteReadOperation) {
@@ -139,6 +164,11 @@ TEST(HttpProtocolGTest, TestWriteHeader_Reply) {
 TEST(HttpProtocolGTest, TestWriteHeader_Reply2) {
     HttpProtocolTest test;
     ASSERT_TRUE(test.TestWriteHeader_Reply2());
+}
+
+TEST(HttpProtocolGTest, TestWriteHeader_False_InvalidCommand) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestWriteHeader_False_InvalidCommand());
 }
 
 TEST(HttpProtocolGTest, TestSecurityCheck) {
@@ -252,3 +282,24 @@ TEST(HttpProtocolGTest, TestReadHeader_False_PostNoContentLength) {
     HttpProtocolTest test;
     ASSERT_TRUE(test.TestReadHeader_False_PostNoContentLength());
 }
+
+TEST(HttpProtocolGTest, TestReadHeader_FalseInvalidReplyCode) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_FalseInvalidReplyCode());
+}
+
+TEST(HttpProtocolGTest, TestReadHeader_FalseInvalidCommand) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestReadHeader_FalseInvalidCommand());
+}
+
+TEST(HttpProtocolGTest, TestGetInputCommand) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestGetInputCommand());
+}
+
+TEST(HttpProtocolGTest, TestSetOutputCommand) {
+    HttpProtocolTest test;
+    ASSERT_TRUE(test.TestSetOutputCommand());
+}
+

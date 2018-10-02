@@ -76,33 +76,51 @@ TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
     ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
 }
 
-TEST(HttpServiceGTest, TestServerCycle_Text_Interactive) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Text_Interactive());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Text) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Text());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_Structured) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_Structured());
-}
-
-TEST(HttpServiceGTest, TestServerCycle_CloseConnection) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestServerCycle_CloseConnection());
-}
-
-TEST(HttpServiceGTest, TestClientService) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestClientService());
-}
-
 TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestInitialise_DefaultPort());
 }
+/*
+TEST(HttpServiceGTest, TestClientService_Text_Interactive) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_Text_Interactive());
+}
+*/
+
+TEST(HttpServiceGTest, TestStart) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestStart());
+}
+
+TEST(HttpServiceGTest, TestStart_InvalidWebRoot) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestStart_InvalidWebRoot());
+}
+
+TEST(HttpServiceGTest, TestClientService_Text) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_Text());
+}
+
+TEST(HttpServiceGTest, TestClientService_Structured) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_Structured());
+}
+
+TEST(HttpServiceGTest, TestClientService_CloseConnection) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_CloseConnection());
+}
+
+TEST(HttpServiceGTest, TestClientService_InvalidInterface) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_InvalidInterface());
+}
+
+TEST(HttpServiceGTest, TestServerCycle) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestServerCycle());
+}
+
+
 

@@ -545,10 +545,10 @@ bool HttpServiceTestClassTest1::GetAsStructuredData(StreamStructuredDataI &data,
 
     protocol.Write("Content-Type", "text/html");
     data.CreateAbsolute("NodeA.NodeB");
-    uint32 var1=1;
+    uint32 var1 = 1;
     data.Write("var1", var1);
     data.CreateAbsolute("NodeA.NodeC");
-    int32 var2=-1;
+    int32 var2 = -1;
     data.Write("var2", var2);
     data.MoveToRoot();
 
@@ -640,7 +640,7 @@ const char8 *config = ""
         "           Port=4444"
         "           ListenMaxConnections = 255"
         "           Timeout = 0"
-        "           AcceptTimeout=0xFFFFFFFF"
+        "           AcceptTimeout=1000"
         "           MaxNumberOfThreads=100"
         "           MinNumberOfThreads=1"
         "       }"
@@ -955,8 +955,214 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
     return ret;
 }
 
+bool HttpServiceTest::TestStart() {
 
-bool HttpServiceTest::TestServerCycle_Text_Interactive(){
+    const char8 *config1 = ""
+            "$Application = {"
+            "   Class = RealTimeApplication"
+            "       +WebRoot = {"
+            "           Class = HttpServiceTestWebRoot"
+            "           +ClassLister = {"
+            "               Class = HttpServiceTestClassLister"
+            "           }"
+            "           +Test1 = {"
+            "               Class = HttpServiceTestClassTest1"
+            "           }"
+            "       }"
+            "       +HttpServerTest = {"
+            "           Class = HttpServiceTestService"
+            "           WebRoot = \"Application.WebRoot\""
+            "           Port=4444"
+            "           ListenMaxConnections = 255"
+            "           Timeout = 0"
+            "           AcceptTimeout=1000"
+            "           MaxNumberOfThreads=100"
+            "           MinNumberOfThreads=1"
+            "       }"
+            "   +Functions = {"
+            "       Class = ReferenceContainer"
+            "       +GAM1 = {"
+            "           Class = HttpServiceTestGAM"
+            "             InputSignals = {"
+            "                Counter = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                }"
+            "                Time = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                    Frequency = 1000"
+            "                }"
+            "             }"
+            "             OutputSignals = {"
+            "                CounterOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "                TimeOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "             }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        DefaultDataSource = DDB1"
+            "        +DDB1 = {"
+            "            Class = GAMDataSource"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "        +Input = {"
+            "            Class = HttpServiceTestDS"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +Idle = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    CPUs = 2"
+            "                    Functions = { GAM1 }"
+            "                }"
+            "            }"
+            "         }"
+            "     }"
+            "     +Scheduler = {"
+            "         Class = GAMScheduler"
+            "         TimingDataSource = Timings"
+            "     }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config1);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpServiceTestService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+    if (ret) {
+        ReferenceT<ReferenceContainer> webroot = test->GetWebRoot();
+        ret = webroot.IsValid();
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    return ret;
+
+}
+
+bool HttpServiceTest::TestStart_InvalidWebRoot() {
+
+    const char8 *config1 = ""
+            "$Application = {"
+            "   Class = RealTimeApplication"
+            "       +WebRoot = {"
+            "           Class = HttpServiceTestWebRoot"
+            "           +ClassLister = {"
+            "               Class = HttpServiceTestClassLister"
+            "           }"
+            "           +Test1 = {"
+            "               Class = HttpServiceTestClassTest1"
+            "           }"
+            "       }"
+            "       +HttpServerTest = {"
+            "           Class = HttpServiceTestService"
+            "           WebRoot = \"Application.Invalid\""
+            "           Port=4444"
+            "           ListenMaxConnections = 255"
+            "           Timeout = 0"
+            "           AcceptTimeout=1000"
+            "           MaxNumberOfThreads=100"
+            "           MinNumberOfThreads=1"
+            "       }"
+            "   +Functions = {"
+            "       Class = ReferenceContainer"
+            "       +GAM1 = {"
+            "           Class = HttpServiceTestGAM"
+            "             InputSignals = {"
+            "                Counter = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                }"
+            "                Time = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                    Frequency = 1000"
+            "                }"
+            "             }"
+            "             OutputSignals = {"
+            "                CounterOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "                TimeOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "             }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        DefaultDataSource = DDB1"
+            "        +DDB1 = {"
+            "            Class = GAMDataSource"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "        +Input = {"
+            "            Class = HttpServiceTestDS"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +Idle = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    CPUs = 2"
+            "                    Functions = { GAM1 }"
+            "                }"
+            "            }"
+            "         }"
+            "     }"
+            "     +Scheduler = {"
+            "         Class = GAMScheduler"
+            "         TimingDataSource = Timings"
+            "     }"
+            "}";
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config1);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpServiceTestService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = !test->Start();
+        }
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    return ret;
+}
+
+bool HttpServiceTest::TestClientService_Text_Interactive() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
     ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
@@ -967,11 +1173,11 @@ bool HttpServiceTest::TestServerCycle_Text_Interactive(){
         }
     }
 
-    while(1);
+    while (1)
+        ;
 }
 
-
-bool HttpServiceTest::TestServerCycle_Text() {
+bool HttpServiceTest::TestClientService_Text() {
 
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
@@ -1035,7 +1241,7 @@ bool HttpServiceTest::TestServerCycle_Text() {
     //return true;
 }
 
-bool HttpServiceTest::TestServerCycle_Structured(){
+bool HttpServiceTest::TestClientService_Structured() {
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
     ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
@@ -1116,8 +1322,7 @@ bool HttpServiceTest::TestServerCycle_Structured(){
 
 }
 
-
-bool HttpServiceTest::TestServerCycle_CloseConnection(){
+bool HttpServiceTest::TestClientService_CloseConnection() {
 
     bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
     ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
@@ -1180,7 +1385,155 @@ bool HttpServiceTest::TestServerCycle_CloseConnection(){
 
 }
 
+bool HttpServiceTest::TestClientService_InvalidInterface() {
 
-bool HttpServiceTest::TestClientService() {
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    socket.Connect("127.0.0.1", 4444);
+
+    HttpProtocol stream(socket);
+
+    StreamString payload;
+
+    socket.Printf("%s", "GET /TestFake/ HTTP/1.1\r\n");
+    socket.Printf("%s", "Host: localhost:4444\r\n");
+    socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+    socket.Printf("%s", "Accept: text/html\r\n");
+    socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+    socket.Printf("%s", "Connection: close\r\n\r\n");
+    socket.Flush();
+
+    stream.ReadHeader();
+    StreamString respBody;
+    stream.CompleteReadOperation(&respBody, 1000);
+
+    printf("\n%s\n", respBody.Buffer());
+
+    if (ret) {
+        ret = respBody == "20\r\n"
+                "<html><head><TITLE>HttpServiceTe\r\n"
+                "20\r\n"
+                "stWebRoot</TITLE></head><BODY BG\r\n"
+                "20\r\n"
+                "COLOR=\"#ffffff\"><H1>HttpServiceT\r\n"
+                "20\r\n"
+                "estWebRoot</H1><UL><TABLE>\n"
+                "<TR>\n\r\n"
+                "20\r\n"
+                "<TD>HttpServiceTestClassLister</\r\n"
+                "20\r\n"
+                "TD><TD><A HREF=\"ClassLister/\">Cl\r\n"
+                "20\r\n"
+                "assLister</A></TD>\n"
+                "</TR>\n"
+                "<TR>\n"
+                "<T\r\n"
+                "20\r\n"
+                "D>HttpServiceTestClassTest1</TD>\r\n"
+                "20\r\n"
+                "<TD><A HREF=\"Test1/\">Test1</A></\r\n"
+                "20\r\n"
+                "TD>\n"
+                "</TR>\n"
+                "</TABLE>\n"
+                "</UL></BODY>\n\r\n"
+                "8\r\n"
+                "</html>\n\r\n"
+                "0\r\n\r\n";
+
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    Sleep::Sec(1);
+    return ret;
+
+}
+
+bool HttpServiceTest::TestServerCycle() {
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    uint32 numberOfClients = 10u;
+
+    for (uint32 i = 0u; (i < numberOfClients) && (ret); i++) {
+
+        InternetHost source(4444 + i, "127.0.0.1");
+        InternetHost destination(4444, "127.0.0.1");
+
+        TCPSocket socket;
+
+        socket.SetSource(source);
+        socket.SetDestination(destination);
+        socket.Open();
+        socket.Connect("127.0.0.1", 4444);
+
+        HttpProtocol stream(socket);
+
+        StreamString payload;
+
+        socket.Printf("%s", "GET /Test1/ HTTP/1.1\r\n");
+        socket.Printf("%s", "Host: localhost:4444\r\n");
+        socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+        socket.Printf("%s", "Accept: text/html\r\n");
+        socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+        socket.Printf("%s", "Connection: close\r\n\r\n");
+        socket.Flush();
+
+        stream.ReadHeader();
+        StreamString respBody;
+        stream.CompleteReadOperation(&respBody, 1000);
+
+        printf("\n%s\n", respBody.Buffer());
+
+        if (ret) {
+            ret = respBody == "20\r\n"
+                    "<html><head><TITLE>HttpServiceTe\r\n"
+                    "20\r\n"
+                    "stClassTest1</TITLE></head><BODY\r\n"
+                    "20\r\n"
+                    " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                    "20\r\n"
+                    "ceTestClassTest1</H1><UL></UL></\r\n"
+                    "C\r\n"
+                    "BODY></html>\r\n"
+                    "0\r\n\r\n";
+        }
+
+    }
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    Sleep::Sec(1);
+    return ret;
+
     return true;
 }
