@@ -325,16 +325,6 @@ void DoubleBufferedStream::SetTimeout(const TimeoutType &timeoutIn) {
     writeBuffer.SetTimeout(timeoutIn);
 }
 
-bool DoubleBufferedStream::Flush() {
-
-    bool ret = true;
-    // some data in writeBuffer
-    // we can flush in all cases then
-    if (writeBuffer.UsedSize() > 0u) {
-        ret = writeBuffer.NoMoreSpaceToWrite();
-    }
-    return ret;
-}
 
 }
 

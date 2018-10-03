@@ -39,38 +39,91 @@
 
 namespace MARTe{
 
+/**
+ * @brief The MARTe standard (configuration database) language printer.
+ * @see PrinterI
+ */
 class StandardPrinter: public PrinterI {
 public:
+
+    /**
+     * @brief Default constructor
+     */
     StandardPrinter();
 
+    /**
+     * @brief Constructor
+     */
     StandardPrinter(BufferedStreamI & streamIn);
 
+    /**
+     * @brief Destructor
+     */
     virtual ~StandardPrinter();
 
+    /**
+     * @see PrinterI::PrintOpenMatrix
+     */
     virtual bool PrintOpenMatrix();
 
+    /**
+     * @see PrinterI::PrintCloseMatrix
+     */
     virtual bool PrintCloseMatrix();
 
+    /**
+     * @see PrinterI::PrintScalarSeparator
+     */
     virtual bool PrintScalarSeparator();
 
+    /**
+     * @see PrinterI::PrintVectorSeparator
+     */
     virtual bool PrintVectorSeparator();
 
+    /**
+     * @see PrinterI::PrintVariableSeparator
+     */
     virtual bool PrintVariableSeparator();
 
+    /**
+     * @see PrinterI::PrintBlockSeparator
+     */
     virtual bool PrintBlockSeparator();
 
+    /**
+     * @see PrinterI::PrintOpenVector
+     */
     virtual bool PrintOpenVector();
 
+    /**
+     * @see PrinterI::PrintCloseVector
+     */
     virtual bool PrintCloseVector();
 
+    /**
+     * @see PrinterI::PrintOpenBlock
+     */
     virtual bool PrintOpenBlock(const char8 *const blockName);
 
+    /**
+     * @see PrinterI::PrintCloseBlock
+     */
     virtual bool PrintCloseBlock(const char8 *const blockName);
 
+    /**
+     * @see PrinterI::PrintOpenAssignment
+     */
     virtual bool PrintOpenAssignment(const char8 *const varName);
 
+    /**
+     * @see PrinterI::PrintCloseAssignment
+     */
     virtual bool PrintCloseAssignment(const char8 *const varName);
 
+    /**
+     * @see PrinterI::PrintVariable
+     */
     virtual bool PrintVariable(const AnyType &var);
 
 };

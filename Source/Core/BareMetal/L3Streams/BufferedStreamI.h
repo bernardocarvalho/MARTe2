@@ -403,13 +403,37 @@ public:
                        const AnyType& par9,
                        const AnyType& par10);
 
+    /**
+     * @brief Flushes the internal buffer on the stream.
+     * @return true if the flush to the stream returns without errors, false otherwise.
+     */
     virtual bool Flush();
 
+    /**
+     * @brief Fills the internal buffers with the data from the stream.
+     * @return true if the refill from the stream returns without errors, false otherwise.
+     */
     virtual bool Refill();
 
+    /**
+     * @brief Allows to adjust the calibration read parameter.
+     * @details By default this parameter is set to 4. The read operation from a stream will use
+     * the internal buffer if ([read buffer size]>4*[size to read]*[calib read param])
+     * @details Setting this parameter to zero means that the buffer is used at each read operation.
+     * @param[in] calibReadIn the new read calibration parameter to set.
+     */
     inline void SetCalibReadParam(const uint32 calibReadIn);
 
+    /**
+     * @brief Allows to adjust the calibration write parameter.
+     * @details By default this parameter is set to 4. The write operation to a stream will use
+     * the internal buffer if ([write buffer size]>4*[size to write]*[calib write param])
+     * @details Setting this parameter to zero means that the buffer is used at each write operation.
+     * @param[in] calibWriteIn the new write calibration parameter to set.
+     */
     inline void SetCalibWriteParam(const uint32 calibWriteIn);
+
+
 protected:
 
     /**

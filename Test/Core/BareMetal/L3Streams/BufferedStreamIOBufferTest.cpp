@@ -122,15 +122,17 @@ bool BufferedStreamIOBufferTest::TestSetTimeout() {
 bool BufferedStreamIOBufferTest::TestRefill() {
 
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer *buffered=stream.GetWriteBufferX();
+    BufferedStreamIOBuffer *buffered=stream.GetReadBufferX();
     uint32 bufferSize = 10;
     buffered->SetBufferSize(bufferSize);
+
 
     const char8* toWrite = "HelloWorldThisIsATest";
 
     uint32 writeSize = StringHelper::Length(toWrite);
-
+    buffered->Flush();
     buffered->WriteAll(toWrite, writeSize);
+
     stream.Seek(0);
 
     //try to trick with a non empty buffer
@@ -144,7 +146,7 @@ bool BufferedStreamIOBufferTest::TestRefill() {
         return false;
     }
 
-    return StringHelper::CompareN(buffered->Buffer(), toWrite, bufferSize) == 0;
+    return StringHelper::CompareN(buffered->Buffer(), toWrite+trickSize, bufferSize) == 0;
 }
 
 bool BufferedStreamIOBufferTest::TestRefill_NULL_Stream() {
@@ -159,9 +161,10 @@ bool BufferedStreamIOBufferTest::TestRefill_NULL_Stream() {
 bool BufferedStreamIOBufferTest::TestRefill_NULL_Buffer() {
 
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer buffered(&stream);
+    BufferedStreamIOBuffer *buffered=stream.GetReadBufferX();
+    buffered->SetBufferSize(0);
 
-    return !buffered.Refill();
+    return !buffered->Refill();
 }
 
 bool BufferedStreamIOBufferTest::TestFlush() {
@@ -206,18 +209,19 @@ bool BufferedStreamIOBufferTest::TestFlush_NULL_Buffer() {
 bool BufferedStreamIOBufferTest::TestResync() {
 
     DummySingleBufferedStream stream;
-    BufferedStreamIOBuffer buffered(&stream);
+    BufferedStreamIOBuffer *buffered=stream.GetWriteBufferX();
 
+    buffered->Flush();
     uint32 bufferSize = 10;
-    buffered.SetBufferSize(bufferSize);
+    buffered->SetBufferSize(bufferSize);
 
     const char8* toWrite = "HelloWorldThisIsATest";
 
     uint32 writeSize = StringHelper::Length(toWrite);
 
-    buffered.WriteAll(toWrite, writeSize);
+    buffered->WriteAll(toWrite, writeSize);
 
-    buffered.Flush();
+    buffered->Flush();
 
     stream.Seek(0);
 
@@ -226,14 +230,14 @@ bool BufferedStreamIOBufferTest::TestResync() {
     char8 bufferOut[32];
     uint32 toRead = 5;
     // the buffer is refilled until 10 chars
-    buffered.Refill();
-    buffered.Read(bufferOut, toRead);
+    buffered->Refill();
+    buffered->Read(bufferOut, toRead);
 
     if (stream.OSPosition() != bufferSize) {
         return false;
     }
 
-    buffered.Resync();
+    buffered->Resync();
 
     return stream.OSPosition() == toRead;
 }

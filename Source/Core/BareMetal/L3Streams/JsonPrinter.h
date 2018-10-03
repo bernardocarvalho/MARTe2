@@ -38,38 +38,91 @@
 
 namespace MARTe{
 
+/**
+ * @brief The Json language printer.
+ * @see PrinterI
+ */
 class JsonPrinter: public PrinterI {
 public:
+    /**
+     * @brief Constructor
+     */
     JsonPrinter();
 
+    /**
+     * @brief Constructor. Sets a pointer to the stream where to print to.
+     * @param[in] streamIn is the stream to write to.
+     */
     JsonPrinter(BufferedStreamI & streamIn);
 
+    /**
+     * @brief Destructor
+     */
     virtual ~JsonPrinter();
 
+    /**
+     * @see PrinterI::PrintOpenMatrix
+     */
     virtual bool PrintOpenMatrix();
 
+    /**
+     * @see PrinterI::PrintCloseMatrix
+     */
     virtual bool PrintCloseMatrix();
 
+    /**
+     * @see PrinterI::PrintScalarSeparator
+     */
     virtual bool PrintScalarSeparator();
 
+    /**
+     * @see PrinterI::PrintVectorSeparator
+     */
     virtual bool PrintVectorSeparator();
 
+    /**
+     * @see PrinterI::PrintVariableSeparator
+     */
     virtual bool PrintVariableSeparator();
 
+    /**
+     * @see PrinterI::PrintBlockSeparator
+     */
     virtual bool PrintBlockSeparator();
 
+    /**
+     * @see PrinterI::PrintOpenVector
+     */
     virtual bool PrintOpenVector();
 
+    /**
+     * @see PrinterI::PrintCloseVector
+     */
     virtual bool PrintCloseVector();
 
-    virtual bool PrintOpenBlock(const char8 * const blockName);
+    /**
+     * @see PrinterI::PrintOpenBlock
+     */
+    virtual bool PrintOpenBlock(const char8 *const blockName);
 
-    virtual bool PrintCloseBlock(const char8 * const blockName);
+    /**
+     * @see PrinterI::PrintCloseBlock
+     */
+    virtual bool PrintCloseBlock(const char8 *const blockName);
 
-    virtual bool PrintOpenAssignment(const char8 * const varName);
+    /**
+     * @see PrinterI::PrintOpenAssignment
+     */
+    virtual bool PrintOpenAssignment(const char8 *const varName);
 
-    virtual bool PrintCloseAssignment(const char8 * const varName);
+    /**
+     * @see PrinterI::PrintCloseAssignment
+     */
+    virtual bool PrintCloseAssignment(const char8 *const varName);
 
+    /**
+     * @see PrinterI::PrintVariable
+     */
     virtual bool PrintVariable(const AnyType &var);
 
 

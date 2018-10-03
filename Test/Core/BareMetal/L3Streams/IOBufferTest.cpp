@@ -1727,9 +1727,9 @@ bool IOBufferTest::TestPrintFormattedIntrospection() {
             "    }\r\n"
             "}\r\n";
 
-    printf("\n|%s||%s|\n",ioBuffer.Buffer(), test);
-    bool ret=(StringHelper::Compare(ioBuffer.Buffer(), test) == 0);
-    if(ret){
+    printf("\n|%s||%s|\n", ioBuffer.Buffer(), test);
+    bool ret = (StringHelper::Compare(ioBuffer.Buffer(), test) == 0);
+    if (ret) {
         Clear(ioBuffer);
         ioBuffer.Seek(0);
         ioBuffer.PrintFormatted("%J?", &at);
@@ -1761,11 +1761,11 @@ bool IOBufferTest::TestPrintFormattedIntrospection() {
                 "        \"attributes\": \"\"\r\n"
                 "    }\r\n"
                 "}\r\n";
-        printf("\n|%s||%s|\n",ioBuffer.Buffer(), test1);
-        ret=(StringHelper::Compare(ioBuffer.Buffer(), test1) == 0);
+        printf("\n|%s||%s|\n", ioBuffer.Buffer(), test1);
+        ret = (StringHelper::Compare(ioBuffer.Buffer(), test1) == 0);
     }
 
-    if(ret){
+    if (ret) {
         Clear(ioBuffer);
         ioBuffer.Seek(0);
         ioBuffer.PrintFormatted("%X?", &at);
@@ -1797,8 +1797,8 @@ bool IOBufferTest::TestPrintFormattedIntrospection() {
                 "        <attributes> \"\"</attributes>\r\n"
                 "    </member5>\r\n"
                 "</TestIOBufferIntrospectionStructure>\r\n";
-        printf("\n|%s||%s|\n",ioBuffer.Buffer(), test2);
-        ret=(StringHelper::Compare(ioBuffer.Buffer(), test2) == 0);
+        printf("\n|%s||%s|\n", ioBuffer.Buffer(), test2);
+        ret = (StringHelper::Compare(ioBuffer.Buffer(), test2) == 0);
     }
     return ret;
 }
@@ -1840,8 +1840,8 @@ bool IOBufferTest::TestPrintFormattedObject() {
                     "}\r\n";
 
     printf("\n|%s||%s|\n", ioBuffer.Buffer(), test.Buffer());
-    bool ret=(StringHelper::Compare(ioBuffer.Buffer(), test.Buffer()) == 0);
-    if(ret){
+    bool ret = (StringHelper::Compare(ioBuffer.Buffer(), test.Buffer()) == 0);
+    if (ret) {
         ioBuffer.SetBufferHeapMemory(allocationSize, 0);
         Clear(ioBuffer);
         ioBuffer.PrintFormatted("%J@", &at);
@@ -1860,11 +1860,11 @@ bool IOBufferTest::TestPrintFormattedObject() {
                         "\"nestedMember2\": \"Hello\"\r\n"
                         "}\r\n";
         printf("\n|%s||%s|\n", ioBuffer.Buffer(), test1.Buffer());
-        ret=(StringHelper::Compare(ioBuffer.Buffer(), test1.Buffer()) == 0);
+        ret = (StringHelper::Compare(ioBuffer.Buffer(), test1.Buffer()) == 0);
 
     }
 
-    if(ret){
+    if (ret) {
         ioBuffer.SetBufferHeapMemory(allocationSize, 0);
         Clear(ioBuffer);
         ioBuffer.PrintFormatted("%X@", &at);
@@ -1883,9 +1883,8 @@ bool IOBufferTest::TestPrintFormattedObject() {
                         "<nestedMember2> \"Hello\"</nestedMember2>\r\n"
                         "</member5>\r\n";
         printf("\n|%s||%s|\n", ioBuffer.Buffer(), test2.Buffer());
-        ret=(StringHelper::Compare(ioBuffer.Buffer(), test2.Buffer()) == 0);
+        ret = (StringHelper::Compare(ioBuffer.Buffer(), test2.Buffer()) == 0);
     }
-
 
     return ret;
 }
@@ -1955,7 +1954,6 @@ bool IOBufferTest::TestPrintStructuredDataInterface() {
         printf("\n|%s|\n|%s|\n", ioBuffer.Buffer(), test2);
         ret = (StringHelper::Compare(test2, ioBuffer.Buffer()) == 0);
     }
-
 
     return ret;
 }
@@ -2036,5 +2034,33 @@ bool IOBufferTest::TestPrintPointerMatrix() {
     ioBuffer2.PrintFormatted("%p", &toPrint2);
 
     return StringHelper::Compare(ioBuffer.Buffer(), ioBuffer2.Buffer()) == 0;
+}
+
+bool IOBufferTest::TestRefill() {
+    IOBuffer ioBuffer;
+    return !ioBuffer.Refill();
+}
+
+bool IOBufferTest::TestFlush() {
+    IOBuffer ioBuffer;
+    bool ret = !ioBuffer.Flush();
+    if (ret) {
+        ret = !ioBuffer.Flush(10u);
+    }
+    return ret;
+}
+
+bool IOBufferTest::TestNoMoreSpaceToWriteArg() {
+    IOBuffer ioBuffer;
+    return !ioBuffer.NoMoreSpaceToWrite(10u);
+}
+
+bool IOBufferTest::TestNoMoreSpaceToWrite() {
+    IOBuffer ioBuffer;
+    return !ioBuffer.NoMoreSpaceToWrite();
+}
+
+bool IOBufferTest::TestNoMoreDataToRead() {
+
 }
 

@@ -41,53 +41,93 @@
 
 namespace MARTe {
 
+/**
+ * @brief Prints the XML open matrix separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLOpenMatrix(IOBuffer &iobuff) {
     return iobuff.PutC('[');
 }
 
+/**
+ * @brief Prints the XML close matrix separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLCloseMatrix(IOBuffer &iobuff) {
     return iobuff.PutC(']');
 }
 
+/**
+ * @brief Prints the XML scalar separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLScalarSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
+/**
+ * @brief Prints the XML vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLVectorSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
+/**
+ * @brief Prints the XML open vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLOpenVector(IOBuffer &iobuff) {
     return iobuff.PutC('[');
 
 }
 
+/**
+ * @brief Prints the XML close vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLCloseVector(IOBuffer &iobuff) {
     return iobuff.PutC(']');
 }
 
+/**
+ * @brief Prints the XML open block separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLOpenBlock(IOBuffer &iobuff,
-                       const char8* blockName) {
+                       const char8* const blockName) {
     AnyType at[] = { blockName , voidAnyType};
-    return iobuff.PrintFormatted("<%s>", at);
+    return iobuff.PrintFormatted("<%s>", &at[0]);
 }
 
+/**
+ * @brief Prints the XML close block separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLCloseBlock(IOBuffer &iobuff,
-                        const char8* blockName) {
+                        const char8* const blockName) {
     AnyType at[] = { blockName , voidAnyType};
-    return iobuff.PrintFormatted("</%s>", at);
+    return iobuff.PrintFormatted("</%s>", &at[0]);
 }
 
+/**
+ * @brief Prints the XML open assignment separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLOpenAssignment(IOBuffer &iobuff,
-                            const char8* varName) {
+                            const char8* const varName) {
     AnyType at[] = { varName , voidAnyType};
-    return iobuff.PrintFormatted("<%s>", at);
+    return iobuff.PrintFormatted("<%s>", &at[0]);
 }
 
+/**
+ * @brief Prints the XML close assignment separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintXMLCloseAssignment(IOBuffer &iobuff,
-                             const char8* varName) {
+                             const char8* const varName) {
     AnyType at[] = { varName , voidAnyType};
-    return iobuff.PrintFormatted("</%s>", at);
+    return iobuff.PrintFormatted("</%s>", &at[0]);
 }
 
 }

@@ -1411,7 +1411,7 @@ bool HttpServiceTest::TestClientService_InvalidInterface() {
 
     StreamString payload;
 
-    socket.Printf("%s", "GET /TestFake/ HTTP/1.1\r\n");
+    socket.Printf("%s", "GET /TestFake HTTP/1.1\r\n");
     socket.Printf("%s", "Host: localhost:4444\r\n");
     socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
     socket.Printf("%s", "Accept: text/html\r\n");
@@ -1466,6 +1466,49 @@ bool HttpServiceTest::TestClientService_InvalidInterface() {
     Sleep::Sec(1);
     return ret;
 
+}
+
+bool HttpServiceTest::TestClientService_FailReadHeader() {
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+    ReferenceT<HttpService> test = god->Find("Application.HttpServerTest");
+    if (ret) {
+        ret = test.IsValid();
+        if (ret) {
+            ret = test->Start();
+        }
+    }
+
+    InternetHost source(4444, "127.0.0.1");
+    InternetHost destination(4444, "127.0.0.1");
+
+    TCPSocket socket;
+
+    socket.SetSource(source);
+    socket.SetDestination(destination);
+    socket.Open();
+    socket.Connect("127.0.0.1", 4444);
+
+    HttpProtocol stream(socket);
+
+    StreamString payload;
+
+    socket.Printf("%s", "GOT /TestFake HTTP/1.1\r\n");
+    socket.Printf("%s", "Host: localhost:4444\r\n");
+    socket.Printf("%s", "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0\r\n");
+    socket.Printf("%s", "Accept: text/html\r\n");
+    socket.Printf("%s", "Accept-Encoding: gzip, deflate\r\n");
+    socket.Printf("%s", "Connection: close\r\n\r\n");
+    socket.Flush();
+
+
+    if (ret) {
+        ret = test->Stop();
+    }
+
+    Sleep::Sec(1);
+    return ret;
 }
 
 bool HttpServiceTest::TestServerCycle() {

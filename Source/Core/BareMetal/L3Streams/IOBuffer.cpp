@@ -102,10 +102,6 @@ extern bool PrintStandardOpenMatrix(IOBuffer &iobuff);
 
 extern bool PrintStandardCloseMatrix(IOBuffer &iobuff);
 
-extern bool PrintStandardScalarSeparator(IOBuffer &iobuff);
-
-extern bool PrintStandardVectorSeparator(IOBuffer &iobuff);
-
 extern bool PrintStandardOpenVector(IOBuffer &iobuff);
 
 extern bool PrintStandardCloseVector(IOBuffer &iobuff);
@@ -216,7 +212,7 @@ bool PrintScalarSeparator(IOBuffer &iobuff,
 
     bool ret = false;
     if (fd.desiredGrammar == PrintInStandardGrammar) {
-        ret = PrintStandardScalarSeparator(iobuff);
+        ret = true;
     }
     else if (fd.desiredGrammar == PrintInJsonGrammar) {
         ret = PrintJsonScalarSeparator(iobuff);
@@ -235,7 +231,7 @@ bool PrintVectorSeparator(IOBuffer &iobuff,
 
     bool ret = false;
     if (fd.desiredGrammar == PrintInStandardGrammar) {
-        ret = PrintStandardVectorSeparator(iobuff);
+        ret = true;
     }
     else if (fd.desiredGrammar == PrintInJsonGrammar) {
         ret = PrintJsonVectorSeparator(iobuff);

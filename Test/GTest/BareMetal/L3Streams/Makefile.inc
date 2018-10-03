@@ -39,6 +39,7 @@ OBJSX=  AdvancedErrorManagementGTest.x \
 	StreamStringGTest.x \
 	StreamStringIOBufferGTest.x\
 	StreamStructuredDataGTest.x\
+	StreamStructuredDataIGTest.x\
 	XMLPrinterGTest.x
 
 

@@ -41,6 +41,7 @@ OBJSX=	AdvancedErrorManagementTest.x \
 	StreamStringTest.x \
 	StreamTestHelper.x\
 	StreamStructuredDataTest.x\
+	StreamStructuredDataITest.x\
 	XMLPrinterTest.x
 		
 PACKAGE=Core/BareMetal

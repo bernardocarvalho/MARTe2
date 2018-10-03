@@ -164,12 +164,6 @@ public:
     virtual bool SetSize(uint64 size);
 
     /**
-     * @brief Flushes the write buffer.
-     * @return true if the Flush of the buffer succeeds.
-     */
-    virtual bool Flush();
-
-    /**
      * @brief Gets the timeout value for read/write operations.
      * @return the timeout value for read/write operations.
      */

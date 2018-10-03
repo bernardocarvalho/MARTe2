@@ -42,52 +42,94 @@
 
 namespace MARTe{
 
-
+/**
+ * @brief Prints the Json open matrix separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonOpenMatrix(IOBuffer &iobuff) {
     return iobuff.PutC('[');
 }
 
+/**
+ * @brief Prints the Json close matrix separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonCloseMatrix(IOBuffer &iobuff) {
     return iobuff.PutC(']');
 }
 
+/**
+ * @brief Prints the Json scalar separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonScalarSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
+/**
+ * @brief Prints the Json vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonVectorSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
+/**
+ * @brief Prints the Json variable separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonVariableSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
+/**
+ * @brief Prints the Json block separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonBlockSeparator(IOBuffer &iobuff) {
     return iobuff.PutC(',');
 }
 
-
+/**
+ * @brief Prints the Json open vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonOpenVector(IOBuffer &iobuff) {
     return iobuff.PutC('[');
 
 }
 
+/**
+ * @brief Prints the Json close vector separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonCloseVector(IOBuffer &iobuff) {
     return iobuff.PutC(']');
 }
 
-bool PrintJsonOpenBlock(IOBuffer &iobuff, const char8 *blockName) {
+/**
+ * @brief Prints the Json open block separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
+bool PrintJsonOpenBlock(IOBuffer &iobuff, const char8 * const blockName) {
     AnyType at[]={blockName, voidAnyType};
     return iobuff.PrintFormatted("\"%s\": {", at);
 }
 
+/**
+ * @brief Prints the Json close block separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonCloseBlock(IOBuffer &iobuff) {
     return iobuff.PutC('}');
 }
 
+/**
+ * @brief Prints the Json open assignment separator
+ * @param[in] iobuff the IOBuffer where to print to
+ */
 bool PrintJsonOpenAssignment(IOBuffer &iobuff,
-                                const char8 *varName) {
+                                const char8 * const varName) {
     uint32 size = StringHelper::Length(varName);
     bool ret = iobuff.PutC('"');
     if (ret) {

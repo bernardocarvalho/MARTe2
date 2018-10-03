@@ -1,7 +1,7 @@
 /**
- * @file MultiStream.h
- * @brief Header file for class MultiStream
- * @date 30 ago 2018
+ * @file StreamStructuredDataITest.h
+ * @brief Header file for class StreamStructuredDataITest
+ * @date 03 ott 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MultiStream
+ * @details This header file contains the declaration of the class StreamStructuredDataITest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MULTISTREAM_H_
-#define MULTISTREAM_H_
+#ifndef STREAMSTRUCTUREDDATAITEST_H_
+#define STREAMSTRUCTUREDDATAITEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,44 +31,31 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "StreamString.h"
-#include "StructuredDataI.h"
-#include "AnyType.h"
+#include "StreamStructuredDataI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
-namespace MARTe {
 
-class MultiStream: public StreamString {
+using namespace MARTe;
+
+class StreamStructuredDataITest {
 public:
-    MultiStream();
+    StreamStructuredDataITest();
 
-    virtual ~MultiStream();
+    virtual ~StreamStructuredDataITest();
 
-    virtual bool Switch(const char8 *path)=0;
+    bool TestConstructor();
 
-    virtual bool Load(const char8 *varName)=0;
+    bool TestSetStream();
 
-    virtual bool Commit(const char8 *varName)=0;
+    bool TestGetStream();
 
-    virtual bool DeleteStream(const char8 *varName)=0;
-
-    virtual void GetCurrentPath(StreamString &path)=0;
-
-    virtual bool SwitchPrintAndCommit(const char8* path,
-                              const char8* varName,
-                              const char8* format,
-                              const AnyType pars[])=0;
-
-    virtual bool IsValid() const;
 
 };
-
-}
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* SOURCE_CORE_BAREMETAL_L3STREAMS_MULTISTREAM_H_ */
+#endif /* STREAMSTRUCTUREDDATAITEST_H_ */
 

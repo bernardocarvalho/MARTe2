@@ -37,36 +37,85 @@
 /*---------------------------------------------------------------------------*/
 using namespace MARTe;
 
-
+/**
+ * @brief Tests the JsonPrinter methods
+ */
 class JsonPrinterTest {
 public:
+
+    /**
+     * @brief Constructor
+     */
     JsonPrinterTest();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~JsonPrinterTest();
 
+    /**
+     * @brief Tests the PrintOpenMatrix method
+     */
     bool TestPrintOpenMatrix();
 
+    /**
+     * @brief Tests the PrintCloseMatrix method
+     */
     bool TestPrintCloseMatrix();
 
+    /**
+     * @brief Tests the PrintScalarSeparator method
+     */
     bool TestPrintScalarSeparator();
 
+    /**
+     * @brief Tests the PrintVectorSeparator method
+     */
     bool TestPrintVectorSeparator();
 
+    /**
+     * @brief Tests the PrintVariableSeparator method
+     */
     bool TestPrintVariableSeparator();
 
+    /**
+     * @brief Tests the PrintBlockSeparator method
+     */
     bool TestPrintBlockSeparator();
 
+    /**
+     * @brief Tests the PrintOpenVector method
+     */
     bool TestPrintOpenVector();
 
+    /**
+     * @brief Tests the PrintCloseVector method
+     */
     bool TestPrintCloseVector();
 
+    /**
+     * @brief Tests the PrintOpenBlock method
+     */
     bool TestPrintOpenBlock();
 
+    /**
+     * @brief Tests the PrintCloseBlock method
+     */
     bool TestPrintCloseBlock();
 
+    /**
+     * @brief Tests the PrintOpenAssignment method
+     */
     bool TestPrintOpenAssignment();
 
+    /**
+     * @brief Tests the PrintCloseAssignment method
+     */
     bool TestPrintCloseAssignment();
 
+    /**
+     * @brief Tests the PrintVariable method
+     */
     bool TestPrintVariable();
 
 

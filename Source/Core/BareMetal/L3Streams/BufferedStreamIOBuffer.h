@@ -127,8 +127,23 @@ public:
      */
     inline const OperatingSystemCallbacksI* GetStream() const;
 
+
+    /**
+     * @see IOBuffer::Flush
+     * @details If the stream is not NULL it calls stream->Flush, otherwise it calls IOBuffer::NoMoreSpaceToWrite.
+     * This implementation allows the buffer to access to the strean Flush function. In the stream Flush implementation
+     * the user must use the buffer NoMoreSpaceToWrite function instead of the buffer Flush to not cause a infinite call loop.
+     */
     /*lint -e{1735} this function has the same default parameter of its father.*/
     virtual bool Flush(const uint32 neededSize=0u);
+
+    /**
+     * @see IOBuffer::Refill
+     * @details If the stream is not NULL it calls stream->Refill, otherwise it calls IOBuffer::NoMoreDataToRead.
+     * This implementation allows the buffer to access to the strean Refill function. In the stream Refill implementation
+     * the user must use the buffer NoMoreDataToRead function instead of the buffer Refill to not cause a infinite call loop.
+     */
+    virtual bool Refill();
 
 
     /**
@@ -153,6 +168,9 @@ private:
      */
     OperatingSystemCallbacksI *stream;
 
+    /**
+     * Accelerator to the BufferedStreamI buffer.
+     */
     BufferedStreamI *streamBuffered;
 
     /**

@@ -215,7 +215,7 @@ bool BufferedStreamI::Refill() {
     IOBuffer* buff = GetReadBuffer();
     bool ret = (buff != NULL_PTR(IOBuffer*));
     if (ret) {
-        ret = buff->Refill();
+        ret = buff->NoMoreDataToRead();
     }
     return ret;
 }

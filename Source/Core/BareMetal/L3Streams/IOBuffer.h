@@ -430,7 +430,6 @@ public:
     /*lint -e{1735} this function has the same default parameter of its father.*/
     virtual bool Flush(const uint32 neededSize=0u);
 
-
     /**
      * @see NoMoreSpaceToWrite(const uint32)
      */

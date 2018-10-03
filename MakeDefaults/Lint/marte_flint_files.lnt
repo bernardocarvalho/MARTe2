@@ -82,6 +82,9 @@ HttpChunkedStream.cpp
 IOBuffer.cpp
 IOBufferFloatPrint.cpp
 IOBufferIntegerPrint.cpp
+IOBufferStandardPrint.cpp
+IOBufferJsonPrint.cpp
+IOBufferXMLPrint.cpp
 IntegerToFloat.cpp
 InternetHost.cpp
 InternetHostCore.h

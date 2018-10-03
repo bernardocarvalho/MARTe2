@@ -1,7 +1,7 @@
 /**
- * @file StructuredDataStreamTGTest.cpp
- * @brief Source file for class StructuredDataStreamTGTest
- * @date 30 ago 2018
+ * @file StreamStructuredDataI.cpp
+ * @brief Source file for class StreamStructuredDataI
+ * @date 27 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class StructuredDataStreamTGTest (public, protected, and private). Be aware that some
+ * the class StreamStructuredDataI (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,50 +29,32 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include <limits.h>
-#include "StructuredDataStreamTTest.h"
+#include "StreamStructuredDataI.h"
 
 /*---------------------------------------------------------------------------*/
-/*                        Project header includes                            */
-/*---------------------------------------------------------------------------*/
-
-#include "gtest/gtest.h"
-
-/*---------------------------------------------------------------------------*/
-/*                           Class declaration                               */
+/*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-/*                        Inline method definitions                          */
+/*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-TEST(StructuredDataStreamTGTest, TestSwitch) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestSwitch());
+namespace MARTe {
+
+StreamStructuredDataI::StreamStructuredDataI() {
+    stream = NULL_PTR(BufferedStreamI *);
 }
 
-TEST(StructuredDataStreamTGTest, TestLoad) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestLoad());
+StreamStructuredDataI::~StreamStructuredDataI() {
+    stream = NULL_PTR(BufferedStreamI *);
 }
 
-TEST(StructuredDataStreamTGTest, TestCommit) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestCommit());
+void StreamStructuredDataI::SetStream(BufferedStreamI &streamIn) {
+    stream = &streamIn;
 }
 
-TEST(StructuredDataStreamTGTest, TestDelete) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestDelete());
+BufferedStreamI *StreamStructuredDataI::GetStream() const {
+    return stream;
 }
 
-TEST(StructuredDataStreamTGTest, TestGetCurrentPath) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestGetCurrentPath());
 }
-
-TEST(StructuredDataStreamTGTest, TestSwitchPrintAndCommit) {
-    StructuredDataStreamTTest test;
-    ASSERT_TRUE(test.TestSwitchPrintAndCommit());
-}
-

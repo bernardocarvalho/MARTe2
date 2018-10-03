@@ -1,7 +1,7 @@
 /**
- * @file MultiStream.cpp
- * @brief Source file for class MultiStream
- * @date 30 ago 2018
+ * @file StreamStructuredDataIGTest.cpp
+ * @brief Source file for class StreamStructuredDataI
+ * @date 03 ott 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class MultiStream (public, protected, and private). Be aware that some 
+ * the class StreamStructuredDataI (public, protected, and private). Be aware that some 
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,30 +29,34 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "MultiStream.h"
+#include <limits.h>
 
 /*---------------------------------------------------------------------------*/
-/*                           Static definitions                              */
+/*                        Project header includes                            */
+/*---------------------------------------------------------------------------*/
+
+#include "gtest/gtest.h"
+#include "StreamStructuredDataITest.h"
+
+/*---------------------------------------------------------------------------*/
+/*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-/*                           Method definitions                              */
+/*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe {
-
-MultiStream::MultiStream() {
-    // Auto-generated constructor stub for MultiStream
-    // TODO Verify if manual additions are needed
+TEST(StreamStructuredDataIGTest, TestConstructor) {
+    StreamStructuredDataITest myStreamStructuredDataITest;
+    ASSERT_TRUE(myStreamStructuredDataITest.TestConstructor());
 }
 
-MultiStream::~MultiStream() {
-    // Auto-generated destructor stub for MultiStream
-    // TODO Verify if manual additions are needed
+TEST(StreamStructuredDataIGTest, TestSetStream) {
+    StreamStructuredDataITest myStreamStructuredDataITest;
+    ASSERT_TRUE(myStreamStructuredDataITest.TestSetStream());
 }
 
-bool MultiStream::IsValid() const {
-    return true;
-}
-
+TEST(StreamStructuredDataIGTest, TestGetStream) {
+    StreamStructuredDataITest myStreamStructuredDataITest;
+    ASSERT_TRUE(myStreamStructuredDataITest.TestGetStream());
 }

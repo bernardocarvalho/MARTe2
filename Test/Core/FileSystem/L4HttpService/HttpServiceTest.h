@@ -71,7 +71,11 @@ public:
 
     bool TestClientService_InvalidInterface();
 
+    bool TestClientService_FailReadHeader();
+
     bool TestServerCycle();
+
+
 };
 
 

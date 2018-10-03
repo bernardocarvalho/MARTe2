@@ -65,7 +65,7 @@ HttpService::~HttpService() {
     //delete embeddedMethod;
     // Auto-generated destructor stub for HttpService
     // TODO Verify if manual additions are needed
-    server.Close();
+    (void)server.Close();
 }
 
 bool HttpService::Initialise(StructuredDataI &data) {
@@ -198,10 +198,6 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                 }
                             }
 #endif
-                            if(!hi.IsValid()) {
-                                hi = webRoot;
-                            }
-
                             // save remainder of address
                             uint32 remAddrIndex=filter.GetRemainedAddrIndex();
                             StreamString urlTemp;

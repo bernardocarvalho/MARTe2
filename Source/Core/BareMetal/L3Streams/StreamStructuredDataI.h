@@ -1,7 +1,7 @@
 /**
- * @file MultiStreamTest.h
- * @brief Header file for class MultiStreamTest
- * @date 03 set 2018
+ * @file StreamStructuredDataI.h
+ * @brief Header file for class StreamStructuredDataI
+ * @date 27 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class MultiStreamTest
+ * @details This header file contains the declaration of the class StreamStructuredDataI
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MULTISTREAMTEST_H_
-#define MULTISTREAMTEST_H_
+#ifndef STREAMSTRUCTUREDDATAI_H_
+#define STREAMSTRUCTUREDDATAI_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,29 +31,54 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "MultiStream.h"
-
+#include "StructuredDataI.h"
+#include "BufferedStreamI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-using namespace MARTe;
+namespace MARTe{
 
-class MultiStreamTest {
+/**
+ * @brief Adds a stream to the StructuredDataI interface.
+ */
+class StreamStructuredDataI: public StructuredDataI {
 public:
-    MultiStreamTest();
 
-    virtual ~MultiStreamTest();
+    /**
+     * @brief Constructor
+     */
+    StreamStructuredDataI();
 
-    bool TestConstructor();
+    /**
+     * @brief Destructor
+     */
+    virtual ~StreamStructuredDataI();
 
-    bool TestIsValid();
+    /**
+     * @brief Sets the internal stream
+     * @param[in] streamIn the internal stream.
+     */
+    virtual void SetStream(BufferedStreamI &streamIn);
 
+    /**
+     * @brief Retrieves the internal stream.
+     * @return the internal stream.
+     */
+    virtual BufferedStreamI *GetStream() const;
+
+protected:
+
+    /**
+     * Pointer to the internal stream
+     */
+    BufferedStreamI *stream;
 };
+}
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* MULTISTREAMTEST_H_ */
+#endif /* SOURCE_CORE_BAREMETAL_L3STREAMS_STREAMSTRUCTUREDDATAI_H_ */
 

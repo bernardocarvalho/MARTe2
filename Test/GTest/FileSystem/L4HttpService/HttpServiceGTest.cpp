@@ -117,6 +117,11 @@ TEST(HttpServiceGTest, TestClientService_InvalidInterface) {
     ASSERT_TRUE(test.TestClientService_InvalidInterface());
 }
 
+TEST(HttpServiceGTest, TestClientService_FailReadHeader) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_FailReadHeader());
+}
+
 TEST(HttpServiceGTest, TestServerCycle) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestServerCycle());

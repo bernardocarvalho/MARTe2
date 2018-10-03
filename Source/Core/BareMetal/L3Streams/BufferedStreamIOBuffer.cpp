@@ -164,4 +164,19 @@ bool BufferedStreamIOBuffer::Flush(const uint32 neededSize) {
     return ret;
 }
 
+
+bool BufferedStreamIOBuffer::Refill(){
+
+    bool ret = true;
+
+    if (streamBuffered != NULL_PTR(BufferedStreamI*)) {
+        ret = streamBuffered->Refill();
+    }
+    else {
+        ret = IOBuffer::NoMoreDataToRead();
+    }
+    return ret;
+}
+
+
 }
