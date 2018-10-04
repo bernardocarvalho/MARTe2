@@ -167,5 +167,5 @@ bool StreamStructuredDataITest::TestSetStream() {
 }
 
 bool StreamStructuredDataITest::TestGetStream() {
-    return TestGetStream();
+    return TestSetStream();
 }

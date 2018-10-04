@@ -1,8 +1,8 @@
 /**
  * @file HttpProtocolTest.cpp
  * @brief Source file for class HttpProtocolTest
- * @date 17 set 2018
- * @author pc
+ * @date 17/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -190,7 +190,7 @@ bool HttpProtocolTest::TestReadHeader_Get1() {
     ret &= cdb->Read("Peer", peer);
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "www.nowhere123.com");
@@ -304,7 +304,7 @@ bool HttpProtocolTest::TestReadHeader_Get2_Commands() {
     }
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "www.nowhere123.com");
@@ -407,7 +407,7 @@ bool HttpProtocolTest::TestReadHeader_Put1() {
     ret &= cdb->Read("Peer", peer);
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "http://sookocheff.com");
@@ -498,7 +498,7 @@ bool HttpProtocolTest::TestReadHeader_Post1() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "api.evasrv.com");
@@ -640,7 +640,7 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "example.com");
@@ -773,7 +773,7 @@ bool HttpProtocolTest::TestReadHeader_Post2_Multiform_WrappedBoundary() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "example.com");
@@ -907,7 +907,7 @@ bool HttpProtocolTest::TestReadHeader_Post2_MultiformConsecutiveData() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "example.com");
@@ -1094,7 +1094,7 @@ bool HttpProtocolTest::TestReadHeader_Head() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Host", par);
         ret &= (par == "www.legaltorrents.com");
@@ -1186,7 +1186,7 @@ bool HttpProtocolTest::TestReadHeader_Reply() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Date", par);
         ret &= (par == "Mon, 27 Jul 2009 12:28:53 GMT");
@@ -1293,7 +1293,7 @@ bool HttpProtocolTest::TestReadHeader_IncompatibleHTTPVersion() {
     printf("%s\n", output.Buffer());
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Date", par);
         ret &= (par == "Mon, 27 Jul 2009 12:28:53 GMT");
@@ -1668,7 +1668,7 @@ static void clientJobWrite(HttpProtocolTest &tt) {
     if (tt.retVal) {
         StreamString stream;
         HttpProtocol test(socket);
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
 
@@ -1703,7 +1703,7 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         StreamString stream;
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Transfer-Encoding", "chunked");
 
         test.Write("Content-Type", "application/x-www-form-urlencoded");
@@ -1713,7 +1713,7 @@ static void clientJobWrite2(HttpProtocolTest &tt) {
         tt.retVal = test.WriteHeader(false, tt.command, &stream, "localhost");
         tt.eventSem.Wait();
         tt.eventSem.Reset();
-        test.MoveAbsolute("OutputHttpOptions");
+        test.MoveAbsolute("OutputOptions");
 
         test.Delete("Connection");
 
@@ -1778,7 +1778,7 @@ bool HttpProtocolTest::TestWriteHeader() {
         }
     }
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Content-Length", par);
         ret &= (par == "12");
@@ -1830,7 +1830,7 @@ bool HttpProtocolTest::TestWriteHeader2() {
     output.Printf("%@", *cdb);
     printf("%s\n", output.Buffer());
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Transfer-Encoding", par);
         ret &= (par == "chunked");
@@ -1857,7 +1857,7 @@ bool HttpProtocolTest::TestWriteHeader2() {
     printf("%s\n", remained.Buffer());
     printf("%s\n", remained2.Buffer());
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Content-Length", par);
         ret &= (par == "8");
@@ -1971,7 +1971,7 @@ static void clientJobWriteStructuredStored(HttpProtocolTest &tt) {
         stream.SetStream(string);
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         string.SetSize(0);
@@ -2046,7 +2046,7 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
     printf("%s\n", output.Buffer());
     /*
      if (ret) {
-     ret = cdb->MoveAbsolute("InputHttpOptions");
+     ret = cdb->MoveAbsolute("InputOptions");
      StreamString par;
      ret &= cdb->Read("Transfer-Encoding", par);
      ret &= (par == "chunked");
@@ -2089,7 +2089,7 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataStored() {
            "}");
 
     if (ret) {
-        ret = cdb->MoveAbsolute("InputHttpOptions");
+        ret = cdb->MoveAbsolute("InputOptions");
         StreamString par;
         ret &= cdb->Read("Content-Length", par);
         ret &= (par == "111");
@@ -2141,7 +2141,7 @@ static void clientJobWriteStructuredOnline(HttpProtocolTest &tt) {
         HttpProtocol test(socket);
 
         stream.SetStream(socket);
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Transfer-Encoding", "chunked");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
 
@@ -2217,7 +2217,7 @@ bool HttpProtocolTest::TestWriteHeader_StrucuredDataOnline() {
     printf("%s\n", output.Buffer());
     /*
      if (ret) {
-     ret = cdb->MoveAbsolute("InputHttpOptions");
+     ret = cdb->MoveAbsolute("InputOptions");
      StreamString par;
      ret &= cdb->Read("Transfer-Encoding", par);
      ret &= (par == "chunked");
@@ -2304,7 +2304,7 @@ static void clientJobWriteInvalid(HttpProtocolTest &tt) {
     if (tt.retVal) {
         StreamString stream;
         HttpProtocol test(socket);
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
 
@@ -2779,7 +2779,7 @@ static void clientJobWritePostNoContentType(HttpProtocolTest &tt) {
         StreamString stream;
         HttpProtocol test(socket);
 
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Transfer-Encoding", "chunked");
 
         stream.SetSize(0);
@@ -2851,7 +2851,7 @@ static void clientJobWritePostNoContentLength(HttpProtocolTest &tt) {
     if (tt.retVal) {
         StreamString stream;
         HttpProtocol test(socket);
-        test.CreateAbsolute("OutputHttpOptions");
+        test.CreateAbsolute("OutputOptions");
         test.Write("Content-Type", "application/x-www-form-urlencoded");
         test.MoveToRoot();
 

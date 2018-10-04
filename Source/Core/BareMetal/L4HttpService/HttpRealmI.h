@@ -1,8 +1,8 @@
 /**
  * @file HttpRealm.h
  * @brief Header file for class HttpRealm
- * @date 22 ago 2018
- * @author pc
+ * @date 22/08/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -40,17 +40,44 @@
 
 namespace MARTe {
 
+/**
+ * @brief HTTP Realm interface to implement a realm.
+ */
 class HttpRealmI: public Object {
 public:
+
+    /**
+     * @brief Default constructor
+     */
     HttpRealmI();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~HttpRealmI();
 
-    virtual bool Validate(const char8 * key,
-                          int32 command,
-                          uint32 ipNumber) = 0;
+    /**
+     * @brief Validates a key
+     * @param[in] key the key to be validated
+     * @param[in] command the HTTP command
+     * param[in] ipNumber the client ip number
+     * @return true if the key is valid, false otherwise
+     */
+    virtual bool Validate(const char8 * const key,
+                          const int32 command,
+                          const uint32 ipNumber) = 0;
 
+    /**
+     * @brief Asserts if the security digest is needed.
+     * @return true if the security digest is needed, false otherwise.
+     */
     virtual bool DigestSecurityNeeded() = 0;
 
+    /**
+     * @brief Retrieves the authentication request.
+     * @param[out[ message contains the authentication request in output.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool GetAuthenticationRequest(StreamString &message)= 0;
 
 };

@@ -1,8 +1,8 @@
 /**
  * @file ProtocolI.h
  * @brief Header file for class ProtocolI
- * @date 14 set 2018
- * @author pc
+ * @date 14/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -38,28 +38,76 @@
 
 namespace MARTe {
 
+/**
+ * @brief Interface of a protocol.
+ */
 class ProtocolI: public ConfigurationDatabase {
 public:
+    /**
+     * @brief Constructor
+     */
     ProtocolI();
+
+    /**
+     * @brief Destrucotr
+     */
     virtual ~ProtocolI();
 
+    /**
+     * @brief Reads the header.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool ReadHeader()=0;
 
+    /**
+     * @brief Writes the header.
+     * @param[in] isMessageCompleted specifies if the message is completed.
+     * @param[in] command the command.
+     * @param[in] payload the payload.
+     * @param[in] id the message id.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool WriteHeader(const bool isMessageCompleted,
                              const int32 command,
                              BufferedStreamI *payload,
                              const char8 * const id)=0;
 
+    /**
+     * @brief Sets the unmatched id.
+     * @param[in] unMatchedIdIn the unmatched id to set.
+     */
     virtual void SetUnmatchedId(const char8 *unMatchedIdIn)=0;
 
+    /**
+     * @brief Retrieves the unmatched id.
+     * @return the unmatched id.
+     */
     virtual void GetUnmatchedId(StreamString& unmatchedIdOut)=0;
 
+    /**
+     * @brief Retrieves the path.
+     * @param[out] pathOut the path in output.
+     */
     virtual void GetPath(StreamString& pathOut)=0;
 
+    /**
+     * @brief Retrieves the id.
+     * @param[out] pathOut the id in output.
+     */
     virtual void GetId(StreamString& idOut)=0;
 
+    /**
+     * @brief Retrieves the value of the input command \a commandName.
+     * @param[in] commandName the name of the command.
+     * @param[out] commandValue the value of the required command.
+     */
     virtual bool GetInputCommand(const char8 * const commandName, const AnyType &commandValue)=0;
 
+    /**
+     * @brief Sets the value of the output command \a commandName.
+     * @param[in] commandName the name of the command.
+     * @param[in] commandValue the value of the command to set.
+     */
     virtual bool SetOutputCommand(const char8 * const commandName, const AnyType &commandValue)=0;
 
 };

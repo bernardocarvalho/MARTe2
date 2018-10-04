@@ -1,8 +1,8 @@
 /**
  * @file HttpChunkedStreamTest.h
  * @brief Header file for class HttpChunkedStreamTest
- * @date 01 ott 2018
- * @author pc
+ * @date 01/10/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -39,19 +39,46 @@
 
 using namespace MARTe;
 
+/**
+ * @brief Tests the HttpChunkedStream methods
+ */
 class HttpChunkedStreamTest {
 public:
+
+    /**
+     * @brief Constructor.
+     */
     HttpChunkedStreamTest();
+
+    /**
+     * @brief Destructor.
+     */
     virtual ~HttpChunkedStreamTest();
 
+    /**
+     * @brief Tests the constructor
+     */
     bool TestConstructor();
 
+    /**
+     * @brief Tests the Flush method
+     */
     bool TestFlush();
 
+
+    /**
+     * @brief Tests the FinalChunk method
+     */
     bool TestFinalChunk();
 
+    /**
+     * @brief Tests the SetChunkMode method
+     */
     bool TestSetChunkMode();
 
+    /**
+     * @brief Tests the IsChunkMode method
+     */
     bool TestIsChunkMode();
 
 

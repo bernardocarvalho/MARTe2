@@ -1,8 +1,8 @@
 /**
  * @file HttpDefinitionTest.h
  * @brief Header file for class HttpDefinitionTest
- * @date 17 set 2018
- * @author pc
+ * @date 17/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -37,22 +37,50 @@
 /*---------------------------------------------------------------------------*/
 
 using namespace MARTe;
-
+/**
+ * @brief Tests the HttpDefinition methods
+ */
 class HttpDefinitionTest {
 public:
+
+    /**
+     * @brief Constructor
+     */
     HttpDefinitionTest();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~HttpDefinitionTest();
 
+    /**
+     * @brief Tests the HttpEncode method.
+     */
     bool TestHttpEncode();
 
+    /**
+     * @brief Tests the HexDecode method.
+     */
     bool TestHexDecode();
 
+    /**
+     * @brief Tests the HttpDecode method.
+     */
     bool TestHttpDecode();
 
+    /**
+     * @brief Tests the IsReplyCode method.
+     */
     bool TestIsReplyCode();
 
+    /**
+     * @brief Tests the GenerateReplyCode method.
+     */
     bool TestGenerateReplyCode();
 
+    /**
+     * @brief Tests the GetErrorCodeString method.
+     */
     bool TestGetErrorCodeString();
 };
 

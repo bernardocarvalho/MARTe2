@@ -71,11 +71,6 @@ TEST(HttpServiceGTest, TestInitialise_DefaultNListenConnections) {
     ASSERT_TRUE(test.TestInitialise_DefaultNListenConnections());
 }
 
-TEST(HttpServiceGTest, TestInitialise_DefaultRelyUrl) {
-    HttpServiceTest test;
-    ASSERT_TRUE(test.TestInitialise_DefaultRelyUrl());
-}
-
 TEST(HttpServiceGTest, TestInitialise_DefaultPort) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestInitialise_DefaultPort());

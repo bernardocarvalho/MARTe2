@@ -1,8 +1,8 @@
 /**
  * @file IOBufferJsonPrint.cpp
  * @brief Source file for class IOBufferJsonPrint
- * @date 06 set 2018
- * @author pc
+ * @date 06/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').

@@ -1,8 +1,8 @@
 /**
  * @file XMLPrinter.h
  * @brief Header file for class XMLPrinter
- * @date 07 set 2018
- * @author pc
+ * @date 07/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').

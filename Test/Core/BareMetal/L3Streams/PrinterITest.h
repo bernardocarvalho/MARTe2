@@ -1,8 +1,8 @@
 /**
  * @file PrinterITest.h
  * @brief Header file for class PrinterITest
- * @date 18 set 2018
- * @author pc
+ * @date 18/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -38,17 +38,35 @@
 
 using namespace MARTe;
 
+/**
+ * @brief Test the PrinterI methods
+ */
 class PrinterITest {
 public:
 
+    /**
+     * @brief Constructor
+     */
     PrinterITest();
 
+    /**
+     * @brief Destructor
+     */
     virtual ~PrinterITest();
 
+    /**
+     * @brief Tests the default constructor
+     */
     bool TestConstructor();
 
+    /**
+     * @brief Tests the full constructor
+     */
     bool TestFullConstructor();
 
+    /**
+     * @brief Tests the SetStream method
+     */
     bool TestSetStream();
 };
 

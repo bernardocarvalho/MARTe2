@@ -1,8 +1,8 @@
 /**
  * @file HttpProtocol.cpp
  * @brief Source file for class HttpProtocol
- * @date 14 set 2018
- * @author pc
+ * @date 14/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -33,7 +33,10 @@
 #include "HttpDefinition.h"
 #include "AdvancedErrorManagement.h"
 #include "BasicSocket.h"
-#include "DoubleBufferedStream.h"/*---------------------------------------------------------------------------*/
+#include "DoubleBufferedStream.h"
+
+
+/*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
@@ -47,13 +50,13 @@ const uint32 COPY_BUF_LEN = 1024u;
 
 //#define NULL_PTR(x) NULL
 
-HttpProtocol::HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn) :
+HttpProtocol::HttpProtocol(DoubleBufferedStream &outputStreamIn) :
         ProtocolI() {
     httpCommand = HttpDefinition::HSHCNone;
     httpVersion = 1000u;
     httpErrorCode = 200;
     keepAlive = true;
-    outputStream = &clientBufferedStreamIn;
+    outputStream = &outputStreamIn;
     lastUpdateTime = 0ull;
     /** unknown information length */
     unreadInput = -1;
@@ -368,8 +371,8 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
     if (ret) {
         ret = MoveToRoot();
         if (ret) {
-            if (!MoveRelative("OutputHttpOptions")) {
-                ret = CreateRelative("OutputHttpOptions");
+            if (!MoveRelative("OutputOptions")) {
+                ret = CreateRelative("OutputOptions");
             }
         }
         if (ret) {
@@ -610,8 +613,8 @@ bool HttpProtocol::StoreInputOptions() {
 
     if (ret) {
 //delete existing
-        (void) Delete("InputHttpOptions");
-        ret = CreateRelative("InputHttpOptions");
+        (void) Delete("InputOptions");
+        ret = CreateRelative("InputOptions");
 
     }
     if (ret) {
@@ -918,7 +921,7 @@ bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
     if (realm.IsValid()) {
         // get key. on failure exit
         StreamString authorisationKey;
-        if (MoveRelative("InputHttpOptions")) {
+        if (MoveRelative("InputOptions")) {
             if (Read("Authorization", authorisationKey)) {
                 BasicSocket* mySocket = dynamic_cast<BasicSocket *>(outputStream);
                 if (mySocket != NULL_PTR(BasicSocket*)) {

@@ -1,8 +1,8 @@
 /**
  * @file StreamStructuredData.h
  * @brief Header file for class StreamStructuredData
- * @date 14 set 2018
- * @author pc
+ * @date 14/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -50,177 +50,188 @@
 
 namespace MARTe {
 
-class NodeName: public ReferenceContainer {
+/**
+ * @brief A descriptor used to keep the status during the
+ * StreamStructuredData operations.
+ */
+class StreamStructuredDataNodeDes: public ReferenceContainer {
 public:
 
-    NodeName();
-    virtual ~NodeName();
+    /**
+     * @brief Constructor
+     */
+    StreamStructuredDataNodeDes();
 
+    /**
+     * @brief destructor
+     */
+    virtual ~StreamStructuredDataNodeDes();
+
+    /**
+     * Denote a node as closed.
+     */
     uint8 isClosed;
+
+    /**
+     * Stores the number of variables
+     * within a node.
+     */
     uint32 numberOfVariables;
 };
 
+/**
+ * @brief Implementation of a StructuredDataI interface mounted on a stream.
+ * @see StreamStructuredDataI
+ * @details This class allows to use the StructuredDataI interface without need to store data
+ * in memory, but streaming out directly on a chosen stream. Only the write operations are
+ * allowed.
+ * @details This template version allows to choose a printer (that must be a descendant of PrinterI)
+ * to print on the stream using the database language implemented by the printer object.
+ * @details All the StructuredDataI read operations will return false because this object is intended to
+ * be used only to write out data. Since the write operations are directly flushed on the internal stream,
+ * it is not allowed to move or create new nodes backward in the database. For Instance in these sequence of operations:\n
+ *   CreateAbsolute("A.B") //allowed\n
+ *   CreateAbsolute("A.C") //allowed but now B is closed\n
+ *   CreateAbsolute("A.B.D") //not allowed: it is not possible return back into B
+ */
 template<class Printer>
 class StreamStructuredData: public StreamStructuredDataI {
 
 public:
 
+    /**
+     * @brief Default Constructor
+     */
     StreamStructuredData();
 
+    /**
+     * @brief Constructor.
+     * @details Sets the internal stream.
+     * @param[in] streamIn is the internal stream.
+     */
     StreamStructuredData(BufferedStreamI &streamIn);
 
+    /**
+     * @brief Destructor
+     */
     virtual ~StreamStructuredData();
 
+    /**
+     * @brief Sets the internal stream.
+     * @param[in] streamIn is the internal stream.
+     */
     virtual void SetStream(BufferedStreamI &streamIn);
 
     /**
-     * @brief Reads a previously stored AnyType. The node with this name has to be a child of the current node.
-     * @param[in] name the name of the leaf used to store the AnyType \a value.
-     * @param[out] value the read AnyType will be stored in this parameter. If the AnyType
-     * cannot be successfully read its value will be set to VoidType and the function will return false.
-     * @return true if the AnyType is successfully read.
-     * @pre
-     *   GetType(name).GetTypeDescriptor() != VoidType
+     * @see StructuredDataI::Read.
+     * @details Not implemented. It returns false.
      */
     virtual bool Read(const char8 * const name,
                       const AnyType &value);
 
     /**
-     * @brief Gets the type of a previously stored AnyType.
-     * @param[in] name the name of the leaf used to store the AnyType \a value.
-     * @return the type of the stored AnyType or VoidType if this \a name does not exist.
+     * @see StructuredDataI::GetType.
+     * @details Not implemented. It returns false.
      */
     virtual AnyType GetType(const char8 * const name);
 
     /**
-     * @brief Writes an AnyType against the provided \a name and adds it to the current node.
-     * @details If the name already exists the value will be overridden.
-     * @param[in] name the name of the leaf against which the AnyType will be stored.
-     * @param[in] value the AnyType to store.
-     * @return true if the AnyType is successfully stored.
-     * @pre
-     *   name != NULL &&
-     *   StringHelper::Length(name) > 0
+     * @see StructuredDataI::Write.
      */
     virtual bool Write(const char8 * const name,
                        const AnyType &value);
 
     /**
-     * @brief Copies the content of the current node to the provided destination.
-     * @details A deep copy of the contents is recursively performed.
-     * @param[out] destination where the database will be copied to.
-     * @return true if the copy is successful.
+     * @see StructuredDataI::GetType.
+     * @details Not implemented. It returns false.
      */
     virtual bool Copy(StructuredDataI &destination);
 
     /**
-     * @brief Adds a node to the current node.
-     * @param[in] node a reference to the node to add.
-     * @return true if the node is successfully added.
-     * @post
-     *   If successful: the current node will be node
-     *   If unsuccessful: the current node will not be changed
+     * @see StructuredDataI::AddToCurrentNode.
      */
     virtual bool AddToCurrentNode(Reference node);
 
     /**
-     * @brief Moves the current node to the root node.
-     * @return true if the move is successful and the current node is now the root node.
+     * @see StructuredDataI::MoveToRoot.
      */
     virtual bool MoveToRoot();
 
     /**
-     * @brief Moves to the generations-th node containing this node.
-     * @param[in] generations number of parent nodes to climb.
-     * @return true if the move is successful and the current node is now the parent node which is n-generations above.
-     * @pre
-     *   generations > 0
+     * @see StructuredDataI::MoveToAncestor.
      */
     virtual bool MoveToAncestor(uint32 generations);
 
     /**
-     * @brief Moves the current node to a new node address specified by an absolute path.
-     * @param[in] path a path with the node address.
-     * @return true if the move was successful and the current node is the node described by \a path. If unsuccessful the current node
-     * is not changed.
+     * @see StructuredDataI::MoveAbsolute.
      */
     virtual bool MoveAbsolute(const char8 * const path);
 
     /**
-     * @brief Moves the current node to an address specified by a path relative to the current node address.
-     * @param[in] path a path with the node address.
-     * @return true if the move was successful and the current node is the node described by \a path. If unsuccessful the current node
-     * is not changed.
+     * @see StructuredDataI::MoveRelative.
      */
     virtual bool MoveRelative(const char8 * const path);
 
     /**
-     * @brief Moves the current node the child with idx \a childIdx.
-     * @param[in] childIdx the index of the child where to move to.
-     * @return true if the move was successful and the current node is the node at index \a .childIdx If unsuccessful the current node
-     * is not changed.
+     * @see StructuredDataI::MoveToChild.
      */
     virtual bool MoveToChild(const uint32 childIdx);
 
     /**
-     * @brief Create a new series of nodes based on the provided absolute path.
-     * @param[in] path the path of nodes to be created.
-     * @return true if the nodes were successfully created and if the path does not already exist.
-     * @pre
-     *   MoveAbsolute(path) == false
-     * @post
-     *   If successful: the current node will be the last node specified in the path.
-     *   If unsuccessful: the current node will not be changed.
+     * @see StructuredDataI::CreateAbsolute.
      */
     virtual bool CreateAbsolute(const char8 * const path);
 
     /**
-     * @brief Create a new series of nodes based on the provided relative path.
-     * @param[in] path the path of nodes to be created, relative to the current node.
-     * @return true if the nodes were successfully created and if the path does not already exist.
-     * @pre
-     *   MoveRelative(path) == false
-     * @post
-     *   If successful: the current node will be the last node specified in the path.
-     *   If unsuccessful: the current node will not be changed.
+     * @see StructuredDataI::CreateRelative.
      */
     virtual bool CreateRelative(const char8 * const path);
 
     /**
-     * @brief Deletes the node with \a name under the current node (and as a consequence all the nodes underneath).
-     * @param[in] name the name of the node to be deleted.
-     * @return true if the current node is successfully removed.
+     * @see StructuredDataI::Delete.
      */
     virtual bool Delete(const char8 * const name);
 
     /**
-     * @brief Retrieves the name of the current node.
-     * @return the name of the current node.
+     * @see StructuredDataI::GetName.
      */
     virtual const char8 *GetName();
 
     /**
-     * @brief Retrieves the name of the child in the specified index.
-     * @param[in] index is the index of the current node child.
-     * @return the name of the child in the specified index.
+     * @see StructuredDataI::GetChildName.
      */
     virtual const char8 *GetChildName(const uint32 index);
 
     /**
-     * @brief Retrieves the number of children of the current node.
-     * @return the number of children of the current node.
+     * @see StructuredDataI::GetNumberOfChildren.
      */
     virtual uint32 GetNumberOfChildren();
 
 protected:
 
+    /**
+     * Stores the last path accessed.
+     */
     StreamString currentPath;
-    ReferenceT<NodeName> treeDescriptor;
-    ReferenceT<NodeName> currentNode;
 
-    StreamString middleBuffer;
+    /**
+     * The root descriptor
+     */
+    ReferenceT<StreamStructuredDataNodeDes> treeDescriptor;
 
+    /**
+     * The current node descriptor
+     */
+    ReferenceT<StreamStructuredDataNodeDes> currentNode;
+
+    /**
+     * The printer that defines the database language
+     */
     Printer printer;
+
+    /**
+     * Used to check if a block is closed or not.
+     */
     bool blockCloseState;
 };
 
@@ -316,7 +327,7 @@ bool StreamStructuredData<Printer>::Copy(StructuredDataI &destination) {
 
 template<class Printer>
 bool StreamStructuredData<Printer>::AddToCurrentNode(Reference node) {
-    ReferenceT<NodeName> toAdd = node;
+    ReferenceT<StreamStructuredDataNodeDes> toAdd = node;
     bool ret = toAdd.IsValid();
     if (ret) {
         ret = currentNode->Insert(node);
@@ -337,7 +348,7 @@ bool StreamStructuredData<Printer>::MoveToRoot() {
     uint32 pathSize = path.Size();
     bool ret = (pathSize > 0u);
     for (uint32 i = 0u; (i < pathSize) && (ret); i++) {
-        ReferenceT<NodeName> ref = path.Get(pathSize - i - 1u);
+        ReferenceT<StreamStructuredDataNodeDes> ref = path.Get(pathSize - i - 1u);
         ret = ref.IsValid();
         if (ret) {
             ref->isClosed = 1u;
@@ -390,7 +401,7 @@ bool StreamStructuredData<Printer>::MoveToAncestor(uint32 generations) {
                 }
             }
             else {
-                ReferenceT<NodeName> ref = path.Get(pathSize - i + goodOnes - 1u);
+                ReferenceT<StreamStructuredDataNodeDes> ref = path.Get(pathSize - i + goodOnes - 1u);
                 ret = (ref.IsValid());
                 if (ret) {
                     ref->isClosed = 1u;
@@ -423,7 +434,7 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
     uint32 pathDestSize = resultDest.Size();
     bool ret = (pathDestSize > 0u);
     if (ret) {
-        ReferenceT<NodeName> ref = resultDest.Get(pathDestSize - 1u);
+        ReferenceT<StreamStructuredDataNodeDes> ref = resultDest.Get(pathDestSize - 1u);
         ret = (ref.IsValid());
         if (ret) {
             ret = (ref->isClosed == 0u);
@@ -445,7 +456,7 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
 
                 StreamString token;
                 curPathTemp.GetToken(token, ".", terminator);
-                ReferenceT<NodeName> ref = resultDest.Get(i);
+                ReferenceT<StreamStructuredDataNodeDes> ref = resultDest.Get(i);
                 ret = (ref.IsValid());
                 if (ret) {
                     StreamString nodeName = ref->GetName();
@@ -460,7 +471,7 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
             bool blocksClosed = (exitIndex < pathSize);
             if (pathSize > 0u) {
                 for (uint32 j = (pathSize - 1u); (j >= exitIndex) && (ret); j--) {
-                    ReferenceT<NodeName> ref = result.Get(j);
+                    ReferenceT<StreamStructuredDataNodeDes> ref = result.Get(j);
                     ret = (ref.IsValid());
                     if (ret) {
                         ref->isClosed = 1u;
@@ -475,7 +486,7 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
 
             //open braces
             for (uint32 j = exitIndex; (j < pathDestSize) && (ret); j++) {
-                ReferenceT<NodeName> ref = resultDest.Get(j);
+                ReferenceT<StreamStructuredDataNodeDes> ref = resultDest.Get(j);
                 ret = (ref.IsValid());
                 if (ret) {
                     if (j == exitIndex) {
@@ -496,8 +507,10 @@ bool StreamStructuredData<Printer>::MoveAbsolute(const char8 * const path) {
                     //close deeply also the children
                     uint32 curSize = currentNode->Size();
                     for (uint32 j = 0u; (j < curSize) && (ret); j++) {
-                        Reference ref = currentNode->Get(j);
-                        ret = currentNode->Delete(ref);
+                        ReferenceT<StreamStructuredDataNodeDes> ref = currentNode->Get(j);
+                        if (ref.IsValid()) {
+                            ret = currentNode->Delete(ref);
+                        }
                     }
                 }
                 if (ret) {
@@ -530,7 +543,7 @@ bool StreamStructuredData<Printer>::MoveRelative(const char8 * const path) {
 template<class Printer>
 bool StreamStructuredData<Printer>::MoveToChild(const uint32 childIdx) {
 
-    ReferenceT<NodeName> child = currentNode->Get(childIdx);
+    ReferenceT<StreamStructuredDataNodeDes> child = currentNode->Get(childIdx);
     bool ret = child.IsValid();
     if (ret) {
         ret = (child->isClosed == 0u);
@@ -558,7 +571,7 @@ template<class Printer>
 bool StreamStructuredData<Printer>::CreateAbsolute(const char8 * const path) {
     StreamString pathStr = path;
     pathStr.Seek(0u);
-    ReferenceT<NodeName> node = treeDescriptor;
+    ReferenceT<StreamStructuredDataNodeDes> node = treeDescriptor;
 
     //tokenize the path
     char8 terminator;
@@ -568,7 +581,7 @@ bool StreamStructuredData<Printer>::CreateAbsolute(const char8 * const path) {
         uint32 nodeSize = node->Size();
         bool found = false;
         for (uint32 i = 0u; (i < nodeSize) && (ret) && (!found); i++) {
-            ReferenceT<NodeName> child = node->Get(i);
+            ReferenceT<StreamStructuredDataNodeDes> child = node->Get(i);
             ret = child.IsValid();
             if (ret) {
                 found = (token == child->GetName());
@@ -579,7 +592,7 @@ bool StreamStructuredData<Printer>::CreateAbsolute(const char8 * const path) {
         }
         if ((ret) && (!found)) {
             //create the node
-            ReferenceT<NodeName> newNode(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+            ReferenceT<StreamStructuredDataNodeDes> newNode(GlobalObjectsDatabase::Instance()->GetStandardHeap());
             ret = newNode.IsValid();
             if (ret) {
                 newNode->SetName(token.Buffer());
@@ -623,7 +636,7 @@ const char8 *StreamStructuredData<Printer>::GetChildName(const uint32 index) {
 
     const char8 * ret = NULL;
     if (index < size) {
-        ReferenceT<NodeName> child = currentNode->Get(index);
+        ReferenceT<StreamStructuredDataNodeDes> child = currentNode->Get(index);
         if (child.IsValid()) {
             ret = child->GetName();
         }

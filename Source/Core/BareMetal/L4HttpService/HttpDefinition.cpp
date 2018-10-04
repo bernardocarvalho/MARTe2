@@ -1,8 +1,8 @@
 /**
  * @file HttpDefinition.cpp
  * @brief Source file for class HttpDefinition
- * @date 17 ago 2018
- * @author pc
+ * @date 17/08/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').

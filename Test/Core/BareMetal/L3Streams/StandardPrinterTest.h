@@ -1,8 +1,8 @@
 /**
  * @file StandardPrinterTest.h
  * @brief Header file for class StandardPrinterTest
- * @date 18 set 2018
- * @author pc
+ * @date 18/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -36,35 +36,86 @@
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 using namespace MARTe;
+
+/**
+ * @brief Tests the StandardPrinter methods
+ */
 class StandardPrinterTest {
 public:
+
+    /**
+     * @brief Constructor
+     */
     StandardPrinterTest();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~StandardPrinterTest();
 
+    /**
+     * @brief Tests the PrintOpenMatrix method
+     */
     bool TestPrintOpenMatrix();
 
+    /**
+     * @brief Tests the PrintCloseMatrix method
+     */
     bool TestPrintCloseMatrix();
 
+    /**
+     * @brief Tests the PrintScalarSeparator method
+     */
     bool TestPrintScalarSeparator();
 
+    /**
+     * @brief Tests the PrintVectorSeparator method
+     */
     bool TestPrintVectorSeparator();
 
+    /**
+     * @brief Tests the PrintVariableSeparator method
+     */
     bool TestPrintVariableSeparator();
 
+    /**
+     * @brief Tests the PrintBlockSeparator method
+     */
     bool TestPrintBlockSeparator();
 
+    /**
+     * @brief Tests the PrintOpenVector method
+     */
     bool TestPrintOpenVector();
 
+    /**
+     * @brief Tests the PrintCloseVector method
+     */
     bool TestPrintCloseVector();
 
+    /**
+     * @brief Tests the PrintOpenBlock method
+     */
     bool TestPrintOpenBlock();
 
+    /**
+     * @brief Tests the PrintCloseBlock method
+     */
     bool TestPrintCloseBlock();
 
+    /**
+     * @brief Tests the PrintOpenAssignment method
+     */
     bool TestPrintOpenAssignment();
 
+    /**
+     * @brief Tests the PrintCloseAssignment method
+     */
     bool TestPrintCloseAssignment();
 
+    /**
+     * @brief Tests the PrintVariable method
+     */
     bool TestPrintVariable();
 
 };

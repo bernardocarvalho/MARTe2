@@ -38,16 +38,35 @@
 
 using namespace MARTe;
 
+/**
+ * @brief Tests the StreamStructuredDataI methods.
+ */
 class StreamStructuredDataITest {
 public:
+
+    /**
+     * @brief Constructor.
+     */
     StreamStructuredDataITest();
 
+    /**
+     * @brief Destructor.
+     */
     virtual ~StreamStructuredDataITest();
 
+    /**
+     * @brief Tests the constructor.
+     */
     bool TestConstructor();
 
+    /**
+     * @brief Tests the SetStream method.
+     */
     bool TestSetStream();
 
+    /**
+     * @brief Tests the GetStream method.
+     */
     bool TestGetStream();
 
 

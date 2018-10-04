@@ -46,12 +46,18 @@
 
 using namespace MARTe;
 
+/**
+ * @brief A structure used to test the StreamStructuredData methods
+ */
 struct StreamStructuredDataTestWriteStruct {
     AnyType *toWrite;
     const char8 ** varnames;
     StreamString desResult;
 };
 
+/**
+ * @brief A structure used to test the StreamStructuredData methods
+ */
 struct StreamStructuredDataTestAddToCurrentNodeStruct {
     Reference toAdd;
     const char8 ** movements;
@@ -61,42 +67,102 @@ struct StreamStructuredDataTestAddToCurrentNodeStruct {
     uint32 *index;
 };
 
+
+/**
+ * @brief Tests the StreamStructuredData methods
+ */
 template<class Printer>
 class StreamStructuredDataTest {
 public:
+
+    /**
+     * @brief Constructor
+     */
     StreamStructuredDataTest();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~StreamStructuredDataTest();
 
+    /**
+     * @brief Tests the Read method
+     */
     bool TestRead();
 
+    /**
+     * @brief Tests the GetType method
+     */
     bool TestGetType();
 
+    /**
+     * @brief Tests the Write method
+     */
     bool TestWrite(StreamStructuredDataTestWriteStruct *table);
 
+    /**
+     * @brief Tests the Copy method
+     */
     bool TestCopy();
 
+    /**
+     * @brief Tests the AddToCurrentNode method
+     */
     bool TestAddToCurrentNode(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the MoveToRoot method
+     */
     bool TestMoveToRoot(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the MoveToAncestor method
+     */
     bool TestMoveToAncestor(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the MoveAbsolute method
+     */
     bool TestMoveAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the MoveRelative method
+     */
     bool TestMoveRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the MoveToChild method
+     */
     bool TestMoveToChild(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the CreateAbsolute method
+     */
     bool TestCreateAbsolute(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the CreateRelative method
+     */
     bool TestCreateRelative(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the Delete method
+     */
     bool TestDelete();
 
+    /**
+     * @brief Tests the GetName method
+     */
     bool TestGetName(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the GetChildName method
+     */
     bool TestGetChildName(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
+    /**
+     * @brief Tests the GetNumberOfChildren method
+     */
     bool TestGetNumberOfChildren(StreamStructuredDataTestAddToCurrentNodeStruct *table);
 
 };

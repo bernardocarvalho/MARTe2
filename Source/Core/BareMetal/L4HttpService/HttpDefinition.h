@@ -1,8 +1,8 @@
 /**
  * @file HttpDefinition.h
  * @brief Header file for class HttpDefinition
- * @date 17 ago 2018
- * @author pc
+ * @date 17/08/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -37,71 +37,73 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
+
+/**
+ * @brief Functions and constants utilities for the HTTP protocol implementation
+ */
 namespace HttpDefinition {
-/** read while available (no content length specified)*/
+/**
+ * No content length specified
+ */
 static const int32 HTTPNoContentLengthSpecified = -2;
 
-/** the status of HttpStream */
-//HSOperatingMode
-/** operates on the string both read and write */
-static const int32 HSOMWriteToString = 0x0;
 
-/** final mode: only write, and use the client direct stream */
-static const int32 HSOMWriteToClient = 0x1;
-
-/** operates read and write with CDB  */
-static const int32 HSOMWriteToCDB = 0x2;
-
-/** no more reading or writing   */
-static const int32 HSOMCompleted = 0x4;
-
-/** the command requested via HTTP */
-//HSHttpCommand
-/** none */
+/**
+ * None command
+ */
 static const int32 HSHCNone = 0;
 
-/** HTTP GET */
+/**
+ * HTTP GET command
+ */
 static const int32 HSHCGet = 1;
 
-/** HTTP PUT */
+/**
+ * HTTP PUT command
+ */
 static const int32 HSHCPut = 2;
 
-/** HTTP POST */
+/**
+ * HTTP POST command
+ */
 static const int32 HSHCPost = 3;
 
-/** HTTP HEAD */
+/**
+ * HTTP HEAD command
+ */
 static const int32 HSHCHead = 4;
 
-/** HTTP REPLY */
+/**
+ * HTTP REPLY command
+ */
 static const int32 HSHCReply = 0x10000000;
 
-/** HTTP REPLY OK*/
+/**
+ * HTTP REPLY OK command
+ */
 static const int32 HSHCReplyOK = (HSHCReply + 200);
 
-/** HTTP REPLY AUTH REQUIURED*/
+/**
+ * HTTP REPLY AUTH REQUIURED command
+ */
 static const int32 HSHCReplyAUTH = (HSHCReply + 401);
 
 
-// UrlProtocols
-/** NONE  */
-static const int32 URLP_NONE = 0;
-
-/** HTTP  */
-static const int32 URLP_HTTP = 1;
-
-/** FTP */
-static const int32 URLP_FTP = 2;
-
-/** FILE */
-static const int32 URLP_FILE = 3;
-
-
-/** create a HSHttpCommand relative toa reply with a specfic ErrorCode */
+/**
+ * @brief Creates a HSHttpCommand relative to reply with a specific ErrorCode
+ * @param[in] httpErrorCode the received HTTP error code.
+ * @return the reply value associated to \a httpErrorCode.
+ */
 static inline int32 GenerateReplyCode(const int32 httpErrorCode) {
     return (httpErrorCode + HSHCReply);
 }
 
-/** create a HSHttpCommand relative toa reply with a specfic ErrorCode */
+/**
+ * @brief Asserts if the command in input is a reply or not.
+ * @param[in] command the command to be checked.
+ * param[out] httpErrorCode contains the reply code in output if \a command is a reply.
+ * @return true if command is a reply, false otherwise.
+ */
 static inline bool IsReplyCode(const int32 command,
                                int32 &httpErrorCode) {
 
@@ -113,7 +115,9 @@ static inline bool IsReplyCode(const int32 command,
 }
 
 /**
- * @return the HTTP string corresponding to the error code
+ * @brief return the HTTP string corresponding to the error code.
+ * @param[in] httpErrorCode the error code in input.
+ * @return the HTTP string corresponding to \a httpErrorCode.
  */
 static inline const char8 *GetErrorCodeString(const int32 httpErrorCode) {
     const char8 *ret = "Unknown code";
@@ -189,11 +193,28 @@ static inline const char8 *GetErrorCodeString(const int32 httpErrorCode) {
 
 
 
+/**
+ * @brief Encodes the url in input.
+ * @param[out] converted is the encoded url.
+ * @param[in] original is the url in input to be encoded.
+ */
 bool HttpEncode(BufferedStreamI &converted,
                 const char8 * const original);
 
+
+/**
+ * @brief Converts the hex value in the input character to a decimal value.
+ * @param[in] c is the character in input containing '0' to '9' and 'A' to 'F'.
+ * @return -1 if c does not represent a valid hex number, the converted decimal
+ * value otherwise.
+ */
 int32 HexDecode(const char8 c);
 
+/**
+ * @brief Deodes the url in input.
+ * @param[out] destination is the decoded url.
+ * @param[in] source is the encoded url in input to be decoded.
+ */
 bool HttpDecode(BufferedStreamI &destination,
                 BufferedStreamI &source);
 

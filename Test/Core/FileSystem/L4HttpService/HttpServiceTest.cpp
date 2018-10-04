@@ -1,8 +1,8 @@
 /**
  * @file HttpServiceTest.cpp
  * @brief Source file for class HttpServiceTest
- * @date 12 set 2018
- * @author pc
+ * @date 12/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -61,8 +61,6 @@ HttpServiceTestService    ();
 
     uint32 GetPort();
 
-    const char8 *GetHttpRelayURL();
-
     ReferenceT<ReferenceContainer> GetWebRoot();
 
     const char8 *GetWebRootPath();
@@ -80,10 +78,6 @@ HttpServiceTestService::~HttpServiceTestService() {
 
 uint32 HttpServiceTestService::GetPort() {
     return port;
-}
-
-const char8 *HttpServiceTestService::GetHttpRelayURL() {
-    return httpRelayURL.Buffer();
 }
 
 ReferenceT<ReferenceContainer> HttpServiceTestService::GetWebRoot() {
@@ -227,7 +221,7 @@ HttpServiceTestWebRoot    ();
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
-    virtual int32 GetReplyCode(StructuredDataI &data);
+    virtual int32 GetReplyCode(ProtocolI &data);
 
 private:
     void RecCallback(ReferenceT<ReferenceContainer> ref,
@@ -274,8 +268,8 @@ bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
     StreamString *hStream = (&hString);
 
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
-        protocol.CreateAbsolute("OutputHttpOptions");
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
     }
     protocol.Write("Content-Type", "text/html");
 
@@ -302,7 +296,7 @@ bool HttpServiceTestWebRoot::GetAsText(StreamI &stream,
     return true;
 }
 
-int32 HttpServiceTestWebRoot::GetReplyCode(StructuredDataI &data) {
+int32 HttpServiceTestWebRoot::GetReplyCode(ProtocolI &data) {
     return HttpDefinition::HSHCReplyOK;
 }
 
@@ -320,7 +314,7 @@ HttpServiceTestClassLister    ();
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
-    virtual int32 GetReplyCode(StructuredDataI &data);
+    virtual int32 GetReplyCode(ProtocolI &data);
 
 };
 
@@ -332,7 +326,7 @@ HttpServiceTestClassLister::~HttpServiceTestClassLister() {
 
 }
 
-int32 HttpServiceTestClassLister::GetReplyCode(StructuredDataI &data) {
+int32 HttpServiceTestClassLister::GetReplyCode(ProtocolI &data) {
     return HttpDefinition::HSHCReplyOK;
 }
 
@@ -354,8 +348,8 @@ bool HttpServiceTestClassLister::GetAsText(StreamI &stream,
 
     printf("\nclass name = %s\n", className.Buffer());
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
-        protocol.CreateAbsolute("OutputHttpOptions");
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
     }
     protocol.Write("Content-Type", "text/html");
 
@@ -528,7 +522,7 @@ HttpServiceTestClassTest1    ();
 
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
-    virtual int32 GetReplyCode(StructuredDataI &data);
+    virtual int32 GetReplyCode(ProtocolI &data);
 
 };
 
@@ -561,8 +555,8 @@ bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
     StreamString *hStream = (&hString);
 
     hStream->SetSize(0);
-    if (!protocol.MoveAbsolute("OutputHttpOptions")) {
-        protocol.CreateAbsolute("OutputHttpOptions");
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
     }
     protocol.Write("Content-Type", "text/html");
 
@@ -581,7 +575,7 @@ bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
     return true;
 }
 
-int32 HttpServiceTestClassTest1::GetReplyCode(StructuredDataI &data) {
+int32 HttpServiceTestClassTest1::GetReplyCode(ProtocolI &data) {
     return HttpDefinition::HSHCReplyOK;
 }
 
@@ -718,7 +712,6 @@ bool HttpServiceTest::TestConstructor() {
     HttpServiceTestService httpserver;
     bool ret = (httpserver.GetPort() == 0u);
 
-    ret &= (StringHelper::Compare(httpserver.GetHttpRelayURL(), "") == 0);
     ret &= (StringHelper::Compare(httpserver.GetWebRootPath(), "") == 0);
     ret &= httpserver.GetListenMaxConnections() == 0;
     ret &= !httpserver.GetWebRoot().IsValid();
@@ -757,7 +750,6 @@ bool HttpServiceTest::TestInitialise() {
         if (ret) {
             ret = test.GetPort() == 4444;
         }
-        ret &= (StringHelper::Compare(test.GetHttpRelayURL(), "www.google.it") == 0);
         ret &= (StringHelper::Compare(test.GetWebRootPath(), "WebRoot") == 0);
         ret &= test.GetListenMaxConnections() == 3;
 
@@ -797,7 +789,6 @@ bool HttpServiceTest::TestInitialise_DefaultWebRoot() {
         if (ret) {
             ret = test.GetPort() == 4444;
         }
-        ret &= (StringHelper::Compare(test.GetHttpRelayURL(), "www.google.it") == 0);
         ret &= (StringHelper::Compare(test.GetWebRootPath(), "") == 0);
         ret &= test.GetListenMaxConnections() == 3;
 
@@ -865,49 +856,8 @@ bool HttpServiceTest::TestInitialise_DefaultNListenConnections() {
         if (ret) {
             ret = test.GetPort() == 4444;
         }
-        ret &= (StringHelper::Compare(test.GetHttpRelayURL(), "www.google.it") == 0);
         ret &= (StringHelper::Compare(test.GetWebRootPath(), "WebRoot") == 0);
         ret &= test.GetListenMaxConnections() == 255;
-
-        ret &= !test.GetWebRoot().IsValid();
-    }
-
-    return ret;
-}
-
-bool HttpServiceTest::TestInitialise_DefaultRelyUrl() {
-    StreamString configStream = "+WebRoot = {\n"
-            "Class = ReferenceContainer\n"
-            "}\n"
-            "+HttpServerTest = {\n"
-            "Class = HttpService\n"
-            "WebRoot=\"WebRoot\"\n"
-            "Port=4444\n"
-            "ListenMaxConnections = 3\n"
-            "Timeout = 0\n"
-            "MaxNumberOfThreads=100\n"
-            "MinNumberOfThreads=1\n"
-            "}";
-
-    ConfigurationDatabase cdb;
-    configStream.Seek(0);
-    StandardParser parser(configStream, cdb);
-
-    bool ret = parser.Parse();
-
-    HttpServiceTestService test;
-
-    if (ret) {
-        ret = cdb.MoveAbsolute("+HttpServerTest");
-        if (ret) {
-            ret = test.Initialise(cdb);
-        }
-        if (ret) {
-            ret = test.GetPort() == 4444;
-        }
-        ret &= (StringHelper::Compare(test.GetHttpRelayURL(), "http://localhost:8080") == 0);
-        ret &= (StringHelper::Compare(test.GetWebRootPath(), "WebRoot") == 0);
-        ret &= test.GetListenMaxConnections() == 3;
 
         ret &= !test.GetWebRoot().IsValid();
     }
@@ -945,7 +895,6 @@ bool HttpServiceTest::TestInitialise_DefaultPort() {
         if (ret) {
             ret = test.GetPort() == 80;
         }
-        ret &= (StringHelper::Compare(test.GetHttpRelayURL(), "www.google.it") == 0);
         ret &= (StringHelper::Compare(test.GetWebRootPath(), "WebRoot") == 0);
         ret &= test.GetListenMaxConnections() == 3;
 

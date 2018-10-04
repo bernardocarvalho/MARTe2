@@ -1,8 +1,8 @@
 /**
  * @file HttpService.cpp
  * @brief Source file for class HttpService
- * @date 24 ago 2018
- * @author pc
+ * @date 24/08/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -81,11 +81,6 @@ bool HttpService::Initialise(StructuredDataI &data) {
         if (!data.Read("Port", port)) {
             port = 80u;
             REPORT_ERROR(ErrorManagement::Information, "Port not specified: using default %d", port);
-        }
-
-        if (!data.Read("HttpRelayURL", httpRelayURL)) {
-            httpRelayURL = "http://localhost:8080";
-            REPORT_ERROR(ErrorManagement::Information, "Port not specified: using default %s", httpRelayURL.Buffer());
         }
 
         if (!data.Read("ListenMaxConnections", listenMaxConnections)) {
@@ -221,13 +216,13 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                 if (realm.IsValid()) {
                                     if (!hstream.SecurityCheck(realm)) {
                                         AnyType args[]= {"Content-Type"};
-                                        hstream.SwitchPrintAndCommit("OutputHttpOptions", "text/html", "%s", args);
+                                        hstream.SwitchPrintAndCommit("OutputOptions", "text/html", "%s", args);
 
                                         StreamString realmMsg;
                                         realm->GetAuthenticationRequest(realmMsg);
                                         args[0]=realmMsg.Buffer();
 
-                                        hstream.SwitchPrintAndCommit("OutputHttpOptions", "WWW-Authenticate", "%s", args);
+                                        hstream.SwitchPrintAndCommit("OutputOptions", "WWW-Authenticate", "%s", args);
 
                                         hstream.Printf("%s","<HTML><HEAD>\n"
                                                 "<TITLE>401 Authorization Required</TITLE>\n"
@@ -255,8 +250,8 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                 if (err.ErrorsCleared()) {
                                     int32 replyCode=hi->GetReplyCode(hprotocol);
 
-                                    if(!hprotocol.MoveAbsolute("OutputHttpOptions")) {
-                                        err=!(hprotocol.CreateAbsolute("OutputHttpOptions"));
+                                    if(!hprotocol.MoveAbsolute("OutputOptions")) {
+                                        err=!(hprotocol.CreateAbsolute("OutputOptions"));
                                     }
                                     if (err.ErrorsCleared()) {
                                         err=!(hprotocol.Write("Transfer-Encoding","chunked"));

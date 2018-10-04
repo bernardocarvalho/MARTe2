@@ -1,8 +1,8 @@
 /**
  * @file DataExportI.h
  * @brief Header file for class DataExportI
- * @date 14 set 2018
- * @author pc
+ * @date 14/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -40,17 +40,44 @@
 
 namespace MARTe {
 
+/**
+ * @brief Interface to export relevant data using a defined protocol.
+ */
 class DataExportI {
 public:
+
+    /**
+     * @brief Default constructor.
+     */
     DataExportI();
 
+    /**
+     * @brief Destructor.
+     */
     virtual ~DataExportI();
 
+    /**
+     * @brief Exports data to the StreamStructuredDataI passed in input.
+     * @oaram[in[ protocol the protocol used to exchange data.
+     * @param[out] data contains the exported data in output.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol)=0;
 
+    /**
+     * @brief Exports data as text writing on the stream in input.
+     * @oaram[in[ protocol the protocol used to exchange data.
+     * @param[out] stream the stream where to write.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol)=0;
 
-    virtual int32 GetReplyCode(StructuredDataI &data)=0;
+    /**
+     * @brief Returns the reply code checking the data provided by the protocol in input.
+     * @param[in] the protocol used to exchange data.
+     * @return the reply code.
+     */
+    virtual int32 GetReplyCode(ProtocolI &data)=0;
 
 };
 

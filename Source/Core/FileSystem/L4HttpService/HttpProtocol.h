@@ -1,8 +1,8 @@
 /**
  * @file HttpProtocol.h
  * @brief Header file for class HttpProtocol
- * @date 14 set 2018
- * @author pc
+ * @date 14/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
@@ -41,47 +41,151 @@
 /*---------------------------------------------------------------------------*/
 
 namespace MARTe {
+
+/**
+ * @brief Implementation of the HTTP protocol.
+ * @details This implementation allows to send and receive HTTP messages.
+ */
 class HttpProtocol: public ProtocolI {
 public:
-    HttpProtocol(DoubleBufferedStream &clientBufferedStreamIn);
 
+    /**
+     * @brief Constructor.
+     * @details Sets the stream used to exchange HTTP messages.
+     * @param[in] outputStreamIn the stream
+     */
+    HttpProtocol(DoubleBufferedStream &outputStreamIn);
+
+    /**
+     * @brief Destructor.
+     */
     virtual ~HttpProtocol();
 
+    /**
+     * @brief Reads the HTTP header.
+     * @details Parses the HTTP header recognising the HTTP, GET, PUT, POST, HEAD commands.
+     * In case of POST command:\n
+     *   If the content type is multipart/form-data the data between boundaries is saved into
+     *   variables in InputOptions block. This variables can be accessed also using the
+     *   GetInputCommand method.\n
+     *   If the content type is application/x-www-form-urlencoded the url in the body is decoded
+     *   and also in this case the variables are saved in the InputOptions block.
+     * @details Use the CompleteReadOperation method to get the unread data of the HTTP message after a
+     * ReadHeader call.
+     * @return true if the read operation suceeds, false otherwise.
+     */
     virtual bool ReadHeader();
 
+
+    /**
+     * @brief Writes the HTTP header.
+     * @param[in] isMessageCompleted specifies if the message is completed. In this case the Content-Length
+     * is computed as the size of the \a payload stream passed in input and the payload is apppended to the
+     * header and sent as the HTTP body.
+     * @param[in] command the HTTP command and can be one of HTTP, GET, PUT, POST, HEAD.
+     * @param[in] payload contains the body to be appended to the header. If NULL or empty, only the header will be sent.
+     * @param[in] id the url to write in the header if command is not a reply (!=HTTP).
+     * @return true if the write operation succeeds, false otherwise.
+     */
     virtual bool WriteHeader(const bool isMessageCompleted,
                              const int32 command,
                              BufferedStreamI * const payload,
                              const char8 * const id);
 
+    /**
+     * @brief Reads the unread data after a ReadHeader call.
+     * @param[out] streamout the stream where the unread data will be written.
+     * @param[in] msecTimeout the maximum time allowed for this operation.
+     * @return true if the read operation succeeds, false otherwise.
+     */
     bool CompleteReadOperation(BufferedStreamI * const streamout,
                                TimeoutType msecTimeout = TTInfiniteWait);
 
+    /**
+     * @brief Performs a security check using the realm passed in input.
+     * @param[in] realm the realm that implements the security check.
+     * @return true if the security check succeeds, false otherwise.
+     */
     bool SecurityCheck(ReferenceT<HttpRealmI> realm);
 
+    /**
+     * @brief Asserts if the connection flag is keep-alive or close.
+     * @return true if the connection is keep-alive, false if it is close.
+     */
     bool KeepAlive() const;
 
+    /**
+     * @brief Sets the connection mode.
+     * @param[in] isKeepAlive to set the connection mode.
+     */
     void SetKeepAlive(const bool isKeepAlive);
 
+    /**
+     * @brief Retrieves the HTTP command code of the last ReadHeade call.
+     * @return the HTTP command code of the last ReadHeade call.
+     */
     int32 GetHttpCommand() const;
 
+    /**
+     * @brief Sets the unmatched url.
+     * @param[in] unMatchedIdIn the unmatched url.
+     */
     virtual void SetUnmatchedId(const char8 * const unMatchedIdIn);
 
+    /**
+     * @brief Returns the unmatched url.
+     * @param[out] unmatchedIdOut contains the unmatched url in output.
+     */
     virtual void GetUnmatchedId(StreamString& unmatchedIdOut);
 
+    /**
+     * @brief Retrieves the path that has been built from the received url.
+     * @param[out] pathOut contains the path in output.
+     */
     virtual void GetPath(StreamString& pathOut);
 
+    /**
+     * @brief Retrieves the received url.
+     * @param[out] idOut contains the url in output.
+     */
     virtual void GetId(StreamString& idOut);
 
+    /**
+     * @brief Read the input command specified in \a commandName.
+     * @details All the input variables are saved in the InputCommands block, so can be also directly using
+     * the StructuredDataI::Read methods.
+     * @param[in] commandName the command name.
+     * @param[out] commandValue the command value in output.
+     * @return true if the operation succeeds, false otherwise.
+     */
     virtual bool GetInputCommand(const char8 * const commandName, const AnyType &commandValue);
 
+    /**
+     * @brief Returns false.
+     * @see ProtocolI::SetOutputCommand.
+     */
     virtual bool SetOutputCommand(const char8 * const commandName, const AnyType &commandValue);
 
+    /**
+     * @brief Retrieves the text mode status.
+     * @details. If the client specifies an input command TextMode=[0(false),1(true)] the protocol
+     * will assume that the clients is expecting data in text mode (if 1) or in database mode (if 0)
+     * and the service (in this case HttpService) will call DataExportI::GetAsText if TextMode==1 and
+     * DataExportI::GetAsStructuredData if TextMode==0. This flag is initialised at -1, this means that
+     * the client does not assert anything about how it wants to receive the data and the service will
+     * proceed in its default mode.
+     * @return -1 if the client has not specified a TextMode command, 1 if the client has specified
+     * TextMode=1 command, 0 if the client has specified TextMode==0 command.
+     */
     int8 TextMode() const;
 
 
 
 protected:
+
+    /**
+     * The stream where to read from and write to.
+     */
     DoubleBufferedStream *outputStream;
 
     /**
@@ -90,18 +194,27 @@ protected:
      */
     int32 unreadInput;
 
-    /** The Http return code */
+    /**
+     * The Http return code
+     */
     int32 httpErrorCode;
 
+
+    /**
+     * The Http command
+     */
     int32 httpCommand;
 
     /**
+     * The Http version
      * 1000 means v1.0 2100 means v2.1
      */
     uint32 httpVersion;
 
     /**
+     * The keep-alive connection flag
      * True if communication should continue after transaction
+     * False otherwise
      */
     bool keepAlive;
 
@@ -125,46 +238,71 @@ protected:
      */
     StreamString unMatchedUrl;
 
-    ConfigurationDatabase options;
-
+    /**
+     * The text mode flag
+     */
     int8 textMode;
 
 private:
-    /**
-     * Handles a post request
-     */
 
-    /***********************/
-    /* used in ReadHeader  */
-    /***********************/
+    /**
+     * @brief Called by ReadHeader. Parses the HTTP header and recognises the HTTP command.
+     */
     bool RetrieveHttpCommand(StreamString &command,
                              StreamString &line);
 
+    /**
+     * @brief Called by ReadHeader. Builds the received
+     */
     char8 BuildUrl(StreamString &line);
 
+    /**
+     * @brief Called by ReadHeader. Stores the received commands in the InputCommands block.
+     */
     bool StoreCommands(StreamString &line);
 
+    /**
+     * @brief Called by ReadHeader. Stores the received output options in the OutputOptions block.
+     */
     bool StoreOutputOptions();
 
+    /**
+     * @brief Called by ReadHeader. Stores the received input options in the InputOptions block.
+     */
     bool StoreInputOptions();
 
-    /*****************************************/
-    /* used in ReadHeader to handle the post */
-    /*****************************************/
-
+    /**
+     * @brief Called by ReadHeader. Recognises the content-type and calls the relative
+     * method to handle a POST HTTP request.
+     */
     bool HandlePost(StreamString &contentType,
                     StreamString &content);
 
+    /**
+     * @brief Called by HandlePost. Handles a POST with Content-Type=multipart/form-data
+     */
     bool HandlePostMultipartFormData(StreamString &contentType,
                                      StreamString &content);
 
+    /**
+     * @brief Called by HandlePost. Handles a POST with Content-Type=application/x-www-form-urlencoded
+     * @details The parsed variables will be saved in the InputOptions block.
+     */
     bool HandlePostApplicationForm(StreamString &content);
 
+    /**
+     * @brief Called by HandlePostMultipartFormData. Handles the POST header.
+     * @details The parsed variables will be saved in the InputOptions block.
+     */
     bool HandlePostHeader(StreamString &line,
                           StreamString &content,
                           StreamString &name,
                           StreamString &filename);
 
+    /**
+     * @brief Called by HandlePostMultipartFormData. Handles the POST content.
+     * @details The parsed variables will be saved in the InputOptions block.
+     */
     bool HandlePostContent(StreamString &line,
                            StreamString &boundary,
                            StreamString &name,

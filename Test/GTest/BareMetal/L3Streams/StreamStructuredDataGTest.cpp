@@ -139,15 +139,15 @@ TEST(StreamStructuredDataGTest, TestCopy) {
 TEST(StreamStructuredDataGTest, TestAddToCurrentNodeStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -168,18 +168,49 @@ TEST(StreamStructuredDataGTest, TestAddToCurrentNodeStandard) {
     ASSERT_TRUE(myStreamStructuredDataTest.TestAddToCurrentNode(&arg));
 }
 
+
+TEST(StreamStructuredDataGTest, TestAddToCurrentNodeStandard_DeleteBlocks) {
+    StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
+
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    a->SetName("A");
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    b->SetName("B");
+    a->Insert(b);
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    c->SetName("C");
+    a->Insert(c);
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    d->SetName("D");
+    c->Insert(d);
+
+    StreamStructuredDataTestAddToCurrentNodeStruct arg;
+    arg.toAdd = a;
+    const char8 *movements[] = { "A.C", "A.B", "A.C.D", NULL };
+    bool expected[] = { true, true, false };
+    arg.expected = expected;
+    arg.movements = movements;
+    arg.desResult = "\n\r"
+            "A = {\n\r"
+            "C = {\n\r"
+            "}\n\r"
+            "B = {";
+
+    ASSERT_TRUE(myStreamStructuredDataTest.TestAddToCurrentNode(&arg));
+}
+
 TEST(StreamStructuredDataGTest, TestAddToCurrentNodeJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -203,15 +234,15 @@ TEST(StreamStructuredDataGTest, TestAddToCurrentNodeJson) {
 TEST(StreamStructuredDataGTest, TestAddToCurrentNodeJson2) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -235,15 +266,15 @@ TEST(StreamStructuredDataGTest, TestAddToCurrentNodeJson2) {
 TEST(StreamStructuredDataGTest, TestAddToCurrentNodeXML) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -267,15 +298,15 @@ TEST(StreamStructuredDataGTest, TestAddToCurrentNodeXML) {
 TEST(StreamStructuredDataGTest, TestMoveToRootStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -301,15 +332,15 @@ TEST(StreamStructuredDataGTest, TestMoveToRootStandard) {
 TEST(StreamStructuredDataGTest, TestMoveToRootJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -335,15 +366,15 @@ TEST(StreamStructuredDataGTest, TestMoveToRootJson) {
 TEST(StreamStructuredDataGTest, TestMoveToRootXML) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -369,15 +400,15 @@ TEST(StreamStructuredDataGTest, TestMoveToRootXML) {
 TEST(StreamStructuredDataGTest, TestMoveToAncestorStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -403,15 +434,15 @@ TEST(StreamStructuredDataGTest, TestMoveToAncestorStandard) {
 TEST(StreamStructuredDataGTest, TestMoveToAncestorJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -437,15 +468,15 @@ TEST(StreamStructuredDataGTest, TestMoveToAncestorJson) {
 TEST(StreamStructuredDataGTest, TestMoveToAncestorXML) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -471,15 +502,15 @@ TEST(StreamStructuredDataGTest, TestMoveToAncestorXML) {
 TEST(StreamStructuredDataGTest, TestMoveAbsoluteStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -503,15 +534,15 @@ TEST(StreamStructuredDataGTest, TestMoveAbsoluteStandard) {
 TEST(StreamStructuredDataGTest, TestMoveAbsoluteJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -535,15 +566,15 @@ TEST(StreamStructuredDataGTest, TestMoveAbsoluteJson) {
 TEST(StreamStructuredDataGTest, TestMoveAbsoluteXML) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -567,15 +598,15 @@ TEST(StreamStructuredDataGTest, TestMoveAbsoluteXML) {
 TEST(StreamStructuredDataGTest, TestMoveRelativeStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -595,15 +626,15 @@ TEST(StreamStructuredDataGTest, TestMoveRelativeStandard) {
 TEST(StreamStructuredDataGTest, TestMoveRelativeJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -623,15 +654,15 @@ TEST(StreamStructuredDataGTest, TestMoveRelativeJson) {
 TEST(StreamStructuredDataGTest, TestMoveRelativeXML) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -651,15 +682,15 @@ TEST(StreamStructuredDataGTest, TestMoveRelativeXML) {
 TEST(StreamStructuredDataGTest, TestMoveToChildStandard) {
     StreamStructuredDataTest<StandardPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -682,15 +713,15 @@ TEST(StreamStructuredDataGTest, TestMoveToChildStandard) {
 TEST(StreamStructuredDataGTest, TestMoveToChildJson) {
     StreamStructuredDataTest<JsonPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -713,15 +744,15 @@ TEST(StreamStructuredDataGTest, TestMoveToChildJson) {
 TEST(StreamStructuredDataGTest, TestMoveToChild) {
     StreamStructuredDataTest<XMLPrinter> myStreamStructuredDataTest;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -833,15 +864,15 @@ TEST(StreamStructuredDataGTest, TestGetNameStandard) {
 
     StreamStructuredDataTestAddToCurrentNodeStruct arg;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -863,15 +894,15 @@ TEST(StreamStructuredDataGTest, TestGetChildName) {
 
     StreamStructuredDataTestAddToCurrentNodeStruct arg;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 
@@ -894,15 +925,15 @@ TEST(StreamStructuredDataGTest, TestGetNumberOfChildren) {
 
     StreamStructuredDataTestAddToCurrentNodeStruct arg;
 
-    ReferenceT<NodeName> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> a(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     a->SetName("A");
-    ReferenceT<NodeName> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> b(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     b->SetName("B");
     a->Insert(b);
-    ReferenceT<NodeName> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> c(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     c->SetName("C");
     a->Insert(c);
-    ReferenceT<NodeName> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    ReferenceT<StreamStructuredDataNodeDes> d(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     d->SetName("D");
     c->Insert(d);
 

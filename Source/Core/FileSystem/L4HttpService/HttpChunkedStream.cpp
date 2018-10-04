@@ -1,8 +1,8 @@
 /**
  * @file HttpChunkedStream.cpp
  * @brief Source file for class HttpChunkedStream
- * @date 28 set 2018
- * @author pc
+ * @date 28/09/2018
+ * @author Giuseppe Ferro
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
