@@ -300,6 +300,8 @@ int32 HttpServiceTestWebRoot::GetReplyCode(ProtocolI &data) {
     return HttpDefinition::HSHCReplyOK;
 }
 
+
+
 CLASS_REGISTER(HttpServiceTestWebRoot, "1.0")
 
 class HttpServiceTestClassLister: public ReferenceContainer, public DataExportI {
@@ -523,7 +525,6 @@ HttpServiceTestClassTest1    ();
     virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
 
     virtual int32 GetReplyCode(ProtocolI &data);
-
 };
 
 HttpServiceTestClassTest1::HttpServiceTestClassTest1() {
@@ -578,6 +579,8 @@ bool HttpServiceTestClassTest1::GetAsText(StreamI &stream,
 int32 HttpServiceTestClassTest1::GetReplyCode(ProtocolI &data) {
     return HttpDefinition::HSHCReplyOK;
 }
+
+
 
 CLASS_REGISTER(HttpServiceTestClassTest1, "1.0")
 

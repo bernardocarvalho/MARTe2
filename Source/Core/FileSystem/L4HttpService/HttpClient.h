@@ -31,10 +31,9 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "HttpStream.h"
 #include "TCPSocket.h"
-#include "UrlAddress.h"
 #include "BufferedStreamI.h"
+#include "HttpProtocol.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
@@ -47,14 +46,32 @@ public:
 
     virtual ~HttpClient();
 
-    HttpClient(const char8 * authorisation);
+    virtual bool Initialise(StructuredDataI &data);
 
-    bool HttpGet(UrlAddress url,
-                 BufferedStreamI &stream,
-                 TimeoutType msecTimeout,
-                 int32 operationId = -1);
+    //can use it to set http options and commands
+    HttpProtocol *GetHttpProtocol();
 
-private:
+    bool HttpExchange(BufferedStreamI &streamDataRead,
+                      int32 command,
+                      BufferedStreamI * const payload = NULL_PTR(BufferedStreamI *),
+                      TimeoutType msecTimeout=TTInfiniteWait,
+                      int32 operationId = -1);
+
+
+    void SetServerAddress(const char8 * const serverAddressIn);
+
+    void SetServerPort(const uint32 serverPortIn);
+
+    void SetServerUri(const char8 * const serverUriIn);
+
+
+    void GetServerAddress(StreamString &serverAddrOut) const;
+
+    uint32 GetServerPort() const;
+
+    void GetServerUri(StreamString &serverUriOut) const;
+
+protected:
 
     bool Connect(TimeoutType msecTimeout);
 
@@ -63,23 +80,24 @@ private:
 
     /** */
     bool GenerateDigestKey(StreamString & key,
-                           const char8 * data,
-                           const char8 * uri,
-                           const char8 * command,
+                           const char8 * const data,
+                           const char8 * const command,
                            int32 nc);
 
-    bool AutenticationProcedure(const TimeoutType &msecTimeout,
-                                HttpStream &hs,
-                                UrlAddress url,
-                                int32 operationId);
+    bool AutenticationProcedure(const int32 command, const TimeoutType &msecTimeout,
+            const int32 operationId);
+
+
+    bool reConnect;
+
     /** the socket being used in the connection */
     TCPSocket socket;
 
-    /** the host at which we are connected to */
-    StreamString host;
+    HttpProtocol protocol;
 
-    /** the host port at which we are connected */
-    uint32 port;
+    StreamString urlUri;
+    StreamString urlHost;
+    uint32 urlPort;
 
     /** authorisation is <BASE64 of User:Password> */
     StreamString authorisation;

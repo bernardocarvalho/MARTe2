@@ -65,7 +65,7 @@ HttpService::~HttpService() {
     //delete embeddedMethod;
     // Auto-generated destructor stub for HttpService
     // TODO Verify if manual additions are needed
-    (void)server.Close();
+    (void) server.Close();
 }
 
 bool HttpService::Initialise(StructuredDataI &data) {
@@ -160,7 +160,6 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                         REPORT_ERROR(ErrorManagement::CommunicationError, "Error while reading HTTP header");
                     }
                     ReferenceT<DataExportI> hi=webRoot;
-                    //ReferenceT<HttpRealmI> realm;
                     bool pagePrepared = false;
 
                     if (err.ErrorsCleared()) {
@@ -180,74 +179,63 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                 uint32 last=static_cast<uint32>(results.Size())-1u;
                                 hi=results.Get(last);
                             }
-#if 0
-                            if(hi.IsValid()) {
-                                realm=hi->GetRealm();
-                            }
-                            else {
-                                hi = webRoot;
-                                if (hi.IsValid()) {
-                                    if ((hi->GetRealm()).IsValid()) {
-                                        realm = hi->GetRealm();
-                                    }
-                                }
-                            }
-#endif
                             // save remainder of address
                             uint32 remAddrIndex=filter.GetRemainedAddrIndex();
                             StreamString urlTemp;
                             hprotocol.GetId(urlTemp);
                             StreamString unmatchedUrl=&urlTemp.Buffer()[remAddrIndex];
-
-                            uint32 newUrlLastCharIdx=(static_cast<uint32>(unmatchedUrl.Size())-1u);
-                            if (unmatchedUrl.Buffer()[newUrlLastCharIdx] == '/') {
-                                err=!(unmatchedUrl.SetSize(static_cast<uint64>(newUrlLastCharIdx)));
+                            if(unmatchedUrl.Size()>0ull) {
+                                uint32 newUrlLastCharIdx=(static_cast<uint32>(unmatchedUrl.Size())-1u);
+                                if (unmatchedUrl.Buffer()[newUrlLastCharIdx] == '/') {
+                                    err=!(unmatchedUrl.SetSize(static_cast<uint64>(newUrlLastCharIdx)));
+                                }
                             }
 
                             hprotocol.SetUnmatchedId(unmatchedUrl.BufferReference());
                         }
 
                         if (err.ErrorsCleared()) {
-                            if (hi.IsValid()) {
+                            ReferenceT<HttpRealmI> hiRealm=hi;
+                            if (hiRealm.IsValid()) {
                                 //check security
                                 //GCRTemplate<HttpRealm> realm = searchFilter.GetRealm();
                                 //TODO security stuff
-#if 0
-                                if (realm.IsValid()) {
-                                    if (!hstream.SecurityCheck(realm)) {
-                                        AnyType args[]= {"Content-Type"};
-                                        hstream.SwitchPrintAndCommit("OutputOptions", "text/html", "%s", args);
+                                if (!hprotocol.SecurityCheck(hiRealm)) {
+                                    if(!hprotocol.MoveAbsolute("OutputOptions")) {
+                                        err=!(hprotocol.CreateAbsolute("OutputOptions"));
+                                    }
+                                    if (err.ErrorsCleared()) {
+                                        StreamString contentType="text/html";
+                                        err=!hprotocol.Write("Content-Type", contentType.Buffer());
+                                        if (err.ErrorsCleared()) {
+                                            StreamString realmMsg;
+                                            hiRealm->GetAuthenticationRequest(realmMsg);
+                                            err=!hprotocol.Write("WWW-Authenticate", realmMsg.Buffer());
+                                            StreamString hstream;
+                                            hstream.Printf("%s","<HTML><HEAD>\n"
+                                                    "<TITLE>401 Authorization Required</TITLE>\n"
+                                                    "</HEAD><BODY>\n"
+                                                    "<H1>Authorization Required</H1>\n"
+                                                    "This server could not verify that you\n"
+                                                    "are authorized to access the document you\n"
+                                                    "requested.  Either you supplied the wrong\n"
+                                                    "credentials (e.g., bad password), or your\n"
+                                                    "browser doesn't understand how to supply\n"
+                                                    "the credentials required.<P>\n"
+                                                    "</BODY></HTML>\n");
 
-                                        StreamString realmMsg;
-                                        realm->GetAuthenticationRequest(realmMsg);
-                                        args[0]=realmMsg.Buffer();
-
-                                        hstream.SwitchPrintAndCommit("OutputOptions", "WWW-Authenticate", "%s", args);
-
-                                        hstream.Printf("%s","<HTML><HEAD>\n"
-                                                "<TITLE>401 Authorization Required</TITLE>\n"
-                                                "</HEAD><BODY>\n"
-                                                "<H1>Authorization Required</H1>\n"
-                                                "This server could not verify that you\n"
-                                                "are authorized to access the document you\n"
-                                                "requested.  Either you supplied the wrong\n"
-                                                "credentials (e.g., bad password), or your\n"
-                                                "browser doesn't understand how to supply\n"
-                                                "the credentials required.<P>\n"
-                                                "</BODY></HTML>\n");
-
-                                        // force reissuing of a new thread
-                                        hstream.SetKeepAlive(false);
-                                        if (!hstream.WriteHeader(true, HSHCReplyAUTH)) {
-                                            err=ErrorManagement::CommunicationError;
-                                            REPORT_ERROR(ErrorManagement::CommunicationError, "Error while writing page back\n");
+                                            // force reissuing of a new thread
+                                            hprotocol.SetKeepAlive(false);
+                                            err=!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyAUTH, &hstream, NULL_PTR(const char8*));
+                                            pagePrepared = err.ErrorsCleared();
                                         }
-                                        pagePrepared = true;
                                     }
                                 }
-#endif
+                            }
 
-                                if (err.ErrorsCleared()) {
+                            if (err.ErrorsCleared()) {
+                                if(!pagePrepared) {
+
                                     int32 replyCode=hi->GetReplyCode(hprotocol);
 
                                     if(!hprotocol.MoveAbsolute("OutputOptions")) {
@@ -267,7 +255,6 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                         if (err.ErrorsCleared()) {
 
                                             commClient->SetChunkMode(true);
-                                            //if(!pagePrepared) {
                                             if(textMode>0u) {
                                                 pagePrepared = hi->GetAsText(*commClient, hprotocol);
                                             }
@@ -285,7 +272,6 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                             //hprotocol.SetKeepAlive(false);
                                         }
                                     }
-                                    //}
                                 }
                             }
                         }
@@ -334,7 +320,8 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             newClient->SetCalibWriteParam(0u);
             err = !(newClient->SetBufferSize(32u, chunkSize));
             if (err.ErrorsCleared()) {
-                REPORT_ERROR(ErrorManagement::Information, "New thread waiting");
+                uint32 id = (uint32) Threads::Id();
+                REPORT_ERROR(ErrorManagement::Information, "New thread waiting %d", id);
                 if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
                     err=MARTe::ErrorManagement::Timeout;
                     delete newClient;

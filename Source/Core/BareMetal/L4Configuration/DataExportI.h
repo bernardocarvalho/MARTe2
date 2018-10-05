@@ -62,7 +62,8 @@ public:
      * @param[out] data contains the exported data in output.
      * @return true if the operation succeeds, false otherwise.
      */
-    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol)=0;
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data,
+                                     ProtocolI &protocol)=0;
 
     /**
      * @brief Exports data as text writing on the stream in input.
@@ -70,7 +71,8 @@ public:
      * @param[out] stream the stream where to write.
      * @return true if the operation succeeds, false otherwise.
      */
-    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol)=0;
+    virtual bool GetAsText(StreamI &stream,
+                           ProtocolI &protocol)=0;
 
     /**
      * @brief Returns the reply code checking the data provided by the protocol in input.

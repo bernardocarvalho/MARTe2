@@ -24,7 +24,8 @@
 #
 #############################################################
 
-OBJSX=	HttpService.x\
+OBJSX=	HttpClient.x\
+    HttpService.x\
     HttpProtocol.x\
     HttpChunkedStream.x
         

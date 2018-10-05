@@ -37,11 +37,12 @@
 #include "HttpDefinition.h"
 #include "StreamStructuredData.h"
 #include "JsonPrinter.h"
+#include "HttpRealmI.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
 
-class HttpStreamTestRealm: public HttpRealmI {
+class HttpStreamTestRealm: public Object, public HttpRealmI {
 public:
     CLASS_REGISTER_DECLARATION();
 

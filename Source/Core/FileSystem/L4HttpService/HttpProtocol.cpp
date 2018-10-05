@@ -90,7 +90,7 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
         uint32 readSize = 1u;
         uint32 sizeToRead = bufferSize;
 
-        if (unreadInput > 0) {
+        if (unreadInput >= 0) {
             sizeToRead = static_cast<uint32>(unreadInput);
             //clip the size
             if (sizeToRead > bufferSize) {
@@ -915,7 +915,7 @@ bool HttpProtocol::HandlePost(StreamString &contentType,
 }
 
 bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
-    bool ret = false;
+    bool ret = true;
 
     // no valid realm !
     if (realm.IsValid()) {

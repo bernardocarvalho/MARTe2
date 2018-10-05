@@ -75,6 +75,7 @@ HeapI.h
 HeapManager.cpp
 HighResolutionTimer.h
 HighResolutionTimerCalibrator.cpp
+HttpClient.cpp
 HttpDefinition.cpp
 HttpProtocol.cpp
 HttpService.cpp

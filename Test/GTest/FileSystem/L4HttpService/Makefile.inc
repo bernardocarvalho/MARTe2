@@ -24,7 +24,7 @@
 #
 #############################################################
 
-OBJSX=  HttpServiceGTest.x HttpProtocolGTest.x HttpChunkedStreamGTest.x
+OBJSX=  HttpServiceGTest.x HttpProtocolGTest.x HttpChunkedStreamGTest.x HttpClientGTest.x
 		
 PACKAGE=GTest/FileSystem
 ROOT_DIR=../../../..

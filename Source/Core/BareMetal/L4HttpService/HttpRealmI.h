@@ -31,7 +31,6 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "Object.h"
 #include "HttpDefinition.h"
 #include "StreamString.h"
 /*---------------------------------------------------------------------------*/
@@ -43,7 +42,7 @@ namespace MARTe {
 /**
  * @brief HTTP Realm interface to implement a realm.
  */
-class HttpRealmI: public Object {
+class HttpRealmI {
 public:
 
     /**

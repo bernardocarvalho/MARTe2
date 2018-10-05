@@ -40,27 +40,29 @@
 
 namespace MARTe {
 
-static bool SearchKey(const char8 *key,
-                      const char8 *name,
+static bool SearchKey(const char8 * const key,
+                      const char8 * const name,
                       StreamString &value) {
-    value.SetSize(0);
-
-    bool ret = (key != NULL);
+    bool ret = value.SetSize(0ULL);
     if (ret) {
-        ret = (name != NULL);
-    }
-
-    if (ret) {
-        const char8 *p = StringHelper::SearchString(key, name);
-        ret = (p != NULL);
+        ret = (key != NULL_PTR(const char8 * const));
         if (ret) {
-            p += StringHelper::Length(name);
-            ret = ((p[0] == '=') && (p[1] == '"'));
+            ret = (name != NULL_PTR(const char8 * const));
+        }
+
+        if (ret) {
+            const char8 *p = StringHelper::SearchString(key, name);
+            ret = (p != NULL_PTR(const char8 *));
             if (ret) {
-                p += 2;
-                while (*p != '"') {
-                    value += *p;
-                    p = &(p[1]);
+                uint32 gap = StringHelper::Length(name);
+                p = &p[gap];
+                ret = ((p[0] == '=') && (p[1] == '"'));
+                if (ret) {
+                    p = &p[2];
+                    while (p[0] != '"') {
+                        value += p[0];
+                        p = &(p[1]);
+                    }
                 }
             }
         }
@@ -72,128 +74,209 @@ static bool SearchKey(const char8 *key,
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-HttpClient::HttpClient() {
-    port = 0u;
-    host = "";
+HttpClient::HttpClient() :
+        Object(),
+        socket(),
+        protocol(socket) {
+    urlPort = 0u;
+    urlHost = "";
     lastOperationId = 0;
+    reConnect = true;
 }
 
+/*lint -e{1551} no exception will be thrown*/
 HttpClient::~HttpClient() {
     // Auto-generated destructor stub for HttpClient
     // TODO Verify if manual additions are needed
+    (void) socket.Close();
 }
 
-bool HttpClient::AutenticationProcedure(const TimeoutType &msecTimeout,
-                                        HttpStream &hs,
-                                        UrlAddress url,
-                                        int32 operationId) {
+/*lint -e{1536} the pointer is exposed deliberately*/
+HttpProtocol *HttpClient::GetHttpProtocol() {
+    return &protocol;
+}
 
-    bool ret = true;
+bool HttpClient::Initialise(StructuredDataI &data) {
 
-    // discard bodyF
-    StreamString nullStream;
-    ret = hs.CompleteReadOperation(&nullStream, msecTimeout);
-    if (ret) {
-        ret = (authorisation.Size() >= 3u);
+    StreamString urlHostTemp;
+    bool ret = data.Read("ServerAddress", urlHostTemp);
+    if (!ret) {
+        REPORT_ERROR(ErrorManagement::InitialisationError, "Please define the server ip ServerAddress");
+    }
+    else {
+        if (urlHost != urlHostTemp) {
+            urlHost = urlHostTemp;
+            reConnect = true;
+        }
+        uint32 urlPortTemp;
+        ret = data.Read("ServerPort", urlPortTemp);
         if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation information needed to access %s", url.GetUri());
+            REPORT_ERROR(ErrorManagement::InitialisationError, "Please define the server port ServerPort");
+        }
+        else {
+            if (urlPort != urlPortTemp) {
+                urlPort = urlPortTemp;
+                reConnect = true;
+            }
         }
     }
 
     if (ret) {
-        ret = hs.Switch("InputHttpOtions");
+        StreamString urlUriTemp;
+        ret = data.Read("ServerUri", urlUriTemp);
+        if (!ret) {
+            REPORT_ERROR(ErrorManagement::InitialisationError, "Please define the server uri ServerUri");
+        }
+        else {
+            if (urlUri != urlUriTemp) {
+                urlUri = urlUriTemp;
+                reConnect = true;
+            }
+        }
+    }
+    if (ret) {
+        if (!data.Read("Authorisation", authorisation)) {
+            authorisation = "";
+        }
+    }
+
+    return ret;
+}
+
+void HttpClient::SetServerAddress(const char8 * const serverAddressIn) {
+    if (urlHost != serverAddressIn) {
+        urlHost = serverAddressIn;
+        reConnect = true;
+    }
+}
+
+void HttpClient::SetServerPort(const uint32 serverPortIn) {
+    if (urlPort != serverPortIn) {
+        urlPort = serverPortIn;
+        reConnect = true;
+    }
+}
+
+void HttpClient::SetServerUri(const char8 * const serverUriIn) {
+    if (urlUri != serverUriIn) {
+        urlUri = serverUriIn;
+    }
+}
+
+void HttpClient::GetServerAddress(StreamString &serverAddrOut) const {
+    serverAddrOut = urlHost;
+}
+
+uint32 HttpClient::GetServerPort() const {
+    return urlPort;
+}
+
+void HttpClient::GetServerUri(StreamString &serverUriOut) const {
+    serverUriOut = urlUri;
+}
+
+bool HttpClient::AutenticationProcedure(const int32 command,
+                                        const TimeoutType &msecTimeout,
+                                        const int32 operationId) {
+
+    // discard bodyF
+    StreamString nullStream;
+    bool ret = protocol.CompleteReadOperation(&nullStream, msecTimeout);
+    if (ret) {
+        ret = (authorisation.Size() >= 3u);
+        if (!ret) {
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation information needed to access %s", urlUri);
+        }
+    }
+
+    StreamString auth;
+    if (ret) {
+        ret = protocol.MoveAbsolute("InputOptions");
         if (ret) {
-            ret = hs.Load("WWW-Authenticate");
+            ret = protocol.Read("WWW-Authenticate", auth);
         }
     }
 
     StreamString newAuthorisationKey;
     if (ret) {
         StreamString authRequest;
-        hs.Seek(0);
-        char8 terminator;
-        (void) hs.GetToken(authRequest, "\n\r", terminator);
+        ret = auth.Seek(0ULL);
+        if (ret) {
+            char8 terminator;
+            (void) auth.GetToken(authRequest, "\n\r", terminator);
 
-        // identify basic or digest and call appropriate function
-        // to generate newAuthorisationKey
-        if (StringHelper::CompareN("Basic ", authRequest.Buffer(), 6u) == 0) {
-            newAuthorisationKey = authorisation;
-        }
-        else if (StringHelper::CompareN("Digest ", authRequest.Buffer(), 7u) == 0) {
-            GenerateDigestKey(newAuthorisationKey, &(authRequest.Buffer()[7]), url.GetUri(), "GET", operationId);
-        }
-        else {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation request of unknown type: %s", authRequest.Buffer());
-            ret = false;
+            // identify basic or digest and call appropriate function
+            // to generate newAuthorisationKey
+            if (StringHelper::CompareNoCaseSensN("Basic ", authRequest.Buffer(), 6u) == 0) {
+                newAuthorisationKey = authorisation;
+            }
+            else if (StringHelper::CompareNoCaseSensN("Digest ", authRequest.Buffer(), 7u) == 0) {
+                ret=GenerateDigestKey(newAuthorisationKey, &(authRequest.Buffer()[7]), HttpDefinition::GetErrorCodeString(command), operationId);
+            }
+            else {
+                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation request of unknown type: %s", authRequest.Buffer());
+                ret = false;
+            }
         }
     }
     return ret;
 }
 
-bool HttpClient::HttpGet(UrlAddress url,
-                         BufferedStreamI &stream,
-                         TimeoutType msecTimeout,
-                         int32 operationId) {
+bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
+                              int32 command,
+                              BufferedStreamI * const payload,
+                              TimeoutType msecTimeout,
+                              int32 operationId) {
 
     // absolute time for timeout !
     uint64 startCounter = HighResolutionTimer::Counter();
 
     // a counter of the transactions
     if (operationId == -1) {
-        operationId = lastOperationId++;
+        lastOperationId++
+        operationId = lastOperationId;
     }
 
-    bool ret = (url.GetProtocol() == URLP_HTTP);
-    if (!ret) {
-        REPORT_ERROR(ErrorManagement::ParametersError, "Only HTTP url is supported\n");
+    if (!reConnect) {
+        reConnect = (!socket.IsConnected());
     }
-    else {
-        const char8 *urlUri = url.GetUri();
-        const char8 *urlHost = url.GetServer();
-        uint32 urlPort = url.GetPort();
 
-        bool reConnect = (!socket.IsConnected());
-
-        if (host != NULL) {
-            if (!(host == urlHost)) {
-                host = urlHost;
-                reConnect = true;
-            }
-        }
-        if (port > 0u) {
-            if (port != urlPort) {
-                port = urlPort;
-                reConnect = true;
-            }
-        }
-
+    int32 errorCode;
+    bool ret = !HttpDefinition::IsReplyCode(command, errorCode);
+    if (ret) {
         /* connect to remote host */
         if (reConnect) {
             ret = Connect(msecTimeout);
         }
-        HttpStream hs(socket);
 
         if (ret) {
             /* create and send request */
-            hs.SetKeepAlive(true);
+            protocol.SetKeepAlive(true);
             if (authorisationKey.Size() > 0) {
                 //switch and write
-                ret = hs.Switch("OutputHttpOtions");
-                if (ret) {
-                    hs.SetSize(0);
-                    hs.Printf("%s", authorisationKey.Buffer());
+                if (protocol.MoveAbsolute("OutputOtions")) {
+                    ret = protocol.CreateAbsolute("OutputOtions");
                 }
-                hs.Commit("Authorization");
+
+                if (ret) {
+                    AnyType at = protocol.GetType("Authorization");
+                    if (!at.IsVoid()) {
+                        ret = protocol.Delete("Authorization");
+                    }
+                    if (ret) {
+                        ret = protocol.Write("Authorization", authorisationKey.Buffer());
+                    }
+                }
             }
 
             if (ret) {
-                ret = hs.WriteHeader(true, HSHCGet, urlUri);
+                ret = protocol.WriteHeader(true, command, payload, urlUri.Buffer());
             }
 
         }
         if (ret) {
             /* read reply */
-            ret = hs.ReadHeader();
+            ret = protocol.ReadHeader();
         }
 
         if (ret) {
@@ -213,25 +296,26 @@ bool HttpClient::HttpGet(UrlAddress url,
 
         if (ret) {
             // check reply for 200 (authorisation request)
-            if (hs.GetHttpCommand() == HSHCReplyOK) {
+            if (protocol.GetHttpCommand() == HttpDefinition::HSHCReplyOK) {
                 // read body
-                ret = hs.CompleteReadOperation(&stream, msecTimeout);
+                //TODO here we can read the body inside a structured data?
+                ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
             }
             else {
 
                 // check reply for 401 (authorisation request)
-                if (hs.GetHttpCommand() == HSHCReplyAUTH) {
+                if (protocol.GetHttpCommand() == HttpDefinition::HSHCReplyAUTH) {
 
-                    ret = AutenticationProcedure(msecTimeout, hs, url, operationId);
+                    ret = AutenticationProcedure(command, msecTimeout, operationId);
 
                 }
                 else {
 
                     // discard body
-                    ret = hs.CompleteReadOperation(&stream, msecTimeout);
+                    ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
 
                     // close if the server says so...
-                    if (!hs.KeepAlive()) {
+                    if (!protocol.KeepAlive()) {
                         socket.Close();
                     }
                 }
@@ -239,8 +323,11 @@ bool HttpClient::HttpGet(UrlAddress url,
             }
 
         }
-
     }
+    else {
+        REPORT_ERROR_STATIC(ErrorManagement::FatalError, "The command cannot be a reply code");
+    }
+
     return ret;
 
 }
@@ -252,15 +339,14 @@ bool HttpClient::Connect(TimeoutType mSecTimeout) {
         ret = socket.SetBlocking(true);
     }
     if (ret) {
-        ret = socket.Connect(host.Buffer(), port, mSecTimeout);
+        ret = socket.Connect(urlHost.Buffer(), urlPort, mSecTimeout);
     }
     return ret;
 }
 
 bool HttpClient::GenerateDigestKey(StreamString &key,
-                                   const char8 *data,
-                                   const char8 *uri,
-                                   const char8 *command,
+                                   const char8 * const data,
+                                   const char8 * const command,
                                    int32 nc) {
     key.SetSize(0);
 
@@ -304,7 +390,7 @@ bool HttpClient::GenerateDigestKey(StreamString &key,
         MemoryOperationsHelper::Set(buffer, '\0', 16u);
         HA2.SetSize(0);
         toEncode.SetSize(0);
-        toEncode.Printf("%s:%s", command, uri);
+        toEncode.Printf("%s:%s", command, urlUri);
         Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncode.Size(), buffer);
         for (uint32 i = 0; i < 16u; i++) {
             HA2.Printf("%02x", buffer[i]);
@@ -339,7 +425,8 @@ bool HttpClient::GenerateDigestKey(StreamString &key,
                    "cnonce=\"%s\","
                    "response=\"%s\","
                    "opaque=\"%s\"",
-                   user.Buffer(), realm.Buffer(), nonce.Buffer(), uri, qop.Buffer(), ncStr.Buffer(), cnonce.Buffer(), response.Buffer(), opaque.Buffer());
+                   user.Buffer(), realm.Buffer(), nonce.Buffer(), urlUri.Buffer(), qop.Buffer(), ncStr.Buffer(), cnonce.Buffer(), response.Buffer(),
+                   opaque.Buffer());
     }
     return ret;
 

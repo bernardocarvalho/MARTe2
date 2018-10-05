@@ -41,8 +41,7 @@
 
 namespace MARTe {
 
-HttpRealmI::HttpRealmI() :
-        Object() {
+HttpRealmI::HttpRealmI() {
     // Auto-generated constructor stub for HttpRealm
     // TODO Verify if manual additions are needed
 }
