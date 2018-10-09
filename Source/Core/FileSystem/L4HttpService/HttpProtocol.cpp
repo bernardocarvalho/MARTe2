@@ -35,7 +35,6 @@
 #include "BasicSocket.h"
 #include "DoubleBufferedStream.h"
 
-
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -349,19 +348,19 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
     }
 
     if (isReply) {
-        ret=outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, HttpDefinition::GetErrorCodeString(httpErrorCode));
+        ret = outputStream->Printf("HTTP/%i.%i %i %s\r\n", majorVersion, minorVersion, httpErrorCode, HttpDefinition::GetErrorCodeString(httpErrorCode));
     }
     else if (command == HttpDefinition::HSHCGet) {
-        ret=outputStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
+        ret = outputStream->Printf("GET %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCPut) {
-        ret=outputStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
+        ret = outputStream->Printf("PUT %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCPost) {
-        ret=outputStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
+        ret = outputStream->Printf("POST %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else if (command == HttpDefinition::HSHCHead) {
-        ret=outputStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
+        ret = outputStream->Printf("HEAD %s HTTP/%i.%i\r\n", urlToUse, majorVersion, minorVersion);
     }
     else {
         REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Command code %i unknown \n", command);
@@ -369,11 +368,8 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
     }
 
     if (ret) {
-        ret = MoveToRoot();
-        if (ret) {
-            if (!MoveRelative("OutputOptions")) {
-                ret = CreateRelative("OutputOptions");
-            }
+        if (!MoveAbsolute("OutputOptions")) {
+            ret = CreateAbsolute("OutputOptions");
         }
         if (ret) {
             if (isMessageCompleted) {
@@ -782,7 +778,8 @@ bool HttpProtocol::HandlePostMultipartFormData(StreamString &contentType,
             if ((parsedBoundary[0u] == '\"')) {
                 if ((parsedBoundary[finalIndex] == '\"')) {
                     parsedBoundary = (&(parsedBoundary.Buffer()[1]));
-                    ret = parsedBoundary.SetSize(static_cast<uint64>(finalIndex-1u));
+
+                    ret = parsedBoundary.SetSize(static_cast<uint64>(finalIndex) - 1ull);
                 }
             }
         }
@@ -915,7 +912,7 @@ bool HttpProtocol::HandlePost(StreamString &contentType,
 }
 
 bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
-    bool ret = true;
+    bool ret = false;
 
     // no valid realm !
     if (realm.IsValid()) {
@@ -924,7 +921,8 @@ bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
         if (MoveRelative("InputOptions")) {
             if (Read("Authorization", authorisationKey)) {
                 BasicSocket* mySocket = dynamic_cast<BasicSocket *>(outputStream);
-                if (mySocket != NULL_PTR(BasicSocket*)) {
+                ret = mySocket != NULL_PTR(BasicSocket*);
+                if (ret) {
                     ret = realm->Validate(authorisationKey.Buffer(), httpCommand, (mySocket->GetSource()).GetAddressAsNumber());
                 }
             }

@@ -84,6 +84,16 @@ TEST(HttpClientGTest, TestHttpExchange) {
     ASSERT_TRUE(test.TestHttpExchange());
 }
 
+TEST(HttpClientGTest, TestHttpExchange_Authorization_Digest) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_Digest());
+}
+
+TEST(HttpClientGTest, TestHttpExchange_Authorization_Basic) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_Basic());
+}
+
 TEST(HttpClientGTest, TestSetServerAddress) {
     HttpClientTest test;
     ASSERT_TRUE(test.TestSetServerAddress());
@@ -113,3 +123,5 @@ TEST(HttpClientGTest, TestGetServerUri) {
     HttpClientTest test;
     ASSERT_TRUE(test.TestGetServerUri());
 }
+
+

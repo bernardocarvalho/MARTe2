@@ -47,10 +47,67 @@
 
 #include "DataExportI.h"
 #include "HttpService.h"
-
+#include "Base64Encoder.h"
+#include "Md5Encrypt.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
+
+static bool SearchKey(const char8 * const key,
+                      const char8 * const name,
+                      StreamString &value) {
+    bool ret = value.SetSize(0ULL);
+    if (ret) {
+        ret = (key != NULL_PTR(const char8 * const));
+        if (ret) {
+            ret = (name != NULL_PTR(const char8 * const));
+        }
+
+        if (ret) {
+            const char8 *p = StringHelper::SearchString(key, name);
+            ret = (p != NULL_PTR(const char8 *));
+            if (ret) {
+                uint32 gap = StringHelper::Length(name);
+                p = &p[gap];
+                ret = ((p[0] == '=') && (p[1] == '"'));
+                if (ret) {
+                    p = &p[2];
+                    while (p[0] != '"') {
+                        value += p[0];
+                        p = &(p[1]);
+                    }
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+static bool SearchKey1(const char8 * const key,
+                       const char8 * const name,
+                       StreamString &value) {
+    bool ret = value.SetSize(0ULL);
+    if (ret) {
+        ret = (key != NULL_PTR(const char8 * const));
+        if (ret) {
+            ret = (name != NULL_PTR(const char8 * const));
+        }
+
+        if (ret) {
+            const char8 *p = StringHelper::SearchString(key, name);
+            ret = (p != NULL_PTR(const char8 *));
+            if (ret) {
+                uint32 gap = StringHelper::Length(name);
+                p = &p[gap];
+                while (p[0] != ',') {
+                    value += p[0];
+                    p = &(p[1]);
+                }
+            }
+        }
+    }
+    return ret;
+}
 
 class HttpClientTestObj: public HttpClient {
 public:
@@ -161,6 +218,263 @@ int32 HttpClientTestClassTest1::GetReplyCode(ProtocolI &data) {
 }
 
 CLASS_REGISTER(HttpClientTestClassTest1, "1.0")
+
+class HttpClientTestClassTest2: public ReferenceContainer, public DataExportI, public HttpRealmI {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpClientTestClassTest2    ();
+
+    virtual ~HttpClientTestClassTest2();
+
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
+
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
+
+    virtual int32 GetReplyCode(ProtocolI &data);
+
+    virtual bool Validate(const char8 * const key,
+            const int32 command,
+            const uint32 ipNumber);
+
+    virtual bool DigestSecurityNeeded();
+
+    virtual bool GetAuthenticationRequest(StreamString &message);
+};
+
+HttpClientTestClassTest2::HttpClientTestClassTest2() {
+
+}
+
+HttpClientTestClassTest2::~HttpClientTestClassTest2() {
+
+}
+
+bool HttpClientTestClassTest2::GetAsStructuredData(StreamStructuredDataI &data,
+                                                   ProtocolI &protocol) {
+
+    protocol.Write("Content-Type", "text/html");
+    data.CreateAbsolute("NodeA.NodeB");
+    uint32 var1 = 1;
+    data.Write("var1", var1);
+    data.CreateAbsolute("NodeA.NodeC");
+    int32 var2 = -1;
+    data.Write("var2", var2);
+    data.MoveToRoot();
+
+    return true;
+}
+
+bool HttpClientTestClassTest2::GetAsText(StreamI &stream,
+                                         ProtocolI &protocol) {
+    StreamString hString;
+    StreamString *hStream = (&hString);
+
+    hStream->SetSize(0);
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
+    }
+    protocol.Write("Content-Type", "text/html");
+
+    hStream->SetSize(0);
+
+    hStream->Printf("<html><head><TITLE>%s</TITLE>"
+                    "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                    "HttpServiceTestClassTest1", "HttpServiceTestClassTest1");
+    hStream->Printf("%s", "</UL></BODY>");
+    hStream->Printf("%s", "</html>");
+    hStream->Seek(0);
+    uint32 stringSize = hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
+
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    return true;
+}
+
+int32 HttpClientTestClassTest2::GetReplyCode(ProtocolI &data) {
+    return HttpDefinition::HSHCReplyOK;
+}
+
+bool HttpClientTestClassTest2::Validate(const char8 * const key,
+                                        const int32 command,
+                                        const uint32 ipNumber) {
+
+    printf("HEREEE %s\n", key);
+
+    StreamString user, passwd, realm, nonce, uri, cnonce, response, opaque, nc, qop;
+    SearchKey(key, "username", user);
+    SearchKey(key, "realm", realm);
+    SearchKey(key, "nonce", nonce);
+    SearchKey(key, "uri", uri);
+    SearchKey(key, "cnonce", cnonce);
+    SearchKey(key, "response", response);
+    SearchKey(key, "opaque", opaque);
+    SearchKey1(key, "nc=", nc);
+    SearchKey1(key, "qop=", qop);
+
+    StreamString HA1;
+    StreamString toEncode;
+    passwd = "1234";
+    toEncode.Printf("%s:%s:%s", user.Buffer(), realm.Buffer(), passwd.Buffer());
+    uint32 toEncodeLen = static_cast<uint32>(toEncode.Size());
+
+    uint8 buffer[16];
+    MemoryOperationsHelper::Set(buffer, 0, 16);
+    Md5Encrypt::Md5(reinterpret_cast<uint8 *>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+    for (uint32 i = 0u; (i < 16u); i++) {
+        HA1.Printf("%02x", buffer[i]);
+    }
+
+    StreamString HA2;
+    StreamString commandStr = HttpDefinition::GetErrorCodeString(command);
+    MemoryOperationsHelper::Set(buffer, 0, 16);
+    toEncode.SetSize(0);
+    toEncode.Printf("%s:%s", commandStr.Buffer(), uri);
+    toEncodeLen = static_cast<uint32>(toEncode.Size());
+    Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+    for (uint32 i = 0u; (i < 16u); i++) {
+        HA2.Printf("%02x", buffer[i]);
+    }
+
+    StreamString expectedResponse;
+    MemoryOperationsHelper::Set(buffer, 0, 16);
+    MemoryOperationsHelper::Set(buffer, 0, 16);
+    toEncode.SetSize(0);
+    printf("md5(%s:%s:%s:%s:%s:%s)", HA1.Buffer(), nonce.Buffer(), nc.Buffer(), cnonce.Buffer(), qop.Buffer(), HA2.Buffer());
+
+    toEncode.Printf("%s:%s:%s:%s:%s:%s", HA1.Buffer(), nonce.Buffer(), nc.Buffer(), cnonce.Buffer(), qop.Buffer(), HA2.Buffer());
+    toEncodeLen = static_cast<uint32>(toEncode.Size());
+    Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+    for (uint32 i = 0u; (i < 16u); i++) {
+        expectedResponse.Printf("%02x", buffer[i]);
+    }
+
+    bool ret = (user == "gferro");
+    ret &= (realm == "1234");
+    ret &= (nonce == "4321");
+    ret &= (uri == "Test1");
+    ret &= (response == expectedResponse);
+    ret &= (opaque == "true");
+
+    return ret;
+}
+
+bool HttpClientTestClassTest2::DigestSecurityNeeded() {
+    return false;
+}
+
+bool HttpClientTestClassTest2::GetAuthenticationRequest(StreamString &message) {
+
+    message = "Digest realm=\"1234\" nonce=\"4321\" opaque=\"true\"";
+    return true;
+}
+
+CLASS_REGISTER(HttpClientTestClassTest2, "1.0")
+
+class HttpClientTestClassTest3: public ReferenceContainer, public DataExportI, public HttpRealmI {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpClientTestClassTest3    ();
+
+    virtual ~HttpClientTestClassTest3();
+
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
+
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
+
+    virtual int32 GetReplyCode(ProtocolI &data);
+
+    virtual bool Validate(const char8 * const key,
+            const int32 command,
+            const uint32 ipNumber);
+
+    virtual bool DigestSecurityNeeded();
+
+    virtual bool GetAuthenticationRequest(StreamString &message);
+};
+
+HttpClientTestClassTest3::HttpClientTestClassTest3() {
+
+}
+
+HttpClientTestClassTest3::~HttpClientTestClassTest3() {
+
+}
+
+bool HttpClientTestClassTest3::GetAsStructuredData(StreamStructuredDataI &data,
+                                                   ProtocolI &protocol) {
+
+    protocol.Write("Content-Type", "text/html");
+    data.CreateAbsolute("NodeA.NodeB");
+    uint32 var1 = 1;
+    data.Write("var1", var1);
+    data.CreateAbsolute("NodeA.NodeC");
+    int32 var2 = -1;
+    data.Write("var2", var2);
+    data.MoveToRoot();
+
+    return true;
+}
+
+bool HttpClientTestClassTest3::GetAsText(StreamI &stream,
+                                         ProtocolI &protocol) {
+    StreamString hString;
+    StreamString *hStream = (&hString);
+
+    hStream->SetSize(0);
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
+    }
+    protocol.Write("Content-Type", "text/html");
+
+    hStream->SetSize(0);
+
+    hStream->Printf("<html><head><TITLE>%s</TITLE>"
+                    "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                    "HttpServiceTestClassTest1", "HttpServiceTestClassTest1");
+    hStream->Printf("%s", "</UL></BODY>");
+    hStream->Printf("%s", "</html>");
+    hStream->Seek(0);
+    uint32 stringSize = hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
+
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    return true;
+}
+
+int32 HttpClientTestClassTest3::GetReplyCode(ProtocolI &data) {
+    return HttpDefinition::HSHCReplyOK;
+}
+
+bool HttpClientTestClassTest3::Validate(const char8 * const key,
+                                        const int32 command,
+                                        const uint32 ipNumber) {
+
+    StreamString keyStr = key;
+    StreamString auth;
+    Base64Encoder::Decode(keyStr, auth);
+
+    bool ret = auth == "gferro:1234";
+    return ret;
+}
+
+bool HttpClientTestClassTest3::DigestSecurityNeeded() {
+    return false;
+}
+
+bool HttpClientTestClassTest3::GetAuthenticationRequest(StreamString &message) {
+
+    StreamString auth = "gferro:1234";
+    auth.Seek(0);
+    StreamString encoded;
+    Base64Encoder::Encode(auth, encoded);
+    message.Printf("Basic %s", encoded.Buffer());
+    message.Seek(0);
+    return true;
+}
+
+CLASS_REGISTER(HttpClientTestClassTest3, "1.0")
 
 //#if 0
 /**
@@ -420,8 +734,306 @@ bool HttpClientTest::TestHttpExchange() {
     if (ret) {
         StreamString readOut;
 
-        ret=test.HttpExchange(readOut,HttpDefinition::HSHCGet, NULL, 1000u);
+        ret = test.HttpExchange(readOut, HttpDefinition::HSHCGet, NULL, 1000u);
         printf("\n%s\n", readOut.Buffer());
+
+        if (ret) {
+            ret = (readOut == "20\r\n"
+                    "<html><head><TITLE>HttpServiceTe\r\n"
+                    "20\r\n"
+                    "stClassTest1</TITLE></head><BODY\r\n"
+                    "20\r\n"
+                    " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                    "20\r\n"
+                    "ceTestClassTest1</H1><UL></UL></\r\n"
+                    "C\r\n"
+                    "BODY></html>\r\n"
+                    "0\r\n\r\n");
+        }
+
+    }
+
+    if (ret) {
+        ret = service->Stop();
+    }
+    return ret;
+}
+
+bool HttpClientTest::TestHttpExchange_Authorization_Digest() {
+
+    const char8 *config = ""
+            "$Application = {"
+            "   Class = RealTimeApplication"
+            "       +WebRoot = {"
+            "           Class = HttpServiceTestWebRoot"
+            "           +ClassLister = {"
+            "               Class = HttpServiceTestClassLister"
+            "           }"
+            "           +Test1 = {"
+            "               Class = HttpClientTestClassTest2"
+            "           }"
+            "       }"
+            "       +HttpServerTest = {"
+            "           Class = HttpService"
+            "           WebRoot = \"Application.WebRoot\""
+            "           Port=2222"
+            "           ListenMaxConnections = 255"
+            "           Timeout = 0"
+            "           AcceptTimeout=1000"
+            "           MaxNumberOfThreads=100"
+            "           MinNumberOfThreads=1"
+            "       }"
+            "   +Functions = {"
+            "       Class = ReferenceContainer"
+            "       +GAM1 = {"
+            "           Class = HttpServiceTestGAM"
+            "             InputSignals = {"
+            "                Counter = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                }"
+            "                Time = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                    Frequency = 1000"
+            "                }"
+            "             }"
+            "             OutputSignals = {"
+            "                CounterOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "                TimeOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "             }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        DefaultDataSource = DDB1"
+            "        +DDB1 = {"
+            "            Class = GAMDataSource"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "        +Input = {"
+            "            Class = HttpServiceTestDS"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +Idle = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    CPUs = 2"
+            "                    Functions = { GAM1 }"
+            "                }"
+            "            }"
+            "         }"
+            "     }"
+            "     +Scheduler = {"
+            "         Class = GAMScheduler"
+            "         TimingDataSource = Timings"
+            "     }"
+            "}";
+
+    HttpClient test;
+
+    test.SetServerAddress("127.0.0.1");
+    test.SetServerPort(2222);
+    test.SetServerUri("Test1");
+
+    StreamString userPass = "gferro:1234";
+    StreamString encodedUserPass;
+    Base64Encoder::Encode(userPass, encodedUserPass);
+    test.SetAuthorisation(encodedUserPass.Buffer());
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+
+    ReferenceT<HttpService> service = god->Find("Application.HttpServerTest");
+    ret = service.IsValid();
+
+    if (ret) {
+        ret = service->Start();
+    }
+
+    if (ret) {
+        StreamString readOut;
+
+        ret = test.HttpExchange(readOut, HttpDefinition::HSHCGet, NULL, 20000u);
+
+        if (ret) {
+            StreamString readOut;
+
+            ret = test.HttpExchange(readOut, HttpDefinition::HSHCGet, NULL, 2000u);
+            printf("\n%s\n", readOut.Buffer());
+
+            if (ret) {
+                ret = (readOut == "20\r\n"
+                        "<html><head><TITLE>HttpServiceTe\r\n"
+                        "20\r\n"
+                        "stClassTest1</TITLE></head><BODY\r\n"
+                        "20\r\n"
+                        " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                        "20\r\n"
+                        "ceTestClassTest1</H1><UL></UL></\r\n"
+                        "C\r\n"
+                        "BODY></html>\r\n"
+                        "0\r\n\r\n");
+            }
+        }
+
+    }
+
+    if (ret) {
+        ret = service->Stop();
+    }
+    return ret;
+}
+
+bool HttpClientTest::TestHttpExchange_Authorization_Basic() {
+
+    const char8 *config = ""
+            "$Application = {"
+            "   Class = RealTimeApplication"
+            "       +WebRoot = {"
+            "           Class = HttpServiceTestWebRoot"
+            "           +ClassLister = {"
+            "               Class = HttpServiceTestClassLister"
+            "           }"
+            "           +Test1 = {"
+            "               Class = HttpClientTestClassTest3"
+            "           }"
+            "       }"
+            "       +HttpServerTest = {"
+            "           Class = HttpService"
+            "           WebRoot = \"Application.WebRoot\""
+            "           Port=2222"
+            "           ListenMaxConnections = 255"
+            "           Timeout = 0"
+            "           AcceptTimeout=1000"
+            "           MaxNumberOfThreads=100"
+            "           MinNumberOfThreads=1"
+            "       }"
+            "   +Functions = {"
+            "       Class = ReferenceContainer"
+            "       +GAM1 = {"
+            "           Class = HttpServiceTestGAM"
+            "             InputSignals = {"
+            "                Counter = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                }"
+            "                Time = {"
+            "                    DataSource = Input"
+            "                    Type = uint32"
+            "                    Frequency = 1000"
+            "                }"
+            "             }"
+            "             OutputSignals = {"
+            "                CounterOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "                TimeOnDDB = {"
+            "                    DataSource = DDB1"
+            "                    Type = uint32"
+            "                }"
+            "             }"
+            "        }"
+            "    }"
+            "    +Data = {"
+            "        Class = ReferenceContainer"
+            "        DefaultDataSource = DDB1"
+            "        +DDB1 = {"
+            "            Class = GAMDataSource"
+            "        }"
+            "        +Timings = {"
+            "            Class = TimingDataSource"
+            "        }"
+            "        +Input = {"
+            "            Class = HttpServiceTestDS"
+            "        }"
+            "    }"
+            "    +States = {"
+            "        Class = ReferenceContainer"
+            "        +Idle = {"
+            "            Class = RealTimeState"
+            "            +Threads = {"
+            "                Class = ReferenceContainer"
+            "                +Thread1 = {"
+            "                    Class = RealTimeThread"
+            "                    CPUs = 2"
+            "                    Functions = { GAM1 }"
+            "                }"
+            "            }"
+            "         }"
+            "     }"
+            "     +Scheduler = {"
+            "         Class = GAMScheduler"
+            "         TimingDataSource = Timings"
+            "     }"
+            "}";
+
+    HttpClient test;
+
+    test.SetServerAddress("127.0.0.1");
+    test.SetServerPort(2222);
+    test.SetServerUri("Test1");
+
+    StreamString userPass = "gferro:4567";
+    StreamString encodedUserPass;
+    Base64Encoder::Encode(userPass, encodedUserPass);
+    test.SetAuthorisation(encodedUserPass.Buffer());
+
+    bool ret = InitialiseMemoryMapInputBrokerEnviroment(config);
+    ObjectRegistryDatabase *god = ObjectRegistryDatabase::Instance();
+
+    ReferenceT<HttpService> service = god->Find("Application.HttpServerTest");
+    ret = service.IsValid();
+
+    if (ret) {
+        ret = service->Start();
+    }
+
+    if (ret) {
+        StreamString readOut;
+
+        ret = test.HttpExchange(readOut, HttpDefinition::HSHCGet, NULL, 20000u);
+
+        if (ret) {
+            StreamString userPass = "gferro:1234";
+            StreamString encodedUserPass;
+            Base64Encoder::Encode(userPass, encodedUserPass);
+            test.SetAuthorisation(encodedUserPass.Buffer());
+
+            StreamString readOut;
+
+            ret = test.HttpExchange(readOut, HttpDefinition::HSHCGet, NULL, 10000u);
+            printf("\n%s\n", readOut.Buffer());
+
+            if (ret) {
+                ret = (readOut == "20\r\n"
+                        "<html><head><TITLE>HttpServiceTe\r\n"
+                        "20\r\n"
+                        "stClassTest1</TITLE></head><BODY\r\n"
+                        "20\r\n"
+                        " BGCOLOR=\"#ffffff\"><H1>HttpServi\r\n"
+                        "20\r\n"
+                        "ceTestClassTest1</H1><UL></UL></\r\n"
+                        "C\r\n"
+                        "BODY></html>\r\n"
+                        "0\r\n\r\n");
+            }
+
+        }
 
     }
 

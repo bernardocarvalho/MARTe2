@@ -52,7 +52,7 @@ public:
     HttpProtocol *GetHttpProtocol();
 
     bool HttpExchange(BufferedStreamI &streamDataRead,
-                      int32 command,
+                      const int32 command,
                       BufferedStreamI * const payload = NULL_PTR(BufferedStreamI *),
                       TimeoutType msecTimeout=TTInfiniteWait,
                       int32 operationId = -1);
@@ -60,10 +60,11 @@ public:
 
     void SetServerAddress(const char8 * const serverAddressIn);
 
-    void SetServerPort(const uint32 serverPortIn);
+    void SetServerPort(const uint16 serverPortIn);
 
     void SetServerUri(const char8 * const serverUriIn);
 
+    void SetAuthorisation(const char8 * const authIn);
 
     void GetServerAddress(StreamString &serverAddrOut) const;
 
@@ -71,12 +72,14 @@ public:
 
     void GetServerUri(StreamString &serverUriOut) const;
 
+
+    void GetAuthorisation(StreamString authOut) const;
 protected:
 
-    bool Connect(TimeoutType msecTimeout);
+    bool Connect(const TimeoutType &msecTimeout);
 
     /** */
-    void CalculateNonce(StreamString & nonce);
+    bool CalculateNonce(StreamString & nonce);
 
     /** */
     bool GenerateDigestKey(StreamString & key,
@@ -97,7 +100,7 @@ protected:
 
     StreamString urlUri;
     StreamString urlHost;
-    uint32 urlPort;
+    uint16 urlPort;
 
     /** authorisation is <BASE64 of User:Password> */
     StreamString authorisation;

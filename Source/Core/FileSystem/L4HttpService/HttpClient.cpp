@@ -108,7 +108,7 @@ bool HttpClient::Initialise(StructuredDataI &data) {
             urlHost = urlHostTemp;
             reConnect = true;
         }
-        uint32 urlPortTemp;
+        uint16 urlPortTemp;
         ret = data.Read("ServerPort", urlPortTemp);
         if (!ret) {
             REPORT_ERROR(ErrorManagement::InitialisationError, "Please define the server port ServerPort");
@@ -150,7 +150,7 @@ void HttpClient::SetServerAddress(const char8 * const serverAddressIn) {
     }
 }
 
-void HttpClient::SetServerPort(const uint32 serverPortIn) {
+void HttpClient::SetServerPort(const uint16 serverPortIn) {
     if (urlPort != serverPortIn) {
         urlPort = serverPortIn;
         reConnect = true;
@@ -163,6 +163,11 @@ void HttpClient::SetServerUri(const char8 * const serverUriIn) {
     }
 }
 
+void HttpClient::SetAuthorisation(const char8 * const authIn) {
+    authorisation = authIn;
+    authorisationKey = authIn;
+}
+
 void HttpClient::GetServerAddress(StreamString &serverAddrOut) const {
     serverAddrOut = urlHost;
 }
@@ -173,6 +178,10 @@ uint32 HttpClient::GetServerPort() const {
 
 void HttpClient::GetServerUri(StreamString &serverUriOut) const {
     serverUriOut = urlUri;
+}
+
+void HttpClient::GetAuthorisation(StreamString authOut) const {
+    authOut = authorisation;
 }
 
 bool HttpClient::AutenticationProcedure(const int32 command,
@@ -211,19 +220,24 @@ bool HttpClient::AutenticationProcedure(const int32 command,
                 newAuthorisationKey = authorisation;
             }
             else if (StringHelper::CompareNoCaseSensN("Digest ", authRequest.Buffer(), 7u) == 0) {
-                ret=GenerateDigestKey(newAuthorisationKey, &(authRequest.Buffer()[7]), HttpDefinition::GetErrorCodeString(command), operationId);
+                ret = GenerateDigestKey(newAuthorisationKey, &(authRequest.Buffer()[7]), HttpDefinition::GetErrorCodeString(command), operationId);
             }
             else {
                 REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation request of unknown type: %s", authRequest.Buffer());
                 ret = false;
             }
         }
+        if (ret) {
+            authorisationKey = newAuthorisationKey;
+        }
+
     }
     return ret;
+    //Z2ZlcnJvOjQ1Njc=
 }
 
 bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
-                              int32 command,
+                              const int32 command,
                               BufferedStreamI * const payload,
                               TimeoutType msecTimeout,
                               int32 operationId) {
@@ -233,7 +247,7 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
 
     // a counter of the transactions
     if (operationId == -1) {
-        lastOperationId++
+        lastOperationId++;
         operationId = lastOperationId;
     }
 
@@ -252,10 +266,10 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
         if (ret) {
             /* create and send request */
             protocol.SetKeepAlive(true);
-            if (authorisationKey.Size() > 0) {
+            if (authorisationKey.Size() > 0ULL) {
                 //switch and write
-                if (protocol.MoveAbsolute("OutputOtions")) {
-                    ret = protocol.CreateAbsolute("OutputOtions");
+                if (!protocol.MoveAbsolute("OutputOptions")) {
+                    ret = protocol.CreateAbsolute("OutputOptions");
                 }
 
                 if (ret) {
@@ -296,32 +310,27 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
 
         if (ret) {
             // check reply for 200 (authorisation request)
-            if (protocol.GetHttpCommand() == HttpDefinition::HSHCReplyOK) {
-                // read body
-                //TODO here we can read the body inside a structured data?
-                ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
-            }
-            else {
+            if (protocol.GetHttpCommand() == HttpDefinition::HSHCReplyAUTH) {
 
-                // check reply for 401 (authorisation request)
-                if (protocol.GetHttpCommand() == HttpDefinition::HSHCReplyAUTH) {
-
-                    ret = AutenticationProcedure(command, msecTimeout, operationId);
-
-                }
-                else {
-
-                    // discard body
-                    ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
-
-                    // close if the server says so...
-                    if (!protocol.KeepAlive()) {
-                        socket.Close();
+                ret = AutenticationProcedure(command, msecTimeout, operationId);
+                if (ret) {
+                    if (protocol.KeepAlive()) {
+                        //try again with new authorization
+                        ret = HttpExchange(streamDataRead, command, payload, msecTimeout, operationId);
                     }
                 }
 
             }
+            else {
+                // read body
+                //TODO here we can read the body inside a structured data?
+                ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
+            }
 
+            // close if the server says so...
+            if (!protocol.KeepAlive()) {
+                (void) socket.Close();
+            }
         }
     }
     else {
@@ -332,14 +341,14 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
 
 }
 
-bool HttpClient::Connect(TimeoutType mSecTimeout) {
+bool HttpClient::Connect(const TimeoutType &msecTimeout) {
     (void) socket.Close();
     bool ret = socket.Open();
     if (ret) {
         ret = socket.SetBlocking(true);
     }
     if (ret) {
-        ret = socket.Connect(urlHost.Buffer(), urlPort, mSecTimeout);
+        ret = socket.Connect(urlHost.Buffer(), urlPort, msecTimeout);
     }
     return ret;
 }
@@ -348,99 +357,145 @@ bool HttpClient::GenerateDigestKey(StreamString &key,
                                    const char8 * const data,
                                    const char8 * const command,
                                    int32 nc) {
-    key.SetSize(0);
+    bool ret = key.SetSize(0ULL);
 
     StreamString qop = "auth";
     //if (!SearchKeyNoQuote(data,"qop",qop)) return False;
 
     StreamString userPasswd;
-    bool ret = Base64Encoder::Decode(authorisation, userPasswd);
-    StreamString user;
-    StreamString passwd;
-    StreamString realm;
     if (ret) {
+        ret = Base64Encoder::Decode(authorisation, userPasswd);
+        StreamString user;
+        StreamString passwd;
+        StreamString realm;
+        if (ret) {
 
-        char8 terminator;
+            char8 terminator;
 
-        userPasswd.Seek(0);
-        (void) userPasswd.GetToken(user, ":", terminator);
-        (void) userPasswd.GetToken(passwd, "\n\t ", terminator);
+            ret = userPasswd.Seek(0ULL);
+            if (ret) {
+                if (!userPasswd.GetToken(user, ":", terminator)) {
+                    //TODO warning?
+                }
+                if (!userPasswd.GetToken(passwd, "\n\t ", terminator)) {
+                    //TODO warning?
+                }
+            }
 
-        ret = SearchKey(data, "realm", realm);
-    }
-
-    StreamString HA1;
-    StreamString HA2;
-    StreamString response;
-    StreamString ncStr;
-    StreamString cnonce;
-    StreamString nonce;
-    StreamString opaque;
-
-    if (ret) {
-        HA1.SetSize(0);
-        uint8 buffer[16];
-        StreamString toEncode;
-        toEncode.Printf("%s:%s:%s", user.Buffer(), realm.Buffer(), passwd.Buffer());
-        Md5Encrypt::Md5(reinterpret_cast<uint8 *>(toEncode.BufferReference()), toEncode.Size(), buffer);
-        for (uint32 i = 0u; i < 16u; i++) {
-            HA1.Printf("%02x", buffer[i]);
+            ret = SearchKey(data, "realm", realm);
         }
 
-        MemoryOperationsHelper::Set(buffer, '\0', 16u);
-        HA2.SetSize(0);
-        toEncode.SetSize(0);
-        toEncode.Printf("%s:%s", command, urlUri);
-        Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncode.Size(), buffer);
-        for (uint32 i = 0; i < 16u; i++) {
-            HA2.Printf("%02x", buffer[i]);
+        REPORT_ERROR(ErrorManagement::Information, "user=%s, pass=%s, realm=%s", user.Buffer(), passwd.Buffer(), realm.Buffer());
+
+        StreamString HA1;
+        StreamString HA2;
+        StreamString response;
+        StreamString ncStr;
+        StreamString cnonce;
+        StreamString nonce;
+        StreamString opaque;
+
+        if (ret) {
+            ret = HA1.SetSize(0ULL);
+            if (ret) {
+                uint8 buffer[16];
+                StreamString toEncode;
+                ret = toEncode.Printf("%s:%s:%s", user.Buffer(), realm.Buffer(), passwd.Buffer());
+                if (ret) {
+                    uint32 toEncodeLen = static_cast<uint32>(toEncode.Size());
+                    Md5Encrypt::Md5(reinterpret_cast<uint8 *>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+                    for (uint32 i = 0u; (i < 16u) && (ret); i++) {
+                        ret = HA1.Printf("%02x", buffer[i]);
+                    }
+                    if (ret) {
+                        ret = MemoryOperationsHelper::Set(&buffer[0], '\0', 16u);
+                    }
+                    if (ret) {
+                        ret = HA2.SetSize(0ULL);
+                    }
+                }
+                if (ret) {
+                    ret = toEncode.SetSize(0ULL);
+                }
+                if (ret) {
+                    ret = toEncode.Printf("%s:%s", command, urlUri);
+                    if (ret) {
+                        uint32 toEncodeLen = static_cast<uint32>(toEncode.Size());
+                        Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+                        for (uint32 i = 0u; (i < 16u) && (ret); i++) {
+                            ret = HA2.Printf("%02x", buffer[i]);
+                        }
+                        if (ret) {
+                            ret = ncStr.Printf("%08x", nc);
+                        }
+                        if (ret) {
+                            ret = CalculateNonce(cnonce);
+                        }
+                        if (ret) {
+                            ret = SearchKey(data, "nonce", nonce);
+                        }
+                    }
+                }
+            }
+        }
+        if (ret) {
+            uint8 buffer[16];
+
+            StreamString toEncode;
+            ret = toEncode.SetSize(0ULL);
+            if (ret) {
+                ret = toEncode.Printf("%s:%s:%s:%s:%s:%s", HA1.Buffer(), nonce.Buffer(), ncStr.Buffer(), cnonce.Buffer(), qop.Buffer(), HA2.Buffer());
+                REPORT_ERROR(ErrorManagement::Information, "md5(%s, %s, %s, %s", HA1.Buffer(), nonce.Buffer(), ncStr.Buffer(), cnonce.Buffer());
+                REPORT_ERROR(ErrorManagement::Information, "%s, %s)", qop.Buffer(), HA2.Buffer());
+                if (ret) {
+                    uint32 toEncodeLen = static_cast<uint32>(toEncode.Size());
+                    Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);
+                    for (uint32 i = 0u; (i < 16u) && (ret); i++) {
+                        ret = response.Printf("%02x", buffer[i]);
+                    }
+                    if (ret) {
+                        ret = SearchKey(data, "opaque", opaque);
+                    }
+                }
+            }
         }
 
-        ncStr.Printf("%08x", nc);
-        CalculateNonce(cnonce);
-        ret = SearchKey(data, "nonce", nonce);
-    }
-    if (ret) {
-        uint8 buffer[16];
+        if (ret) {
 
-        StreamString toEncode;
-        toEncode.SetSize(0);
-        toEncode.Printf("%s:%s:%s:%s:%s:%s", HA1.Buffer(), nonce.Buffer(), ncStr.Buffer(), cnonce.Buffer(), qop.Buffer(), HA2.Buffer());
-        Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncode.Size(), buffer);
-        for (uint32 i = 0u; i < 16u; i++) {
-            response.Printf("%02x", buffer[i]);
+            ret = key.Printf("Digest "
+                             "username=\"%s\","
+                             "realm=\"%s\","
+                             "nonce=\"%s\","
+                             "uri=\"%s\","
+                             "qop=%s,"
+                             "nc=%s,"
+                             "cnonce=\"%s\","
+                             "response=\"%s\","
+                             "opaque=\"%s\"",
+                             user.Buffer(), realm.Buffer(), nonce.Buffer(), urlUri.Buffer(), qop.Buffer(), ncStr.Buffer(), cnonce.Buffer(), response.Buffer(),
+                             opaque.Buffer());
         }
-        ret = SearchKey(data, "opaque", opaque);
-    }
-
-    if (ret) {
-
-        key.Printf("Digest "
-                   "username=\"%s\","
-                   "realm=\"%s\","
-                   "nonce=\"%s\","
-                   "uri=\"%s\","
-                   "qop=%s,"
-                   "nc=%s,"
-                   "cnonce=\"%s\","
-                   "response=\"%s\","
-                   "opaque=\"%s\"",
-                   user.Buffer(), realm.Buffer(), nonce.Buffer(), urlUri.Buffer(), qop.Buffer(), ncStr.Buffer(), cnonce.Buffer(), response.Buffer(),
-                   opaque.Buffer());
     }
     return ret;
 
 }
 
-void HttpClient::CalculateNonce(StreamString &nonce) {
-    nonce.SetSize(0);
+bool HttpClient::CalculateNonce(StreamString &nonce) {
+    bool ret = nonce.SetSize(0ULL);
     StreamString tid;
-    tid.Printf("%08x%08x", static_cast<uint32>(Threads::Id()), this);
-    uint8 buffer[16];
-    Md5Encrypt::Md5((uint8 *) tid.BufferReference(), tid.Size(), buffer);
-    for (uint32 i = 0u; i < 16u; i++) {
-        nonce.Printf("%02x", buffer[i]);
+    if (ret) {
+        ret = tid.Printf("%08x%08x", static_cast<uint32>(Threads::Id()), this);
     }
+    if (ret) {
+        uint8 buffer[16];
+        uint32 tidSize = static_cast<uint32>(tid.Size());
+        Md5Encrypt::Md5(reinterpret_cast<uint8 *>(tid.BufferReference()), tidSize, &buffer[0]);
+        for (uint32 i = 0u; (i < 16u) && (ret); i++) {
+            ret = nonce.Printf("%02x", buffer[i]);
+        }
+    }
+
+    return ret;
 }
 
 }

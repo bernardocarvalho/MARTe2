@@ -49,23 +49,23 @@ public:
 
     ~Base64Codec();
 
-    char8 decodingTable[256];
+    uint8 decodingTable[256];
 
-    static const char8 *base64Alphabet;
+    static const char8 * const base64Alphabet;
 
 } base64Codec;
 
-const char8 *Base64Codec::base64Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+const char8 * const Base64Codec::base64Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 Base64Codec::Base64Codec() {
     for (uint32 i = 0u; i < 256u; i++) {
         decodingTable[i] = 0xFFu;
     }
-    for (uint32 i = 0u; i < 64u; i++) {
+    for (uint8 i = 0u; i < 64u; i++) {
+        /*lint -e{1938} access to global data allowed*/
         decodingTable[static_cast<uint8>(base64Alphabet[i])] = i;
     }
-    decodingTable['='] = 0xFEu;
-
+    decodingTable[static_cast<uint8>('=')] = 0xFEu;
 }
 
 Base64Codec::~Base64Codec() {
@@ -74,44 +74,44 @@ Base64Codec::~Base64Codec() {
 bool Encode(StreamString &input,
             StreamString &output) {
 
-    int32 size = input.Size();
-    const uint8 *in = (const uint8 *) input.Buffer();
+    int32 size = static_cast<int32>(input.Size());
+    const uint8 *in = reinterpret_cast<const uint8 *>(input.Buffer());
     output = "";
-    uint32 word = 0;
+    uint32 word = 0u;
     uint32 code;
     while (size > 0) {
         word = in[0];
-        code = word >> 2;
-        word &= 0x3;
+        code = (word >> 2u);
+        word &= 0x3u;
         output += Base64Codec::base64Alphabet[code];
         if (size > 1) {
-            word <<= 8;
+            word <<= 8u;
             word |= in[1];
-            code = word >> 4;
-            word &= 0xF;
+            code = (word >> 4u);
+            word &= 0xFu;
             output += Base64Codec::base64Alphabet[code];
             if (size > 2) {
-                word <<= 8;
+                word <<= 8u;
                 word |= in[2];
                 code = word;
-                word &= 0x3F;
-                code >>= 6;
+                word &= 0x3Fu;
+                code >>= 6u;
                 output += Base64Codec::base64Alphabet[code];
                 output += Base64Codec::base64Alphabet[word];
             }
             else { // 4 bits available
-                word <<= 2;
+                word <<= 2u;
                 output += Base64Codec::base64Alphabet[word];
                 output += "=";
             }
         }
         else { // 2 bits available
-            word <<= 4;
+            word <<= 4u;
             output += Base64Codec::base64Alphabet[word];
             output += "==";
         }
         size -= 3;
-        in += 3;
+        in = &in[3];
     }
 
     return true;
@@ -120,23 +120,23 @@ bool Encode(StreamString &input,
 bool Decode(StreamString &input,
             StreamString &output) {
 
-    uint32 size = input.Size();
+    uint32 size = static_cast<uint32>(input.Size());
     const uint8 *in = reinterpret_cast<const uint8*>(input.Buffer());
     output = "";
-    uint32 word = 0;
-    uint32 code;
-    uint8 key;
-    uint8 c;
+    uint32 word = 0u;
+    uint32 code = 0u;
+    uint8 key = 0u;
+    uint8 c = 0u;
     bool done = false;
     bool ret = true;
-    while ((size >= 4) && (ret) && (!done)) {
+    while ((size >= 4u) && (ret) && (!done)) {
         c = in[0];
-        if (c == '=') {
+        if (c == static_cast<uint8>('=')) {
             done = true;
         }
         if (!done) {
             key = base64Codec.decodingTable[c];
-            if (key == 0xFF) {
+            if (key == 0xFFu) {
                 ret = false;
             }
         }
@@ -146,64 +146,64 @@ bool Decode(StreamString &input,
 
             c = in[1];
             if (c == static_cast<uint8>('=')) {
-                word <<= 2;
-                output += word;
+                word <<= 2u;
+                output += static_cast<char8>(word);
                 done = true;
             }
             if (!done) {
                 key = base64Codec.decodingTable[c];
-                if (key == 0xFF) {
+                if (key == 0xFFu) {
                     ret = false;
                 }
             }
         }
         if ((ret) && (!done)) {
 
-            word <<= 6;
+            word <<= 6u;
             word |= key;
-            code = (word >> 4);
-            word &= 0xF;
-            output += code;
+            code = (word >> 4u);
+            word &= 0xFu;
+            output += static_cast<char8>(code);
 
             c = in[2];
-            if (c == '=') {
-                word <<= 4;
-                output += word;
+            if (c == static_cast<uint8>('=')) {
+                word <<= 4u;
+                output += static_cast<char8>(word);
                 done = true;
             }
             if (!done) {
                 key = base64Codec.decodingTable[c];
-                if (key == 0xFF) {
+                if (key == 0xFFu) {
                     ret = false;
                 }
             }
         }
 
         if ((ret) && (!done)) {
-            word <<= 6;
+            word <<= 6u;
             word |= key;
-            code = (word >> 2);
-            word &= 0x3;
-            output += code;
+            code = (word >> 2u);
+            word &= 0x3u;
+            output += static_cast<char8>(code);
 
             c = in[3];
-            if (c == '=') {
+            if (c == static_cast<uint8>('=')) {
                 done = true;
             }
             if (!done) {
                 key = base64Codec.decodingTable[c];
-                if (key == 0xFF) {
+                if (key == 0xFFu) {
                     ret = false;
                 }
             }
         }
         if ((ret) && (!done)) {
-            word <<= 6;
+            word <<= 6u;
             word |= key;
-            output += word;
+            output += static_cast<char8>(word);
 
-            size -= 4;
-            in += 4;
+            size -= 4u;
+            in = &in[4];
         }
     }
     return ret;

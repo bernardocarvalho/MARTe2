@@ -209,25 +209,34 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                         err=!hprotocol.Write("Content-Type", contentType.Buffer());
                                         if (err.ErrorsCleared()) {
                                             StreamString realmMsg;
-                                            hiRealm->GetAuthenticationRequest(realmMsg);
-                                            err=!hprotocol.Write("WWW-Authenticate", realmMsg.Buffer());
+                                            err=! (hiRealm->GetAuthenticationRequest(realmMsg));
+                                            if (err.ErrorsCleared()) {
+                                                err=!hprotocol.Write("WWW-Authenticate", realmMsg.Buffer());
+                                            }
                                             StreamString hstream;
-                                            hstream.Printf("%s","<HTML><HEAD>\n"
-                                                    "<TITLE>401 Authorization Required</TITLE>\n"
-                                                    "</HEAD><BODY>\n"
-                                                    "<H1>Authorization Required</H1>\n"
-                                                    "This server could not verify that you\n"
-                                                    "are authorized to access the document you\n"
-                                                    "requested.  Either you supplied the wrong\n"
-                                                    "credentials (e.g., bad password), or your\n"
-                                                    "browser doesn't understand how to supply\n"
-                                                    "the credentials required.<P>\n"
-                                                    "</BODY></HTML>\n");
+                                            if (err.ErrorsCleared()) {
+                                                err=!hstream.Printf("%s","<HTML><HEAD>\n"
+                                                        "<TITLE>401 Authorization Required</TITLE>\n"
+                                                        "</HEAD><BODY>\n"
+                                                        "<H1>Authorization Required</H1>\n"
+                                                        "This server could not verify that you\n"
+                                                        "are authorized to access the document you\n"
+                                                        "requested.  Either you supplied the wrong\n"
+                                                        "credentials (e.g., bad password), or your\n"
+                                                        "browser doesn't understand how to supply\n"
+                                                        "the credentials required.<P>\n"
+                                                        "</BODY></HTML>\n");
+                                                if (err.ErrorsCleared()) {
+                                                    err=!hstream.Seek(0ULL);
+                                                }
+                                            }
+                                            if (err.ErrorsCleared()) {
+                                                // force reissuing of a new thread
+                                                hprotocol.SetKeepAlive(false);
+                                                err=!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyAUTH, &hstream, NULL_PTR(const char8*));
+                                                pagePrepared = err.ErrorsCleared();
+                                            }
 
-                                            // force reissuing of a new thread
-                                            hprotocol.SetKeepAlive(false);
-                                            err=!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyAUTH, &hstream, NULL_PTR(const char8*));
-                                            pagePrepared = err.ErrorsCleared();
                                         }
                                     }
                                 }
@@ -320,8 +329,6 @@ ErrorManagement::ErrorType HttpService::ServerCycle(MARTe::ExecutionInfo &inform
             newClient->SetCalibWriteParam(0u);
             err = !(newClient->SetBufferSize(32u, chunkSize));
             if (err.ErrorsCleared()) {
-                uint32 id = (uint32) Threads::Id();
-                REPORT_ERROR(ErrorManagement::Information, "New thread waiting %d", id);
                 if (server.WaitConnection(acceptTimeout, newClient) == NULL) {
                     err=MARTe::ErrorManagement::Timeout;
                     delete newClient;
