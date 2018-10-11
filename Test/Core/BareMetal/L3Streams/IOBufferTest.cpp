@@ -2061,6 +2061,7 @@ bool IOBufferTest::TestNoMoreSpaceToWrite() {
 }
 
 bool IOBufferTest::TestNoMoreDataToRead() {
-
+    IOBuffer ioBuffer;
+    return !ioBuffer.NoMoreDataToRead();
 }
 

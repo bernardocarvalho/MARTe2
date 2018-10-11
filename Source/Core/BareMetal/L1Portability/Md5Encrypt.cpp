@@ -66,8 +66,17 @@ namespace Md5Encrypt {
 }
 #endif
 
-static const uint8 md5_padding[64] = { 0x80u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
-        0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
+
+#define S(x,n) ((x << n) | ((x & 0xFFFFFFFFu) >> (32u - n)))
+
+#define P(a,b,c,d,k,s,t)                                \
+{                                                       \
+a += F(b,c,d) + X[k] + t; a = S(a,s) + b;           \
+}
+
+
+static const uint8 md5_padding[64] = { 0x80u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u,
+        0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
 
 class Md5Context {
 public:
@@ -84,24 +93,24 @@ public:
 
     void Finish(uint8 *output);
 
-    void Md5Process(uint8 data[64]);
+    void Md5Process(const uint8 data[64]);
 
     /*
      * MD5 HMAC context setup
      */
-    void HmacStarts(uint8 *key,
-                    uint32 keylen);
+    void HmacStarts(const uint8 * const key,
+                    const uint32 keylen);
 
     /*
      * MD5 HMAC process buffer
      */
-    void HmacUpdate(uint8 *input,
-                    uint32 ilen);
+    void HmacUpdate(uint8 * const input,
+                    const uint32 ilen);
 
     /*
      * MD5 HMAC final digest
      */
-    void HmacFinish(uint8 *output);
+    void HmacFinish(uint8 * const output);
 
 private:
 
@@ -122,9 +131,9 @@ Md5Context::Md5Context() {
     state[2] = 0x98BADCFEu;
     state[3] = 0x10325476u;
 
-    (void)MemoryOperationsHelper::Set(&buffer[0], '\0', 64u);
-    (void)MemoryOperationsHelper::Set(&ipad[0], '\0', 64u);
-    (void)MemoryOperationsHelper::Set(&opad[0], '\0', 64u);
+    (void) MemoryOperationsHelper::Set(&buffer[0], '\0', 64u);
+    (void) MemoryOperationsHelper::Set(&ipad[0], '\0', 64u);
+    (void) MemoryOperationsHelper::Set(&opad[0], '\0', 64u);
 
 }
 
@@ -158,12 +167,12 @@ void Md5Context::Update(uint8 *input,
         total[0] += ilen;
         total[0] &= 0xFFFFFFFFu;
 
-        if (total[0] < static_cast<osulong>(ilen)){
+        if (total[0] < static_cast<osulong>(ilen)) {
             total[1]++;
         }
 
-        if ((left!=0u) && (ilen >= fill)) {
-            (void)MemoryOperationsHelper::Copy(reinterpret_cast<void *> (&buffer[left]), reinterpret_cast<void *>(input), fill);
+        if ((left != 0u) && (ilen >= fill)) {
+            (void) MemoryOperationsHelper::Copy(reinterpret_cast<void *>(&buffer[left]), reinterpret_cast<void *>(input), fill);
             Md5Process(&buffer[0]);
             input = &input[fill];
             ilen -= fill;
@@ -177,7 +186,7 @@ void Md5Context::Update(uint8 *input,
         }
 
         if (ilen > 0u) {
-            (void)MemoryOperationsHelper::Copy(reinterpret_cast<void *>(&buffer[left]), reinterpret_cast<void *>(input), ilen);
+            (void) MemoryOperationsHelper::Copy(reinterpret_cast<void *>(&buffer[left]), reinterpret_cast<void *>(input), ilen);
         }
     }
 }
@@ -209,7 +218,7 @@ void Md5Context::Finish(uint8 * const output) {
     PUT_UINT32_LE(state[3], output, 12)
 }
 
-void Md5Context::Md5Process(uint8 data[64]) {
+void Md5Context::Md5Process(const uint8 data[64]) {
     osulong X[16];
     osulong A;
     osulong B;
@@ -234,99 +243,99 @@ void Md5Context::Md5Process(uint8 data[64]) {
     GET_UINT32_LE(X[14], data, 56)
     GET_UINT32_LE(X[15], data, 60)
 
-#define S(x,n) ((x << n) | ((x & 0xFFFFFFFFu) >> (32u - n)))
-
-#define P(a,b,c,d,k,s,t)                                \
-{                                                       \
-    a += F(b,c,d) + X[k] + t; a = S(a,s) + b;           \
-}
-
     A = state[0];
     B = state[1];
     C = state[2];
     D = state[3];
 
+    /*lint -e{9158} allowed define within a block*/
 #define F(x,y,z) (z ^ (x & (y ^ z)))
 
-    P(A, B, C, D, 0, 7, 0xD76AA478u)
-    P(D, A, B, C, 1, 12, 0xE8C7B756u)
-    P(C, D, A, B, 2, 17, 0x242070DBu)
-    P(B, C, D, A, 3, 22, 0xC1BDCEEEu)
-    P(A, B, C, D, 4, 7, 0xF57C0FAFu)
-    P(D, A, B, C, 5, 12, 0x4787C62Au)
-    P(C, D, A, B, 6, 17, 0xA8304613u)
-    P(B, C, D, A, 7, 22, 0xFD469501u)
-    P(A, B, C, D, 8, 7, 0x698098D8u)
-    P(D, A, B, C, 9, 12, 0x8B44F7AFu)
-    P(C, D, A, B, 10, 17, 0xFFFF5BB1u)
-    P(B, C, D, A, 11, 22, 0x895CD7BEu)
-    P(A, B, C, D, 12, 7, 0x6B901122u)
-    P(D, A, B, C, 13, 12, 0xFD987193u)
-    P(C, D, A, B, 14, 17, 0xA679438Eu)
-    P(B, C, D, A, 15, 22, 0x49B40821u)
+    P(A, B, C, D, 0, 7u, 0xD76AA478u)
+    P(D, A, B, C, 1, 12u, 0xE8C7B756u)
+    P(C, D, A, B, 2, 17u, 0x242070DBu)
+    P(B, C, D, A, 3, 22u, 0xC1BDCEEEu)
+    P(A, B, C, D, 4, 7u, 0xF57C0FAFu)
+    P(D, A, B, C, 5, 12u, 0x4787C62Au)
+    P(C, D, A, B, 6, 17u, 0xA8304613u)
+    P(B, C, D, A, 7, 22u, 0xFD469501u)
+    P(A, B, C, D, 8, 7u, 0x698098D8u)
+    P(D, A, B, C, 9, 12u, 0x8B44F7AFu)
+    P(C, D, A, B, 10, 17u, 0xFFFF5BB1u)
+    P(B, C, D, A, 11, 22u, 0x895CD7BEu)
+    P(A, B, C, D, 12, 7u, 0x6B901122u)
+    P(D, A, B, C, 13, 12u, 0xFD987193u)
+    P(C, D, A, B, 14, 17u, 0xA679438Eu)
+    P(B, C, D, A, 15, 22u, 0x49B40821u)
 
+    /*lint -e{9021} -e{9159} use of undef allowed*/
 #undef F
 
+    /*lint -e{9158} allowed define within a block*/
 #define F(x,y,z) (y ^ (z & (x ^ y)))
 
-    P(A, B, C, D, 1, 5, 0xF61E2562u)
-    P(D, A, B, C, 6, 9, 0xC040B340u)
-    P(C, D, A, B, 11, 14, 0x265E5A51u)
-    P(B, C, D, A, 0, 20, 0xE9B6C7AAu)
-    P(A, B, C, D, 5, 5, 0xD62F105Du)
-    P(D, A, B, C, 10, 9, 0x02441453u)
-    P(C, D, A, B, 15, 14, 0xD8A1E681u)
-    P(B, C, D, A, 4, 20, 0xE7D3FBC8u)
-    P(A, B, C, D, 9, 5, 0x21E1CDE6u)
-    P(D, A, B, C, 14, 9, 0xC33707D6u)
-    P(C, D, A, B, 3, 14, 0xF4D50D87u)
-    P(B, C, D, A, 8, 20, 0x455A14EDu)
-    P(A, B, C, D, 13, 5, 0xA9E3E905u)
-    P(D, A, B, C, 2, 9, 0xFCEFA3F8u)
-    P(C, D, A, B, 7, 14, 0x676F02D9u)
-    P(B, C, D, A, 12, 20, 0x8D2A4C8Au)
+    P(A, B, C, D, 1, 5u, 0xF61E2562u)
+    P(D, A, B, C, 6, 9u, 0xC040B340u)
+    P(C, D, A, B, 11, 14u, 0x265E5A51u)
+    P(B, C, D, A, 0, 20u, 0xE9B6C7AAu)
+    P(A, B, C, D, 5, 5u, 0xD62F105Du)
+    P(D, A, B, C, 10, 9u, 0x02441453u)
+    P(C, D, A, B, 15, 14u, 0xD8A1E681u)
+    P(B, C, D, A, 4, 20u, 0xE7D3FBC8u)
+    P(A, B, C, D, 9, 5u, 0x21E1CDE6u)
+    P(D, A, B, C, 14, 9u, 0xC33707D6u)
+    P(C, D, A, B, 3, 14u, 0xF4D50D87u)
+    P(B, C, D, A, 8, 20u, 0x455A14EDu)
+    P(A, B, C, D, 13, 5u, 0xA9E3E905u)
+    P(D, A, B, C, 2, 9u, 0xFCEFA3F8u)
+    P(C, D, A, B, 7, 14u, 0x676F02D9u)
+    P(B, C, D, A, 12, 20u, 0x8D2A4C8Au)
 
+    /*lint -e{9021} -e{9159} use of undef allowed*/
 #undef F
 
+    /*lint -e{9158} allowed define within a block*/
 #define F(x,y,z) (x ^ y ^ z)
 
-    P(A, B, C, D, 5, 4, 0xFFFA3942u)
-    P(D, A, B, C, 8, 11, 0x8771F681u)
-    P(C, D, A, B, 11, 16, 0x6D9D6122u)
-    P(B, C, D, A, 14, 23, 0xFDE5380Cu)
-    P(A, B, C, D, 1, 4, 0xA4BEEA44u)
-    P(D, A, B, C, 4, 11, 0x4BDECFA9u)
-    P(C, D, A, B, 7, 16, 0xF6BB4B60u)
-    P(B, C, D, A, 10, 23, 0xBEBFBC70u)
-    P(A, B, C, D, 13, 4, 0x289B7EC6u)
-    P(D, A, B, C, 0, 11, 0xEAA127FAu)
-    P(C, D, A, B, 3, 16, 0xD4EF3085u)
-    P(B, C, D, A, 6, 23, 0x04881D05u)
-    P(A, B, C, D, 9, 4, 0xD9D4D039u)
-    P(D, A, B, C, 12, 11, 0xE6DB99E5u)
-    P(C, D, A, B, 15, 16, 0x1FA27CF8u)
-    P(B, C, D, A, 2, 23, 0xC4AC5665u)
+    P(A, B, C, D, 5, 4u, 0xFFFA3942u)
+    P(D, A, B, C, 8, 11u, 0x8771F681u)
+    P(C, D, A, B, 11, 16u, 0x6D9D6122u)
+    P(B, C, D, A, 14, 23u, 0xFDE5380Cu)
+    P(A, B, C, D, 1, 4u, 0xA4BEEA44u)
+    P(D, A, B, C, 4, 11u, 0x4BDECFA9u)
+    P(C, D, A, B, 7, 16u, 0xF6BB4B60u)
+    P(B, C, D, A, 10, 23u, 0xBEBFBC70u)
+    P(A, B, C, D, 13, 4u, 0x289B7EC6u)
+    P(D, A, B, C, 0, 11u, 0xEAA127FAu)
+    P(C, D, A, B, 3, 16u, 0xD4EF3085u)
+    P(B, C, D, A, 6, 23u, 0x04881D05u)
+    P(A, B, C, D, 9, 4u, 0xD9D4D039u)
+    P(D, A, B, C, 12, 11u, 0xE6DB99E5u)
+    P(C, D, A, B, 15, 16u, 0x1FA27CF8u)
+    P(B, C, D, A, 2, 23u, 0xC4AC5665u)
 
+    /*lint -e{9021} -e{9159} use of undef allowed*/
 #undef F
 
+    /*lint -e{9158} allowed define within a block*/
 #define F(x,y,z) (y ^ (x | ~z))
 
-    P(A, B, C, D, 0, 6, 0xF4292244u)
-    P(D, A, B, C, 7, 10, 0x432AFF97u)
-    P(C, D, A, B, 14, 15, 0xAB9423A7u)
-    P(B, C, D, A, 5, 21, 0xFC93A039u)
-    P(A, B, C, D, 12, 6, 0x655B59C3u)
-    P(D, A, B, C, 3, 10, 0x8F0CCC92u)
-    P(C, D, A, B, 10, 15, 0xFFEFF47Du)
-    P(B, C, D, A, 1, 21, 0x85845DD1u)
-    P(A, B, C, D, 8, 6, 0x6FA87E4Fu)
-    P(D, A, B, C, 15, 10, 0xFE2CE6E0u)
-    P(C, D, A, B, 6, 15, 0xA3014314u)
-    P(B, C, D, A, 13, 21, 0x4E0811A1u)
-    P(A, B, C, D, 4, 6, 0xF7537E82u)
-    P(D, A, B, C, 11, 10, 0xBD3AF235u)
-    P(C, D, A, B, 2, 15, 0x2AD7D2BBu)
-    P(B, C, D, A, 9, 21, 0xEB86D391u)
+    P(A, B, C, D, 0, 6u, 0xF4292244u)
+    P(D, A, B, C, 7, 10u, 0x432AFF97u)
+    P(C, D, A, B, 14, 15u, 0xAB9423A7u)
+    P(B, C, D, A, 5, 21u, 0xFC93A039u)
+    P(A, B, C, D, 12, 6u, 0x655B59C3u)
+    P(D, A, B, C, 3, 10u, 0x8F0CCC92u)
+    P(C, D, A, B, 10, 15u, 0xFFEFF47Du)
+    P(B, C, D, A, 1, 21u, 0x85845DD1u)
+    P(A, B, C, D, 8, 6u, 0x6FA87E4Fu)
+    P(D, A, B, C, 15, 10u, 0xFE2CE6E0u)
+    P(C, D, A, B, 6, 15u, 0xA3014314u)
+    P(B, C, D, A, 13, 21u, 0x4E0811A1u)
+    P(A, B, C, D, 4, 6u, 0xF7537E82u)
+    P(D, A, B, C, 11, 10u, 0xBD3AF235u)
+    P(C, D, A, B, 2, 15u, 0x2AD7D2BBu)
+    P(B, C, D, A, 9, 21u, 0xEB86D391u)
 
 #undef F
 
@@ -339,11 +348,11 @@ void Md5Context::Md5Process(uint8 data[64]) {
 /*
  * MD5 HMAC context setup
  */
-void Md5Context::HmacStarts(uint8 *key,
-                            uint32 keylen) {
+void Md5Context::HmacStarts(const uint8 * const key,
+                            const uint32 keylen) {
 
-    (void)MemoryOperationsHelper::Set(ipad, 0x36, 64);
-    (void)MemoryOperationsHelper::Set(opad, 0x5C, 64);
+    (void) MemoryOperationsHelper::Set(&ipad[0], static_cast<char8>(0x36), 64u);
+    (void) MemoryOperationsHelper::Set(&opad[0], static_cast<char8>(0x5C), 64u);
 
     for (uint32 i = 0u; i < keylen; i++) {
         if (i >= 64u) {
@@ -355,38 +364,38 @@ void Md5Context::HmacStarts(uint8 *key,
     }
 
     Starts();
-    Update(ipad, 64u);
+    Update(&ipad[0], 64u);
 }
 
 /*
  * MD5 HMAC process buffer
  */
-void Md5Context::HmacUpdate(uint8 *input,
-                            uint32 ilen) {
+void Md5Context::HmacUpdate(uint8 * const input,
+                            const uint32 ilen) {
     Update(input, ilen);
 }
 
 /*
  * MD5 HMAC final digest
  */
-void Md5Context::HmacFinish(uint8 *output) {
+void Md5Context::HmacFinish(uint8 * const output) {
     uint8 tmpbuf[16];
 
-    Finish(tmpbuf);
+    Finish(&tmpbuf[0]);
     Starts();
-    Update(opad, 64u);
-    Update(tmpbuf, 16u);
-    Finish(output);
+    Update(&opad[0], 64u);
+    Update(&tmpbuf[0], 16u);
+    Finish(&output[0]);
 
-    (void)MemoryOperationsHelper::Set(tmpbuf, 0, sizeof(tmpbuf));
+    (void) MemoryOperationsHelper::Set(&tmpbuf[0], '\0', 16u);
 }
 
 /*
  * Output = MD5( input buffer )
  */
-void Md5(uint8 *input,
-         uint32 ilen,
-         uint8 *output) {
+void Md5(uint8 * const input,
+         const uint32 ilen,
+         uint8 * const output) {
     Md5Context ctx;
 
     ctx.Starts();
@@ -398,18 +407,18 @@ void Md5(uint8 *input,
 /*
  * Output = HMAC-MD5( hmac key, input buffer )
  */
-void Md5Hmac(uint8 *key,
-             uint32 keylen,
-             uint8 *input,
-             uint32 ilen,
-             uint8 *output) {
+void Md5Hmac(const uint8 * const key,
+             const uint32 keylen,
+             uint8 * const input,
+             const uint32 ilen,
+             uint8 * const output) {
     Md5Context ctx;
 
     ctx.HmacStarts(key, keylen);
     ctx.HmacUpdate(input, ilen);
     ctx.HmacFinish(output);
 
-    (void)MemoryOperationsHelper::Set(&ctx, '\0', sizeof(Md5Context));
+    (void) MemoryOperationsHelper::Set(&ctx, '\0', static_cast<uint32>(sizeof(Md5Context)));
 }
 
 }

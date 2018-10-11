@@ -94,6 +94,8 @@ public:
      *   IsTextMode: The default data sending mode. A client can change this mode by sending the HTTP command called TextMode=[0(false), 1(true)].
      *     Default=1 (text mode).
      *   ChunkSize: the maximum size of the chunks in which the reply bode is divided to perform the chunked transfer encoding mode. Default = 32
+     *   closeOnAuthFail: can be 0 (false) or 1 (true). It asserts if after an authentication failure the connection must be closed or not. Default 1 (close
+     *     the connection).
      *
      */
     virtual bool Initialise(StructuredDataI &data);
@@ -174,6 +176,13 @@ protected:
      * The HTTP reply body chunk size.
      */
     uint32 chunkSize;
+
+
+    /**
+     * Specifies if after an authentication
+     * failure the connection has to be closed or not
+     */
+    uint8 closeOnAuthFail;
 };
 
 }

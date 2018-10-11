@@ -94,6 +94,26 @@ TEST(HttpClientGTest, TestHttpExchange_Authorization_Basic) {
     ASSERT_TRUE(test.TestHttpExchange_Authorization_Basic());
 }
 
+TEST(HttpClientGTest, TestHttpExchange_Authorization_FalseInvalidAuthType) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_FalseInvalidAuthType());
+}
+
+TEST(HttpClientGTest, TestHttpExchange_Authorization_FalseTimeout) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_FalseTimeout());
+}
+
+TEST(HttpClientGTest, TestHttpExchange_Authorization_FalseReplyCommand) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_FalseReplyCommand());
+}
+
+TEST(HttpClientGTest, TestHttpExchange_Authorization_Digest_KeepAlive) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestHttpExchange_Authorization_Digest_KeepAlive());
+}
+
 TEST(HttpClientGTest, TestSetServerAddress) {
     HttpClientTest test;
     ASSERT_TRUE(test.TestSetServerAddress());
@@ -123,5 +143,16 @@ TEST(HttpClientGTest, TestGetServerUri) {
     HttpClientTest test;
     ASSERT_TRUE(test.TestGetServerUri());
 }
+
+TEST(HttpClientGTest, TestGetAuthorisation) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestGetAuthorisation());
+}
+
+TEST(HttpClientGTest, TestSetAuthorisation) {
+    HttpClientTest test;
+    ASSERT_TRUE(test.TestSetAuthorisation());
+}
+
 
 

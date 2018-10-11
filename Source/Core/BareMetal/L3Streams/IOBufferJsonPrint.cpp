@@ -113,7 +113,7 @@ bool PrintJsonCloseVector(IOBuffer &iobuff) {
  */
 bool PrintJsonOpenBlock(IOBuffer &iobuff, const char8 * const blockName) {
     AnyType at[]={blockName, voidAnyType};
-    return iobuff.PrintFormatted("\"%s\": {", at);
+    return iobuff.PrintFormatted("\"%s\": {", &at[0]);
 }
 
 /**

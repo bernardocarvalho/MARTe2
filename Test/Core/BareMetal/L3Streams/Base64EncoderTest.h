@@ -1,7 +1,7 @@
 /**
- * @file Md5Encrypt.h
- * @brief Header file for class Md5Encrypt
- * @date 23 ago 2018
+ * @file Base64EncoderTest.h
+ * @brief Header file for class Base64EncoderTest
+ * @date 26 set 2018
  * @author pc
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class Md5Encrypt
+ * @details This header file contains the declaration of the class Base64EncoderTest
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef MD5ECRYPT_H_
-#define MD5ECRYPT_H_
+#ifndef BASE64ENCODERTEST_H_
+#define BASE64ENCODERTEST_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -31,51 +31,43 @@
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "GeneralDefinitions.h"
+#include "Base64Encoder.h"
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
 
-namespace MARTe {
+using namespace MARTe;
 
 /**
- * @brief Contains the functions to perform MD5 hash function computing.
+ * @brief Tests the Base64Encoder methods
  */
-namespace Md5Encrypt {
+class Base64EncoderTest {
+public:
 
+    /**
+     * @brief Constructor
+     */
+    Base64EncoderTest();
 
-/**
- * @brief Performs the MD5 hash function on \a input generating the result in \a output
- * @param[in] input the input.
- * @param[in] ilen the input length.
- * @param[out] output the result of the MD5(input) function.
- */
-void Md5(uint8 *const input,
-         const uint32 ilen,
-         uint8 *const output);
+    /**
+     * @brief Destructor
+     */
+    virtual ~Base64EncoderTest();
 
+    /**
+     * @brief Tests the Encode method
+     */
+    bool TestEncode(const char8 *toEncodeIn, const char8* expected);
 
+    /**
+     * @brief Tests the Decode method.
+     */
+    bool TestDecode(const char8 *toDecodeIn, const char8* expected);
+};
 
-/**
- * @brief Adds the HMAC authentication mode to the MD5 hash function.
- * @param[in] key the secret key
- * @param[in} keylen the length of \a key
- * @param[in] input the input.
- * @param[in] ilen the length of \a input.
- * @param[out] the result of MD5_HMAC(input)
- */
-void Md5Hmac(const uint8 *const key,
-             const uint32 keylen,
-             uint8 *const input,
-             const uint32 ilen,
-             uint8 *const output);
-
-}
-
-}
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
 /*---------------------------------------------------------------------------*/
 
-#endif /* SOURCE_CORE_BAREMETAL_L1PORTABILITY_MD5ECRYPT_H_ */
+#endif /* BASE64ENCODERTEST_H_ */
 

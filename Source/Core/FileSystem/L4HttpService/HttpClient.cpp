@@ -180,7 +180,7 @@ void HttpClient::GetServerUri(StreamString &serverUriOut) const {
     serverUriOut = urlUri;
 }
 
-void HttpClient::GetAuthorisation(StreamString authOut) const {
+void HttpClient::GetAuthorisation(StreamString &authOut) const {
     authOut = authorisation;
 }
 
@@ -191,13 +191,6 @@ bool HttpClient::AutenticationProcedure(const int32 command,
     // discard bodyF
     StreamString nullStream;
     bool ret = protocol.CompleteReadOperation(&nullStream, msecTimeout);
-    if (ret) {
-        ret = (authorisation.Size() >= 3u);
-        if (!ret) {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "Authorisation information needed to access %s", urlUri);
-        }
-    }
-
     StreamString auth;
     if (ret) {
         ret = protocol.MoveAbsolute("InputOptions");
@@ -233,7 +226,6 @@ bool HttpClient::AutenticationProcedure(const int32 command,
 
     }
     return ret;
-    //Z2ZlcnJvOjQ1Njc=
 }
 
 bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
@@ -261,6 +253,7 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
         /* connect to remote host */
         if (reConnect) {
             ret = Connect(msecTimeout);
+            reConnect = false;
         }
 
         if (ret) {
@@ -340,6 +333,11 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
     return ret;
 
 }
+
+
+//TODO HttpExchange(StructuredDataI* data)
+//connect a parser to the socket and create directly the structured data
+
 
 bool HttpClient::Connect(const TimeoutType &msecTimeout) {
     (void) socket.Close();
@@ -445,8 +443,6 @@ bool HttpClient::GenerateDigestKey(StreamString &key,
             ret = toEncode.SetSize(0ULL);
             if (ret) {
                 ret = toEncode.Printf("%s:%s:%s:%s:%s:%s", HA1.Buffer(), nonce.Buffer(), ncStr.Buffer(), cnonce.Buffer(), qop.Buffer(), HA2.Buffer());
-                REPORT_ERROR(ErrorManagement::Information, "md5(%s, %s, %s, %s", HA1.Buffer(), nonce.Buffer(), ncStr.Buffer(), cnonce.Buffer());
-                REPORT_ERROR(ErrorManagement::Information, "%s, %s)", qop.Buffer(), HA2.Buffer());
                 if (ret) {
                     uint32 toEncodeLen = static_cast<uint32>(toEncode.Size());
                     Md5Encrypt::Md5(reinterpret_cast<uint8*>(toEncode.BufferReference()), toEncodeLen, &buffer[0]);

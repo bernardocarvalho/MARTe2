@@ -107,6 +107,11 @@ bool HttpService::Initialise(StructuredDataI &data) {
             REPORT_ERROR(ErrorManagement::Information, "ChunkSize not specified: using default %d", chunkSize);
 
         }
+
+        if (!data.Read("CloseOnAuthFail", closeOnAuthFail)) {
+            closeOnAuthFail = 1u;
+        }
+
     }
 
     return ret;
@@ -231,8 +236,10 @@ ErrorManagement::ErrorType HttpService::ClientService(HttpChunkedStream * const 
                                                 }
                                             }
                                             if (err.ErrorsCleared()) {
-                                                // force reissuing of a new thread
-                                                hprotocol.SetKeepAlive(false);
+                                                if(closeOnAuthFail>0u) {
+                                                    // force reissuing of a new thread
+                                                    hprotocol.SetKeepAlive(false);
+                                                }
                                                 err=!hprotocol.WriteHeader(true, HttpDefinition::HSHCReplyAUTH, &hstream, NULL_PTR(const char8*));
                                                 pagePrepared = err.ErrorsCleared();
                                             }

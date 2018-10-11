@@ -131,6 +131,13 @@ public:
      */
     bool TestClientService_FailReadHeader();
 
+
+    /**
+     * @brief Tests the ClientService method with
+     * an object that requires authentication.
+     */
+    bool TestClientService_Authorisation();
+
     /**
      * @brief Tests the ServerCycle method
      */

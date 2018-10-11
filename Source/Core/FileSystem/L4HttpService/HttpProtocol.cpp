@@ -923,6 +923,7 @@ bool HttpProtocol::SecurityCheck(ReferenceT<HttpRealmI> realm) {
                 BasicSocket* mySocket = dynamic_cast<BasicSocket *>(outputStream);
                 ret = mySocket != NULL_PTR(BasicSocket*);
                 if (ret) {
+                    /*lint -e{613} NULL pointer checked*/
                     ret = realm->Validate(authorisationKey.Buffer(), httpCommand, (mySocket->GetSource()).GetAddressAsNumber());
                 }
             }

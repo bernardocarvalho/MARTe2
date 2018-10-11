@@ -117,6 +117,11 @@ TEST(HttpServiceGTest, TestClientService_FailReadHeader) {
     ASSERT_TRUE(test.TestClientService_FailReadHeader());
 }
 
+TEST(HttpServiceGTest, TestClientService_Authorisation) {
+    HttpServiceTest test;
+    ASSERT_TRUE(test.TestClientService_Authorisation());
+}
+
 TEST(HttpServiceGTest, TestServerCycle) {
     HttpServiceTest test;
     ASSERT_TRUE(test.TestServerCycle());

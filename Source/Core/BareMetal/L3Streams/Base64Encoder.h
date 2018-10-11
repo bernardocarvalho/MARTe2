@@ -39,11 +39,24 @@
 
 namespace MARTe {
 
+/**
+ * @brief Contains functions to perform Base64 encoding and decoding.
+ */
 namespace Base64Encoder {
 
+/**
+ * @brief Base64 encoding.
+ * @param[in] input the input text to be encoded.
+ * @param[out] output the encoded result.
+ */
 bool Encode(StreamString &input,
             StreamString &output);
 
+/**
+ * @brief Base64 decoding.
+ * @param[in] input the input text to be decoded.
+ * @param[out] output the decoded result.
+ */
 bool Decode(StreamString &input,
             StreamString &output);
 
