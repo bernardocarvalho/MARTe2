@@ -40,7 +40,7 @@
 
 namespace MARTe {
 namespace HttpDefinition {
-static const char8 *Http2Convert = " #%<>&~,$+=:/?";
+static const char8 *Http2Convert = " #%<>&~,$+=:/?[]\"@{}";
 
 bool HttpEncode(BufferedStreamI &converted,
                 const char8 * const original) {
