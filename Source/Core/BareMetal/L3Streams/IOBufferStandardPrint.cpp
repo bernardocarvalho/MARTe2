@@ -83,7 +83,7 @@ bool PrintStandardCloseVector(IOBuffer &iobuff) {
  */
 bool PrintStandardOpenBlock(IOBuffer &iobuff, const char8 * const blockName) {
     AnyType at[]={blockName, voidAnyType};
-    return iobuff.PrintFormatted("%s = {", &at[0]);
+    return iobuff.PrintFormatted("%#s = {", &at[0]);
 }
 
 /**
@@ -100,10 +100,10 @@ bool PrintStandardCloseBlock(IOBuffer &iobuff) {
  */
 bool PrintStandardOpenAssignment(IOBuffer &iobuff, const char8 * const varName){
     uint32 size=StringHelper::Length(varName);
-    bool ret=iobuff.Write(varName, size);
+    bool ret=iobuff.WriteAll(varName, size);
     if(ret){
         size=2u;
-        ret=iobuff.Write(" =", size);
+        ret=iobuff.WriteAll(" =", size);
     }
     return ret;
 }

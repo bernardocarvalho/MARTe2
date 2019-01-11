@@ -133,7 +133,7 @@ bool PrintJsonOpenAssignment(IOBuffer &iobuff,
     uint32 size = StringHelper::Length(varName);
     bool ret = iobuff.PutC('"');
     if (ret) {
-        ret = iobuff.Write(varName, size);
+        ret = iobuff.WriteAll(varName, size);
     }
     if (ret) {
         ret = iobuff.PutC('"');

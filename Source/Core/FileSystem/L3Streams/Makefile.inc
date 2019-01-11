@@ -26,7 +26,8 @@
 
 OBJSX=	File.x \
     TCPSocket.x \
-    UDPSocket.x
+    UDPSocket.x\
+    StreamObjects.x
         
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..

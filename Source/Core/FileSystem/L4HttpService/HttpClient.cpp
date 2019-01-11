@@ -334,10 +334,80 @@ bool HttpClient::HttpExchange(BufferedStreamI &streamDataRead,
 
 }
 
+bool HttpClient::HttpSendMessage(const int32 command,
+                                 BufferedStreamI * const payload,
+                                 TimeoutType msecTimeout,
+                                 int32 operationId) {
+
+
+    // a counter of the transactions
+    if (operationId == -1) {
+        lastOperationId++;
+        operationId = lastOperationId;
+    }
+
+    if (!reConnect) {
+        reConnect = (!socket.IsConnected());
+    }
+
+    int32 errorCode;
+    bool ret = !HttpDefinition::IsReplyCode(command, errorCode);
+    if (ret) {
+        /* connect to remote host */
+        if (reConnect) {
+            ret = Connect(msecTimeout);
+            reConnect = false;
+        }
+
+        if (ret) {
+            /* create and send request */
+            if (ret) {
+                ret = protocol.WriteHeader(true, command, payload, urlUri.Buffer());
+            }
+
+        }
+    }
+    return ret;
+}
+
+bool HttpClient::HttpRecvReply(BufferedStreamI &streamDataRead,
+                               TimeoutType msecTimeout) {
+    uint64 startCounter = HighResolutionTimer::Counter();
+
+    /* read reply */
+    bool ret = protocol.ReadHeader();
+
+    if (ret) {
+        if (msecTimeout.IsFinite()) {
+            uint64 elapsed = (HighResolutionTimer::Counter() - startCounter);
+            uint64 delta = msecTimeout.HighResolutionTimerTicks();
+            ret = elapsed < delta;
+            if (!ret) {
+                REPORT_ERROR_STATIC(ErrorManagement::Timeout, "Timeout on completion");
+            }
+            else {
+                uint64 ticksLeft = (delta - elapsed);
+                msecTimeout.SetTimeoutHighResolutionTimerTicks(ticksLeft);
+            }
+        }
+    }
+
+    if (ret) {
+        // read body
+        //TODO here we can read the body inside a structured data?
+        ret = protocol.CompleteReadOperation(&streamDataRead, msecTimeout);
+
+        // close if the server says so...
+        if (!protocol.KeepAlive()) {
+            (void) socket.Close();
+        }
+    }
+    return ret;
+
+}
 
 //TODO HttpExchange(StructuredDataI* data)
 //connect a parser to the socket and create directly the structured data
-
 
 bool HttpClient::Connect(const TimeoutType &msecTimeout) {
     (void) socket.Close();

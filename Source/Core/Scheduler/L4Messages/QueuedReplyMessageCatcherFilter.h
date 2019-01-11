@@ -81,7 +81,7 @@ public:
      */
     virtual ErrorManagement::ErrorType ConsumeMessage(ReferenceT<Message> &messageToTest);
 
-private:
+protected:
 
     /**
      * The message to catch.

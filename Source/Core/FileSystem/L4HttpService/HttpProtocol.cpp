@@ -144,6 +144,7 @@ bool HttpProtocol::ReadHeader() {
     char8 terminator;
     // Reads the HTTP command
     bool ret = outputStream->GetLine(line, false);
+
     if (!ret) {
         REPORT_ERROR_STATIC(ErrorManagement::CommunicationError, "Failed reading a line from socket");
     }

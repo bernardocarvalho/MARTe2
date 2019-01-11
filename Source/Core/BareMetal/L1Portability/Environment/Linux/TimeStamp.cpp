@@ -61,8 +61,8 @@ bool TimeStamp::ConvertFromEpoch(const oslong secondsFromEpoch) {
         seconds = static_cast<uint32>(tValues->tm_sec);
         minutes = static_cast<uint32>(tValues->tm_min);
         hours = static_cast<uint32>(tValues->tm_hour);
-        days = static_cast<uint32>(tValues->tm_mday) - 1u;
-        month = static_cast<uint32>(tValues->tm_mon);
+        days = static_cast<uint32>(tValues->tm_mday);
+        month = static_cast<uint32>(tValues->tm_mon)+1u;
         year = static_cast<uint32>(tValues->tm_year) + 1900u;
     }
 

@@ -308,7 +308,8 @@ bool ParserI::Parse() {
                     else {
                         (token == 0u) ? (isEOF = true) : (isError = true);
                         if (isError) {
-                            PrintErrorOnStream("\nInvalid Token! [%d]", GetCurrentTokenLineNumber(currentToken), errorStream);
+                            errorStream->Printf("\nInvalid Token! [%d] %s", GetCurrentTokenLineNumber(currentToken), GetCurrentTokenData(currentToken));
+                            //PrintErrorOnStream("\nInvalid Token! [%d] %s", GetCurrentTokenLineNumber(currentToken), GetCurrentTokenData(currentToken), errorStream);
                         }
                         new_token = GetConstant(ParserConstant::END_OF_SLK_INPUT);
                     }
@@ -316,7 +317,8 @@ bool ParserI::Parse() {
                 else {
                     (token == 0u) ? (isEOF = true) : (isError = true);
                     if (isError) {
-                        PrintErrorOnStream("\nInvalid Token! [%d]", GetCurrentTokenLineNumber(currentToken), errorStream);
+                        errorStream->Printf("\nInvalid Token! [%d] %s", GetCurrentTokenLineNumber(currentToken), GetCurrentTokenData(currentToken));
+                        //PrintErrorOnStream("\nInvalid Token! [%d] %s", GetCurrentTokenLineNumber(currentToken), GetCurrentTokenData(currentToken), errorStream);
                     }
                     new_token = GetConstant(ParserConstant::END_OF_SLK_INPUT);
                 }

@@ -397,6 +397,9 @@ bool StreamStructuredData<Printer>::MoveToAncestor(uint32 generations) {
                     ret = (terminator == '.');
                     if (ret) {
                         currentPathTmp += token;
+                        if (i < (goodOnes - 1u)) {
+                            currentPathTmp += terminator;
+                        }
                     }
                 }
             }

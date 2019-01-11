@@ -80,13 +80,13 @@ DoubleBufferedStream::~DoubleBufferedStream() {
 bool DoubleBufferedStream::SetBufferSize(uint32 readBufferSize,
                                          uint32 writeBufferSize) {
     // minimum size = 8
-    if (readBufferSize < 8u) {
+/*    if (readBufferSize < 8u) {
         readBufferSize = 8u;
     }
     if (writeBufferSize < 8u) {
         writeBufferSize = 8u;
     }
-
+*/
     bufferSizeSet = false;
     // dump any data in the write Queue
     if (Flush()) {

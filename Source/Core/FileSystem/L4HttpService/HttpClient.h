@@ -93,7 +93,6 @@ public:
      */
     HttpProtocol *GetHttpProtocol();
 
-
     /**
      * @brief Sends the HTTP request and waits for reply. If the request has not been authorised,
      * then it updates the Authorization field depending on what has been sent from the server and
@@ -110,9 +109,16 @@ public:
     bool HttpExchange(BufferedStreamI &streamDataRead,
                       const int32 command,
                       BufferedStreamI * const payload = NULL_PTR(BufferedStreamI *),
-                      TimeoutType msecTimeout=TTInfiniteWait,
+                      TimeoutType msecTimeout = TTInfiniteWait,
                       int32 operationId = -1);
 
+    bool HttpSendMessage(const int32 command,
+                         BufferedStreamI * const payload = NULL_PTR(BufferedStreamI *),
+                         TimeoutType msecTimeout = TTInfiniteWait,
+                         int32 operationId = -1);
+
+    bool HttpRecvReply(BufferedStreamI &streamDataRead,
+                       TimeoutType msecTimeout = TTInfiniteWait);
 
     /**
      * @brief Sets the server ip address.
@@ -170,7 +176,6 @@ protected:
      */
     bool Connect(const TimeoutType &msecTimeout);
 
-
     /**
      * @brief Computes the local nonce as MD5(threadId, threadId size, random)
      * @param[out] nonce the local nonce in output,
@@ -198,9 +203,9 @@ protected:
      * @param[in[ msecTimeout the function timeout.
      * @param[in] operationId the operation id.
      */
-    bool AutenticationProcedure(const int32 command, const TimeoutType &msecTimeout,
-            const int32 operationId);
-
+    bool AutenticationProcedure(const int32 command,
+                                const TimeoutType &msecTimeout,
+                                const int32 operationId);
 
     bool reConnect;
 

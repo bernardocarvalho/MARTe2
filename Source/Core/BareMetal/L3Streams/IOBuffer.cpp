@@ -814,6 +814,34 @@ static bool PrintStructuredDataInterface(IOBuffer &iobuff,
                                          uint32 nodeLevel = 0u) {
     bool ret = true;
     uint32 numberOfChildren = structuredData->GetNumberOfChildren();
+    if (numberOfChildren == 0u) {
+        //print dummy field
+        uint32 j;
+        for (j = 0u; (j < nodeLevel) && (ret); j++) {
+            AnyType noneType = voidAnyType;
+            ret = (iobuff.PrintFormatted("    ", &noneType));
+        }
+
+        ret = PrintOpenAssignment(iobuff, "Empty", fd);
+        if (ret) {
+            AnyType noneType = voidAnyType;
+            ret = (iobuff.PrintFormatted(" ", &noneType));
+        }
+        //AnyType printLeftSide[] = {childName, "= ", voidAnyType};
+        //ret = (iobuff.PrintFormatted("%s %s", &printLeftSide[0]));
+        if (ret) {
+            AnyType printLeaf[] = { "True", voidAnyType };
+            ret = (iobuff.PrintFormatted("%#!", &printLeaf[0]));
+        }
+        if (ret) {
+            ret = PrintCloseAssignment(iobuff, "Empty", fd);
+        }
+        if (ret) {
+            AnyType noneType = voidAnyType;
+            ret = (iobuff.PrintFormatted("\r\n", &noneType));
+        }
+
+    }
     for (uint32 i = 0u; (i < numberOfChildren) && (ret); i++) {
         const char8 * childName = structuredData->GetChildName(i);
 

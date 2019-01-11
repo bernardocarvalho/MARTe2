@@ -32,6 +32,7 @@ OBJSX=	EmbeddedServiceI.x \
     MultiThreadService.x \
     MultiClientEmbeddedThread.x \
     MultiClientService.x \
+    SemaphoreObjects.x\
     SingleThreadService.x \
         
 PACKAGE=Core/Scheduler

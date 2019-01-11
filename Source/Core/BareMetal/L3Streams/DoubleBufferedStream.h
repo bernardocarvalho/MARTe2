@@ -90,8 +90,8 @@ public:
      * @param[in] writeBufferSize the desired size for the write buffer.
      * @return true if the buffer memory is reallocated correctly.
      * @pre
-     *    readBufferSize > 8u &&
-     *    writeBufferSize > 8u &&
+     *    readBufferSize > 1u &&
+     *    writeBufferSize > 1u &&
      *    (CanRead() || CanWrite())
      * @post
      *    GetInputStream()->GetBufferSize() == readBufferSize
