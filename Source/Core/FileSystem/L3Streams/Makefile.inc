@@ -26,9 +26,8 @@
 
 OBJSX=	File.x \
     TCPSocket.x \
-    UDPSocket.x\
-    StreamObjects.x
-        
+    UDPSocket.x
+
 PACKAGE=Core/FileSystem
 ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
