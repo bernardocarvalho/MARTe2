@@ -237,6 +237,11 @@ public:
      * @brief Tests the SetCurrentNodeAsRootNode method
      */
     bool TestSetCurrentNodeAsRootNode();
+
+    /**
+     * TODO
+     */
+    bool TestPerformance();
 };
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */

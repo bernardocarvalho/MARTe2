@@ -315,12 +315,16 @@ static bool TestLauncher(RealTimeApplicationConfigurationBuilder &rtAppBuilder, 
         ret = rtAppBuilder.Copy(functionsDatabase, dataDatabase);
     }
 
+    StreamString efDisplay;
     StreamString fDisplay;
     StreamString dDisplay;
+    efDisplay.Printf("%!", expectedFunctionsDatabase);
     fDisplay.Printf("%!", functionsDatabase);
     dDisplay.Printf("%!", dataDatabase);
+    efDisplay.Seek(0);
     fDisplay.Seek(0);
     dDisplay.Seek(0);
+    printf("%s\n", efDisplay.Buffer());
     printf("%s\n", fDisplay.Buffer());
     printf("%s\n", dDisplay.Buffer());
 

@@ -53,6 +53,8 @@ INCLUDES += -I../L1Portability
 INCLUDES += -I../L2Objects
 INCLUDES += -I../L3Streams
 
+CPPFLAGS += -O1
+
 all: $(OBJS)    \
 	        $(BUILD_DIR)/L4ConfigurationB$(LIBEXT) \
 	        $(BUILD_DIR)/L4ConfigurationB.def

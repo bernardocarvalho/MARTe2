@@ -332,8 +332,11 @@ bool IntrospectionStructure::RegisterStructuredDataIPriv(StructuredDataI &in, Co
             StreamString token;
             StreamString varArrayName = variableName;
             (void) varArrayName.Seek(0LLU);
-            char8 ignore;
-            bool isArray = varArrayName.GetToken(token, "[", ignore);
+            char8 terminator;
+            bool isArray = varArrayName.GetToken(token, "[", terminator);
+            /*if (isArray) {
+                isArray = (terminator == '[');
+            }*/
             if (isArray) {
                 numberOfElements = 1;
                 varArrayName = token;
@@ -346,7 +349,10 @@ bool IntrospectionStructure::RegisterStructuredDataIPriv(StructuredDataI &in, Co
                     StreamString nextVarArrayName = in.GetChildName(n);
                     (void) nextVarArrayName.Seek(0LLU);
                     token = "";
-                    isArray = nextVarArrayName.GetToken(token, "[", ignore);
+                    isArray = nextVarArrayName.GetToken(token, "[", terminator);
+                    /*if (isArray) {
+                        isArray = (terminator == '[');
+                    }*/
                     if (isArray) {
                         //Still the same array?
                         isArray = (token == varArrayName);
@@ -354,7 +360,7 @@ bool IntrospectionStructure::RegisterStructuredDataIPriv(StructuredDataI &in, Co
                     if (isArray) {
                         token = "";
                         if (ok) {
-                            ok = nextVarArrayName.GetToken(token, "]", ignore);
+                            ok = nextVarArrayName.GetToken(token, "]", terminator);
                         }
                         if (ok) {
                             ok = TypeConvert(numberOfElements, token.Buffer());

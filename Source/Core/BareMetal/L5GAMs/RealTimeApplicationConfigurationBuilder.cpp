@@ -571,11 +571,12 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignalsDatabase(Configurati
 
             if (ret) {
                 uint32 numberOfSignals = signalDatabase.GetNumberOfChildren();
-                ReferenceT<ReferenceContainer> signalList = signalDatabase.GetCurrentNode();
+                //ReferenceT<ReferenceContainer> signalList = signalDatabase.GetCurrentNode();
                 uint32 j = 0u;
                 //...then for each signal...
                 while ((j < numberOfSignals) && (ret)) {
-                    const char8 *signalName = signalList->Get(j)->GetName();
+                    //const char8 *signalName = signalList->Get(j)->GetName();
+                    const char8 *signalName = signalDatabase.GetChildName(j);
                     if (StringHelper::Compare(signalName, "Locked") != 0) {
                         ConfigurationDatabase signalDatabaseBeforeFlatten = signalDatabase;
                         ret = signalDatabase.MoveToChild(j);
@@ -650,14 +651,15 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignal(const bool isFunctio
     if (!signalTypeDefined) {
         uint32 numberOfElements = signalDatabase.GetNumberOfChildren();
         uint32 n;
-        ReferenceT<ReferenceContainer> elementsList = signalDatabase.GetCurrentNode();
+        //ReferenceT<ReferenceContainer> elementsList = signalDatabase.GetCurrentNode();
         for (n = 0u; (n < numberOfElements); n++) {
             StreamString elementName = signalDatabase.GetChildName(n);
             //If this element is a node then recurse
             // "MemberAliases" and "Defaults" the only node can be found in a signal. Mark it as a keyword.
-            if (elementsList->Get(n)->IsReferenceContainer()) {
-                ConfigurationDatabase signalDatabaseBeforeMove = signalDatabase;
-                ret = signalDatabase.MoveToChild(n);
+            //if (elementsList->Get(n)->IsReferenceContainer()) {
+            ConfigurationDatabase signalDatabaseBeforeMove = signalDatabase;
+            if (signalDatabase.MoveToChild(n)) {
+                //ret = signalDatabase.MoveToChild(n);
                 if (StringHelper::Compare(elementName.Buffer(), "MemberAliases") != 0) {
                     if (StringHelper::Compare(elementName.Buffer(), "Defaults") != 0) {
                         foundANode = true;
@@ -2093,7 +2095,11 @@ bool RealTimeApplicationConfigurationBuilder::ResolveStatesFromConfiguration() {
     }
     ConfigurationDatabase local;
     if (ret) {
-        ret = local.AddToCurrentNode(globalDatabase.GetCurrentNode());
+        //ret = local.AddToCurrentNode(globalDatabase.GetCurrentNode());
+        ret = local.CreateAbsolute(globalDatabase.GetName());
+    }
+    if (ret) {
+        ret = globalDatabase.Copy(local);
     }
     if (ret) {
         ret = globalDatabase.MoveAbsolute("+States");

@@ -367,3 +367,8 @@ TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestSetCurrentNodeAsRo
     ConfigurationDatabaseTest cdbTest;
     ASSERT_TRUE(cdbTest.TestSetCurrentNodeAsRootNode());
 }
+
+TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestPerformance) {
+    ConfigurationDatabaseTest cdbTest;
+    ASSERT_TRUE(cdbTest.TestPerformance());
+}
