@@ -1056,7 +1056,7 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
         dataSourcesDatabase = cachedDatabase;
         uint32 locked;
         if (dataSourcesDatabase.Read("Locked", locked)) {
-            isDsLocked = (locked != 0u);
+            //isDsLocked = (locked != 0u);
         }
 
         ret = dataSourcesDatabase.MoveRelative("Signals");
@@ -1080,11 +1080,13 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
             signalAlreadyExists = (StringHelper::Compare(signalName.Buffer(), dataSourceSignalName.Buffer()) == 0);
         }
     }
-
     if (ret) {
-        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
+        if (signalAlreadyExists && ret) {
+
+//        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
             dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-            ret = dataSourcesDatabase.MoveToChild(n);
+//            ret = dataSourcesDatabase.MoveToChild(n);
+            ret = dataSourcesDatabase.MoveToChild(foundSignalId);
             StreamString dataSourceSignalName;
             if (ret) {
                 ret = dataSourcesDatabase.Read("QualifiedName", dataSourceSignalName);
@@ -1121,7 +1123,6 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
             ret = dataSourcesDatabase.MoveToChild(foundSignalId);
         }
     }
-
     if ((!signalAlreadyExists) && (ret)) {
         //If the signal still does not exist in the dataSourcesDatabase create it.
         ret = (!isDsLocked);
@@ -1140,6 +1141,7 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
             ret = dataSourcesDatabase.Write("QualifiedName", signalName.Buffer());
         }
     }
+
     if (ret) {
         //Loop through all properties.
         const char8 *properties[] = { "Type", "NumberOfDimensions", "NumberOfElements", "Default", "MemberSize", NULL_PTR(char8 *) };
@@ -1288,40 +1290,44 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                 if (ret) {
                     dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMove;
 
-                    // check if it is a partial definition. Delete if the type is not specified, error otherwise (empty node)
-                    ConfigurationDatabase dataSourcesDatabaseBeforeSignalMoveOther = dataSourcesDatabase;
-                    for (uint32 k = 0u; (k < numberOfSignals) && (!signalFound) && (ret); k++) {
-                        if (k != s) {
-                            char8 terminator;
-                            ret = dataSourcesDatabase.MoveToChild(k);
-                            StreamString otherSName;
-                            //The QualifiedName must be known
-                            if (ret) {
-                                ret = dataSourcesDatabase.Read("QualifiedName", otherSName);
+                    //Do this only for structured types.
+                    TypeDescriptor td = TypeDescriptor::GetTypeDescriptorFromTypeName(type.Buffer());
+                    if (td == VoidType) {
+                        // check if it is a partial definition. Delete if the type is not specified, error otherwise (empty node)
+                        ConfigurationDatabase dataSourcesDatabaseBeforeSignalMoveOther = dataSourcesDatabase;
+                        for (uint32 k = 0u; (k < numberOfSignals) && (!signalFound) && (ret); k++) {
+                            if (k != s) {
+                                char8 terminator;
+                                ret = dataSourcesDatabase.MoveToChild(k);
+                                StreamString otherSName;
+                                //The QualifiedName must be known
                                 if (ret) {
-                                    ret = otherSName.Seek(0LLU);
-                                }
-                            }
-                            if (ret) {
-                                // ret becomes true if found a partial def
-                                StreamString signalNameStr = signalName;
-                                ret = signalNameStr.Seek(0LLU);
-                                StreamString token1;
-                                StreamString token2;
-                                signalFound = true;
-                                while (signalNameStr.GetToken(token1, ".", terminator) && (signalFound) && (ret)) {
-                                    if (otherSName.GetToken(token2, ".", terminator)) {
-                                        signalFound = (token1 == token2);
+                                    ret = dataSourcesDatabase.Read("QualifiedName", otherSName);
+                                    if (ret) {
+                                        ret = otherSName.Seek(0LLU);
                                     }
-                                    else {
-                                        signalFound = false;
-                                    }
-                                    token1 = "";
-                                    token2 = "";
                                 }
-                            }
-                            if (ret) {
-                                dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                                if (ret) {
+                                    // ret becomes true if found a partial def
+                                    StreamString signalNameStr = signalName;
+                                    ret = signalNameStr.Seek(0LLU);
+                                    StreamString token1;
+                                    StreamString token2;
+                                    signalFound = true;
+                                    while (signalNameStr.GetToken(token1, ".", terminator) && (signalFound) && (ret)) {
+                                        if (otherSName.GetToken(token2, ".", terminator)) {
+                                            signalFound = (token1 == token2);
+                                        }
+                                        else {
+                                            signalFound = false;
+                                        }
+                                        token1 = "";
+                                        token2 = "";
+                                    }
+                                }
+                                if (ret) {
+                                    dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                                }
                             }
                         }
                     }
@@ -3640,47 +3646,52 @@ bool RealTimeApplicationConfigurationBuilder::FindFunctionNumber(StreamString fu
 }
 
 bool RealTimeApplicationConfigurationBuilder::CheckTypeCompatibility(StreamString &fullType, StreamString &otherFullType, StreamString &signalName, StreamString &dataSourceSignalName) const {
+    //If they are equal just move on with it.
+    bool ret = (fullType == otherFullType);
+    if (!ret) {
+        ret = signalName.Seek(0LLU);
+        if (ret) {
+            ret = dataSourceSignalName.Seek(0LLU);
+        }
+        if (ret) {
+            ret = fullType.Seek(0LLU);
+        }
+        if (ret) {
+            ret = otherFullType.Seek(0LLU);
+        }
 
-    bool ret = signalName.Seek(0LLU);
-    if (ret) {
-        ret = dataSourceSignalName.Seek(0LLU);
-    }
-    if (ret) {
-        ret = fullType.Seek(0LLU);
-    }
-    if (ret) {
-        ret = otherFullType.Seek(0LLU);
-    }
+        char8 terminator;
+        StreamString token1;
+        StreamString token2;
 
-    char8 terminator;
-    StreamString token1;
-    StreamString token2;
-
-    bool go = true;
-    while (go && ret) {
-        go = signalName.GetToken(token1, ".", terminator);
-        if (go) {
-            go = dataSourceSignalName.GetToken(token2, ".", terminator);
+        bool go = true;
+        while (go && ret) {
+            go = signalName.GetToken(token1, ".", terminator);
             if (go) {
-                go = (token1 == token2);
-                token1 = "";
-                token2 = "";
+                go = dataSourceSignalName.GetToken(token2, ".", terminator);
                 if (go) {
-                    ret = fullType.GetToken(token1, ".", terminator);
-                    if (ret) {
-                        ret = otherFullType.GetToken(token2, ".", terminator);
-                    }
-                    if (ret) {
-                        bool equalTokens = (token1 == token2);
+                    go = (token1 == token2);
+                    token1 = "";
+                    token2 = "";
+                    if (go) {
+                        ret = fullType.GetToken(token1, ".", terminator);
+                        if (ret) {
+                            ret = otherFullType.GetToken(token2, ".", terminator);
+                        }
                         bool token1Node = (token1 == "Node");
-                        bool token2Node = (token2 == "Node");
-                        ret = (equalTokens) || (token1Node) || (token2Node);
+                        if (!token1Node) {
+                            if (ret) {
+                                bool equalTokens = (token1 == token2);
+                                bool token2Node = (token2 == "Node");
+                                ret = (equalTokens) || (token1Node) || (token2Node);
+                            }
+                        }
                     }
                 }
             }
+            token1 = "";
+            token2 = "";
         }
-        token1 = "";
-        token2 = "";
     }
     return ret;
 }

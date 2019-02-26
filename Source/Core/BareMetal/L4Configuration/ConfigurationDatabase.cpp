@@ -47,22 +47,6 @@
 
 namespace MARTe {
 #include <stdio.h>
-void ConfigurationDatabase::StupidPrintf(const char8 * fun, bool inp) {
-    /*ConfigurationDatabase temp = *this;
-     if (temp.MoveAbsolute("Functions.1.Signals")) {
-     if (inp) {
-     printf("%s\n", fun);
-     }
-     std::unordered_map<std::string, int>::iterator it;
-     printf("My childs of %s now are:\n", temp.currentNode->GetName());
-     for (it = temp.currentNode->childs.begin(); (it != temp.currentNode->childs.end()); it++) {
-     printf("[%s]\n", it->first.c_str());
-     }
-     if (!inp) {
-     printf("%s\n", fun);
-     }
-     }*/
-}
 
 ConfigurationDatabaseNode::ConfigurationDatabaseNode() {
 
@@ -112,7 +96,6 @@ void ConfigurationDatabase::Purge() {
 
 bool ConfigurationDatabase::Write(const char8 * const name, const AnyType &value) {
 
-    StupidPrintf("Write", true);
     bool ok = false;
     // call conversion Object-StructuredDataI or StructuredDataI-StructuredDataI
     bool isRegisteredObject = (value.GetTypeDescriptor().isStructuredData);
@@ -157,12 +140,10 @@ bool ConfigurationDatabase::Write(const char8 * const name, const AnyType &value
             }
         }
     }
-    StupidPrintf("Write", false);
     return ok;
 }
 
 AnyType ConfigurationDatabase::GetType(const char8 * const name) {
-    StupidPrintf("GetType", true);
     bool found = false;
     Reference foundReference;
     //uint32 i;
@@ -186,12 +167,10 @@ AnyType ConfigurationDatabase::GetType(const char8 * const name) {
             retType = objToRead->GetType();
         }
     }
-    StupidPrintf("GetType", false);
     return retType;
 }
 
 bool ConfigurationDatabase::Copy(StructuredDataI &destination) {
-    StupidPrintf("Copy", true);
     ReferenceT<ConfigurationDatabaseNode> foundNode;
     bool ok = true;
     std::vector<Reference>::iterator it = currentNode->childRefs.begin();
@@ -226,8 +205,6 @@ bool ConfigurationDatabase::Copy(StructuredDataI &destination) {
             }
         }
     }
-    StupidPrintf("Copy", false);
-
     return ok;
 }
 
@@ -248,7 +225,6 @@ bool ConfigurationDatabase::MoveToRoot() {
 }
 
 bool ConfigurationDatabase::Read(const char8 * const name, const AnyType &value) {
-    StupidPrintf("Read", true);
     bool ok = (name != NULL_PTR(const char8 * const));
     // call conversion Object-StructuredDataI or StructuredDataI-StructuredDataI
     bool isRegisteredObject = (value.GetTypeDescriptor().isStructuredData);
@@ -285,13 +261,10 @@ bool ConfigurationDatabase::Read(const char8 * const name, const AnyType &value)
             }
         }
     }
-    StupidPrintf("Read", false);
-
     return ok;
 }
 
 bool ConfigurationDatabase::MoveAbsolute(const char8 * const path) {
-//StupidPrintf("MoveAbsolute", true);
 
     /*ReferenceContainerFilterObjectName filter(1, 0u, path);
      ReferenceContainer resultSingle;
@@ -332,12 +305,10 @@ bool ConfigurationDatabase::MoveAbsolute(const char8 * const path) {
     if (ok) {
         currentNode = tempNode;
     }
-//StupidPrintf("MoveAbsolute", false);
     return ok;
 }
 
 bool ConfigurationDatabase::MoveRelative(const char8 * const path) {
-    StupidPrintf("MoveRelative", true);
     /*ReferenceContainerFilterObjectName filter(1, 0u, path);
      ReferenceContainer resultSingle;
      currentNode->Find(resultSingle, filter);
@@ -376,12 +347,10 @@ bool ConfigurationDatabase::MoveRelative(const char8 * const path) {
     if (ok) {
         currentNode = tempNode;
     }
-    StupidPrintf("MoveRelative", false);
     return ok;
 }
 
 bool ConfigurationDatabase::MoveToChild(const uint32 childIdx) {
-    StupidPrintf("MoveToChild", true);
     /*bool ok = (childIdx < currentNode->Size());
      if (ok) {
      currentNode = currentNode->Get(childIdx);
@@ -397,12 +366,10 @@ bool ConfigurationDatabase::MoveToChild(const uint32 childIdx) {
     if (ok) {
         currentNode = nodeToFind;
     }
-    StupidPrintf("MoveToChild", false);
     return ok;
 }
 
 bool ConfigurationDatabase::MoveToAncestor(const uint32 generations) {
-    StupidPrintf("MoveToAncestor", true);
     bool ok = (generations != 0u);
     ReferenceT<ConfigurationDatabaseNode> tempNode = currentNode;
     if (ok) {
@@ -437,12 +404,10 @@ bool ConfigurationDatabase::MoveToAncestor(const uint32 generations) {
     if (ok) {
         currentNode = tempNode;
     }
-    StupidPrintf("MoveToAncestor", false);
     return ok;
 }
 
 bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
-    StupidPrintf("CreateNodes", true);
     StreamString pathStr = path;
     bool ok = pathStr.Seek(0Lu);
     if (ok) {
@@ -497,7 +462,6 @@ bool ConfigurationDatabase::CreateNodes(const char8 * const path) {
     if (!ok) {
         currentNode = currentNodeOld;
     }
-    StupidPrintf("CreateNodes", false);
     return ok;
 }
 
@@ -553,7 +517,6 @@ bool ConfigurationDatabase::Delete(const char8 * const name) {
 }
 
 bool ConfigurationDatabase::AddToCurrentNode(Reference node) {
-    StupidPrintf("AddToCurrentNode", true);
     ReferenceT<ConfigurationDatabaseNode> nodeToAdd = node;
     bool ok = nodeToAdd.IsValid();
     if (ok) {
@@ -567,7 +530,6 @@ bool ConfigurationDatabase::AddToCurrentNode(Reference node) {
             currentNode->childRefs[it->second] = node;
         }
     }
-    StupidPrintf("AddToCurrentNode", false);
     return ok;
 }
 
