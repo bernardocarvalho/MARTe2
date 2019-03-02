@@ -97,6 +97,25 @@ ErrorManagement::ErrorType Bootstrap::ReadParameters(int32 argc, char8 **argv, S
         }
     }
     if (ret) {
+        StreamString precompiledRealTimeFunctionsFilename;
+        if (argsConfiguration.Read("-pf", precompiledRealTimeFunctionsFilename)) {
+            ret.parametersError = !loaderParameters.Write("PrecompiledFunctions", precompiledRealTimeFunctionsFilename.Buffer());
+        }
+    }
+    if (ret) {
+        StreamString precompiledRealTimeDataFilename;
+        if (argsConfiguration.Read("-pd", precompiledRealTimeDataFilename)) {
+            ret.parametersError = !loaderParameters.Write("PrecompiledData", precompiledRealTimeDataFilename.Buffer());
+        }
+    }
+    if (ret) {
+        uint32 precompileRealTimeApp = 0;
+        if (argsConfiguration.Read("-pc", precompileRealTimeApp)) {
+            ret.parametersError = !loaderParameters.Write("PrecompileRealTimeApp", precompileRealTimeApp);
+        }
+    }
+
+    if (ret) {
         uint32 defaultCPUs = 0x1;
         (void) argsConfiguration.Read("-c", defaultCPUs);
         ret.parametersError = !loaderParameters.Write("DefaultCPUs", defaultCPUs);
