@@ -27,6 +27,8 @@
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
+#include <vector>
+#include <string>
 
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
@@ -313,7 +315,8 @@ private:
     /**
      * The list of references
      */
-    LinkedListHolderT<ReferenceContainerNode> list;
+    //LinkedListHolderT<ReferenceContainerNode> list;
+    std::vector<ReferenceContainerNode *> list;
 
     /**
      * Protects multiple access to the internal resources

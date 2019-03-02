@@ -43,8 +43,8 @@
 
 namespace MARTe {
 
-ReferenceContainerNode::ReferenceContainerNode() :
-        LinkedListable() {
+ReferenceContainerNode::ReferenceContainerNode() /*:
+        LinkedListable()*/ {
 }
 
 ReferenceContainerNode::~ReferenceContainerNode() {

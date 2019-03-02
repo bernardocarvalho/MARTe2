@@ -26,6 +26,7 @@
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
+#include <algorithm>
 
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
@@ -91,8 +92,10 @@ ReferenceContainer& ReferenceContainer::operator =(ReferenceContainer &copy) {
 Reference ReferenceContainer::Get(const uint32 idx) {
     Reference ref;
     if (Lock()) {
-        if (idx < list.ListSize()) {
-            ReferenceContainerNode *node = (list.ListPeek(idx));
+        //if (idx < list.ListSize()) {
+        if (idx < list.size()) {
+            //ReferenceContainerNode *node = (list.ListPeek(idx));
+            ReferenceContainerNode *node = (list[idx]);
             if (node != NULL) {
                 ref = node->GetReference();
             }
@@ -116,13 +119,18 @@ void ReferenceContainer::SetTimeout(const TimeoutType &timeout) {
 /*lint -e{1551} no exception should be thrown given that ReferenceContainer is
  * the sole owner of the list (LinkedListHolder)*/
 ReferenceContainer::~ReferenceContainer() {
-    LinkedListable *p = list.List();
+    /*LinkedListable *p = list.List();
     list.Reset();
     while (p != NULL) {
         LinkedListable *q = p;
         p = p->Next();
         delete q;
+    }*/
+    std::vector<ReferenceContainerNode *>::iterator it = list.begin();
+    for (; it != list.end(); it++) {
+        delete *it;
     }
+    list.clear();
 }
 
 /*lint -e{593} .Justification: The node (newItem) will be deleted by the destructor. */
@@ -132,10 +140,12 @@ bool ReferenceContainer::Insert(Reference ref, const int32 &position) {
         ReferenceContainerNode *newItem = new ReferenceContainerNode();
         if (newItem->SetReference(ref)) {
             if (position == -1) {
-                list.ListAdd(newItem);
+                //list.ListAdd(newItem);
+                list.push_back(newItem);
             }
             else {
-                list.ListInsert(newItem, static_cast<uint32>(position));
+                //list.ListInsert(newItem, static_cast<uint32>(position));
+                list.insert(list.begin() + position, newItem);
             }
         }
         else {
@@ -254,20 +264,25 @@ void ReferenceContainer::Find(ReferenceContainer &result, ReferenceContainerFilt
     int32 index = 0;
     bool ok = Lock();
     if (ok) {
-        if (list.ListSize() > 0u) {
+        //if (list.ListSize() > 0u) {
+        if (list.size() > 0u) {
             if (filter.IsReverse()) {
-                index = static_cast<int32>(list.ListSize()) - 1;
+                //index = static_cast<int32>(list.ListSize()) - 1;
+                index = static_cast<int32>(list.size()) - 1;
             }
 
-            ReferenceContainerNode *currentNode = (list.ListPeek(static_cast<uint32>(index)));
+            //ReferenceContainerNode *currentNode = (list.ListPeek(static_cast<uint32>(index)));
+            ReferenceContainerNode *currentNode = (list[index]);
 
             //The filter will be finished when the correct occurrence has been found (otherwise it will walk all the list)
             //lint -e{9007} no side-effects on the right of the && operator
             while ((!filter.IsFinished())
                     && ((filter.IsReverse() && (index > -1))
-                            || ((!filter.IsReverse()) && (index < static_cast<int32>(list.ListSize()))))) {
+                            //|| ((!filter.IsReverse()) && (index < static_cast<int32>(list.ListSize()))))) {
+                            || ((!filter.IsReverse()) && (index < static_cast<int32>(list.size()))))) {
 
-                Reference const & currentNodeReference = currentNode->GetReference();
+                //Reference const & currentNodeReference = currentNode->GetReference();
+                Reference currentNodeReference = currentNode->GetReference();
                 //Check if the current node meets the filter criteria
                 bool found = filter.Test(result, currentNodeReference);
                 if (found) {
@@ -278,11 +293,20 @@ void ReferenceContainer::Find(ReferenceContainer &result, ReferenceContainerFilt
                         if (result.Insert(currentNodeReference)) {
                             if (filter.IsRemove()) {
                                 //Only delete the exact node index
-                                if (list.ListDelete(currentNode)) {
+                                if (list.erase(std::remove(list.begin(), list.end(), currentNode), list.end()) != list.end()) {
+                                //if (list.erase(list.begin() + index) != list.end()) {
+                                    delete currentNode;
+                                //if (list.ListDelete(currentNode)) {
                                     //Given that the index will be incremented, but we have removed an element, the index should stay in the same position
                                     if (!filter.IsReverse()) {
                                         index--;
-                                        currentNode = (list.ListPeek(static_cast<uint32>(index)));
+                                        currentNode = NULL;
+                                        //currentNode = (list.ListPeek(static_cast<uint32>(index)));
+                                        if (index > 0) {
+                                            if (index < static_cast<int32>(list.size())) {
+                                                currentNode = (list[index]);
+                                            }
+                                        }
                                     }
                                 }
                                 else {
@@ -312,15 +336,20 @@ void ReferenceContainer::Find(ReferenceContainer &result, ReferenceContainerFilt
 
                     if (ok) {
                         ReferenceT<ReferenceContainer> currentNodeContainer = currentNodeReference;
-                        uint32 sizeBeforeBranching = result.list.ListSize();
+                        //uint32 sizeBeforeBranching = result.list.ListSize();
+                        uint32 sizeBeforeBranching = result.list.size();
                         UnLock();
                         currentNodeContainer->Find(result, filter);
                         if (Lock()) {
                             //Something was found if the result size has changed
-                            if (sizeBeforeBranching == result.list.ListSize()) {
+                            //if (sizeBeforeBranching == result.list.ListSize()) {
+                            if (sizeBeforeBranching == result.list.size()) {
                                 //Nothing found. Remove the stored path (which led to nowhere).
                                 if (filter.IsStorePath()) {
-                                    LinkedListable *node = result.list.ListExtract(result.list.ListSize() - 1u);
+                                    //LinkedListable *node = result.list.ListExtract(result.list.ListSize() - 1u);
+                                    //LinkedListable *node = result.list.ListExtract(result.list.size() - 1u);
+                                    ReferenceContainerNode *node = result.list[result.list.size() - 1u];
+                                    result.list.erase(result.list.begin() + result.list.size() - 1u);
                                     delete node;
                                 }
                             }
@@ -337,12 +366,14 @@ void ReferenceContainer::Find(ReferenceContainer &result, ReferenceContainerFilt
                 if (!filter.IsReverse()) {
                     index++;
                     if (currentNode != NULL_PTR(ReferenceContainerNode *)) {
-                        currentNode = dynamic_cast<ReferenceContainerNode *>(currentNode->Next());
+                        //currentNode = dynamic_cast<ReferenceContainerNode *>(currentNode->Next());
+                        currentNode = (list[index]);
                     }
                 }
                 else {
                     index--;
-                    currentNode = (list.ListPeek(static_cast<uint32>(index)));
+                    //currentNode = (list.ListPeek(static_cast<uint32>(index)));
+                    currentNode = (list[index]);
                 }
             }
         }
@@ -372,7 +403,8 @@ Reference ReferenceContainer::Find(const char8 * const path, const bool recursiv
 uint32 ReferenceContainer::Size() {
     uint32 size = 0u;
     if (Lock()) {
-        size = list.ListSize();
+        //size = list.ListSize();
+        size = list.size();
     }
     else {
         REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "ReferenceContainer: Failed FastLock()");
