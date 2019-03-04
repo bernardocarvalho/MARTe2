@@ -293,8 +293,8 @@ void ReferenceContainer::Find(ReferenceContainer &result, ReferenceContainerFilt
                         if (result.Insert(currentNodeReference)) {
                             if (filter.IsRemove()) {
                                 //Only delete the exact node index
-                                if (list.erase(std::remove(list.begin(), list.end(), currentNode), list.end()) != list.end()) {
-                                //if (list.erase(list.begin() + index) != list.end()) {
+                                //if (list.erase(std::remove(list.begin(), list.end(), currentNode), list.end()) != list.end()) {
+                                if (list.erase(list.begin() + index) != list.end()) {
                                     delete currentNode;
                                 //if (list.ListDelete(currentNode)) {
                                     //Given that the index will be incremented, but we have removed an element, the index should stay in the same position

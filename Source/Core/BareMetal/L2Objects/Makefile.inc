@@ -46,6 +46,7 @@ OBJSX=  AnyType.x \
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
 INCLUDES+=-I../L1Portability -I../L0Types
+CPPFLAGS += -O2
 
 all: $(OBJS) $(SUBPROJ)   \
 		$(BUILD_DIR)/L2ObjectsB$(LIBEXT) \

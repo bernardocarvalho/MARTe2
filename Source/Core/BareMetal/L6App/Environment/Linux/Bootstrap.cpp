@@ -73,6 +73,8 @@ ErrorManagement::ErrorType Bootstrap::ReadParameters(int32 argc, char8 **argv, S
         int32 i;
         for (i = 1; (i < (argc - 1)); i += 2) {
             argsConfiguration.Write(argv[i], argv[i + 1]);
+            //Also write them into the loaderParameters so that they can be use generally by any loader
+            loaderParameters.Write(argv[i], argv[i + 1]);
         }
         REPORT_ERROR_STATIC(ErrorManagement::Debug, "Arguments:\n%!", argsConfiguration);
     }
