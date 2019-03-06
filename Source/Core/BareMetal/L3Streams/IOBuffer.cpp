@@ -1010,7 +1010,7 @@ static bool PrintObject(IOBuffer & iobuff,
                                     member = AnyType(*reinterpret_cast<void**>(memberPointer));
                                 }
 
-                                if (memberDescriptor == CharString) {
+                                if ((memberDescriptor == CharString)|| (memberDescriptor == ConstCharString)) {
                                     if (memberIntrospection.GetNumberOfDimensions() == 0u) {
                                         member = AnyType(*reinterpret_cast<char8**>(memberPointer));
                                     }
@@ -1388,7 +1388,7 @@ static bool PrintToStreamVector(IOBuffer & iobuff,
         AnyType scalar(descriptor, parIn.GetBitAddress(), scalarPointer);
 
         // Consider the special case of c string
-        if (descriptor == CharString) {
+        if ((descriptor == CharString) || (descriptor == ConstCharString)) {
             scalar = AnyType(*reinterpret_cast<char8**>(scalarPointer));
         }
 

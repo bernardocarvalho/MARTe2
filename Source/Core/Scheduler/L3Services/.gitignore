@@ -3,3 +3,5 @@
 /depends.cov
 /dependsRaw.cov
 /cov/
+/SemaphoreObjects.cpp
+/SemaphoreObjects.h
