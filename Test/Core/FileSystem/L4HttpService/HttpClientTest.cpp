@@ -149,6 +149,99 @@ uint32 HttpClientTestObj::GetLastOperationId() {
     return lastOperationId;
 }
 
+class HttpClientTestWebRoot: public ReferenceContainer, public DataExportI {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+HttpClientTestWebRoot    ();
+
+    virtual ~HttpClientTestWebRoot();
+
+    virtual bool GetAsStructuredData(StreamStructuredDataI &data, ProtocolI &protocol);
+
+    virtual bool GetAsText(StreamI &stream, ProtocolI &protocol);
+
+    virtual int32 GetReplyCode(ProtocolI &data);
+
+private:
+    void RecCallback(ReferenceT<ReferenceContainer> ref,
+            BufferedStreamI *hStream);
+
+};
+
+HttpClientTestWebRoot::HttpClientTestWebRoot() {
+
+}
+
+HttpClientTestWebRoot::~HttpClientTestWebRoot() {
+
+}
+
+void HttpClientTestWebRoot::RecCallback(ReferenceT<ReferenceContainer> ref,
+                                        BufferedStreamI *hStream) {
+
+    if (ref.IsValid()) {
+        const char8* className = ref->GetClassProperties()->GetName();
+        const char8* name = ref->GetName();
+
+        hStream->Printf("%s", "<TR>\n");
+        hStream->Printf("<TD>%s</TD><TD><A HREF=\"%s/\">%s</A></TD>\n", className, name, name);
+        hStream->Printf("%s", "</TR>\n");
+        uint32 numberOfElements = ref->Size();
+        for (uint32 i = 0u; i < numberOfElements; i++) {
+            ReferenceT<ReferenceContainer> child = ref->Get(i);
+            RecCallback(ref, hStream);
+        }
+    }
+
+}
+
+bool HttpClientTestWebRoot::GetAsStructuredData(StreamStructuredDataI &data,
+                                                ProtocolI &protocol) {
+    return false;
+}
+
+bool HttpClientTestWebRoot::GetAsText(StreamI &stream,
+                                      ProtocolI &protocol) {
+
+    StreamString hString;
+    StreamString *hStream = (&hString);
+
+    hStream->SetSize(0);
+    if (!protocol.MoveAbsolute("OutputOptions")) {
+        protocol.CreateAbsolute("OutputOptions");
+    }
+    protocol.Write("Content-Type", "text/html");
+
+    hStream->SetSize(0);
+
+    hStream->Printf("<html><head><TITLE>%s</TITLE>"
+                    "</head><BODY BGCOLOR=\"#ffffff\"><H1>%s</H1><UL>",
+                    "HttpClientTestWebRoot", "HttpClientTestWebRoot");
+    hStream->Printf("%s", "<TABLE>\n");
+    uint32 numberOfElements = Size();
+    for (uint32 i = 0u; i < numberOfElements; i++) {
+        ReferenceT<ReferenceContainer> ref = Get(i);
+        RecCallback(ref, hStream);
+    }
+    hStream->Printf("%s", "</TABLE>\n");
+    hStream->Printf("%s", "</UL></BODY>\n");
+    hStream->Printf("%s", "</html>\n");
+    hStream->Seek(0);
+
+    uint32 stringSize = hStream->Size();
+    stream.Write(hStream->Buffer(), stringSize);
+
+    //protocol.WriteHeader(true, HttpDefinition::HSHCReplyOK, hStream, NULL);
+    return true;
+}
+
+int32 HttpClientTestWebRoot::GetReplyCode(ProtocolI &data) {
+    return HttpDefinition::HSHCReplyOK;
+}
+
+CLASS_REGISTER(HttpClientTestWebRoot, "1.0")
+
 class HttpClientTestClassTest1: public ReferenceContainer, public DataExportI {
 public:
     CLASS_REGISTER_DECLARATION()
@@ -742,7 +835,7 @@ bool HttpClientTest::TestHttpExchange() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -870,7 +963,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_Digest() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -1009,7 +1102,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_Basic() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -1154,7 +1247,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseInvalidAuthType() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -1263,6 +1356,10 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseInvalidAuthType() {
     if (ret) {
         ret = service->Stop();
     }
+    if (ret) {
+        ObjectRegistryDatabase::Instance()->Purge();
+    }
+
     return ret;
 }
 
@@ -1272,7 +1369,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseTimeout() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -1381,6 +1478,9 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseTimeout() {
     if (ret) {
         ret = service->Stop();
     }
+    if (ret) {
+        ObjectRegistryDatabase::Instance()->Purge();
+    }
     return ret;
 }
 
@@ -1390,7 +1490,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseReplyCommand() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
@@ -1499,6 +1599,9 @@ bool HttpClientTest::TestHttpExchange_Authorization_FalseReplyCommand() {
     if (ret) {
         ret = service->Stop();
     }
+    if (ret) {
+        ObjectRegistryDatabase::Instance()->Purge();
+    }
     return ret;
 }
 
@@ -1508,7 +1611,7 @@ bool HttpClientTest::TestHttpExchange_Authorization_Digest_KeepAlive() {
             "$Application = {"
             "   Class = RealTimeApplication"
             "       +WebRoot = {"
-            "           Class = HttpServiceTestWebRoot"
+            "           Class = HttpClientTestWebRoot"
             "           +ClassLister = {"
             "               Class = HttpServiceTestClassLister"
             "           }"
