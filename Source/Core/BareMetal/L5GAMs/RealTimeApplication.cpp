@@ -488,7 +488,7 @@ ErrorManagement::ErrorType RealTimeApplication::StartNextStateExecution() {
 ErrorManagement::ErrorType RealTimeApplication::StopCurrentStateExecution() {
     ErrorManagement::ErrorType ret = scheduler.IsValid();
     if (ret.ErrorsCleared()) {
-        ret = scheduler->StopCurrentStateExecution();
+        ret = !(scheduler->StopCurrentStateExecution());
     }
     return ret;
     /*lint -e{1762} Member function cannot be made const as it is registered as an RPC in CLASS_METHOD_REGISTER*/
