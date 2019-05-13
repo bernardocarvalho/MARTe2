@@ -1,0 +1,26 @@
+Example configuration file:
+RTApp-3.cfg
+
+Start MARTe2 with:
+./MARTeApp.sh -l RealTimeLoader  -f Configurations/RTApp-3.cfg
+
+Connect with:
+sudo ncat -v 127.0.0.1 24680
+
+State machine event triggering messages
+Class = Message Destination = StateMachine Mode = ExpectsReply Function = START
+Class = Message Destination = StateMachine Mode = ExpectsReply Function = GOTOSTATE1
+Class = Message Destination = StateMachine Mode = ExpectsReply Function = GOTOSTATE2
+Class = Message Destination = StateMachine Mode = ExpectsReply Function = ERROR
+Class = Message Destination = StateMachine Mode = ExpectsReply Function = RESET
+
+Direct messages to application (bypassing state machine)
+Class = Message Destination = TestApp Mode = ExpectsReply Function = PrepareNextState +Parameters = { Class = ConfigurationDatabase param1 = State1 }
+Class = Message Destination = TestApp Function = StartNextStateExecution Mode = ExpectsReply
+Class = Message Destination = TestApp Function = StopCurrentStateExecution Mode = ExpectsReply
+Class = Message Destination = TestApp Mode = ExpectsReply Function = PrepareNextState +Parameters = { Class = ConfigurationDatabase param1 = State2 }
+Class = Message Destination = TestApp Function = StartNextStateExecution Mode = ExpectsReply
+Class = Message Destination = TestApp Function = StopCurrentStateExecution Mode = ExpectsReply
+
+
+

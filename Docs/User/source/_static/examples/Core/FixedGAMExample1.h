@@ -54,10 +54,11 @@ namespace MARTe2Tutorial {
  *         }
  *     }
  *     OutputSignals = {
- *         Signal1 = {
- *             DataSource = "DDB1"
- *             Type = uint32
- *         }
+ *         DiffCounter = {   DataSource = DDB1  Type = uint32 }
+ *         DACs = {          DataSource = DDB1  Type = int16 NumberOfElements = 64 }
+ *         DOs = {           DataSource = DDB1  Type = uint8 NumberOfElements = 4 }
+ *         PWMduty = {       DataSource = DDB1  Type = uint16 NumberOfelements = 8 }
+ *
  *     }
  * }
  */
@@ -117,6 +118,22 @@ private:
      * The configured gain.
      */
     MARTe::uint32 gain;
+
+
+    /**
+     *
+     */
+    MARTe::uint32 prevval;
+
+    MARTe::int16 *inputadcs;
+
+
+    MARTe::int16 *outputdacs;
+    MARTe::uint8 *outputdos;
+    MARTe::uint16 *outputpwms;
+
+    MARTe::uint32 cycle;
+
 };
 }
 /*---------------------------------------------------------------------------*/

@@ -30,6 +30,7 @@
 /*---------------------------------------------------------------------------*/
 #include "AdvancedErrorManagement.h"
 #include "FixedGAMExample1.h"
+#include "math.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -43,6 +44,8 @@ FixedGAMExample1::FixedGAMExample1() {
     gain = 0u;
     inputSignal = NULL_PTR(MARTe::uint32 *);
     outputSignal = NULL_PTR(MARTe::uint32 *);
+
+    prevval=0;
 }
 
 FixedGAMExample1::~FixedGAMExample1() {
@@ -64,13 +67,18 @@ bool FixedGAMExample1::Initialise(MARTe::StructuredDataI & data) {
     if (ok) {
         REPORT_ERROR(ErrorManagement::Information, "Parameter Gain set to %d", gain);
     }
+
+
     return ok;
 }
 
 bool FixedGAMExample1::Setup() {
     using namespace MARTe;
-    uint32 numberOfInputSignals = GetNumberOfInputSignals();
-    uint32 numberOfOutputSignals = GetNumberOfOutputSignals();
+    //uint32 numberOfInputSignals = GetNumberOfInputSignals();
+    //uint32 numberOfOutputSignals = GetNumberOfOutputSignals();
+
+
+    /*
     bool ok = (numberOfInputSignals == numberOfOutputSignals);
     if (ok) {
         ok = (numberOfOutputSignals == 1u);
@@ -156,12 +164,61 @@ bool FixedGAMExample1::Setup() {
         inputSignal = reinterpret_cast<uint32 *>(GetInputSignalMemory(0u));
         outputSignal = reinterpret_cast<uint32 *>(GetOutputSignalMemory(0u));
     }
-    return ok;
+    */
+
+
+
+    inputSignal = reinterpret_cast<uint32 *>(GetInputSignalMemory(0u));
+    inputadcs = reinterpret_cast<int16 *>(GetInputSignalMemory(1u));
+
+    outputSignal = reinterpret_cast<uint32 *>(GetOutputSignalMemory(0u));
+    outputdacs = reinterpret_cast<int16 *>(GetOutputSignalMemory(1u));
+    outputdos = reinterpret_cast<uint8 *>(GetOutputSignalMemory(2u));
+    outputpwms = reinterpret_cast<uint16 *>(GetOutputSignalMemory(3u));
+
+    int i;
+    for(i=0; i<64; i++) outputdacs[i]=0.0;
+    for(i=0; i<4; i++) outputdos[i]=0;
+    for(i=0; i<8; i++) outputpwms[i]=0;
+
+    cycle=0;
+
+    //return ok;
+
+    return true;
 
 }
 
 bool FixedGAMExample1::Execute() {
-    *outputSignal = gain * *inputSignal;
+    //REPORT_ERROR(MARTe::ErrorManagement::Debug, "Execute called");
+
+
+    //*outputSignal = gain * *inputSignal;
+
+    *outputSignal = *inputSignal - prevval;
+    prevval = *inputSignal;
+
+    outputdacs[0] = inputadcs[0];
+
+    if(inputadcs[0]>0)
+    {
+        outputdos[0]=0xFF;
+        outputdos[1]=0xFF;
+        outputdos[2]=0xFF;
+        outputdos[3]=0xFF;
+    }
+    else
+    {
+        outputdos[0]=0x00;
+        outputdos[1]=0x00;
+        outputdos[2]=0x00;
+        outputdos[3]=0x00;
+    }
+
+
+    //cycle++;
+    //outputdacs[0] = (MARTe::int16)(3000.0*sin(((double)cycle)/10000.0*6.28));
+
     return true;
 }
 

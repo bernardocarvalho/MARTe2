@@ -381,8 +381,8 @@ bool GAMSchedulerI::ExecuteSingleCycle(ExecutableI * const * const executables,
         // execute the gam
         ret = executables[i]->Execute();
         uint64 tmp = (HighResolutionTimer::Counter() - absTicks);
-        float64 ticksToTime = (static_cast<float64>(tmp) * clockPeriod) * 1e6;
-        uint32 absTime = static_cast<uint32>(ticksToTime);  //us
+        float64 ticksToTime = (static_cast<float64>(tmp) * clockPeriod) * 1e9;
+        uint32 absTime = static_cast<uint32>(ticksToTime);  //ns
         if (ret) {
             uint32 sizeToCopy = static_cast<uint32>(sizeof(uint32));
             ret = MemoryOperationsHelper::Copy(executables[i]->GetTimingSignalAddress(), &absTime, sizeToCopy);

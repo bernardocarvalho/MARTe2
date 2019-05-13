@@ -241,7 +241,7 @@ ErrorManagement::ErrorType GAMScheduler::Execute(ExecutionInfo & information) {
             uint32 absTime = 0u;
             if (rtThreadInfo[idx][threadNumber].lastCycleTimeStamp != 0u) {
                 uint64 tmp = (HighResolutionTimer::Counter() - rtThreadInfo[idx][threadNumber].lastCycleTimeStamp);
-                float64 ticksToTime = (static_cast<float64>(tmp) * clockPeriod) * 1e6;
+                float64 ticksToTime = (static_cast<float64>(tmp) * clockPeriod) * 1e9;
                 absTime = static_cast<uint32>(ticksToTime);  //us
             }
             uint32 sizeToCopy = static_cast<uint32>(sizeof(uint32));
