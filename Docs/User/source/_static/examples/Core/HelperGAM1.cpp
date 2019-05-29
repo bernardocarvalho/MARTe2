@@ -1,15 +1,15 @@
 /**
- * @file FixedGAMExample1.cpp
- * @brief Source file for class FixedGAMExample1
- * @date 06/04/2018
- * @author Andre Neto
+ * @file HelperGAM1.cpp
+ * @brief Source file for class HelperGAM1.cpp
+ * @date 28.05.2019
+ * @author Cristian Galperti
  *
  * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
  * the Development of Fusion Energy ('Fusion for Energy').
  * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
  * by the European Commission - subsequent versions of the EUPL (the "Licence")
  * You may not use this work except in compliance with the Licence.
- * You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+ * You may obtain a copy of the at: http://ec.europa.eu/idabc/eupl
  *
  * @warning Unless required by applicable law or agreed to in writing, 
  * software distributed under the Licence is distributed on an "AS IS"
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class FixedGAMExample1 (public, protected, and private). Be aware that some 
+ * the class HelperGAM1 (public, protected, and private). Be aware that some
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,7 +29,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 #include "AdvancedErrorManagement.h"
-#include "FixedGAMExample1.h"
+#include "HelperGAM1.h"
 #include "math.h"
 
 /*---------------------------------------------------------------------------*/
@@ -40,24 +40,23 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 namespace MARTe2Tutorial {
-FixedGAMExample1::FixedGAMExample1() {
-    gain = 0u;
+HelperGAM1::HelperGAM1() {
     inputSignal = NULL_PTR(MARTe::uint32 *);
     outputSignal = NULL_PTR(MARTe::uint32 *);
     MARTe::StreamString a;
-    prevval=0;
 }
 
-FixedGAMExample1::~FixedGAMExample1() {
+HelperGAM1::~HelperGAM1() {
 
 }
 
-bool FixedGAMExample1::Initialise(MARTe::StructuredDataI & data) {
+bool HelperGAM1::Initialise(MARTe::StructuredDataI & data) {
     using namespace MARTe;
     bool ok = GAM::Initialise(data);
     if (!ok) {
         REPORT_ERROR(ErrorManagement::ParametersError, "Could not Initialise the GAM");
     }
+    /*
     if (ok) {
         ok = data.Read("Gain", gain);
         if (!ok) {
@@ -67,11 +66,13 @@ bool FixedGAMExample1::Initialise(MARTe::StructuredDataI & data) {
     if (ok) {
         REPORT_ERROR(ErrorManagement::Information, "Parameter Gain set to %d", gain);
     }
+    */
 
+    f1=f2=0.0;
     return ok;
 }
 
-bool FixedGAMExample1::Setup() {
+bool HelperGAM1::Setup() {
     using namespace MARTe;
 
 
@@ -169,21 +170,33 @@ bool FixedGAMExample1::Setup() {
     */
 
 
-
+    /*
     inputSignal = reinterpret_cast<uint32 *>(GetInputSignalMemory(0u));
     inputadcs = reinterpret_cast<int16 *>(GetInputSignalMemory(1u));
+    */
 
-    outputSignal = reinterpret_cast<uint32 *>(GetOutputSignalMemory(0u));
-    outputdacs = reinterpret_cast<int16 *>(GetOutputSignalMemory(1u));
-    outputdos = reinterpret_cast<uint8 *>(GetOutputSignalMemory(2u));
-    outputpwms = reinterpret_cast<uint16 *>(GetOutputSignalMemory(3u));
+    /*
+    realtime= { DataSource = DDB1 Type = float32  NumberOfElements = 1   CheckSimulinkType = true  NumberOfDimensions=1 }
+    adc  = { DataSource = DDB1 Type = int16    NumberOfElements = 192 CheckSimulinkType = true  NumberOfDimensions=1 }
+    rfm_in      = { DataSource = DDB1 Type = float32  NumberOfElements = 7   CheckSimulinkType = false NumberOfDimensions=1 }
+    wavegen     = { DataSource = DDB1 Type = float32  NumberOfElements = 2   CheckSimulinkType = true  NumberOfDimensions=1 }
+    proc_in     = { DataSource = DDB1 Type = float32  NumberOfElements = 3   CheckSimulinkType = false NumberOfDimensions=1 }
+    */
 
+    outputrealtime  = reinterpret_cast<float32 *>(GetOutputSignalMemory(0u));
+    outputadc       = reinterpret_cast<int16 *>(GetOutputSignalMemory(1u));
+    outputrfm_in    = reinterpret_cast<uint8 *>(GetOutputSignalMemory(2u));
+    outputwavegen   = reinterpret_cast<float32 *>(GetOutputSignalMemory(3u));
+    outputproc_in   = reinterpret_cast<uint8 *>(GetOutputSignalMemory(4u));
+
+    /*
     int i;
     for(i=0; i<64; i++) outputdacs[i]=0.0;
     for(i=0; i<4; i++) outputdos[i]=0;
     for(i=0; i<8; i++) outputpwms[i]=0;
 
     cycle=0;
+    */
 
     //return ok;
 
@@ -191,12 +204,19 @@ bool FixedGAMExample1::Setup() {
 
 }
 
-bool FixedGAMExample1::Execute() {
+bool HelperGAM1::Execute() {
     //REPORT_ERROR(MARTe::ErrorManagement::Debug, "Execute called");
 
 
     //*outputSignal = gain * *inputSignal;
 
+    outputwavegen[0] = f1;
+    outputwavegen[1] = f2;
+
+    f1+=1.0;
+    f2+=1.0;
+
+    /*
     *outputSignal = *inputSignal - prevval;
     prevval = *inputSignal;
 
@@ -220,9 +240,11 @@ bool FixedGAMExample1::Execute() {
 
     //cycle++;
     //outputdacs[0] = (MARTe::int16)(3000.0*sin(((double)cycle)/10000.0*6.28));
+    */
+
 
     return true;
 }
 
-CLASS_REGISTER(FixedGAMExample1, "")
+CLASS_REGISTER(HelperGAM1, "")
 }
