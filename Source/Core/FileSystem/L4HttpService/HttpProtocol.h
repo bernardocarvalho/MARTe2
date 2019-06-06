@@ -177,6 +177,7 @@ public:
      */
     int8 TextMode() const;
 
+
 protected:
 
     /**

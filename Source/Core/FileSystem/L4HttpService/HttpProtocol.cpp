@@ -47,7 +47,7 @@ namespace MARTe {
 HttpProtocol::HttpProtocol(DoubleBufferedStream &outputStreamIn) :
         ConfigurationDatabase() {
     httpCommand = HttpDefinition::HSHCNone;
-    httpVersion = 1000u;
+    httpVersion = 1100u;
     httpErrorCode = 200;
     keepAlive = true;
     outputStream = &outputStreamIn;
@@ -62,12 +62,14 @@ HttpProtocol::~HttpProtocol() {
     outputStream = NULL_PTR(DoubleBufferedStream*);
 }
 
-bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout, TimeoutType msecTimeout, const uint32 bufferReadSize) {
+bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
+                                         TimeoutType msecTimeout,
+                                         const uint32 bufferReadSize) {
 
     bool ret = true;
     //This way we can change the falsely undefined content-length when this is called from Write Header
     //complete the read only when the body is completed from the other part
-    if ((streamout == NULL) && (unreadInput < 0)) {
+    if ((streamout == NULL) && ((unreadInput < 0)||(msecTimeout==0u))) {
         unreadInput = -1;
     }
     else {
@@ -190,7 +192,7 @@ bool HttpProtocol::ReadHeader(const uint32 bufferReadSize) {
                     fVersion = 0.0F;
                 }
                 if (fVersion <= 0.0F) {
-                    httpVersion = 1000u;
+                    httpVersion = 1100u;
                 }
                 else {
                     /*lint -e{9122} allowed cast from float to integer*/
@@ -325,7 +327,10 @@ bool HttpProtocol::ReadHeader(const uint32 bufferReadSize) {
     return ret;
 }
 
-bool HttpProtocol::WriteHeader(const bool isMessageCompleted, const int32 command, BufferedStreamI * const payload, const char8 * const id,
+bool HttpProtocol::WriteHeader(const bool isMessageCompleted,
+                               const int32 command,
+                               BufferedStreamI * const payload,
+                               const char8 * const id,
                                const uint32 bufferWriteSize) {
 
     //if sending something with bodyCompleted=false
@@ -335,7 +340,6 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted, const int32 comman
     if (!CompleteReadOperation(NULL_PTR(BufferedStreamI*))) {
         REPORT_ERROR(ErrorManagement::Warning, "Failed CompleteReadOperation");
     }
-
     // if it is a reply get errorCode
     // otherwise mark the httpCommand as none
     bool isReply = HttpDefinition::IsReplyCode(command, httpErrorCode);
@@ -457,7 +461,8 @@ bool HttpProtocol::WriteHeader(const bool isMessageCompleted, const int32 comman
 
 }
 
-bool HttpProtocol::RetrieveHttpCommand(StreamString &command, StreamString &line) {
+bool HttpProtocol::RetrieveHttpCommand(StreamString &command,
+                                       StreamString &line) {
     char8 terminator;
 
     bool ret = true;
@@ -484,7 +489,7 @@ bool HttpProtocol::RetrieveHttpCommand(StreamString &command, StreamString &line
 
         //convert the version
         if (fVersion <= 0.0F) {
-            httpVersion = 1000u;
+            httpVersion = 1100u;
         }
         else {
             /*lint -e{9122} allowed cast from float to integer*/
@@ -669,7 +674,10 @@ bool HttpProtocol::StoreInputOptions() {
     return ret;
 }
 
-bool HttpProtocol::HandlePostHeader(StreamString &line, StreamString &content, StreamString &name, StreamString &filename) {
+bool HttpProtocol::HandlePostHeader(StreamString &line,
+                                    StreamString &content,
+                                    StreamString &name,
+                                    StreamString &filename) {
     const char8 *temp = NULL_PTR(const char8 *);
 
     bool ret = true;
@@ -731,7 +739,11 @@ bool HttpProtocol::HandlePostHeader(StreamString &line, StreamString &content, S
     return ret;
 }
 
-bool HttpProtocol::HandlePostContent(StreamString &line, StreamString &boundary, StreamString &name, StreamString &filename, StreamString &value,
+bool HttpProtocol::HandlePostContent(StreamString &line,
+                                     StreamString &boundary,
+                                     StreamString &name,
+                                     StreamString &filename,
+                                     StreamString &value,
                                      bool &headerHandled) {
 
     bool ret = true;
@@ -766,7 +778,8 @@ bool HttpProtocol::HandlePostContent(StreamString &line, StreamString &boundary,
     return ret;
 }
 
-bool HttpProtocol::HandlePostMultipartFormData(StreamString &contentType, StreamString &content) {
+bool HttpProtocol::HandlePostMultipartFormData(StreamString &contentType,
+                                               StreamString &content) {
 
     const char8* parsedBoundaryTemp = StringHelper::SearchString(contentType.Buffer(), "boundary=");
     bool ret = (parsedBoundaryTemp != NULL);
@@ -883,7 +896,8 @@ bool HttpProtocol::HandlePostApplicationForm(StreamString &content) {
     return ret;
 }
 
-bool HttpProtocol::HandlePost(StreamString &contentType, StreamString &content) {
+bool HttpProtocol::HandlePost(StreamString &contentType,
+                              StreamString &content) {
 //Write the raw content
     bool ret = content.Seek(0ull);
     if (ret) {
@@ -970,7 +984,8 @@ int8 HttpProtocol::TextMode() const {
     return textMode;
 }
 
-bool HttpProtocol::GetInputCommand(const char8 * const commandName, const AnyType &commandValue) {
+bool HttpProtocol::GetInputCommand(const char8 * const commandName,
+                                   const AnyType &commandValue) {
 
     bool ret = MoveAbsolute("InputCommands");
     if (ret) {
