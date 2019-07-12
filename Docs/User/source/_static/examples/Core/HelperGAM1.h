@@ -135,6 +135,7 @@ private:
 
     MARTe::float32 f1, f2;
 
+    MARTe::int32 *inputtime;
 
 };
 }

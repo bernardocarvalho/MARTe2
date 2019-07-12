@@ -189,6 +189,8 @@ bool HelperGAM1::Setup() {
     outputwavegen   = reinterpret_cast<float32 *>(GetOutputSignalMemory(3u));
     outputproc_in   = reinterpret_cast<uint8 *>(GetOutputSignalMemory(4u));
 
+    inputtime  = reinterpret_cast<int32 *>(GetInputSignalMemory(0u));
+
     /*
     int i;
     for(i=0; i<64; i++) outputdacs[i]=0.0;
@@ -210,11 +212,16 @@ bool HelperGAM1::Execute() {
 
     //*outputSignal = gain * *inputSignal;
 
-    outputwavegen[0] = f1;
+    *outputrealtime = (MARTe::float32)(*inputtime) * 1e-6;
+
+    /*outputwavegen[0] = f1;
     outputwavegen[1] = f2;
 
     f1+=1.0;
     f2-=1.0;
+    */
+
+
 
     /*
     *outputSignal = *inputSignal - prevval;
