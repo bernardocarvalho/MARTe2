@@ -136,6 +136,13 @@ private:
     MARTe::float32 f1, f2;
 
     MARTe::int32 *inputtime;
+    MARTe::int32 *outputtimeformds;
+    MARTe::uint8 *outputtriggerformds;
+
+    MARTe::int32 mdstimeoffset;
+    MARTe::int32 mdsstarttime;
+    MARTe::int32 mdsstoptime;
+
 
 };
 }

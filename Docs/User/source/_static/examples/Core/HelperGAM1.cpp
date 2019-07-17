@@ -68,6 +68,17 @@ bool HelperGAM1::Initialise(MARTe::StructuredDataI & data) {
     }
     */
 
+    if(ok){
+        ok = data.Read("MdsTimeOffset", mdstimeoffset);
+    }
+    if(ok){
+        ok = data.Read("MdsStartTime", mdsstarttime);
+    }
+    if(ok){
+        ok = data.Read("MdsStopTime", mdsstoptime);
+    }
+
+
     f1=f2=0.0;
     return ok;
 }
@@ -183,13 +194,17 @@ bool HelperGAM1::Setup() {
     proc_in     = { DataSource = DDB1 Type = float32  NumberOfElements = 3   CheckSimulinkType = false NumberOfDimensions=1 }
     */
 
-    outputrealtime  = reinterpret_cast<float32 *>(GetOutputSignalMemory(0u));
+    inputtime  = reinterpret_cast<int32 *>(GetInputSignalMemory(0u));
+
+    outputrealtime   = reinterpret_cast<float32 *>(GetOutputSignalMemory(0u));
     outputadc       = reinterpret_cast<int16 *>(GetOutputSignalMemory(1u));
     outputrfm_in    = reinterpret_cast<uint8 *>(GetOutputSignalMemory(2u));
     outputwavegen   = reinterpret_cast<float32 *>(GetOutputSignalMemory(3u));
     outputproc_in   = reinterpret_cast<uint8 *>(GetOutputSignalMemory(4u));
+    outputtimeformds = reinterpret_cast<int32 *>(GetOutputSignalMemory(5u));
+    outputtriggerformds = reinterpret_cast<uint8 *>(GetOutputSignalMemory(6u));
 
-    inputtime  = reinterpret_cast<int32 *>(GetInputSignalMemory(0u));
+    *outputtriggerformds=0;
 
     /*
     int i;
@@ -213,6 +228,9 @@ bool HelperGAM1::Execute() {
     //*outputSignal = gain * *inputSignal;
 
     *outputrealtime = (MARTe::float32)(*inputtime) * 1e-6;
+    *outputtimeformds = *inputtime + mdstimeoffset;
+
+    if(*outputtimeformds>=mdsstarttime && *outputtimeformds<=mdsstoptime)  *outputtriggerformds=1; else *outputtriggerformds=0;
 
     /*outputwavegen[0] = f1;
     outputwavegen[1] = f2;
