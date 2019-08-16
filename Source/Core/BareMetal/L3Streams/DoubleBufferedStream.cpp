@@ -44,7 +44,9 @@
 namespace MARTe {
 
 DoubleBufferedStream::DoubleBufferedStream() :
-        BufferedStreamI(), readBuffer(this), writeBuffer(this) {
+        BufferedStreamI(),
+        readBuffer(this),
+        writeBuffer(this) {
     bufferSizeSet = true;
     if (!readBuffer.SetBufferSize(32u)) {
         REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "SingleBufferedStream: Failed to SetBufferSize(32)");
@@ -57,7 +59,9 @@ DoubleBufferedStream::DoubleBufferedStream() :
 }
 
 DoubleBufferedStream::DoubleBufferedStream(const TimeoutType &timeoutIn) :
-        BufferedStreamI(), readBuffer(this), writeBuffer(this) {
+        BufferedStreamI(),
+        readBuffer(this),
+        writeBuffer(this) {
     SetTimeout(timeoutIn);
     bufferSizeSet = true;
     if (!readBuffer.SetBufferSize(32u)) {
@@ -73,7 +77,8 @@ DoubleBufferedStream::DoubleBufferedStream(const TimeoutType &timeoutIn) :
 DoubleBufferedStream::~DoubleBufferedStream() {
 }
 
-bool DoubleBufferedStream::SetBufferSize(uint32 readBufferSize, uint32 writeBufferSize) {
+bool DoubleBufferedStream::SetBufferSize(uint32 readBufferSize,
+                                         uint32 writeBufferSize) {
     // minimum size = 8
     if (readBufferSize < 8u) {
         readBufferSize = 8u;
@@ -104,7 +109,8 @@ IOBuffer * DoubleBufferedStream::GetWriteBuffer() {
     return &writeBuffer;
 }
 
-bool DoubleBufferedStream::Read(char8 * const output, uint32 & size) {
+bool DoubleBufferedStream::Read(char8 * const output,
+                                uint32 & size) {
 
     bool ret = CanRead() && bufferSizeSet;
     if (ret) {
@@ -125,21 +131,16 @@ bool DoubleBufferedStream::Read(char8 * const output, uint32 & size) {
 
             // decide whether to use the buffer again or just to read directly
             if ((toRead * calibReadParam) < readBuffer.MaxUsableAmount()) {
-                if (!Refill()) {
-                    ret = false;
-                }
+                ret = Refill();
 
                 uint32 readBytes = size;
                 while ((toRead > 0u) && (ret)) {
                     uint32 nRead = toRead;
-                    if (!readBuffer.Read(&output[readBytes], nRead)) {
-                        ret = false;
-                    }
-                    if (nRead != toRead) {
-                        if (!Refill()) {
-                            ret = false;
+                    ret = readBuffer.Read(&output[readBytes], nRead);
+                    if (ret) {
+                        if (nRead != toRead) {
+                            ret = Refill();
                         }
-
                     }
                     if (ret) {
                         toRead -= nRead;
@@ -183,7 +184,9 @@ bool DoubleBufferedStream::Read(char8 * const output, uint32 & size) {
     return ret;
 }
 
-bool DoubleBufferedStream::Read(char8 * const output, uint32 & size, const TimeoutType &timeout) {
+bool DoubleBufferedStream::Read(char8 * const output,
+                                uint32 & size,
+                                const TimeoutType &timeout) {
     TimeoutType prevTimeout = GetTimeout();
     SetTimeout(timeout);
     bool ret = Read(output, size);
@@ -191,7 +194,8 @@ bool DoubleBufferedStream::Read(char8 * const output, uint32 & size, const Timeo
     return ret;
 }
 
-bool DoubleBufferedStream::Write(const char8 * const input, uint32 & size) {
+bool DoubleBufferedStream::Write(const char8 * const input,
+                                 uint32 & size) {
 
     bool ret = CanWrite() && bufferSizeSet;
     if (ret) {
@@ -269,7 +273,9 @@ bool DoubleBufferedStream::Write(const char8 * const input, uint32 & size) {
 
 }
 
-bool DoubleBufferedStream::Write(const char8 * const input, uint32 & size, const TimeoutType &timeout) {
+bool DoubleBufferedStream::Write(const char8 * const input,
+                                 uint32 & size,
+                                 const TimeoutType &timeout) {
     TimeoutType prevTimeout = GetTimeout();
     SetTimeout(timeout);
     bool ret = Write(input, size);
