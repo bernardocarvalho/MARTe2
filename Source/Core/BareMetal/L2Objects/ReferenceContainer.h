@@ -37,7 +37,8 @@
 #include "TimeoutType.h"
 #include "Object.h"
 #include "Reference.h"
-#include "LinkedListable.h"
+#include "StaticList.h"
+#include "BinaryTree.h"
 #include "ReferenceContainerFilter.h"
 #include "ReferenceContainerNode.h"
 
@@ -313,7 +314,12 @@ private:
     /**
      * The list of references
      */
-    LinkedListHolderT<ReferenceContainerNode> list;
+    StaticList<Reference> list;
+
+    /**
+     * Binary tree containing indexes
+     */
+    BinaryTree<uint32> indexes;
 
     /**
      * Protects multiple access to the internal resources

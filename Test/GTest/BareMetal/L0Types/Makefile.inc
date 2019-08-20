@@ -30,6 +30,8 @@ OBJSX=  BasicTypeGTest.x \
 		DoubleIntegerGTest.x \
 		ErrorTypeGTest.x \
 		FractionalIntegerGTest.x \
+		Fnv1aHashFunctionGTest.x\
+		DjbHashFunctionGTest.x\
 		LinkedListHolderGTest.x \
 		LinkedListableGTest.x \
 		MatrixGTest.x \

@@ -186,7 +186,7 @@ ErrorManagement::ErrorType StateMachine::EventTriggered(ReferenceT<StateMachineE
         errSend = SendMultipleMessagesAndWaitReply(*(event.operator ->()), event->GetTransitionTimeout());
     }
 
-    StreamString currentStateName=currentState.GetName();
+    StreamString currentStateName=currentState->GetName();
     if (err.ErrorsCleared()) {
         if (nextState != currentStateName) {
             //Remove all the filters related to the previous event (except this one which will be removed by the MessageFilter).

@@ -34,7 +34,7 @@
 
 #include "StaticListHolder.h"
 #include "GeneralDefinitions.h"
-
+#include <iostream>
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
 /*---------------------------------------------------------------------------*/
@@ -67,6 +67,16 @@ public:
     StaticList();
 
     /**
+     * @brief Destructor
+     */
+    ~StaticList();
+
+    /**
+     * @brief Empties the list
+     */
+    void Reset();
+
+    /**
      * @see StaticListHolder::GetElementSize()
      */
     uint32 GetElementSize(void) const;
@@ -95,7 +105,7 @@ public:
      * @see StaticListHolder::Peek()
      */
     bool Peek(const uint32 position,
-              elementType &value) const;
+              elementType &value);
 
     /**
      * @see StaticListHolder::Add()
@@ -133,7 +143,12 @@ public:
      *   if (pos >= GetSize())
      *      return last element in the list
      */
-    elementType operator[](uint32 pos);
+    elementType &operator[](uint32 pos);
+
+    /**
+     * @brief Retrieves the memory buffer
+     */
+    elementType *GetAllocatedMemory();
 
 private:
 
@@ -154,8 +169,27 @@ namespace MARTe {
 
 template<typename elementType, uint32 listAllocationGranularity>
 StaticList<elementType, listAllocationGranularity>::StaticList() :
-        slh(sizeof(elementType), listAllocationGranularity) {
+        slh(sizeof(elementType), listAllocationGranularity, false) {
 }
+
+
+template<typename elementType, uint32 listAllocationGranularity>
+StaticList<elementType, listAllocationGranularity>::~StaticList(){
+    //call all the element destructors before deallocating the memory
+    for(uint32 i=0u; i<GetSize(); i++){
+        ((GetAllocatedMemory())[i]).~elementType();
+    }
+}
+
+template<typename elementType, uint32 listAllocationGranularity>
+void StaticList<elementType, listAllocationGranularity>::Reset(){
+    //call all the element destructors before deallocating the memory
+    for(uint32 i=0u; i<GetSize(); i++){
+        ((GetAllocatedMemory())[i]).~elementType();
+    }
+    slh.Reset();
+}
+
 
 template<typename elementType, uint32 listAllocationGranularity>
 uint32 StaticList<elementType, listAllocationGranularity>::GetElementSize(void) const {
@@ -184,42 +218,84 @@ uint32 StaticList<elementType, listAllocationGranularity>::GetMaxCapacity(void) 
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Peek(const uint32 position,
-                                                              elementType &value) const {
-    return slh.Peek(position, static_cast<void *>(&value));
+                                                              elementType &value) {
+    bool ret = (position < GetSize());
+    if (ret) {
+        elementType *myMem = (elementType *)&(((uint8*)slh.GetAllocatedMemory())[position*sizeof(elementType)]);
+        value = *myMem;
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Add(const elementType &value) {
-    return slh.Add(static_cast<const void *>(&value));
+    bool ret = (slh.Add(static_cast<const void *>(&value)));
+    if (ret) {
+        uint32 index = (slh.GetSize() - 1u);
+        //initialise and call the = operator on the memory
+        elementType *myMem = new (&(((uint8*)slh.GetAllocatedMemory())[index*sizeof(elementType)])) elementType();
+        (*myMem) = value;
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Insert(const uint32 position,
                                                                 const elementType &value) {
-    return slh.Insert(position, static_cast<const void *>(&value));
+    bool ret = slh.Insert(position, static_cast<const void *>(&value));
+    if (ret) {
+        //initialise and call the = operator on the memory
+        elementType *myMem = new (&(((uint8*)slh.GetAllocatedMemory())[position*sizeof(elementType)])) elementType();
+        (*myMem) = value;
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Remove(const uint32 position) {
-    return slh.Remove(position);
+    bool ret = (position < GetSize());
+
+    if (ret) {
+        elementType *myMem = (elementType *)&(((uint8*)slh.GetAllocatedMemory())[position*sizeof(elementType)]);
+        myMem->~elementType();
+        ret = slh.Remove(position);
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Extract(const uint32 position,
                                                                  elementType &value) {
-    return slh.Extract(position, static_cast<void *>(&value));
+    bool ret = (position < GetSize());
+    if (ret) {
+        elementType *myMem = (elementType *)&(((uint8*)slh.GetAllocatedMemory())[position*sizeof(elementType)]);
+        value = *myMem;
+        myMem->~elementType();
+        ret = slh.Remove(position);
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
 bool StaticList<elementType, listAllocationGranularity>::Set(const uint32 position,
                                                              elementType &value) {
-    return slh.Set(position, static_cast<void *>(&value));
+    bool ret= slh.Set(position, static_cast<void *>(&value));
+    if(ret){
+        elementType *myMem = new (&(((uint8*)slh.GetAllocatedMemory())[position*sizeof(elementType)])) elementType();
+        (*myMem) = value;
+    }
+    return ret;
 }
 
 template<typename elementType, uint32 listAllocationGranularity>
-elementType StaticList<elementType, listAllocationGranularity>::operator[](uint32 pos) {
+elementType &StaticList<elementType, listAllocationGranularity>::operator[](uint32 pos) {
     return (pos > (slh.GetSize() - 1u)) ?
             (reinterpret_cast<elementType*>(slh.GetAllocatedMemory())[slh.GetSize() - 1u]) : (reinterpret_cast<elementType*>(slh.GetAllocatedMemory())[pos]);
+}
+
+template<typename elementType, uint32 listAllocationGranularity>
+elementType *StaticList<elementType, listAllocationGranularity>::GetAllocatedMemory() {
+    return reinterpret_cast<elementType*>(slh.GetAllocatedMemory());
 }
 
 }

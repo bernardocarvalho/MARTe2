@@ -298,6 +298,7 @@
   */
 -esym(9107, MARTe::ReferenceT*)
 -esym(9107, MARTe::EmbeddedServiceMethodBinderT*)
+-esym(9107, MARTe::BinaryTree*)
 
 /*
  * Rule flexelint 1793

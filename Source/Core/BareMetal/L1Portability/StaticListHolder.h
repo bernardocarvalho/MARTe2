@@ -137,12 +137,17 @@ public:
      *   GetCapacity() == 0
      */
     StaticListHolder(const uint32 listElementSize,
-                     const uint32 listAllocationGranularity);
+            const uint32 listAllocationGranularity, const bool copyMemoryIn=true);
 
     /**
      * @brief Destructor
      */
     ~StaticListHolder();
+
+    /**
+     * @brief Empties the list
+     */
+    void Reset();
 
     /**
      * @brief Gets the element type size
@@ -201,7 +206,7 @@ public:
      * @warning *copyFrom must be valid allocated memory of size GetElementSize()
      */
     bool Insert(const uint32 position,
-                const void * const copyFrom);
+            const void * const copyFrom);
 
     /**
      * @brief Peeks an element from a given position of the list
@@ -218,7 +223,7 @@ public:
      * @warning *copyTo must be a valid allocated memory of size GetElementSize()
      */
     bool Peek(const uint32 position,
-              void * const copyTo) const;
+            void * const copyTo) const;
 
     /**
      * @brief Extracts an element from a given position of the list (i.e. peeks and deletes)
@@ -247,7 +252,7 @@ public:
      * @post Peek'post && Remove'post
      */
     bool Extract(const uint32 position,
-                 void * const copyTo);
+            void * const copyTo);
 
     /**
      * @brief Replaces the element at the specified position
@@ -258,7 +263,7 @@ public:
      * @post Peek(position, element) => *element = *value
      */
     bool Set(const uint32 position,
-             const void * const value);
+            const void * const value);
 
     /**
      * @brief Retrieves the pointer to the allocated memory area.
@@ -305,6 +310,12 @@ private:
      * Stores the Size
      */
     uint32 listSize_;
+
+
+    /**
+     * If copy the memory when adding a new element
+     */
+    bool copyMemory;
 
     /*lint -e{1712} This class does not have a default constructor because
      * the element type size must be defined on construction and remain constant

@@ -46,7 +46,8 @@
 namespace MARTe {
 
 StaticListHolder::StaticListHolder(const uint32 listElementSize,
-                                   const uint32 listAllocationGranularity) :
+                                   const uint32 listAllocationGranularity,
+                                   bool copyMemoryIn) :
         //Initializes the element size
         listElementSize_(listElementSize),
 
@@ -65,7 +66,10 @@ StaticListHolder::StaticListHolder(const uint32 listElementSize,
         listCapacity_(0U),
 
         //Initializes the actual size
-        listSize_(0U) {
+        listSize_(0U),
+
+        //if copy the memory when add new elements
+        copyMemory(copyMemoryIn) {
 }
 
 StaticListHolder::~StaticListHolder() {
@@ -76,7 +80,26 @@ StaticListHolder::~StaticListHolder() {
          * HeapManager::Free result, because allocatedMemory_ was initialized
          * by IncreaseCapacity*/
         HeapManager::Free(pointer);
+        listCapacity_ = 0u;
+        listSize_ = 0u;
+        allocatedMemory_=NULL_PTR(uint8 *);
+
     }
+    /*lint -e{1740} allocatedMemory_ was zero or it is freed and zeroed by HeapManager::Free*/
+}
+
+void StaticListHolder::Reset() {
+    if (allocatedMemory_ != NULL_PTR(uint8 *)) {
+        void * pointer = static_cast<void *>(allocatedMemory_);
+        /*lint -e{1551} HeapManager::Free is expected to be exception free*/
+        /*lint -e{534} It is not necessary to check for error/result on
+         * HeapManager::Free result, because allocatedMemory_ was initialized
+         * by IncreaseCapacity*/
+        HeapManager::Free(pointer);
+        allocatedMemory_=NULL_PTR(uint8 *);
+    }
+    listCapacity_ = 0u;
+    listSize_ = 0u;
     /*lint -e{1740} allocatedMemory_ was zero or it is freed and zeroed by HeapManager::Free*/
 }
 
@@ -123,10 +146,12 @@ bool StaticListHolder::Add(const void * const copyFrom) {
 
     //Copies the element to the back of the list
     if (ret) {
-        /*lint -e{9016} This implementation uses pointer arithmetic instead of array indexing*/
-        /*lint -e{679} This implementation uses pointer arithmetic instead of array indexing*/
-        uint8* pointer = (allocatedMemory_ + (listElementSize_ * listSize_));
-        ret = MemoryOperationsHelper::Copy(pointer, copyFrom, listElementSize_);
+        if (copyMemory) {
+            /*lint -e{9016} This implementation uses pointer arithmetic instead of array indexing*/
+            /*lint -e{679} This implementation uses pointer arithmetic instead of array indexing*/
+            uint8* pointer = (allocatedMemory_ + (listElementSize_ * listSize_));
+            ret = MemoryOperationsHelper::Copy(pointer, copyFrom, listElementSize_);
+        }
         if (ret) {
             listSize_++;
         }
@@ -170,7 +195,9 @@ bool StaticListHolder::Insert(const uint32 position,
         }
 
         if (ret) {
-            ret = MemoryOperationsHelper::Copy(pointer, copyFrom, listElementSize_);
+            if (copyMemory) {
+                ret = MemoryOperationsHelper::Copy(pointer, copyFrom, listElementSize_);
+            }
         }
 
         if (ret) {

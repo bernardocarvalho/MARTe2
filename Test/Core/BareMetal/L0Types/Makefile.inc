@@ -31,6 +31,8 @@ OBJSX=  BasicTypeTest.x \
 		DoubleIntegerTest.x \
 		ErrorTypeTest.x \
 		FractionalIntegerTest.x \
+		Fnv1aHashFunctionTest.x \
+		DjbHashFunctionTest.x\
 		LinkedListHolderTest.x \
 		LinkedListableTest.x \
 		MatrixTest.x \

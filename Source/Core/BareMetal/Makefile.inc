@@ -23,7 +23,7 @@
 # $Id: Makefile.inc 3 2012-01-15 16:26:07Z aneto $
 #
 #############################################################
-OBJSX= 
+OBJSX=
 SPB    = L0Types.x L1Portability.x L2Objects.x L3Streams.x L4Configuration.x L4Logger.x L4Messages.x L4HttpService.x L5GAMs.x L6App.x
 PACKAGE=Core
 MAKEDEFAULTDIR=../../../MakeDefaults
