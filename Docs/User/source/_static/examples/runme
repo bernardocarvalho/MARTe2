@@ -1,0 +1,3 @@
+#taskset 0x02 ./MARTeApp.sh  -s Execution -l RealTimeLoader  -f Configurations/Timer-expcode1005-full-tester.cfg
+#taskset 0x02 ./MARTeApp.sh  -l RealTimeLoader  -f Configurations/Timer-expcode1005-full-tester-sm.cfg
+taskset 0x02 ./MARTeApp.sh  -l RealTimeLoader  -f Configurations/Timer-expcode1005-full-tester-sm.cfg -m ShotManager:Start

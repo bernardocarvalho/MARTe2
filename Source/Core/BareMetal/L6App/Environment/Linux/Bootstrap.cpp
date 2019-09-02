@@ -116,6 +116,7 @@ ErrorManagement::ErrorType Bootstrap::ReadParameters(int32 argc, char8 **argv, S
             ret.parametersError = !loaderParameters.Write("FirstState", firstState.Buffer());
         }
     }
+    StreamString test;
     if (ret) {
         StreamString messageArgs;
         (void) argsConfiguration.Read("-m", messageArgs);
@@ -125,19 +126,28 @@ ErrorManagement::ErrorType Bootstrap::ReadParameters(int32 argc, char8 **argv, S
             StreamString messageDestination;
             StreamString messageFunction;
             ret.parametersError = !messageArgs.GetToken(messageDestination, ":", term);
+            //printf("messageDestination is %s\n", messageDestination.Buffer());
             if (ret) {
                 ret.parametersError = !messageArgs.GetToken(messageFunction, ":", term);
+                //printf("messageFunction is %s\n", messageFunction.Buffer());
             }
             if (ret) {
                 ret.parametersError = !loaderParameters.Write("MessageDestination", messageDestination.Buffer());
+                //printf("After MessageDestination writing.\n");
             }
             if (ret) {
                 ret.parametersError = !loaderParameters.Write("MessageFunction", messageFunction.Buffer());
+                //printf("After MessageFunction writing,");
+
+                loaderParameters.Read("MessageFunction", test);
+                //printf("value %s\n", test.Buffer());
             }
         }
     }
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Loader parameters:\n%!", loaderParameters);
+        // Fix bug in REPORT_ERROR_STATIC with StructureDataI
+        if(test.Size() > 0u) printf(" %s\n", test.Buffer());
     }
     return ret;
 }
