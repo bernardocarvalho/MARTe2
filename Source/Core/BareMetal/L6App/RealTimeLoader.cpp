@@ -143,7 +143,42 @@ ErrorManagement::ErrorType RealTimeLoader::Stop() {
     return ret;
 }
 
+
+SPCRealTimeLoader::SPCRealTimeLoader() :
+        RealTimeLoader()
+{
+}
+
+SPCRealTimeLoader::~SPCRealTimeLoader()
+{
+}
+
+ErrorManagement::ErrorType SPCRealTimeLoader::Configure(StructuredDataI& data, StreamI &configuration) {
+    ErrorManagement::ErrorType ret = RealTimeLoader::Configure(data, configuration);
+
+    if(ret!=ErrorManagement::NoError)
+    {
+        ErrorManagement::ErrorType msgret;
+        ReferenceT<Message> message(new Message());
+        ConfigurationDatabase msgConfig;
+        msgret.parametersError = !msgConfig.Write("Destination", "StateMachine");
+        if (msgret.ErrorsCleared()) {
+            msgret.initialisationError = !msgConfig.Write("Function", "ERROR");
+        }
+        if (msgret.ErrorsCleared()) {
+            msgret.initialisationError = !message->Initialise(msgConfig);
+        }
+        if (msgret.ErrorsCleared()) {
+            msgret = MessageI::SendMessage(message);
+        }
+    }
+
+    return ret;
+}
+
 CLASS_REGISTER(RealTimeLoader, "")
+CLASS_REGISTER(SPCRealTimeLoader, "")
+
 
 }
 

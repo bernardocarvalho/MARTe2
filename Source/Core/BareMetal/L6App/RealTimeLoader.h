@@ -98,6 +98,25 @@ private:
     ReferenceContainer rtApps;
 };
 
+
+class DLL_API SPCRealTimeLoader: public RealTimeLoader {
+public:
+    CLASS_REGISTER_DECLARATION()
+
+    /**
+     * @brief Constructor. NOOP.
+     */
+    SPCRealTimeLoader();
+
+    /**
+     * @brief Destructor. NOOP.
+     */
+    virtual ~SPCRealTimeLoader();
+
+    virtual ErrorManagement::ErrorType Configure(StructuredDataI &data, StreamI &configuration);
+};
+
+
 }
 
 /*---------------------------------------------------------------------------*/
