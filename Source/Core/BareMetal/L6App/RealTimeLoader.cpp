@@ -170,6 +170,7 @@ ErrorManagement::ErrorType SPCRealTimeLoader::Configure(StructuredDataI& data, S
         }
         if (msgret.ErrorsCleared()) {
             msgret = MessageI::SendMessage(message);
+            Sleep::Sec(5);
         }
     }
 

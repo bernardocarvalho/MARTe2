@@ -75,6 +75,12 @@ bool UDPLogger::Initialise(StructuredDataI &data) {
     }
     if (ok) {
         ok = udpSocket.Open();
+        if (ok) {
+            REPORT_ERROR(ErrorManagement::Information, "UDP socket opened");
+        }
+        else {
+            REPORT_ERROR(ErrorManagement::ParametersError, "Error opening UDP socket");
+        }
     }
     if (ok) {
         ok = udpSocket.Connect(address.Buffer(), port);
