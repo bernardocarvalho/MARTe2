@@ -233,7 +233,6 @@ bool ConfigurationDatabaseTest::TestMoveRelative_ValidPaths() {
     ok &= cdb.MoveRelative("D.E");
     ok &= cdb.MoveAbsolute("A.B.C");
     ok &= !cdb.MoveAbsolute("..");
-    ok &= cdb.MoveRelative(".D.E");
     ok &= cdb.MoveAbsolute("A.B.C");
     ok &= !cdb.MoveAbsolute("...");
     ok &= cdb.MoveRelative("D.E.");
@@ -262,7 +261,6 @@ bool ConfigurationDatabaseTest::TestMoveRelative_InvalidPaths() {
     ok &= cdb.MoveRelative("D.E");
     ok &= cdb.MoveAbsolute("A.B.C");
     ok &= !cdb.MoveAbsolute("..");
-    ok &= cdb.MoveRelative(".D.E");
     ok &= cdb.MoveAbsolute("A.B.C");
     ok &= !cdb.MoveAbsolute("...");
     ok &= cdb.MoveRelative("D.E.");

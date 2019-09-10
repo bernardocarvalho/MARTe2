@@ -277,6 +277,11 @@ ReferenceContainer    ();
      */
     static void RemoveDomainToken(char8 token);
 
+
+    void SetFather(Reference fatherIn);
+
+    Reference GetFather();
+
 private:
     /**
      * @brief The tokens that identify in the first character of an Object name, that a new object is to be built.
@@ -319,7 +324,7 @@ private:
     /**
      * Binary tree containing indexes
      */
-    BinaryTree<uint32> indexes;
+    BinaryTree<uint32, Fnv1aHashFunction> indexes;
 
     /**
      * Protects multiple access to the internal resources
@@ -330,6 +335,11 @@ private:
      * Timeout
      */
     TimeoutType muxTimeout;
+
+    /**
+     * A reference to the father in the tree
+     */
+    Reference father;
 
 };
 

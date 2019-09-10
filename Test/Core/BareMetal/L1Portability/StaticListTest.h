@@ -183,9 +183,16 @@ public:
      */
     bool TestSquareOperatorInvalidPosition();
 
-
+    /**
+     * @brief Tests the Set function
+     */
     template<elementType value>
     bool TestSet(uint32 positionToSet);
+
+    /**
+     * @brief Tests the Reset function
+     */
+    bool TestReset();
 };
 
 }
@@ -753,7 +760,7 @@ bool StaticListTest<elementType, listAllocationGranularity, demoValues, maxDemoV
         targetList.Add(demoValues[i]);
     }
 
-    elementType toSet=value;
+    elementType toSet = value;
     targetList.Set(positionToSet, toSet);
 
     elementType test;
@@ -761,6 +768,21 @@ bool StaticListTest<elementType, listAllocationGranularity, demoValues, maxDemoV
     return value == test;
 }
 
+template<typename elementType, uint32 listAllocationGranularity, elementType demoValues[], uint32 maxDemoValues>
+bool StaticListTest<elementType, listAllocationGranularity, demoValues, maxDemoValues>::TestReset() {
+    StaticList<elementType, listAllocationGranularity> targetList;
+    //Initializes the target list with the demo values:
+    for (uint32 i = 0; i < maxDemoValues; i++) {
+        targetList.Add(demoValues[i]);
+    }
+
+    bool ret = (targetList.GetSize() == maxDemoValues);
+    if (ret) {
+        targetList.Reset();
+        ret = targetList.GetSize() == 0u;
+    }
+    return ret;
+}
 
 }
 

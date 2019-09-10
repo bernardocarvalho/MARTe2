@@ -45,6 +45,7 @@
 
 namespace MARTe {
 
+
 /**
  * @brief An implementation of StructuredDataI where node paths are identified and separated by dots.
  * @details Paths are constructed by concatenating node names with dots (e.g. A.B.C.D), where D is a leaf
@@ -226,6 +227,10 @@ private:
      */
     bool CreateNodes(const char8 * const path);
 
+
+    struct ConfigurationDatabaseNode{
+
+    };
     /**
      * The current node to where the database is pointing.
      */

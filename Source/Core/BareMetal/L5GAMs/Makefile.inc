@@ -24,7 +24,8 @@
 #
 #############################################################
 
-OBJSX=BrokerI.x \
+OBJSX=ApplicationBuilderI.x\
+    BrokerI.x \
     DataSourceI.x \
     ExecutableI.x \
     GAM.x \
@@ -45,6 +46,7 @@ OBJSX=BrokerI.x \
     MemoryMapSynchronisedOutputBroker.x \
     RealTimeApplication.x \
     RealTimeApplicationConfigurationBuilder.x \
+    RealTimeApplicationLightConfigBuilder.x\
     RealTimeState.x \
     RealTimeThread.x \
     TimingDataSource.x

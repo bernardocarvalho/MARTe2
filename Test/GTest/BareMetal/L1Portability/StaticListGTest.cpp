@@ -33,6 +33,7 @@
 
 #include "StaticListTest.h"
 #include "GeneralDefinitions.h"
+#include "StreamString.h"
 #include "gtest/gtest.h"
 
 using namespace MARTe;
@@ -174,5 +175,13 @@ TEST(BareMetal_L1Portability_StaticListGTest,TestSquareOperatorInvalidPosition) 
 
 TEST(BareMetal_L1Portability_StaticListGTest,TestSet) {
     StaticListTest<uint32, 10, demoValues, sizeof(demoValues)> tester;
-    ASSERT_TRUE(tester.TestSet<5u>(2u));
+    ASSERT_TRUE(tester.TestSet < 5u > (2u));
+}
+
+TEST(BareMetal_L1Portability_StaticListGTest,TestReset) {
+    StreamString demoStrings[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+    StaticListTest<uint32, 10, demoValues, sizeof(demoValues)> tester;
+
+    //StaticListTest<StreamString, 10, demoStrings, 10u> tester;
+    ASSERT_TRUE(tester.TestReset());
 }

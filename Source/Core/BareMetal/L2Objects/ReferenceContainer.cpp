@@ -40,7 +40,6 @@
 #include "StringHelper.h"
 #include "ReferenceContainerFilterObjectName.h"
 #include <typeinfo>
-#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -141,7 +140,7 @@ bool ReferenceContainer::Insert(Reference ref,
                 indexes.Insert(ref->GetName(), static_cast<uint32>(position));
             }
         }
-        else{
+        else {
             REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "ReferenceContainer: Invalid Reference");
         }
     }
@@ -278,7 +277,14 @@ void ReferenceContainer::Find(ReferenceContainer &result,
                             if (filter.IsRemove()) {
                                 //Only delete the exact node index
                                 if (list.Remove(index)) {
+
                                     if (indexes.Remove(currentNodeReference->GetName())) {
+                                        for (uint32 k = 0u; k < indexes.GetSize(); k++) {
+                                            //adjust the index
+                                            if (indexes[k] > static_cast<uint32>(index)) {
+                                                indexes[k]--;
+                                            }
+                                        }
                                         //Given that the index will be incremented, but we have removed an element, the index should stay in the same position
                                         if (!filter.IsReverse()) {
                                             index--;
@@ -319,8 +325,8 @@ void ReferenceContainer::Find(ReferenceContainer &result,
                                 //Nothing found. Remove the stored path (which led to nowhere).
                                 if (filter.IsStorePath()) {
                                     Reference last = result.Get(sizeBeforeBranching - 1u);
-                                    if (result.indexes.Remove(last->GetName())) {
-                                        result.list.Remove(sizeBeforeBranching - 1u);
+                                    if (result.list.Remove(sizeBeforeBranching - 1u)) {
+                                        result.indexes.Remove(last->GetName());
                                     }
                                 }
                             }
@@ -352,16 +358,44 @@ void ReferenceContainer::Find(ReferenceContainer &result,
 Reference ReferenceContainer::Find(const char8 * const path,
                                    const bool recursive) {
     Reference ret;
-    uint32 mode = ReferenceContainerFilterMode::SHALLOW;
-    if (recursive) {
-        mode = ReferenceContainerFilterMode::RECURSIVE;
+    //find the first name
+    char8 token[1024] = { '\0' };
+
+    const char8* toTokenize = path;
+    const char8* next = StringHelper::TokenizeByChars(toTokenize, ".", token);
+
+    //more than one
+    bool canContinue = (StringHelper::Length(next) > 0u);
+    if (StringHelper::Length(token) > 0u) {
+        uint32 index;
+        //binary search
+        if (indexes.Search(token, index)) {
+            if (canContinue) {
+                ReferenceT<ReferenceContainer> container = Get(indexes[index]);
+                if (container.IsValid()) {
+                    //continue only for the path
+                    ret = container->Find(next, false);
+                }
+            }
+            else {
+                ret = Get(indexes[index]);
+            }
+        }
+        //not found ... keep searching if recursive
+        else {
+            if (!canContinue) {
+                if (recursive) {
+                    for (uint32 i = 0u; (i < Size()) && (!ret.IsValid()); i++) {
+                        ReferenceT<ReferenceContainer> container = Get(i);
+                        if (container.IsValid()) {
+                            ret = container->Find(token, true);
+                        }
+                    }
+                }
+            }
+        }
     }
-    ReferenceContainerFilterObjectName filter(1, mode, path);
-    ReferenceContainer resultSingle;
-    Find(resultSingle, filter);
-    if (resultSingle.Size() > 0u) {
-        ret = resultSingle.Get(resultSingle.Size() - 1u);
-    }
+
     return ret;
 }
 
@@ -540,6 +574,14 @@ void ReferenceContainer::RemoveDomainToken(const char8 token) {
 
 bool ReferenceContainer::IsDomainToken(const char8 token) {
     return IsToken(&domainTokensList[0], token);
+}
+
+void ReferenceContainer::SetFather(Reference fatherIn) {
+    father = fatherIn;
+}
+
+Reference ReferenceContainer::GetFather() {
+    return father;
 }
 
 CLASS_REGISTER(ReferenceContainer, "1.0")

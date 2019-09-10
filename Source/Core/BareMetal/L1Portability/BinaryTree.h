@@ -27,7 +27,7 @@
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
-
+#include "stdio.h"
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
@@ -88,7 +88,7 @@ public:
      * @param[in] position the position of the element in the list
      * @return the value of the element at \a position  within the list
      */
-    T GetValue(const uint32 position);
+    T& operator[](const uint32 position);
 
     /**
      * @brief Retrieves the required element value.
@@ -141,7 +141,9 @@ uint32 BinaryTree<T, HashObject>::Insert(const char8 * const id,
                                          const T value) {
     uint32 key = hashFun.Compute(id, 0u);
     uint32 index = 0u;
-    BinarySearch(key, index);
+    if(BinarySearch(key, index)){
+        //TODO
+    }
 
     bool ret = myKeyList.Insert(index, key);
     if (ret) {
@@ -170,12 +172,11 @@ bool BinaryTree<T, HashObject>::Search(const char8 * const id,
                                        uint32 &index) {
 
     uint32 key = hashFun.Compute(id, 0u);
-
     return BinarySearch(key, index);
 }
 
 template<typename T, typename HashObject>
-T BinaryTree<T, HashObject>::GetValue(const uint32 position) {
+T& BinaryTree<T, HashObject>::operator[](const uint32 position) {
     return myList[position];
 }
 
@@ -208,6 +209,7 @@ uint32 BinaryTree<T, HashObject>::GetSize() {
 template<typename T, typename HashObject>
 bool BinaryTree<T, HashObject>::BinarySearch(const uint32 key,
                                              uint32 &index) {
+
 
     uint32 range_1 = myList.GetSize();
     uint32 range = (range_1 / 2u);

@@ -43,6 +43,7 @@ OBJSX=  BrokerIGTest.x\
         MemoryMapSynchronisedOutputBrokerGTest.x\
         RealTimeApplicationGTest.x\
         RealTimeApplicationConfigurationBuilderGTest.x\
+        RealTimeApplicationLightConfigBuilderGTest.x\
         RealTimeStateGTest.x\
         RealTimeThreadGTest.x\
         TimingDataSourceGTest.x

@@ -70,6 +70,8 @@ public:
                  const char8 *id,
                  T result);
 
+    bool TestReset(BinaryTree<T, HashFunction> &test);
+
 };
 
 }
@@ -121,7 +123,7 @@ bool BinaryTreeTest<T, HashFunction>::TestGetValue(BinaryTree<T, HashFunction> &
 
     uint32 index = 0u;
     test.Search(id, index);
-    return test.GetValue(index) == result;
+    return test[index] == result;
 }
 template<typename T, typename HashFunction>
 bool BinaryTreeTest<T, HashFunction>::TestSquareOperator(BinaryTree<T, HashFunction> &test,
@@ -136,6 +138,12 @@ bool BinaryTreeTest<T, HashFunction>::TestSet(BinaryTree<T, HashFunction> &test,
                                               T result) {
     test[id] = result;
     return (test[id] == result);
+}
+
+template<typename T, typename HashFunction>
+bool BinaryTreeTest<T, HashFunction>::TestReset(BinaryTree<T, HashFunction> &test) {
+    test.Reset();
+    return (test.GetSize() == 0u);
 }
 
 }

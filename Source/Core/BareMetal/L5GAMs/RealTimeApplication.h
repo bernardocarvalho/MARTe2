@@ -173,7 +173,7 @@ public:
      * @return true if all the RealTimeApplication could be successfully configured. When this function returns true it
      *  guarantees that all the MARTe components are ready to be used (e.g. the Scheduler may start to work and execute the GAMs).
      */
-    bool ConfigureApplication();
+    bool ConfigureApplication(const char8* const builderName="RealTimeApplicationLightConfigBuilder");
 
     /**
      * @brief Configures a RealTimeApplication starting from an existing database.
@@ -185,7 +185,7 @@ public:
      *  guarantees that all the MARTe components are ready to be used (e.g. the Scheduler may start to work and execute the GAMs).
      */
     bool ConfigureApplication(ConfigurationDatabase &functionsDatabaseIn,
-            ConfigurationDatabase &dataDatabaseIn);
+            ConfigurationDatabase &dataDatabaseIn,const char8* const builderName="RealTimeApplicationLightConfigBuilder");
 
     /**
      * @brief Calls PrepareNextState on all the StatefulI components that belong to this application.

@@ -199,13 +199,15 @@ ReferenceContainerFilterObjectName::~ReferenceContainerFilterObjectName() {
 }
 
 bool ReferenceContainerFilterObjectName::TestPath(ReferenceContainer &previouslyFound) const {
-    bool found = (previouslyFound.Size() == (addressNumberNodes - 1u));
-    int32 i;
-    for (i = (static_cast<int32>(previouslyFound.Size()) - 1); (found) && (i >= 0); i--) {
-        found = false;
-        if (previouslyFound.Get(static_cast<uint32>(i)).IsValid()) {
-            if (previouslyFound.Get(static_cast<uint32>(i))->GetName() != NULL) {
-                found = (StringHelper::Compare(previouslyFound.Get(static_cast<uint32>(i))->GetName(), addressToSearch[i]) == 0);
+    bool found = true;
+
+    if (previouslyFound.Size() > 0u) {
+        for (uint32 i = 0u; (i < previouslyFound.Size()) && (found); i++) {
+            found = false;
+            if (previouslyFound.Get(static_cast<uint32>(i)).IsValid()) {
+                if (previouslyFound.Get(static_cast<uint32>(i))->GetName() != NULL) {
+                    found = (StringHelper::Compare(previouslyFound.Get(static_cast<uint32>(i))->GetName(), addressToSearch[i]) == 0);
+                }
             }
         }
     }
@@ -216,11 +218,68 @@ bool ReferenceContainerFilterObjectName::Test(ReferenceContainer &previouslyFoun
                                               Reference const &referenceToTest) {
     bool found = (addressNumberNodes > 0u);
 
+    if (found) {
+        found = referenceToTest.IsValid();
+    }
+    if (found) {
+        found = (referenceToTest->GetName() != NULL);
+    }
+
+    if (found) {
+        //if addressNumberNodes==1 then just compare with addressToSearch[0]
+        uint32 index = (addressNumberNodes > 1u) ? (previouslyFound.Size()) : (0u);
+
+        found = (index < addressNumberNodes);
+        if (found) {
+            found = (StringHelper::Compare(referenceToTest->GetName(), addressToSearch[index]) == 0);
+        }
+
+        if (found) {
+            if (addressNumberNodes > 1u) {
+                /*lint -e{9007} no side-effects on TestPath*/
+                found = (TestPath(previouslyFound));
+            }
+        }
+        bool pathOk = found;
+
+        if (found) {
+            if (addressNumberNodes > 1u) {
+                found = (previouslyFound.Size() == (addressNumberNodes - 1u));
+            }
+        }
+
+        //remove the recursive mode if the path is wrong otherwise the Find function
+        //will continue deep.
+        if (addressNumberNodes > 1u) {
+
+            if (pathOk) {
+                SetMode(GetMode() | ReferenceContainerFilterMode::PATH);
+            }
+            else {
+                uint32 mode = GetMode();
+                mode &= ~(ReferenceContainerFilterMode::RECURSIVE | ReferenceContainerFilterMode::PATH);
+                SetMode(mode);
+            }
+        }
+    }
+
+    if (found) {
+        IncrementFound();
+    }
+    return found;
+
+#if 0
+
+    bool found = (addressNumberNodes > 0u);
+
     if (addressNumberNodes > 1u) {
         /*lint -e{9007} no side-effects on TestPath*/
         found = (found && TestPath(previouslyFound));
     }
 
+    if (found) {
+        found = (previouslyFound.Size() == (addressNumberNodes - 1u));
+    }
     //Check if this is the last node and if it matches the last part of the addressToSearch
     if (found && referenceToTest.IsValid()) {
         if (referenceToTest->GetName() != NULL) {
@@ -236,7 +295,7 @@ bool ReferenceContainerFilterObjectName::Test(ReferenceContainer &previouslyFoun
     if (found) {
         IncrementFound();
     }
-    return found;
+#endif
 }
 
 }

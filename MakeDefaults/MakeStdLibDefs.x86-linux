@@ -61,9 +61,9 @@ DEBUG = -g -ggdb
 OPTIM = 
 INCLUDE =
 LFLAGS = -Wl,--no-as-needed -fPIC
-CFLAGS = -fPIC -Wall -Wall -std=c++98 -Wno-invalid-offsetof
+CFLAGS = -fPIC -Wall -Wall -std=c++98 -Wno-invalid-offsetof -std=c++11 -fpermissive
 #-Werror
-CPPFLAGS = -fPIC -frtti -Wall -std=c++98 -Wno-invalid-offsetof
+CPPFLAGS = -fPIC -frtti -Wall -std=c++98 -Wno-invalid-offsetof -std=c++11 -fpermissive
 #-Werror
 CFLAGSPEC= -DARCHITECTURE=$(ARCHITECTURE) -DENVIRONMENT=$(ENVIRONMENT) -DUSE_PTHREAD -pthread
 LIBRARIES =  -lm -lnsl -lpthread -lrt -lncurses -ldl

@@ -53,7 +53,8 @@ namespace MARTe {
 /*---------------------------------------------------------------------------*/
 
 RealTimeApplication::RealTimeApplication() :
-        ReferenceContainer(), MessageI() {
+        ReferenceContainer(),
+        MessageI() {
     filter = ReferenceT<RegisteredMethodsMessageFilter>(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     filter->SetDestination(this);
     ErrorManagement::ErrorType ret = MessageI::InstallMessageFilter(filter);
@@ -61,7 +62,7 @@ RealTimeApplication::RealTimeApplication() :
         REPORT_ERROR(ErrorManagement::FatalError, "Failed to install message filters");
     }
     defaultDataSourceName = "";
-    index=1u;
+    index = 1u;
 
 }
 
@@ -190,32 +191,34 @@ bool RealTimeApplication::Initialise(StructuredDataI & data) {
 
 }
 
-bool RealTimeApplication::ConfigureApplication() {
-    RealTimeApplicationConfigurationBuilder rtAppBuilder(*this, defaultDataSourceName.Buffer());
-    REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder.ConfigureAfterInitialisation()");
-    bool ret = rtAppBuilder.ConfigureAfterInitialisation();
+bool RealTimeApplication::ConfigureApplication(const char8* const builderName) {
+    ReferenceT<ApplicationBuilderI> rtAppBuilder(builderName);
+    rtAppBuilder->SetParameters(*this, defaultDataSourceName.Buffer());
+   // RealTimeApplicationConfigurationBuilder rtAppBuilder(*this, defaultDataSourceName.Buffer());
+    REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder->ConfigureAfterInitialisation()");
+    bool ret = rtAppBuilder->ConfigureAfterInitialisation();
     if (!ret) {
-        REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder.ConfigureAfterInitialisation()");
+        REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder->ConfigureAfterInitialisation()");
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder.PostConfigureDataSources()");
-        ret = rtAppBuilder.PostConfigureDataSources();
+        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder->PostConfigureDataSources()");
+        ret = rtAppBuilder->PostConfigureDataSources();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder.PostConfigureDataSources()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder->PostConfigureDataSources()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder.PostConfigureFunctions()");
-        ret = rtAppBuilder.PostConfigureFunctions();
+        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder->PostConfigureFunctions()");
+        ret = rtAppBuilder->PostConfigureFunctions();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder.PostConfigureFunctions()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder->PostConfigureFunctions()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder.Copy()");
-        ret = rtAppBuilder.Copy(functionsDatabase, dataSourcesDatabase);
+        REPORT_ERROR(ErrorManagement::Information, "Going to rtAppBuilder->Copy()");
+        ret = rtAppBuilder->Copy(functionsDatabase, dataSourcesDatabase);
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder.Copy()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to rtAppBuilder->Copy()");
         }
     }
     if (ret) {
@@ -260,43 +263,47 @@ bool RealTimeApplication::ConfigureApplication() {
     return ret;
 }
 
-bool RealTimeApplication::ConfigureApplication(ConfigurationDatabase &functionsDatabaseIn, ConfigurationDatabase &dataDatabaseIn) {
+bool RealTimeApplication::ConfigureApplication(ConfigurationDatabase &functionsDatabaseIn,
+                                               ConfigurationDatabase &dataDatabaseIn,
+                                               const char8* const builderName) {
 
-    RealTimeApplicationConfigurationBuilder configuration(*this, "DDB1");
-    bool ret = configuration.Set(functionsDatabaseIn, dataDatabaseIn);
+    ReferenceT<ApplicationBuilderI> configuration(builderName);
+    configuration->SetParameters(*this, defaultDataSourceName.Buffer());
+    //RealTimeApplicationConfigurationBuilder configuration(*this, "DDB1");
+    bool ret = configuration->Set(functionsDatabaseIn, dataDatabaseIn);
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to configuration.AssignBrokersToFunctions()");
-        ret = configuration.AssignBrokersToFunctions();
+        REPORT_ERROR(ErrorManagement::Information, "Going to configuration->AssignBrokersToFunctions()");
+        ret = configuration->AssignBrokersToFunctions();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration.AssignBrokersToFunctions()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration->AssignBrokersToFunctions()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to configuration.Copy()");
-        ret = configuration.Copy(functionsDatabase, dataSourcesDatabase);
+        REPORT_ERROR(ErrorManagement::Information, "Going to configuration->Copy()");
+        ret = configuration->Copy(functionsDatabase, dataSourcesDatabase);
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration.Copy()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration->Copy()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to configuration.PostConfigureDataSources()");
-        ret = configuration.PostConfigureDataSources();
+        REPORT_ERROR(ErrorManagement::Information, "Going to configuration->PostConfigureDataSources()");
+        ret = configuration->PostConfigureDataSources();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration.PostConfigureDataSources()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration->PostConfigureDataSources()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to configuration.PostConfigureFunctions()");
-        ret = configuration.PostConfigureFunctions();
+        REPORT_ERROR(ErrorManagement::Information, "Going to configuration->PostConfigureFunctions()");
+        ret = configuration->PostConfigureFunctions();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration.PostConfigureFunctions()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration->PostConfigureFunctions()");
         }
     }
     if (ret) {
-        REPORT_ERROR(ErrorManagement::Information, "Going to configuration.ConfigureThreads()");
-        ret = configuration.ConfigureThreads();
+        REPORT_ERROR(ErrorManagement::Information, "Going to configuration->ConfigureThreads()");
+        ret = configuration->ConfigureThreads();
         if (!ret) {
-            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration.ConfigureThreads()");
+            REPORT_ERROR(ErrorManagement::ParametersError, "Failed to configuration->ConfigureThreads()");
         }
     }
     if (ret) {

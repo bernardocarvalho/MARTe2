@@ -47,16 +47,29 @@
 namespace MARTe {
 
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-extern bool StringToFloatGeneric(const char8 * const input, float32 * const number, const uint32 destBitSize);
+extern bool StringToFloatGeneric(const char8 * const input,
+                                 float32 * const number,
+                                 const uint32 destBitSize);
 
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-extern bool StringToIntegerGeneric(const char8* const source, uint8 * const dest, const uint32 destBitSize, const bool isSigned);
+extern bool StringToIntegerGeneric(const char8* const source,
+                                   uint8 * const dest,
+                                   const uint32 destBitSize,
+                                   const bool isSigned);
 
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-extern bool IntegerToFloatGeneric(const uint8 * const source, const uint32 sourceBitSize, float32 * const dest, const uint32 destBitSize, const bool isSigned);
+extern bool IntegerToFloatGeneric(const uint8 * const source,
+                                  const uint32 sourceBitSize,
+                                  float32 * const dest,
+                                  const uint32 destBitSize,
+                                  const bool isSigned);
 
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-extern bool FloatToIntegerGeneric(const float32 * const source, const uint32 sourceBitSize, uint8 * const dest, const uint32 destBitSize, const bool isSigned);
+extern bool FloatToIntegerGeneric(const float32 * const source,
+                                  const uint32 sourceBitSize,
+                                  uint8 * const dest,
+                                  const uint32 destBitSize,
+                                  const bool isSigned);
 
 /**
  * @brief Saturate the number in input to the maximum or minimum 32-bit float number.
@@ -65,7 +78,8 @@ extern bool FloatToIntegerGeneric(const float32 * const source, const uint32 sou
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
 template<typename FloatType>
-static bool MinMaxFloat(const bool isPositive, FloatType &number) {
+static bool MinMaxFloat(const bool isPositive,
+                        FloatType &number) {
 
     bool ret = false;
     if (isPositive) {
@@ -97,7 +111,8 @@ static bool MinMaxFloat(const bool isPositive, FloatType &number) {
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
 template<typename FloatType1, typename FloatType2>
-static bool FloatToFloat(const FloatType1 source, FloatType2 &destination) {
+static bool FloatToFloat(const FloatType1 source,
+                         FloatType2 &destination) {
 
     destination = static_cast<FloatType2>(0.0);
 
@@ -136,7 +151,8 @@ static bool FloatToFloat(const FloatType1 source, FloatType2 &destination) {
  *   source.GetTypeDescriptor() == UnsignedInteger;
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool IntegerToType(const AnyType &destination, const AnyType &source) {
+static bool IntegerToType(const AnyType &destination,
+                          const AnyType &source) {
 
     void* destinationPointer = destination.GetDataPointer();
     const TypeDescriptor destinationDescriptor = destination.GetTypeDescriptor();
@@ -223,7 +239,7 @@ static bool IntegerToType(const AnyType &destination, const AnyType &source) {
                 ret = BitSetToBitSet(destinationInput, destShift, static_cast<uint8>(destinationDescriptor.numberOfBits), false, sourceInput, sourceShift,
                                      static_cast<uint8>(sourceDescriptor.numberOfBits), false);
             }
-            else {//NOOP
+            else { //NOOP
             }
         }
         else if (destinationDescriptor.type == Float) {
@@ -238,10 +254,10 @@ static bool IntegerToType(const AnyType &destination, const AnyType &source) {
             else if (sourceDescriptor.type == Pointer) {
                 ret = IntegerToFloatGeneric(sourceInput, source.GetBitSize(), destinationInput, destination.GetBitSize(), false);
             }
-            else {//NOOP
+            else { //NOOP
             }
         }
-        else {//NOOP
+        else { //NOOP
         }
     }
     return ret;
@@ -256,7 +272,8 @@ static bool IntegerToType(const AnyType &destination, const AnyType &source) {
  *   source.GetTypeDescriptor() == Float;
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool FloatToType(const AnyType &destination, const AnyType &source) {
+static bool FloatToType(const AnyType &destination,
+                        const AnyType &source) {
 
     void* destinationPointer = destination.GetDataPointer();
     const TypeDescriptor destinationDescriptor = destination.GetTypeDescriptor();
@@ -302,12 +319,12 @@ static bool FloatToType(const AnyType &destination, const AnyType &source) {
             }
         }
         if (destinationDescriptor.type == SignedInteger) {
-            ret = FloatToIntegerGeneric(reinterpret_cast<float32*>(sourcePointer), static_cast<uint8>(sourceDescriptor.numberOfBits), reinterpret_cast<uint8*>(destinationPointer),
-                                        destination.GetBitSize(), true);
+            ret = FloatToIntegerGeneric(reinterpret_cast<float32*>(sourcePointer), static_cast<uint8>(sourceDescriptor.numberOfBits),
+                                        reinterpret_cast<uint8*>(destinationPointer), destination.GetBitSize(), true);
         }
         if (destinationDescriptor.type == UnsignedInteger) {
-            ret = FloatToIntegerGeneric(reinterpret_cast<float32*>(sourcePointer), static_cast<uint8>(sourceDescriptor.numberOfBits), reinterpret_cast<uint8*>(destinationPointer),
-                                        destination.GetBitSize(), false);
+            ret = FloatToIntegerGeneric(reinterpret_cast<float32*>(sourcePointer), static_cast<uint8>(sourceDescriptor.numberOfBits),
+                                        reinterpret_cast<uint8*>(destinationPointer), destination.GetBitSize(), false);
         }
         if (destinationDescriptor.type == Float) {
             if (destination.GetBitSize() == 32u) {
@@ -335,7 +352,8 @@ static bool FloatToType(const AnyType &destination, const AnyType &source) {
  *   source.GetTypeDescriptor() == CArray;
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool StringToType(const AnyType &destination, const AnyType &source) {
+static bool StringToType(const AnyType &destination,
+                         const AnyType &source) {
 
     void* destinationPointer = destination.GetDataPointer();
     const TypeDescriptor destinationDescriptor = destination.GetTypeDescriptor();
@@ -388,7 +406,7 @@ static bool StringToType(const AnyType &destination, const AnyType &source) {
         else if (destinationDescriptor.type == Float) {
             ret = StringToFloatGeneric(token, (reinterpret_cast<float32*>(destinationPointer)), destination.GetBitSize());
         }
-        else {//NOOP
+        else { //NOOP
         }
     }
     return ret;
@@ -402,7 +420,8 @@ static bool StringToType(const AnyType &destination, const AnyType &source) {
  * @pre
  *   The objects represented by \a source and \a destination must be introspectable and registered into ClassRegistryDatabase.
  */
-static bool ObjectToObject(const AnyType &destination, const AnyType &source) {
+static bool ObjectToObject(const AnyType &destination,
+                           const AnyType &source) {
 
     bool ret = false;
     const TypeDescriptor sourceDescriptor = source.GetTypeDescriptor();
@@ -493,7 +512,8 @@ static bool ObjectToObject(const AnyType &destination, const AnyType &source) {
  * @pre
  *   At least the object represented by \a destination must be introspectable.
  */
-static bool StructuredDataToObject(const AnyType &destination, const AnyType &source) {
+static bool StructuredDataToObject(const AnyType &destination,
+                                   const AnyType &source) {
 
     bool ret = false;
     StructuredDataI* sourcePointer = reinterpret_cast<StructuredDataI*>(source.GetDataPointer());
@@ -618,7 +638,8 @@ static bool StructuredDataToObject(const AnyType &destination, const AnyType &so
  * @pre
  *   The object represented by source must be introspectable.
  */
-static bool ObjectToStructuredData(const AnyType &destination, const AnyType &source) {
+static bool ObjectToStructuredData(const AnyType &destination,
+                                   const AnyType &source) {
 
     bool ret = false;
     const TypeDescriptor sourceDescriptor = source.GetTypeDescriptor();
@@ -691,7 +712,8 @@ static bool ObjectToStructuredData(const AnyType &destination, const AnyType &so
  * @param[in] source is the input.
  * @return true if the conversion succeeds, false otherwise.
  */
-static bool StructuredDataToStructuredData(const AnyType &destination, const AnyType &source) {
+static bool StructuredDataToStructuredData(const AnyType &destination,
+                                           const AnyType &source) {
     StructuredDataI* sourcePointer = reinterpret_cast<StructuredDataI*>(source.GetDataPointer());
     StructuredDataI* destinationPointer = reinterpret_cast<StructuredDataI*>(destination.GetDataPointer());
 
@@ -705,7 +727,8 @@ static bool StructuredDataToStructuredData(const AnyType &destination, const Any
  * @return true if the conversion succeeds, false otherwise.
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool ScalarBasicTypeConvert(const AnyType &destination, const AnyType &source) {
+static bool ScalarBasicTypeConvert(const AnyType &destination,
+                                   const AnyType &source) {
 
     void* destinationPointer = destination.GetDataPointer();
     const TypeDescriptor destinationDescriptor = destination.GetTypeDescriptor();
@@ -727,7 +750,8 @@ static bool ScalarBasicTypeConvert(const AnyType &destination, const AnyType &so
             ret = StructuredDataToStructuredData(destination, source);
         }
         else {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "ScalarBasicTypeConvert: No known conversion StructuredDataI to basic type. Use StructuredDataI::Read(*)");
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError,
+                                "ScalarBasicTypeConvert: No known conversion StructuredDataI to basic type. Use StructuredDataI::Read(*)");
         }
     }
 
@@ -738,7 +762,8 @@ static bool ScalarBasicTypeConvert(const AnyType &destination, const AnyType &so
             ret = ObjectToStructuredData(destination, source);
         }
         else {
-            REPORT_ERROR_STATIC(ErrorManagement::FatalError, "ScalarBasicTypeConvert: No known conversion from basic type to StructuredDataI. Use StructuredDataI::Write(*)");
+            REPORT_ERROR_STATIC(ErrorManagement::FatalError,
+                                "ScalarBasicTypeConvert: No known conversion from basic type to StructuredDataI. Use StructuredDataI::Write(*)");
         }
     }
     else if ((isSourceStructured) && (isDestinationStructured)) {
@@ -758,8 +783,16 @@ static bool ScalarBasicTypeConvert(const AnyType &destination, const AnyType &so
             else if (sourceDescriptor.type == BT_CCString) {
                 ret = StringHelper::Copy(reinterpret_cast<char8 *>(destinationPointer), reinterpret_cast<const char8 *>(sourcePointer));
             }
+            else if (sourceDescriptor.type == CArray) {
+                uint32 copySize = source.GetByteSize();
+                if (source.GetNumberOfDimensions() > 0u) {
+                    copySize *= source.GetNumberOfElements(0u);
+                }
+                ret = MemoryOperationsHelper::Copy(destinationPointer, sourcePointer, copySize);
+            }
             else if (sourceDescriptor.type == Pointer) {
-                REPORT_ERROR_STATIC(ErrorManagement::UnsupportedFeature, "ScalarBasicTypeConvert: Conversion to pointer unsupported. Try to cast the pointer to uintp");
+                REPORT_ERROR_STATIC(ErrorManagement::UnsupportedFeature,
+                                    "ScalarBasicTypeConvert: Conversion to pointer unsupported. Try to cast the pointer to uintp");
             }
             else {
                 uint32 copySize = source.GetByteSize();
@@ -801,7 +834,8 @@ static bool ScalarBasicTypeConvert(const AnyType &destination, const AnyType &so
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool VectorBasicTypeConvert(const AnyType &destination, const AnyType &source) {
+static bool VectorBasicTypeConvert(const AnyType &destination,
+                                   const AnyType &source) {
     bool ok = true;
     uint32 numberOfElements = source.GetNumberOfElements(0u);
     //special case of char8[]
@@ -854,7 +888,7 @@ static bool VectorBasicTypeConvert(const AnyType &destination, const AnyType &so
             elementSource.SetNumberOfDimensions(1u);
             elementSource.SetNumberOfElements(0u, source.GetNumberOfElements(0u));
         }
-        else {//NOOP
+        else { //NOOP
         }
 
         char8 *newDestinationPointer = &destinationArray[destinationIndex];
@@ -870,7 +904,7 @@ static bool VectorBasicTypeConvert(const AnyType &destination, const AnyType &so
             elementDestination.SetNumberOfDimensions(1u);
             elementDestination.SetNumberOfElements(0u, destination.GetNumberOfElements(0u));
         }
-        else {//NOOP
+        else { //NOOP
         }
 
         if (!ScalarBasicTypeConvert(elementDestination, elementSource)) {
@@ -893,7 +927,8 @@ static bool VectorBasicTypeConvert(const AnyType &destination, const AnyType &so
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool StaticToStaticMatrix(const AnyType &destination, const AnyType &source) {
+static bool StaticToStaticMatrix(const AnyType &destination,
+                                 const AnyType &source) {
 
     uint32 numberOfRows = destination.GetNumberOfElements(1u);
     uint32 numberOfColumns = destination.GetNumberOfElements(0u);
@@ -964,7 +999,8 @@ static bool StaticToStaticMatrix(const AnyType &destination, const AnyType &sour
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool StaticToHeapMatrix(const AnyType &destination, const AnyType &source) {
+static bool StaticToHeapMatrix(const AnyType &destination,
+                               const AnyType &source) {
     uint32 numberOfRows = destination.GetNumberOfElements(1u);
     uint32 numberOfColumns = destination.GetNumberOfElements(0u);
     TypeDescriptor sourceDescriptor = source.GetTypeDescriptor();
@@ -1026,7 +1062,8 @@ static bool StaticToHeapMatrix(const AnyType &destination, const AnyType &source
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool HeapToStaticMatrix(const AnyType &destination, const AnyType &source) {
+static bool HeapToStaticMatrix(const AnyType &destination,
+                               const AnyType &source) {
     uint32 numberOfRows = destination.GetNumberOfElements(1u);
     uint32 numberOfColumns = destination.GetNumberOfElements(0u);
     TypeDescriptor sourceDescriptor = source.GetTypeDescriptor();
@@ -1076,7 +1113,8 @@ static bool HeapToStaticMatrix(const AnyType &destination, const AnyType &source
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool HeapToHeapMatrix(const AnyType &destination, const AnyType &source) {
+static bool HeapToHeapMatrix(const AnyType &destination,
+                             const AnyType &source) {
     uint32 numberOfRows = destination.GetNumberOfElements(1u);
     uint32 numberOfColumns = destination.GetNumberOfElements(0u);
     TypeDescriptor sourceDescriptor = source.GetTypeDescriptor();
@@ -1131,7 +1169,8 @@ static bool HeapToHeapMatrix(const AnyType &destination, const AnyType &source) 
  *   source.GetNumberOfElements([0:2]) == destination.GetNumberOfElements([0:2]);
  */
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
-static bool MatrixBasicTypeConvert(const AnyType &destination, const AnyType &source) {
+static bool MatrixBasicTypeConvert(const AnyType &destination,
+                                   const AnyType &source) {
 
     bool isSourceStatic = source.IsStaticDeclared();
     bool isDestinationStatic = destination.IsStaticDeclared();
@@ -1153,7 +1192,7 @@ static bool MatrixBasicTypeConvert(const AnyType &destination, const AnyType &so
     else if ((!isSourceStatic) && (!isDestinationStatic)) {
         ok = HeapToHeapMatrix(destination, source);
     }
-    else {//NOOP
+    else { //NOOP
     }
     return ok;
 }
@@ -1165,7 +1204,8 @@ static bool MatrixBasicTypeConvert(const AnyType &destination, const AnyType &so
 
 namespace MARTe {
 
-bool TypeConvert(const AnyType &destination, const AnyType &source) {
+bool TypeConvert(const AnyType &destination,
+                 const AnyType &source) {
 
     bool ok = true;
     if (static_cast<bool>(destination.GetTypeDescriptor().isConstant)) {
@@ -1243,7 +1283,7 @@ bool TypeConvert(const AnyType &destination, const AnyType &source) {
             else if (sourceNumberOfDimensions == 2u) {
                 ok = MatrixBasicTypeConvert(destination, source);
             }
-            else {//NOOP
+            else {        //NOOP
             }
         }
     }
