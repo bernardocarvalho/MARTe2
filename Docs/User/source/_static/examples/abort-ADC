@@ -1,0 +1,6 @@
+#!/bin/bash
+
+(cd ~/PROJECTS/ACQ400/HAPI/acq400_hapi/user_apps/acq400;
+ STATUSMONITOR_TRACE=0 ./acq400_abort.py acq2106_076
+)
+

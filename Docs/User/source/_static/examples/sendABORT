@@ -1,0 +1,1 @@
+echo -n "Class = Message Destination = StateMachine Mode = ExpectsReply Function = ABORT" | nc 127.0.0.1 24680

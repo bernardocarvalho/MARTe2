@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# 7.5 secs at 10kHz
+POST=${POST:-75000}
+let TLEN="$POST*120/100"
+
+(cd ~/PROJECTS/ACQ400/HAPI/acq400_hapi/user_apps/acq400;
+ STATUSMONITOR_TRACE=0 ./acq400_prepshot.py --transient="PRE=0 POST=$TLEN" acq2106_076
+)
+
