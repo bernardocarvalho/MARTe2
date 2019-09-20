@@ -1,2 +1,2 @@
 #taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/AFHBA404-expcode1005-full-tester-sm.cfg   -m ShotManager:Start
-taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/AFHBA404-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start
+taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/AFHBA404-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start 
