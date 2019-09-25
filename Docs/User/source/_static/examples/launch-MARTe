@@ -1,5 +1,6 @@
-#taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/Timer-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start
-#taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/AFHBA404-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start 
-#taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/AFHBA404-expcode1005-noDAC-tester-sm-reprocess.cfg   -m ShotManager:Start 
-#taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/demo-53600-reprocess.cfg   -m ShotManager:Start 
-taskset 0x01 /home/dt100/MARTe2-examples/MARTeApp.sh -l SPCRealTimeLoader -f /home/dt100/MARTe2-examples/Configurations/demo-63495-reprocess.cfg   -m ShotManager:Start 
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/Timer-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/AFHBA404-expcode1005-full-tester-sm-reprocess.cfg   -m ShotManager:Start 
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/AFHBA404-expcode1005-full-tester-sm.cfg   -m ShotManager:Start 
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/AFHBA404-expcode1005-noDAC-tester-sm-reprocess.cfg   -m ShotManager:Start 
+taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/demo-53600-reprocess.cfg   -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/demo-63495-reprocess.cfg   -m ShotManager:Start 
