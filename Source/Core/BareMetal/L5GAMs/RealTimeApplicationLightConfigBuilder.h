@@ -408,11 +408,6 @@ public:
      */
     bool ResolveStatesFromConfiguration();
 
-    /**
-     * @brief Checks that every GAM has been called in at least one thread.
-     * @return true if every GAM has been called in at least one thread.
-     */
-    bool VerifyStates();
 
     /**
      * @brief For every signal in every DataSource set the Consumer and Producer Functions.
@@ -815,16 +810,6 @@ private:
     bool AssignBrokersToSignals(const SignalDirection direction,
                                 ReferenceT<DataSourceI> dataSource);
 
-    /**
-     * @brief Finds a signal with the name \a signalName in \a database.
-     * @details Looks for a signal with a QualifiedName=signalName and leaves the database
-     * pointing at node where the signal is found.
-     * @param[in] signalName the name of the signal to be found.
-     * @param[in] database the database where to look for the signal.
-     * @return true if the signal is found.
-     */
-    bool FindSignalName(StreamString signalName,
-                        ConfigurationDatabase &database) const;
     /**
      * @brief Find the unique number associated to the DataSource with name = \a dataSourceName.
      * @param[in] dataSourceName the fully qualified name of the DataSource to search.

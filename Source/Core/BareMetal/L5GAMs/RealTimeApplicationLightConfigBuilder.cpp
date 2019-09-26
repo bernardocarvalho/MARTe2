@@ -2027,40 +2027,6 @@ bool RealTimeApplicationLightConfigBuilder::CheckTimeSignalInfo() {
 
 ////////////////////////////////
 ////////////////////////////////
-// VerifyStates
-////////////////////////////////
-////////////////////////////////
-
-bool RealTimeApplicationLightConfigBuilder::VerifyStates() {
-    bool ret = functionsDatabase.MoveAbsolute("Functions");
-    uint32 numberOfFunctions = functionsDatabase.GetNumberOfChildren();
-    uint32 i;
-    ConfigurationDatabase functionsDatabaseBeforeMove = functionsDatabase;
-    for (i = 0u; (i < numberOfFunctions) && (ret); i++) {
-        functionsDatabase = functionsDatabaseBeforeMove;
-        ret = functionsDatabase.MoveToChild(i);
-
-        if (ret) {
-            ret = functionsDatabase.MoveRelative("States");
-
-            if (ret) {
-                ret = functionsDatabase.GetNumberOfChildren() > 0u;
-            }
-            if (!ret) {
-                StreamString gamName;
-                if (!functionsDatabase.Read("QualifiedName", gamName)) {
-                    gamName = "UnknownGAM";
-                }
-                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "The GAM %s is never called", gamName.Buffer());
-            }
-
-        }
-    }
-    return ret;
-}
-
-////////////////////////////////
-////////////////////////////////
 // ResolveConsumersAndProducers
 ////////////////////////////////
 ////////////////////////////////
@@ -3124,29 +3090,6 @@ bool RealTimeApplicationLightConfigBuilder::Set(ConfigurationDatabase &functions
     return ret;
 }
 
-bool RealTimeApplicationLightConfigBuilder::FindSignalName(StreamString signalName,
-                                                           ConfigurationDatabase &database) const {
-    bool ret = true;
-    bool found = false;
-    uint32 numberOfSignalsInDatabase = database.GetNumberOfChildren();
-    uint32 j;
-    ConfigurationDatabase databaseBeforeMove = database;
-    for (j = 0u; (j < numberOfSignalsInDatabase) && (ret) && (!found); j++) {
-        database = databaseBeforeMove;
-        ret = database.MoveToChild(j);
-        if (ret) {
-            StreamString databaseSignalName;
-            ret = database.Read("QualifiedName", databaseSignalName);
-            if (ret) {
-                found = (StringHelper::Compare(signalName.Buffer(), databaseSignalName.Buffer()) == 0);
-            }
-        }
-    }
-    if (ret) {
-        ret = found;
-    }
-    return ret;
-}
 
 bool RealTimeApplicationLightConfigBuilder::FindFunctionNumber(StreamString functionName,
                                                                StreamString &functionNumber) {

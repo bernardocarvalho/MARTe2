@@ -235,11 +235,6 @@ public:
      */
     bool TestResolveStatesFalse_InvalidApplication();
 
-    /**
-     * @brief Tests the ResolveStates method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_ResolveStates_False();
-
 
     /**
      * @brief Tests the ResolveDataSources method.
@@ -397,11 +392,6 @@ public:
     bool TestVerifyDataSourcesSignalsFalse_NoType();
 
     /**
-     * @brief Tests the VerifyDataSourcesSignals method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_VerifyDataSourcesSignals_False();
-
-    /**
      * @brief Tests the VerifyDataSourcesSignals method with no type.
      */
     bool TestVerifyDataSourcesSignalsFalse_NoType2();
@@ -462,11 +452,6 @@ public:
     bool TestVerifyConsumersAndProducersFalse_ProducerInTimeSignals();
 
     /**
-     * @brief Tests the VerifyConsumersProducers method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_VerifyConsumersProducers_False();
-
-    /**
      * @brief Tests the Set method.
      */
     bool TestSet();
@@ -505,6 +490,21 @@ public:
      * @brief Tests the ConfigureBeforeInitialisation method.
      */
     bool TestConfigureBeforeInitialisation();
+
+    /**
+     * @brief Tests the ResolveStates method on the ConfigureBeforeInitialisation context.
+     */
+    bool TestConfigureBeforeInitialisation_ResolveStates_False();
+
+    /**
+     * @brief Tests the VerifyDataSourcesSignals method on the ConfigureBeforeInitialisation context.
+     */
+    bool TestConfigureBeforeInitialisation_VerifyDataSourcesSignals_False();
+
+    /**
+     * @brief Tests the VerifyConsumersProducers method on the ConfigureBeforeInitialisation context.
+     */
+    bool TestConfigureBeforeInitialisation_VerifyConsumersProducers_False();
 
     /**
      * @brief Tests the ConfigureBeforeInitialisation method without putting a Functions section.
