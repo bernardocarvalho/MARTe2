@@ -114,7 +114,7 @@ bool BinaryTreeTest<T, HashFunction>::TestSearch(BinaryTree<T, HashFunction> &te
                                                  T result) {
     uint32 index = 0u;
     test.Search(id, index);
-    return test.GetValue(index) == result;
+    return test[index] == result;
 }
 template<typename T, typename HashFunction>
 bool BinaryTreeTest<T, HashFunction>::TestGetValue(BinaryTree<T, HashFunction> &test,

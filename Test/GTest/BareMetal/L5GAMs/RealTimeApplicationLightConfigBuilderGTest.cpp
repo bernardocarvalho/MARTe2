@@ -501,16 +501,6 @@ TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsu
     ASSERT_TRUE(test.TestVerifyConsumersAndProducers_Ranges());
 }
 
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsumersAndProducers_Ranges2) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestVerifyConsumersAndProducers_Ranges2());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsumersAndProducers_Ranges3) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestVerifyConsumersAndProducers_Ranges3());
-}
-
 TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsumersAndProducers_TimingSignals) {
     RealTimeApplicationLightConfigBuilderTest test;
     ASSERT_TRUE(test.TestVerifyConsumersAndProducers_TimingSignals());
@@ -539,46 +529,6 @@ TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsu
 TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestVerifyConsumersAndProducersFalse_ProducerInTimeSignals) {
     RealTimeApplicationLightConfigBuilderTest test;
     ASSERT_TRUE(test.TestVerifyConsumersAndProducersFalse_ProducerInTimeSignals());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignFunctionsMemoryToDataSource) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignFunctionsMemoryToDataSource());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignFunctionsMemoryToDataSource_GamIO) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignFunctionsMemoryToDataSource_GamIO());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignFunctionsMemoryToDataSource_AlignedStruct) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignFunctionsMemoryToDataSource_AlignedStruct());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignBrokersToFunctions) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignBrokersToFunctions());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignBrokersToFunctionsFalse_UnregisteredDataSource) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignBrokersToFunctionsFalse_UnregisteredDataSource());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignBrokersToFunctionsFalse_UnsupportedBroker) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignBrokersToFunctionsFalse_UnsupportedBroker());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignBrokersToFunctionsFalse_UnsupportedBroker_Output) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignBrokersToFunctionsFalse_UnsupportedBroker_Output());
-}
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestAssignBrokersToFunctionsFalse_InvalidApplication) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestAssignBrokersToFunctionsFalse_InvalidApplication());
 }
 
 TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestCopy) {

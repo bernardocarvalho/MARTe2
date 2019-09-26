@@ -432,16 +432,6 @@ public:
     bool TestVerifyConsumersAndProducers_Ranges();
 
     /**
-     * @brief Tests the VerifyConsumersAndProducers method with ranges in structure.
-     */
-    bool TestVerifyConsumersAndProducers_Ranges2();
-
-    /**
-     * @brief Tests the VerifyConsumersAndProducers method with ranges overlap (but in input).
-     */
-    bool TestVerifyConsumersAndProducers_Ranges3();
-
-    /**
      * @brief Tests the VerifyConsumersAndProducers method with merging of timing signals.
      */
     bool TestVerifyConsumersAndProducers_TimingSignals();
@@ -475,106 +465,6 @@ public:
      * @brief Tests the VerifyConsumersProducers method on the ConfigureBeforeInitialisation context.
      */
     bool TestConfigureBeforeInitialisation_VerifyConsumersProducers_False();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize.
-     */
-    bool TestResolveFunctionSignalsMemorySize();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize method with ranges.
-     */
-    bool TestResolveFunctionSignalsMemorySize_Ranges();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize method with invalid ranges min>max.
-     */
-    bool TestResolveFunctionSignalsMemorySize_FalseInvalidRanges();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize method with invalid ranges max>#elements.
-     */
-    bool TestResolveFunctionSignalsMemorySize_FalseInvalidRanges2();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize method with invalid ranges field 3 columns.
-     */
-    bool TestResolveFunctionSignalsMemorySize_FalseInvalidRanges3();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_ResolveFunctionSignalsMemorySize_False();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method.
-     */
-    bool TestResolveFunctionsMemory();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method with samples.
-     */
-    bool TestResolveFunctionsMemory_Samples();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method with interleaved DataSource.
-     */
-    bool TestResolveFunctionsMemory_InterleavedDs();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method with samples and blocks.
-     */
-    bool TestResolveFunctionsMemory_SamplesAndBlocks();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method with Samples =0.
-     */
-    bool TestResolveFunctionsMemoryFalse_InvalidSamples();
-
-    /**
-     * @brief Tests the ResolveFunctionsMemory method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_ResolveFunctionsMemory_False();
-
-    /**
-     * @brief Tests the AssignFunctionsMemoryToDataSource.
-     */
-    bool TestAssignFunctionsMemoryToDataSource();
-
-    /**
-     * @brief Tests the AssignFunctionsMemoryToDataSource method with the same gam as producer and consumer
-     */
-    bool TestAssignFunctionsMemoryToDataSource_GamIO();
-
-    /**
-     * @brief Tests the ResolveFunctionSignalsMemorySize with a structure aligned with unused memory.
-     */
-    bool TestAssignFunctionsMemoryToDataSource_AlignedStruct();
-
-    /**
-     * @brief Tests the AssignBrokersToFunctions.
-     */
-    bool TestAssignBrokersToFunctions();
-
-    /**
-     * @brief Tests the AssignBrokersToFunctions method with an unregistered DataSource and initialised from configuration.
-     */
-    bool TestAssignBrokersToFunctionsFalse_UnregisteredDataSource();
-
-    /**
-     * @brief Tests the AssignBrokersToFunctions method with an  unsupported broker.
-     */
-    bool TestAssignBrokersToFunctionsFalse_UnsupportedBroker();
-
-    /**
-     * @brief Tests the AssignBrokersToFunctions method with an  unsupported broker for output signals.
-     */
-    bool TestAssignBrokersToFunctionsFalse_UnsupportedBroker_Output();
-
-    /**
-     * @brief Tests the AssignBrokersToFunctions method with an invalid application.
-     */
-    bool TestAssignBrokersToFunctionsFalse_InvalidApplication();
 
     /**
      * @brief Tests the Set method.
