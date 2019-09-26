@@ -87,21 +87,11 @@ void RealTimeApplicationLightConfigBuilder::SetParameters(RealTimeApplication &r
 
 bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
     initialiseAfterInitialisation = true;
-#ifdef USE_FILE
-    File statistics;
-    statistics.Open("statistics.csv", (BasicFile::ACCESS_MODE_W | BasicFile::FLAG_CREAT));
-#else
-    StreamString statistics;
-#endif
-    uint64 ticks = HighResolutionTimer::Counter();
     REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to InitialiseSignalsDatabase");
     bool ret = InitialiseSignalsDatabase();
     if (!ret) {
         REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to InitialiseSignalsDatabase");
     }
-    float64 timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("InitialiseSignalsDatabase=%f\n", timeElapsed);
 
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to FlattenSignalsDatabases");
@@ -110,11 +100,6 @@ bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
             REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to FlattenSignalsDatabases");
         }
     }
-
-    timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("FlattenSignalsDatabases=%f\n", timeElapsed);
-
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to ResolveStates");
         ret = ResolveStates();
@@ -122,11 +107,6 @@ bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
             REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to ResolveStates");
         }
     }
-
-    timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("ResolveStates=%f\n", timeElapsed);
-
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to ResolveDataSources");
         ret = ResolveDataSources();
@@ -134,11 +114,6 @@ bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
             REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to ResolveDataSources");
         }
     }
-
-    timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("ResolveDataSources=%f\n", timeElapsed);
-
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to VerifyDataSourcesSignals");
         ret = VerifyDataSourcesSignals();
@@ -146,10 +121,6 @@ bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
             REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to VerifyDataSourcesSignals");
         }
     }
-    timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("VerifyDataSourcesSignals=%f\n", timeElapsed);
-
     if (ret) {
         REPORT_ERROR_STATIC(ErrorManagement::Information, "Going to VerifyConsumersAndProducers");
         ret = VerifyConsumersAndProducers();
@@ -157,10 +128,6 @@ bool RealTimeApplicationLightConfigBuilder::ConfigureAfterInitialisation() {
             REPORT_ERROR_STATIC(ErrorManagement::ParametersError, "Failed to VerifyConsumersAndProducers");
         }
     }
-    timeElapsed = (HighResolutionTimer::Counter() - ticks) * HighResolutionTimer::Period();
-    ticks = HighResolutionTimer::Counter();
-    statistics.Printf("VerifyConsumersAndProducers=%f\n", timeElapsed);
-
     return ret;
 }
 
@@ -1108,7 +1075,7 @@ bool RealTimeApplicationLightConfigBuilder::AddSignalToDataSource(StreamString f
         dataSourcesDatabase = cachedDatabase;
         uint32 locked;
         if (dataSourcesDatabase.Read("Locked", locked)) {
-            //isDsLocked = (locked != 0u);
+            isDsLocked = (locked != 0u);
         }
 
         ret = dataSourcesDatabase.MoveRelative("Signals");
@@ -1133,12 +1100,12 @@ bool RealTimeApplicationLightConfigBuilder::AddSignalToDataSource(StreamString f
         }
     }
     if (ret) {
-        if (signalAlreadyExists && ret) {
+//        if (signalAlreadyExists && ret) {
 
-//        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
+        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
             dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-//            ret = dataSourcesDatabase.MoveToChild(n);
-            ret = dataSourcesDatabase.MoveToChild(foundSignalId);
+            ret = dataSourcesDatabase.MoveToChild(n);
+            //ret = dataSourcesDatabase.MoveToChild(foundSignalId);
             StreamString dataSourceSignalName;
             if (ret) {
                 ret = dataSourcesDatabase.Read("QualifiedName", dataSourceSignalName);

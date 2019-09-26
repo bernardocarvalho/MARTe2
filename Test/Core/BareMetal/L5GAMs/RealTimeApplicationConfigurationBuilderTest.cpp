@@ -13762,7 +13762,7 @@ bool RealTimeApplicationConfigurationBuilderTest::TestVerifyDataSourcesSignalsFa
             "                       Ranges = \"{{0 0} {3 3}}\""
             "                       Samples = 2"
             "                       Frequency = 2"
-            "                       Default = \"{1 2 3 4}\""
+            "                       Default = \"{1 2 3 4 5}\""
             "                   }"
             "               }"
             "               ADCs = {"

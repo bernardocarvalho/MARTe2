@@ -181,7 +181,7 @@ bool ConfigurationDatabase::Initialise(StructuredDataI &data) {
     if (ok) {
         ok = data.Copy(*this);
     }
-    if(ok){
+    if (ok) {
         rootNode->SetName(data.GetName());
     }
     return ok;
@@ -240,7 +240,7 @@ bool ConfigurationDatabase::MoveAbsolute(const char8 * const path) {
 
 #if 1
     //Invalidate move to leafs
-    ReferenceT<ReferenceContainer> container = rootNode->Find(path);
+    ReferenceT < ReferenceContainer > container = rootNode->Find(path);
     bool ok = container.IsValid();
     if (ok) {
         currentNode = container;
@@ -267,7 +267,7 @@ bool ConfigurationDatabase::MoveAbsolute(const char8 * const path) {
 bool ConfigurationDatabase::MoveRelative(const char8 * const path) {
 #if 1
 
-    ReferenceT<ReferenceContainer> container = currentNode->Find(path);
+    ReferenceT < ReferenceContainer > container = currentNode->Find(path);
     bool ok = container.IsValid();
     if (ok) {
         currentNode = container;
@@ -294,7 +294,11 @@ bool ConfigurationDatabase::MoveRelative(const char8 * const path) {
 bool ConfigurationDatabase::MoveToChild(const uint32 childIdx) {
     bool ok = (childIdx < currentNode->Size());
     if (ok) {
-        currentNode = currentNode->Get(childIdx);
+        ReferenceT < ReferenceContainer > temp = currentNode->Get(childIdx);
+        ok = temp.IsValid();
+        if (ok) {
+            currentNode = temp;
+        }
     }
     return ok;
 }
@@ -308,8 +312,8 @@ bool ConfigurationDatabase::MoveToAncestor(const uint32 generations) {
             ReferenceT < ReferenceContainer > father = currentNode->GetFather();
             ok = father.IsValid();
             if (ok) {
-                if(father == rootNode){
-                    ok=(generations==(i+1u));
+                if (father == rootNode) {
+                    ok = (generations == (i + 1u));
                 }
                 currentNode = father;
             }

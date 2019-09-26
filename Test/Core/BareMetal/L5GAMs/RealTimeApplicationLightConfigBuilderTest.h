@@ -191,6 +191,57 @@ public:
     bool TestFlattenSignalsDatabases_UnregisteredType();
 
     /**
+     * @brief Tests the ResolveStates method.
+     */
+    bool TestResolveStates(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with same gam in more states.
+     */
+    bool TestResolveStates2(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with gam groups.
+     */
+    bool TestResolveStates_FunctionGroups(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with more threads per state.
+     */
+    bool TestResolveStates_MoreThreads(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with the same GAM in more than one thread in the same state.
+     */
+    bool TestResolveStatesFalse_SameGAMInMoreThreads(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with more than one sync point in a thread.
+     */
+    bool TestResolveStatesFalse_MoreSyncs1(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with more than one sync point in a thread.
+     */
+    bool TestResolveStatesFalse_MoreSyncs2(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with more than one sync point in a thread.
+     */
+    bool TestResolveStatesFalse_MoreSyncs3(bool fromConfig);
+
+    /**
+     * @brief Tests the ResolveStates method with an invalid application.
+     */
+    bool TestResolveStatesFalse_InvalidApplication();
+
+    /**
+     * @brief Tests the ResolveStates method on the ConfigureBeforeInitialisation context.
+     */
+    bool TestConfigureBeforeInitialisation_ResolveStates_False();
+
+
+    /**
      * @brief Tests the ResolveDataSources method.
      */
     bool TestResolveDataSources1();
@@ -369,141 +420,6 @@ public:
      * @brief Tests the VerifyDataSourcesSignals method with incompatible defaults.
      */
     bool TestVerifyDataSourcesSignalsFalse_IncompatibleDefaultsMultiVarAsArray();
-
-    /**
-     * @brief Tests the ResolveFunctionSignals.
-     */
-    bool TestResolveFunctionSignals1();
-
-    /**
-     * @brief Tests the ResolveFunctionSignals.
-     */
-    bool TestResolveFunctionSignals2();
-
-    /**
-     * @brief Tests the ResolveFunctionSignals.
-     */
-    bool TestResolveFunctionSignals3();
-
-    /**
-     * @brief Tests the ResolveFunctionSignals method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_ResolveFunctionSignals_False();
-
-    /**
-     * @brief Tests VerifyFunctionSignals method.
-     */
-    bool TestVerifyFunctionSignals();
-
-    /**
-     * @brief Tests the VerifyFunctionSignals method with with no type.
-     */
-    bool TestVerifyFunctionSignalsFalse_FalseNoType();
-
-    /**
-     * @brief Tests the VerifyFunctionSignals method with no #elements.
-     */
-    bool TestVerifyFunctionSignalsFalse_FalseNoNumberOfElements();
-
-    /**
-     * @brief Tests the VerifyFunctionSignals method with no #dimensions.
-     */
-    bool TestVerifyFunctionSignalsFalse_FalseNoNumberOfDimensions();
-
-    /**
-     * @brief Tests the VerifyFunctionSignals method with no qualified name.
-     */
-    bool TestVerifyFunctionSignalsFalse_FalseNoQualifiedName();
-
-    /**
-     * @brief Tests the VerifyFunctionSignals method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_VerifyFunctionSignals_False();
-
-    /**
-     * @brief Tests the ResolveStates method.
-     */
-    bool TestResolveStates(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with same gam in more states.
-     */
-    bool TestResolveStates2(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with gam groups.
-     */
-    bool TestResolveStates_FunctionGroups(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with more threads per state.
-     */
-    bool TestResolveStates_MoreThreads(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with the same GAM in more than one thread in the same state.
-     */
-    bool TestResolveStatesFalse_SameGAMInMoreThreads(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with more than one sync point in a thread.
-     */
-    bool TestResolveStatesFalse_MoreSyncs1(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with more than one sync point in a thread.
-     */
-    bool TestResolveStatesFalse_MoreSyncs2(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with more than one sync point in a thread.
-     */
-    bool TestResolveStatesFalse_MoreSyncs3(bool fromConfig);
-
-    /**
-     * @brief Tests the ResolveStates method with an invalid application.
-     */
-    bool TestResolveStatesFalse_InvalidApplication();
-
-    /**
-     * @brief Tests the ResolveStates method on the ConfigureBeforeInitialisation context.
-     */
-    bool TestConfigureBeforeInitialisation_ResolveStates_False();
-
-    /**
-     * @brief Tests the VerifyStates method.
-     */
-    bool TestVerifyStates();
-
-    /**
-     * @brief Tests the VerifyStates method with a GAM that is never called.
-     */
-    bool TestVerifyStatesFalse_GAMNeverCalled();
-
-    /**
-     * @brief Tests the ResolveConsumersAndProducers method.
-     */
-    bool TestResolveConsumersAndProducers();
-
-    /**
-     * @brief Tests the ResolveConsumersAndProducers method with more gam signals.
-     */
-    bool TestResolveConsumersAndProducers_MoreSignalsSameGAM();
-
-    /**
-     * @brief Tests the ResolveConsumersAndProducers method with more threads.
-     */
-    bool TestResolveConsumersAndProducers_MoreThreads();
-
-    /**
-     * @brief Tests the ResolveConsumersAndProducers method with more states.
-     */
-    bool TestResolveConsumersAndProducers_MoreStates();
-
-    /**
-     * @brief Tests the ResolveConsumersAndProducers method with more producers.
-     */
-    bool TestResolveConsumersAndProducers_MoreProducers();
 
     /**
      * @brief Tests the VerifyConsumersAndProducers method.
