@@ -38,8 +38,6 @@
 /*---------------------------------------------------------------------------*/
 namespace MARTe {
 
-class RealTimeApplication;
-
 /**
  * @brief Helper class which expands and parses a RealTimeApplication configuration database.
  * @details This class takes a RealTimeApplication ConfigurationDatabase as defined by the
@@ -941,34 +939,34 @@ public:
      *     }
      * </pre>
      */
-    bool AssignBrokersToFunctions();
+    virtual bool AssignBrokersToFunctions();
 
     /**
      * @brief For each DataSource calls DataSourceI::SetConfiguredDatabase followed by DataSourceI::AllocateMemory.
      * @details Calls DataSourceI::SetConfiguredDatabase on each DataSource under Data, passing the Signals{} and Functions{} branches.
      * @return true if DataSourceI::SetConfiguredDatabase returns true for all DataSources.
      */
-    bool PostConfigureDataSources();
+    virtual bool PostConfigureDataSources();
 
     /**
      * @brief For each GAM calls GAM::SetConfiguredDatabase
      * @details Calls calls::SetConfiguredDatabase on each GAM under Functions, passing the Functions{} branches.
      * @return true if calls::SetConfiguredDatabase returns true for all GAMs.
      */
-    bool PostConfigureFunctions();
+    virtual bool PostConfigureFunctions();
 
     /**
      * @brief Initialises the SignalDatabae (see InitialiseSignalsDatabase) using directly a
      *  ConfigurationDatabase as the data source.
      * @return (see InitialiseSignalsDatabase)
      */
-    bool InitialiseSignalsDatabaseFromConfiguration();
+    virtual bool InitialiseSignalsDatabaseFromConfiguration();
 
     /**
      * @brief Calls RealTimeThread::ConfigureArchitecture on all the threads.
      * @return true if RealTimeThread::ConfigureArchitecture returns true on all RealTimeThread elements.
      */
-    bool ConfigureThreads() const;
+    virtual bool ConfigureThreads() const;
 
     /**
      * @brief Compiles all the information required to build a RealTimeApplication after the
@@ -981,7 +979,7 @@ public:
      * @post
      *   The functions PostConfigureDataSources() and PostConfigureFunctions() can now be called.
      */
-    bool ConfigureAfterInitialisation();
+    virtual bool ConfigureAfterInitialisation();
 
     /**
      * @brief Compiles all the information required to build a RealTimeApplication without
@@ -999,7 +997,7 @@ public:
      *   The ObjectRegistryDatabase can now be initialised (typically this is to be performed in another application, see Set).
      *   The functions PostConfigureDataSources() and PostConfigureFunctions() can then be called.
      */
-    bool ConfigureBeforeInitialisation();
+    virtual bool ConfigureBeforeInitialisation();
 
     /**
      * @brief Copies the Function and DataSource databases.
@@ -1007,7 +1005,7 @@ public:
      * @param[out] dataSourcesDatabaseOut where to copy the DataSource database into.
      * @return true if both ConfigurationDatabase::Copy are successful.
      */
-    bool Copy(ConfigurationDatabase &functionsDatabaseOut,
+    virtual bool Copy(ConfigurationDatabase &functionsDatabaseOut,
             ConfigurationDatabase &dataSourcesDatabaseOut);
 
     /**
@@ -1016,7 +1014,7 @@ public:
      * @param[in] dataSourcesDatabaseIn where to copy the DataSource database from.
      * @return true if both ConfigurationDatabase::Copy are successful.
      */
-    bool Set(ConfigurationDatabase &functionsDatabaseIn,
+    virtual bool Set(ConfigurationDatabase &functionsDatabaseIn,
             ConfigurationDatabase &dataSourcesDatabaseIn);
 
 private:

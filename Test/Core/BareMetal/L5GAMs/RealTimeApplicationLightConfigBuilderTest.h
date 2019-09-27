@@ -487,6 +487,31 @@ public:
     bool TestConfigureAfterInitialisation();
 
     /**
+     * @brief Tests the ResolveStates method on the ConfigureAfterInitialisation context.
+     */
+    bool TestConfigureAfterInitialisation_ResolveStates_False();
+
+    /**
+     * @brief Tests the VerifyDataSourcesSignals method on the ConfigureAfterInitialisation context.
+     */
+    bool TestConfigureAfterInitialisation_VerifyDataSourcesSignals_False();
+
+    /**
+     * @brief Tests the VerifyConsumersProducers method on the ConfigureAfterInitialisation context.
+     */
+    bool TestConfigureAfterInitialisation_VerifyConsumersProducers_False();
+
+    /**
+     * @brief Tests the ConfigureAfterInitialisation method without putting a Functions section.
+     */
+    bool TestConfigureAfterInitialisation_False_NoFunctions();
+
+    /**
+     * @brief Tests the ConfigureAfterInitialisation method without putting a Data section.
+     */
+    bool TestConfigureAfterInitialisation_False_NoData();
+
+    /**
      * @brief Tests the ConfigureBeforeInitialisation method.
      */
     bool TestConfigureBeforeInitialisation();
@@ -531,6 +556,10 @@ public:
      */
     bool TestArraysOfStructures2();
 
+    /**
+     * @brief Tests that the application is successfully built with structures that contain arrays of types
+     */
+    bool TestArraysOfStructures3();
 };
 
 }

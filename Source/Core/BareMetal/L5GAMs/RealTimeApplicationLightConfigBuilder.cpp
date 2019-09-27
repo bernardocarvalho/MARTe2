@@ -25,8 +25,6 @@
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
 #define DLL_API
-#include <stdio.h>
-#include <vector>
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
@@ -393,10 +391,6 @@ bool RealTimeApplicationLightConfigBuilder::InitialiseSignalsDatabase() {
                     //Move to the next DataSource
                     ret = dataSourcesDatabase.MoveAbsolute("Data");
                 }
-                else {
-                    REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "Failed to AddSignals for %s", dataSource->GetName());
-                }
-
             }
             if (ret) {
                 ret = (isTimeStamp == 1u);
@@ -1632,7 +1626,8 @@ bool RealTimeApplicationLightConfigBuilder::ResolveStates() {
                                         StreamString presentThread;
                                         ret = functionsDatabase.Read(stateName, presentThread);
                                         if (ret) {
-                                            if (presentThread != threadName) {
+                                            ret=(presentThread == threadName);
+                                            if (!ret) {
                                                 StreamString gamName;
                                                 if (functionsDatabase.MoveToAncestor(1u)) {
                                                     if (!functionsDatabase.Read("QualifiedName", gamName)) {
@@ -3315,9 +3310,6 @@ bool RealTimeApplicationLightConfigBuilder::SignalIntrospectionToStructuredData(
                                     }
                                 }
                             }
-                            REPORT_ERROR_STATIC(ErrorManagement::Debug, "Calling SignalIntrospectionToStructuredData for %s Alias: %s", fullSignalName.Buffer(),
-                                                fullAliasName.Buffer());
-
                             ret = SignalIntrospectionToStructuredData(signalDatabase, entry.GetMemberTypeName(), fullSignalName.Buffer(),
                                                                       fullAliasName.Buffer(), dataSourceName, syncSignalName, triggerSignalName,
                                                                       typeNameStr.Buffer(), ranges, samples, frequency, trigger, data, signalNumber, syncSet,

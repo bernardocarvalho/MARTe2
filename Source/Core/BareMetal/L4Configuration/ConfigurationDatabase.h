@@ -227,10 +227,6 @@ private:
      */
     bool CreateNodes(const char8 * const path);
 
-
-    struct ConfigurationDatabaseNode{
-
-    };
     /**
      * The current node to where the database is pointing.
      */

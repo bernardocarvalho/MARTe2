@@ -566,6 +566,31 @@ TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAf
     ASSERT_TRUE(test.TestConfigureAfterInitialisation());
 }
 
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAfterInitialisation_ResolveStates_False) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestConfigureAfterInitialisation_ResolveStates_False());
+}
+
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAfterInitialisation_VerifyDataSourcesSignals_False) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestConfigureAfterInitialisation_VerifyDataSourcesSignals_False());
+}
+
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAfterInitialisation_VerifyConsumersProducers_False) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestConfigureAfterInitialisation_VerifyConsumersProducers_False());
+}
+
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAfterInitialisation_False_NoFunctions) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestConfigureAfterInitialisation_False_NoFunctions());
+}
+
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureAfterInitialisation_False_NoData) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestConfigureAfterInitialisation_False_NoData());
+}
+
 TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestConfigureBeforeInitialisation) {
     RealTimeApplicationLightConfigBuilderTest test;
     ASSERT_TRUE(test.TestConfigureBeforeInitialisation());
@@ -599,4 +624,9 @@ TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestArraysOfStr
 TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestArraysOfStructures2) {
     RealTimeApplicationLightConfigBuilderTest test;
     ASSERT_TRUE(test.TestArraysOfStructures2());
+}
+
+TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestArraysOfStructures3) {
+    RealTimeApplicationLightConfigBuilderTest test;
+    ASSERT_TRUE(test.TestArraysOfStructures3());
 }
