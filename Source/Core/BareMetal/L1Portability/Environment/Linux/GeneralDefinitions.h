@@ -28,6 +28,7 @@
 #include <pthread.h>
 #ifndef LINT
 #include <termio.h>
+#include <iostream>
 #else
 //typedef unsigned long int pthread_t;
 #endif

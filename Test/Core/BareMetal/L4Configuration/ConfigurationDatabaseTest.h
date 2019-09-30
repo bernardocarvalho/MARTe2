@@ -214,11 +214,6 @@ public:
     bool TestCleanUp();
 
     /**
-     * @brief Tests the GetCurrentNode function
-     */
-    bool TestGetCurrentNode();
-
-    /**
      * @brief Tests the CopyConstructor
      */
     bool TestCopyConstructor();

@@ -256,9 +256,9 @@ bool ReferenceContainerFilterObjectName::Test(ReferenceContainer &previouslyFoun
                 SetMode(GetMode() | ReferenceContainerFilterMode::PATH);
             }
             else {
-                uint32 mode = GetMode();
-                mode &= ~(ReferenceContainerFilterMode::RECURSIVE | ReferenceContainerFilterMode::PATH);
-                SetMode(mode);
+                uint32 modeTemp = GetMode();
+                modeTemp &= ~(ReferenceContainerFilterMode::RECURSIVE | ReferenceContainerFilterMode::PATH);
+                SetMode(modeTemp);
             }
         }
     }

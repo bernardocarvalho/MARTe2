@@ -3248,7 +3248,6 @@ bool RealTimeApplicationLightConfigBuilderTest::TestFlattenSignalsDatabases_Memb
             "                               ADCs.ADC1.Signal3.c1 = ADC_Channel1"
             "                               ADCs.ADC1.Signal3.c3 = ADC_Channel2"
             "                           }"
-
             "                       }"
             "                   }"
             "               }"

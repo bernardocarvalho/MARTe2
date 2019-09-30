@@ -713,20 +713,7 @@ bool ConfigurationDatabaseTest::TestCleanUp() {
     return ok;
 }
 
-bool ConfigurationDatabaseTest::TestGetCurrentNode() {
-    ConfigurationDatabase cdb;
-    bool ok = cdb.CreateAbsolute("A");
-    ok = cdb.MoveToRoot();
-    ok &= cdb.MoveAbsolute("A");
-    ok &= cdb.CreateAbsolute(".A.B");
-    ok &= cdb.CreateAbsolute("A.B.C");
-    ok &= cdb.CreateAbsolute("A.B.D");
-    ok &= cdb.CreateAbsolute("A.B.E");
-    ok &= cdb.CreateAbsolute("A.B.F");
-    ok &= cdb.MoveAbsolute("A.B");
-    ReferenceT<ReferenceContainer> refC = cdb.GetCurrentNode();
-    return (refC->Size() == 4);
-}
+
 
 bool ConfigurationDatabaseTest::TestCopyConstructor() {
     ConfigurationDatabase cdb;

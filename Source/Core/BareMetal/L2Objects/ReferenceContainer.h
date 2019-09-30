@@ -146,7 +146,7 @@ ReferenceContainer    ();
      * @param[in] recursive is the flag for recursive search
      * @return the element if it is found or an invalid reference if not.
      */
-    Reference Find(const char8 * const path, const bool recursive=false);
+    Reference Find(const char8 * const path, const bool recursive=false, const bool flat=false);
 
     /**
      * @brief Checks if \a ref holds a container.
@@ -280,7 +280,7 @@ ReferenceContainer    ();
 
     void SetFather(Reference fatherIn);
 
-    Reference GetFather();
+    Reference GetFather() const;
 
 private:
     /**

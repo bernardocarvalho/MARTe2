@@ -41,7 +41,7 @@
 
 namespace MARTe{
 
-ApplicationBuilderI::ApplicationBuilderI() {
+ApplicationBuilderI::ApplicationBuilderI():Object() {
     // Auto-generated constructor stub for ApplicationBuilderI
     // TODO Verify if manual additions are needed
 }

@@ -21,8 +21,8 @@
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef REALTIMEAPPLICATIONCONFIGURATIONBUILDER_H_
-#define REALTIMEAPPLICATIONCONFIGURATIONBUILDER_H_
+#ifndef REALTIMEAPPLICATIONLIGHTCONFIGBUILDER_H_
+#define REALTIMEAPPLICATIONLIGHTCONFIGBUILDER_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -571,7 +571,7 @@ public:
      *     }
      * </pre>
      */
-    bool AssignBrokersToFunctions();
+    virtual bool AssignBrokersToFunctions();
 
     /**
      * @brief For each DataSource calls DataSourceI::SetConfiguredDatabase followed by DataSourceI::AllocateMemory.
@@ -757,9 +757,9 @@ private:
      */
     bool ResolveConsumersAndProducers(const bool consumers,
                                       Vector<StreamString> &states,
-                                      const char8 *functionId,
-                                      const char8 *functionName,
-                                      const char8 *signalId);
+                                      const char8 * const functionId,
+                                      const char8 * const functionName,
+                                      const char8 * const signalId);
 
     /**
      * @brief Allows to distribute the same Producer across different ranges, i.e. the same Signal might have more than one
@@ -779,7 +779,7 @@ private:
      * @param[in] direction can be either InputSignals or OutputSignals
      * @return @see ResolveFunctionSignalsMemorySize()
      */
-    bool ResolveFunctionSignalsMemorySize(const char8* functionName);
+    bool ResolveFunctionSignalsMemorySize(const char8 * const functionName);
 
     /**
      * @brief @see ResolveFunctionsMemory()
@@ -787,17 +787,17 @@ private:
      * @return @see ResolveFunctionsMemory()
      */
     bool ResolveFunctionsMemory(const SignalDirection direction,
-                                ConfigurationDatabase &functionsDatabaseAfterMove,
+                                const ConfigurationDatabase &functionsDatabaseAfterMove,
                                 uint32 &totalByteSize,
                                 uint32 &allocatedByteSize,
-                                const char8 *functionName);
+                                const char8 * const functionName);
 
     /**
      * @brief @see AssignFunctionsMemoryToDataSource()
      * @param[in] direction can be either InputSignals or OutputSignals
      * @return @see AssignFunctionsMemoryToDataSource()
      */
-    bool AssignFunctionsMemoryToDataSource(const SignalDirection direction, const char8 * functionName);
+    bool AssignFunctionsMemoryToDataSource(const SignalDirection direction, const char8 * const functionName);
 
     /**
      * @brief @see AssignBrokersToSignals()

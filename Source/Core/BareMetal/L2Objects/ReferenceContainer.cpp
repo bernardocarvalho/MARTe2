@@ -130,14 +130,17 @@ bool ReferenceContainer::Insert(Reference ref,
             }
             if (position == -1) {
                 uint32 index = list.GetSize();
-                list.Add(ref);
-                //add the index to the list to find it faster!
-                indexes.Insert(ref->GetName(), index);
-
+                ok=(list.Add(ref));
+                if(ok) {
+                    //add the index to the list to find it faster!
+                    ok=(indexes.Insert(ref->GetName(), index)!=0xFFFFFFFFu);
+                }
             }
             else {
-                list.Insert(static_cast<uint32>(position), ref);
-                indexes.Insert(ref->GetName(), static_cast<uint32>(position));
+                ok=list.Insert(static_cast<uint32>(position), ref);
+                if(ok) {
+                    ok=(indexes.Insert(ref->GetName(), static_cast<uint32>(position))!=0xFFFFFFFFu);
+                }
             }
         }
         else {
@@ -264,7 +267,7 @@ void ReferenceContainer::Find(ReferenceContainer &result,
             //lint -e{9007} no side-effects on the right of the && operator
             while ((!filter.IsFinished()) && ((filter.IsReverse() && (index > -1)) || ((!filter.IsReverse()) && (index < static_cast<int32>(list.GetSize()))))) {
                 Reference currentNodeReference;
-                list.Peek(static_cast<uint32>(index), currentNodeReference);
+                (void)list.Peek(static_cast<uint32>(index), currentNodeReference);
 
                 //Check if the current node meets the filter criteria
                 bool found = filter.Test(result, currentNodeReference);
@@ -276,13 +279,14 @@ void ReferenceContainer::Find(ReferenceContainer &result,
                         if (result.Insert(currentNodeReference)) {
                             if (filter.IsRemove()) {
                                 //Only delete the exact node index
-                                if (list.Remove(index)) {
+                                if (list.Remove(static_cast<uint32>(index))) {
 
                                     if (indexes.Remove(currentNodeReference->GetName())) {
                                         for (uint32 k = 0u; k < indexes.GetSize(); k++) {
                                             //adjust the index
-                                            if (indexes[k] > static_cast<uint32>(index)) {
-                                                indexes[k]--;
+                                            uint32 *indexTemp=&indexes[k];
+                                            if ((*indexTemp) > static_cast<uint32>(index)) {
+                                                (*indexTemp)--;
                                             }
                                         }
                                         //Given that the index will be incremented, but we have removed an element, the index should stay in the same position
@@ -326,7 +330,7 @@ void ReferenceContainer::Find(ReferenceContainer &result,
                                 if (filter.IsStorePath()) {
                                     Reference last = result.Get(sizeBeforeBranching - 1u);
                                     if (result.list.Remove(sizeBeforeBranching - 1u)) {
-                                        result.indexes.Remove(last->GetName());
+                                        (void)result.indexes.Remove(last->GetName());
                                     }
                                 }
                             }
@@ -356,20 +360,27 @@ void ReferenceContainer::Find(ReferenceContainer &result,
 }
 
 Reference ReferenceContainer::Find(const char8 * const path,
-                                   const bool recursive) {
+                                   const bool recursive,
+                                   const bool flat) {
     Reference ret;
     //find the first name
     char8 token[1024] = { '\0' };
 
     const char8* toTokenize = path;
-    const char8* next = StringHelper::TokenizeByChars(toTokenize, ".", token);
+    const char8* next = "";
+    if (flat) {
+        (void) StringHelper::Copy(&token[0], toTokenize);
+    }
+    else {
+        next = StringHelper::TokenizeByChars(toTokenize, ".", &token[0]);
+    }
 
     //more than one
     bool canContinue = (StringHelper::Length(next) > 0u);
-    if (StringHelper::Length(token) > 0u) {
+    if (StringHelper::Length(&token[0]) > 0u) {
         uint32 index;
         //binary search
-        if (indexes.Search(token, index)) {
+        if (indexes.Search(&token[0], index)) {
             if (canContinue) {
                 ReferenceT<ReferenceContainer> container = Get(indexes[index]);
                 if (container.IsValid()) {
@@ -388,7 +399,7 @@ Reference ReferenceContainer::Find(const char8 * const path,
                     for (uint32 i = 0u; (i < Size()) && (!ret.IsValid()); i++) {
                         ReferenceT<ReferenceContainer> container = Get(i);
                         if (container.IsValid()) {
-                            ret = container->Find(token, true);
+                            ret = container->Find(&token[0], true);
                         }
                     }
                 }
@@ -580,7 +591,7 @@ void ReferenceContainer::SetFather(Reference fatherIn) {
     father = fatherIn;
 }
 
-Reference ReferenceContainer::GetFather() {
+Reference ReferenceContainer::GetFather() const{
     return father;
 }
 

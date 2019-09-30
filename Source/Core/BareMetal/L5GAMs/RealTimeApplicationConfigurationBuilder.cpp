@@ -48,18 +48,18 @@
 /*---------------------------------------------------------------------------*/
 namespace MARTe {
 
-RealTimeApplicationConfigurationBuilder::RealTimeApplicationConfigurationBuilder() {
+RealTimeApplicationConfigurationBuilder::RealTimeApplicationConfigurationBuilder():ApplicationBuilderI() {
     realTimeApplication = NULL_PTR(RealTimeApplication*);
 }
 
 RealTimeApplicationConfigurationBuilder::RealTimeApplicationConfigurationBuilder(RealTimeApplication & realTimeApplicationIn,
-                                                                                 const char8 * const defaultDataSourceNameIn) {
+                                                                                 const char8 * const defaultDataSourceNameIn):ApplicationBuilderI() {
     defaultDataSourceName = defaultDataSourceNameIn;
     realTimeApplication = &realTimeApplicationIn;
 }
 
 RealTimeApplicationConfigurationBuilder::RealTimeApplicationConfigurationBuilder(ConfigurationDatabase &globalDatabaseIn,
-                                                                                 const char8 * const defaultDataSourceNameIn) {
+                                                                                 const char8 * const defaultDataSourceNameIn):ApplicationBuilderI() {
     defaultDataSourceName = defaultDataSourceNameIn;
     bool ret = globalDatabaseIn.Copy(globalDatabase);
     if (ret) {
@@ -584,11 +584,12 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignalsDatabase(Configurati
 
             if (ret) {
                 uint32 numberOfSignals = signalDatabase.GetNumberOfChildren();
-                ReferenceT < ReferenceContainer > signalList = signalDatabase.GetCurrentNode();
+                //ReferenceT<ReferenceContainer> signalList = signalDatabase.GetCurrentNode();
                 uint32 j = 0u;
                 //...then for each signal...
                 while ((j < numberOfSignals) && (ret)) {
-                    const char8 *signalName = signalList->Get(j)->GetName();
+                    //const char8 *signalName = signalList->Get(j)->GetName();
+                    const char8 *signalName = signalDatabase.GetChildName(j);
                     if (StringHelper::Compare(signalName, "Locked") != 0) {
                         ConfigurationDatabase signalDatabaseBeforeFlatten = signalDatabase;
                         ret = signalDatabase.MoveToChild(j);
@@ -666,14 +667,15 @@ bool RealTimeApplicationConfigurationBuilder::FlattenSignal(const bool isFunctio
     if (!signalTypeDefined) {
         uint32 numberOfElements = signalDatabase.GetNumberOfChildren();
         uint32 n;
-        ReferenceT < ReferenceContainer > elementsList = signalDatabase.GetCurrentNode();
+        //ReferenceT<ReferenceContainer> elementsList = signalDatabase.GetCurrentNode();
         for (n = 0u; (n < numberOfElements); n++) {
             StreamString elementName = signalDatabase.GetChildName(n);
             //If this element is a node then recurse
             // "MemberAliases" and "Defaults" the only node can be found in a signal. Mark it as a keyword.
-            if (elementsList->Get(n)->IsReferenceContainer()) {
-                ConfigurationDatabase signalDatabaseBeforeMove = signalDatabase;
-                ret = signalDatabase.MoveToChild(n);
+            //if (elementsList->Get(n)->IsReferenceContainer()) {
+            ConfigurationDatabase signalDatabaseBeforeMove = signalDatabase;
+            if (signalDatabase.MoveToChild(n)) {
+                //ret = signalDatabase.MoveToChild(n);
                 if (StringHelper::Compare(elementName.Buffer(), "MemberAliases") != 0) {
                     if (StringHelper::Compare(elementName.Buffer(), "Defaults") != 0) {
                         foundANode = true;
@@ -1318,41 +1320,44 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
                 bool signalFound = false;
                 if (ret) {
                     dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMove;
-
-                    // check if it is a partial definition. Delete if the type is not specified, error otherwise (empty node)
-                    ConfigurationDatabase dataSourcesDatabaseBeforeSignalMoveOther = dataSourcesDatabase;
-                    for (uint32 k = 0u; (k < numberOfSignals) && (!signalFound) && (ret); k++) {
-                        if (k != s) {
-                            char8 terminator;
-                            ret = dataSourcesDatabase.MoveToChild(k);
-                            StreamString otherSName;
-                            //The QualifiedName must be known
-                            if (ret) {
-                                ret = dataSourcesDatabase.Read("QualifiedName", otherSName);
+                    //Do this only for structured types.
+                    TypeDescriptor td = TypeDescriptor::GetTypeDescriptorFromTypeName(type.Buffer());
+                    if (td == VoidType) {
+                        // check if it is a partial definition. Delete if the type is not specified, error otherwise (empty node)
+                        ConfigurationDatabase dataSourcesDatabaseBeforeSignalMoveOther = dataSourcesDatabase;
+                        for (uint32 k = 0u; (k < numberOfSignals) && (!signalFound) && (ret); k++) {
+                            if (k != s) {
+                                char8 terminator;
+                                ret = dataSourcesDatabase.MoveToChild(k);
+                                StreamString otherSName;
+                                //The QualifiedName must be known
                                 if (ret) {
-                                    ret = otherSName.Seek(0LLU);
-                                }
-                            }
-                            if (ret) {
-                                // ret becomes true if found a partial def
-                                StreamString signalNameStr = signalName;
-                                ret = signalNameStr.Seek(0LLU);
-                                StreamString token1;
-                                StreamString token2;
-                                signalFound = true;
-                                while (signalNameStr.GetToken(token1, ".", terminator) && (signalFound) && (ret)) {
-                                    if (otherSName.GetToken(token2, ".", terminator)) {
-                                        signalFound = (token1 == token2);
+                                    ret = dataSourcesDatabase.Read("QualifiedName", otherSName);
+                                    if (ret) {
+                                        ret = otherSName.Seek(0LLU);
                                     }
-                                    else {
-                                        signalFound = false;
-                                    }
-                                    token1 = "";
-                                    token2 = "";
                                 }
-                            }
-                            if (ret) {
-                                dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                                if (ret) {
+                                    // ret becomes true if found a partial def
+                                    StreamString signalNameStr = signalName;
+                                    ret = signalNameStr.Seek(0LLU);
+                                    StreamString token1;
+                                    StreamString token2;
+                                    signalFound = true;
+                                    while (signalNameStr.GetToken(token1, ".", terminator) && (signalFound) && (ret)) {
+                                        if (otherSName.GetToken(token2, ".", terminator)) {
+                                            signalFound = (token1 == token2);
+                                        }
+                                        else {
+                                            signalFound = false;
+                                        }
+                                        token1 = "";
+                                        token2 = "";
+                                    }
+                                }
+                                if (ret) {
+                                    dataSourcesDatabase = dataSourcesDatabaseBeforeSignalMoveOther;
+                                }
                             }
                         }
                     }
@@ -1431,12 +1436,8 @@ bool RealTimeApplicationConfigurationBuilder::VerifyDataSourcesSignals() {
 
                     if (ret) {
                         StreamString defaultVal;
-                        if (!dataSourcesDatabase.Read("Default", defaultVal)) {
-                            REPORT_ERROR_STATIC(ErrorManagement::Warning, "Default value is not defined for signal: %s in %s, by default it will be zeroed",
-                                                signalName.Buffer(), dataSourceName.Buffer());
-                        }
                         // check validity of the default value
-                        else {
+                        if (dataSourcesDatabase.Read("Default", defaultVal)) {
                             // parse the DefaultValue
                             // check its compatibility with the type
                             StreamString defValConfig = "Default=";
@@ -2150,7 +2151,11 @@ bool RealTimeApplicationConfigurationBuilder::ResolveStatesFromConfiguration() {
     }
     ConfigurationDatabase local;
     if (ret) {
-        ret = local.AddToCurrentNode(globalDatabase.GetCurrentNode());
+        //ret = local.AddToCurrentNode(globalDatabase.GetCurrentNode());
+        ret = local.CreateAbsolute(globalDatabase.GetName());
+    }
+    if (ret) {
+        ret = globalDatabase.Copy(local);
     }
     if (ret) {
         ret = globalDatabase.MoveAbsolute("+States");
@@ -3899,9 +3904,6 @@ bool RealTimeApplicationConfigurationBuilder::SignalIntrospectionToStructuredDat
                                     }
                                 }
                             }
-                            REPORT_ERROR_STATIC(ErrorManagement::Debug, "Calling SignalIntrospectionToStructuredData for %s Alias: %s", fullSignalName.Buffer(),
-                                                fullAliasName.Buffer());
-
                             ret = SignalIntrospectionToStructuredData(signalDatabase, entry.GetMemberTypeName(), fullSignalName.Buffer(),
                                                                       fullAliasName.Buffer(), dataSourceName, syncSignalName, triggerSignalName,
                                                                       typeNameStr.Buffer(), ranges, samples, frequency, trigger, data, signalNumber, syncSet,

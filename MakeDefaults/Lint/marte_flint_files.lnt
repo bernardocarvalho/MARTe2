@@ -2,6 +2,7 @@ AdvancedErrorManagement.h
 AnyObject.cpp
 AnyType.cpp
 AnyTypeCreator.cpp
+ApplicationBuilderI.cpp
 Atomic.h
 Base64Encoder.cpp
 BasicConsole.cpp
@@ -11,6 +12,7 @@ BasicSocket.cpp
 BasicTCPSocket.cpp
 BasicType.h
 BasicUDPSocket.cpp
+BinaryTree.h
 BitBoolean.h
 BitRange.h
 BitSetToInteger.h
@@ -165,6 +167,7 @@ QueueingMessageFilter.cpp
 QueuedReplyMessageCatcherFilter.cpp
 RealTimeApplication.cpp
 RealTimeApplicationConfigurationBuilder.cpp
+RealTimeApplicationLightConfigBuilder.cpp
 RealTimeLoader.cpp
 RealTimeState.cpp
 RealTimeThread.cpp

@@ -50,20 +50,23 @@
 /*---------------------------------------------------------------------------*/
 namespace MARTe {
 
-RealTimeApplicationLightConfigBuilder::RealTimeApplicationLightConfigBuilder() {
-    realTimeApplication = NULL;
+RealTimeApplicationLightConfigBuilder::RealTimeApplicationLightConfigBuilder() :
+        ApplicationBuilderI() {
+    realTimeApplication = NULL_PTR(RealTimeApplication*);
     initialiseAfterInitialisation = true;
 }
 
 RealTimeApplicationLightConfigBuilder::RealTimeApplicationLightConfigBuilder(RealTimeApplication & realTimeApplicationIn,
-                                                                             const char8 * const defaultDataSourceNameIn) {
+                                                                             const char8 * const defaultDataSourceNameIn) :
+        ApplicationBuilderI() {
     defaultDataSourceName = defaultDataSourceNameIn;
     realTimeApplication = &realTimeApplicationIn;
     initialiseAfterInitialisation = true;
 }
 
 RealTimeApplicationLightConfigBuilder::RealTimeApplicationLightConfigBuilder(ConfigurationDatabase &globalDatabaseIn,
-                                                                             const char8 * const defaultDataSourceNameIn) {
+                                                                             const char8 * const defaultDataSourceNameIn) :
+        ApplicationBuilderI() {
     defaultDataSourceName = defaultDataSourceNameIn;
     bool ret = globalDatabaseIn.Copy(globalDatabase);
     if (ret) {
@@ -885,7 +888,7 @@ bool RealTimeApplicationLightConfigBuilder::ResolveDataSources() {
             SignalDirection directions[] = { InputSignals, OutputSignals };
             for (uint32 j = 0u; j < 2u; j++) {
                 bool exists = false;
-                const char8 *signalDirection = NULL;
+                const char8 *signalDirection = NULL_PTR(const char8 *);
                 if (ret) {
                     signalDirection = "InputSignals";
                     if (directions[j] == OutputSignals) {
@@ -944,23 +947,25 @@ bool RealTimeApplicationLightConfigBuilder::ResolveDataSources() {
                             uint32 numberOfElements = 0u;
                             if (!functionsDatabase.Read("NumberOfElements", numberOfElements)) {
                                 numberOfElements = 1u;
-                                functionsDatabase.Write("NumberOfElements", numberOfElements);
+                                ret = functionsDatabase.Write("NumberOfElements", numberOfElements);
                             }
-                            uint32 numberOfDimensions = 0u;
-                            if (!functionsDatabase.Read("NumberOfDimensions", numberOfDimensions)) {
-                                numberOfDimensions = 0u;
-                                functionsDatabase.Write("NumberOfDimensions", numberOfDimensions);
+                            if (ret) {
+                                uint32 numberOfDimensions = 0u;
+                                if (!functionsDatabase.Read("NumberOfDimensions", numberOfDimensions)) {
+                                    numberOfDimensions = 0u;
+                                    ret = functionsDatabase.Write("NumberOfDimensions", numberOfDimensions);
+                                }
                             }
                         }
                         if (ret) {
                             ConfigurationDatabase temp = functionDatabaseFunction;
-                            if ((temp.MoveRelative("States")) && (ret)) {
+                            if (temp.MoveRelative("States")) {
                                 uint32 numberOfStates = temp.GetNumberOfChildren();
                                 if (numberOfStates > 0u) {
                                     Vector < StreamString > states(numberOfStates);
-                                    for (uint32 s = 0u; (s < numberOfStates) && (ret); s++) {
-                                        StreamString stateName = temp.GetChildName(s);
-                                        states[s] = stateName;
+                                    for (uint32 st = 0u; (st < numberOfStates) && (ret); st++) {
+                                        StreamString stateName = temp.GetChildName(st);
+                                        states[st] = stateName;
                                     }
                                     ret = ResolveConsumersAndProducers((directions[j] == InputSignals), states, functionId.Buffer(), functionName.Buffer(),
                                                                        signalId.Buffer());
@@ -991,13 +996,13 @@ bool RealTimeApplicationLightConfigBuilder::ResolveDataSources() {
             }
             if (ret) {
                 functionsDatabase = functionDatabaseFunction;
-                if (ret) {
-                    ret = AssignFunctionsMemoryToDataSource(InputSignals, functionName.Buffer());
-                }
+                ret = AssignFunctionsMemoryToDataSource(InputSignals, functionName.Buffer());
                 if (ret) {
                     ret = AssignFunctionsMemoryToDataSource(OutputSignals, functionName.Buffer());
                 }
-                ret = functionsDatabase.MoveRelative("Signals");
+                if (ret) {
+                    ret = functionsDatabase.MoveRelative("Signals");
+                }
             }
 
         }
@@ -1023,6 +1028,7 @@ bool RealTimeApplicationLightConfigBuilder::FindDataSourceNumber(StreamString da
                 ret = dataSourcesDatabase.Read("QualifiedName", qualifiedName);
             }
             if (ret) {
+                //todo binary research here
                 done = (StringHelper::Compare(qualifiedName.Buffer(), dataSourceName.Buffer()) == 0);
             }
         }
@@ -1081,6 +1087,7 @@ bool RealTimeApplicationLightConfigBuilder::AddSignalToDataSource(StreamString f
     uint32 n;
     uint32 foundSignalId = 0u;
     ConfigurationDatabase dataSourcesDatabaseBeforeMove = dataSourcesDatabase;
+    //todo use binary research here
     for (n = 0u; (n < numberOfSignals) && (ret) && (!signalAlreadyExists); n++) {
         dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
         ret = dataSourcesDatabase.MoveToChild(n);
@@ -1090,16 +1097,15 @@ bool RealTimeApplicationLightConfigBuilder::AddSignalToDataSource(StreamString f
             ret = dataSourcesDatabase.Read("QualifiedName", dataSourceSignalName);
         }
         if (ret) {
+            //todo binary research here
             signalAlreadyExists = (StringHelper::Compare(signalName.Buffer(), dataSourceSignalName.Buffer()) == 0);
         }
     }
     if (ret) {
-//        if (signalAlreadyExists && ret) {
+        if (signalAlreadyExists) {
 
-        for (n = 0u; (n < numberOfSignals) && (ret); n++) {
             dataSourcesDatabase = dataSourcesDatabaseBeforeMove;
-            ret = dataSourcesDatabase.MoveToChild(n);
-            //ret = dataSourcesDatabase.MoveToChild(foundSignalId);
+            ret = dataSourcesDatabase.MoveToChild(foundSignalId);
             StreamString dataSourceSignalName;
             if (ret) {
                 ret = dataSourcesDatabase.Read("QualifiedName", dataSourceSignalName);
@@ -1489,7 +1495,7 @@ bool RealTimeApplicationLightConfigBuilder::VerifyDataSourcesSignals() {
                                             // write the default value as a value and not a string anymore!
                                             ret = dataSourcesDatabase.Write("Default", at);
                                         }
-                                        (void)HeapManager::Free(reinterpret_cast<void*&>(ptr));
+                                        (void) HeapManager::Free(reinterpret_cast<void*&>(ptr));
                                     }
                                 }
                                 if (!ret) {
@@ -2028,9 +2034,9 @@ bool RealTimeApplicationLightConfigBuilder::CheckTimeSignalInfo() {
 
 bool RealTimeApplicationLightConfigBuilder::ResolveConsumersAndProducers(const bool consumers,
                                                                          Vector<StreamString> &states,
-                                                                         const char8 *functionId,
-                                                                         const char8 *functionName,
-                                                                         const char8 *signalId) {
+                                                                         const char8 * const functionId,
+                                                                         const char8 * const functionName,
+                                                                         const char8 * const signalId) {
     const char8 *operationType = "Consumers";
     if (!consumers) {
         operationType = "Producers";
@@ -2369,7 +2375,7 @@ bool RealTimeApplicationLightConfigBuilder::AddTimingSignals() {
 ////////////////////////////////
 ////////////////////////////////
 
-bool RealTimeApplicationLightConfigBuilder::ResolveFunctionSignalsMemorySize(const char8* functionName) {
+bool RealTimeApplicationLightConfigBuilder::ResolveFunctionSignalsMemorySize(const char8 * const functionName) {
 
     uint32 signalNumberOfBytes = 0u;
     uint32 numberOfElements = 0u;
@@ -2486,10 +2492,10 @@ bool RealTimeApplicationLightConfigBuilder::ResolveFunctionSignalsMemorySize(con
 ////////////////////////////////
 
 bool RealTimeApplicationLightConfigBuilder::ResolveFunctionsMemory(const SignalDirection direction,
-                                                                   ConfigurationDatabase &functionsDatabaseAfterMove,
+                                                                   const ConfigurationDatabase &functionsDatabaseAfterMove,
                                                                    uint32 &totalByteSize,
                                                                    uint32 &allocatedByteSize,
-                                                                   const char8 * functionName) {
+                                                                   const char8 * const functionName) {
 
     const char8 *signalDirection = "InputSignals";
     if (direction == OutputSignals) {
@@ -2597,6 +2603,7 @@ bool RealTimeApplicationLightConfigBuilder::ResolveFunctionsMemory(const SignalD
                 ret = functionsDatabase.Read("DataSource", thisDataSourceName);
             }
             if (ret) {
+                //todo maybe also here binary research
                 found = (StringHelper::Compare(thisDataSourceName.Buffer(), dataSourceName.Buffer()) == 0);
             }
             //Move to the next DataSource
@@ -2688,7 +2695,7 @@ bool RealTimeApplicationLightConfigBuilder::ResolveFunctionsMemory(const SignalD
 ////////////////////////////////
 
 bool RealTimeApplicationLightConfigBuilder::AssignFunctionsMemoryToDataSource(const SignalDirection direction,
-                                                                              const char8 * functionName) {
+                                                                              const char8 * const functionName) {
     const char8 *signalDirection = "InputSignals";
     if (direction == OutputSignals) {
         signalDirection = "OutputSignals";
@@ -3085,7 +3092,6 @@ bool RealTimeApplicationLightConfigBuilder::Set(ConfigurationDatabase &functions
     return ret;
 }
 
-
 bool RealTimeApplicationLightConfigBuilder::FindFunctionNumber(StreamString functionName,
                                                                StreamString &functionNumber) {
     bool ret = functionsDatabase.MoveAbsolute("Functions");
@@ -3103,6 +3109,7 @@ bool RealTimeApplicationLightConfigBuilder::FindFunctionNumber(StreamString func
                 ret = functionsDatabase.Read("QualifiedName", qualifiedName);
             }
             if (ret) {
+                //todo maybe also here binary research
                 done = (StringHelper::Compare(qualifiedName.Buffer(), functionName.Buffer()) == 0);
             }
         }
@@ -3154,7 +3161,7 @@ bool RealTimeApplicationLightConfigBuilder::CheckTypeCompatibility(StreamString 
                             if (ret) {
                                 bool equalTokens = (token1 == token2);
                                 bool token2Node = (token2 == "Node");
-                                ret = (equalTokens) || (token1Node) || (token2Node);
+                                ret = (equalTokens) || (token2Node);
                             }
                         }
                     }

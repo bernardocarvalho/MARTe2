@@ -47,7 +47,7 @@ namespace MARTe {
 
 StaticListHolder::StaticListHolder(const uint32 listElementSize,
                                    const uint32 listAllocationGranularity,
-                                   bool copyMemoryIn) :
+                                   const bool copyMemoryIn) :
         //Initializes the element size
         listElementSize_(listElementSize),
 

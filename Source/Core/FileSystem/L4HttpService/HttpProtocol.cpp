@@ -69,7 +69,10 @@ bool HttpProtocol::CompleteReadOperation(BufferedStreamI * const streamout,
     bool ret = true;
     //This way we can change the falsely undefined content-length when this is called from Write Header
     //complete the read only when the body is completed from the other part
-    if ((streamout == NULL) && ((unreadInput < 0)||(msecTimeout==0u))) {
+    bool streamNull=(streamout == NULL);
+    bool unreadInputBool=(unreadInput < 0);
+    bool noMsecTimeout=(msecTimeout==0u);
+    if ((streamNull) && (unreadInputBool||noMsecTimeout)) {
         unreadInput = -1;
     }
     else {

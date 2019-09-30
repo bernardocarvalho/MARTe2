@@ -343,11 +343,6 @@ TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestCleanUp) {
     ASSERT_TRUE(cdbTest.TestCleanUp());
 }
 
-TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestGetCurrentNode) {
-    ConfigurationDatabaseTest cdbTest;
-    ASSERT_TRUE(cdbTest.TestGetCurrentNode());
-}
-
 TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestCopyConstructor) {
     ConfigurationDatabaseTest cdbTest;
     ASSERT_TRUE(cdbTest.TestCopyConstructor());
