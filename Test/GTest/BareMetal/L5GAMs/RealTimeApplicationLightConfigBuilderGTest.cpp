@@ -625,8 +625,3 @@ TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestArraysOfStr
     RealTimeApplicationLightConfigBuilderTest test;
     ASSERT_TRUE(test.TestArraysOfStructures2());
 }
-
-TEST(BareMetal_L5GAMs_RealTimeApplicationLightConfigBuilderGTest,TestArraysOfStructures3) {
-    RealTimeApplicationLightConfigBuilderTest test;
-    ASSERT_TRUE(test.TestArraysOfStructures3());
-}

@@ -277,9 +277,16 @@ ReferenceContainer    ();
      */
     static void RemoveDomainToken(char8 token);
 
-
+    /**
+     * @brief Sets the ReferenceContainer father. This can be useful in the database trees.
+     * @param[in] fatherIn a reference to the parent node.
+     */
     void SetFather(Reference fatherIn);
 
+    /**
+     * @brief Gets the father node.
+     * @return the parent node reference.
+     */
     Reference GetFather() const;
 
 private:

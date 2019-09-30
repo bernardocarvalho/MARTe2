@@ -560,3 +560,14 @@ TEST(BareMetal_L2Objects_ReferenceContainerGTest,TestRemoveDomainToken) {
     ReferenceContainerTest referenceContainerTest;
     ASSERT_TRUE(referenceContainerTest.TestRemoveDomainToken());
 }
+
+TEST(BareMetal_L2Objects_ReferenceContainerGTest,TestSetFather) {
+    ReferenceContainerTest referenceContainerTest;
+    ASSERT_TRUE(referenceContainerTest.TestSetFather());
+}
+
+TEST(BareMetal_L2Objects_ReferenceContainerGTest,TestGetFather) {
+    ReferenceContainerTest referenceContainerTest;
+    ASSERT_TRUE(referenceContainerTest.TestGetFather());
+}
+

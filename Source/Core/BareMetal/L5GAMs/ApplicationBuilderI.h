@@ -40,14 +40,33 @@
 namespace MARTe {
 class RealTimeApplication;
 
+/**
+ * @brief The interface of every real time application builder.
+ */
 class ApplicationBuilderI: public Object {
 public:
+    /**
+     * @brief Default Constructor
+     */
     ApplicationBuilderI();
+
+    /**
+     * @brief Destructor
+     */
     virtual ~ApplicationBuilderI();
 
+    /**
+     * @brief Sets the builder parameters
+     * @param[in] realTimeApplicationIn the RealTimeApplication to be built
+     * @param{in] defaultDataSourceNameIn the default DataSource name
+     */
     virtual void SetParameters(RealTimeApplication &realTimeApplicationIn,
                                const char8 * const defaultDataSourceNameIn)=0;
 
+    /**
+     * @brief Assigns the brokers to the RealTimeApplication functions
+     * @return true if the operation succeeds, false otherwise
+     */
     virtual bool AssignBrokersToFunctions()=0;
 
     /**

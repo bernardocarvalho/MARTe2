@@ -500,6 +500,17 @@ public:
      */
     bool TestIsReferenceContainer();
 
+    /**
+     * @brief Tests the SetFather function
+     */
+    bool TestSetFather();
+
+    /**
+     * @brief Tests the GetFather function
+     */
+    bool TestGetFather();
+
+
     volatile int32 spinLock;
 
 private:

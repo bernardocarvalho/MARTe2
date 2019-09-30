@@ -1185,6 +1185,19 @@ bool ReferenceContainerTest::TestRemoveDomainToken() {
     return TestIsDomainToken();
 }
 
+bool ReferenceContainerTest::TestSetFather(){
+    ReferenceContainer container;
+    ReferenceT<ReferenceContainer> father(GlobalObjectsDatabase::Instance()->GetStandardHeap());
+    container.SetFather(father);
+    return (container.GetFather()==father);
+}
+
+
+bool ReferenceContainerTest::TestGetFather(){
+    return TestSetFather();
+}
+
+
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/

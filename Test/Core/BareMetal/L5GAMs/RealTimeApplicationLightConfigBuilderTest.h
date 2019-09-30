@@ -556,10 +556,6 @@ public:
      */
     bool TestArraysOfStructures2();
 
-    /**
-     * @brief Tests that the application is successfully built with structures that contain arrays of types
-     */
-    bool TestArraysOfStructures3();
 };
 
 }

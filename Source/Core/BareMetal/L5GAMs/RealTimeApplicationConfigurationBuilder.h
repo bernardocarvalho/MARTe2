@@ -93,6 +93,9 @@ public:
     RealTimeApplicationConfigurationBuilder(ConfigurationDatabase &globalDatabaseIn,
             const char8 * const defaultDataSourceNameIn);
 
+    /**
+     * @see ApplicationBuilderI::SetParameters
+     */
     virtual void SetParameters(RealTimeApplication &realTimeApplicationIn,const char8 * const defaultDataSourceNameIn);
 
     /**
