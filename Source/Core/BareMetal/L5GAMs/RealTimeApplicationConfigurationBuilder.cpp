@@ -1967,7 +1967,9 @@ bool RealTimeApplicationConfigurationBuilder::ResolveStates() {
                             if (ret) {
                                 ret = (syncSignals <= 1u);
                                 if (!ret) {
-                                    REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "More than one synchronising signal found in %s.%s", stateName, threadName);
+                                    //REPORT_ERROR_STATIC(ErrorManagement::InitialisationError, "More than one synchronising signal found in %s.%s", stateName, threadName);
+                                    REPORT_ERROR_STATIC(ErrorManagement::Warning, "More than one synchronising signal found in %s.%s", stateName, threadName);
+                                    ret=true;
                                 }
                             }
                         }
