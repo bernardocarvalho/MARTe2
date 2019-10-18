@@ -106,13 +106,13 @@ public:
      * @brief Gets the thread priority level.
      * @return the thread priority level.
      */
-    uint8 GetPriorityLevel() const;
+    int8 GetPriorityLevel() const;
 
     /**
      * @brief Sets the thread priority level.
      * @param[in] priorityLevelIn the thread priority level.
      */
-    virtual void SetPriorityLevel(uint8 priorityLevelIn);
+    virtual void SetPriorityLevel(int8 priorityLevelIn);
 
     /**
      * @brief Gets the thread stack size.
@@ -165,7 +165,7 @@ private:
     /**
      * The thread priority level.
      */
-    uint8 priorityLevel;
+    int8 priorityLevel;
 
     /**
      * The thread stack size

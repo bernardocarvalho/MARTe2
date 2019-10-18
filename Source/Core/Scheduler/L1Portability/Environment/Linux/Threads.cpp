@@ -27,13 +27,14 @@
 
 #include <pthread.h>
 #include <signal.h>
-
+#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
 #include "Threads.h"
 #include "ThreadsDatabase.h"
+//#include "EmbeddedThreadI.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -126,18 +127,21 @@ ThreadIdentifier Id() {
  */
 void SetPriority(const ThreadIdentifier &threadId,
                  const Threads::PriorityClassType &priorityClass,
-                 const uint8 &priorityLevel) {
+                 const int8 &priorityLevel) {
 
     bool ok = ThreadsDatabase::Lock();
     if (ok) {
         ThreadInformation *threadInfo = ThreadsDatabase::GetThreadInformation(threadId);
         ThreadsDatabase::UnLock();
         if (threadInfo != static_cast<ThreadInformation *>(NULL)) {
-            uint8 prioLevel = priorityLevel;
-            if (prioLevel > 15u) {
-                prioLevel = 15u;
+            int8 prioLevel = priorityLevel;
+            if (prioLevel > 15) {
+                prioLevel = 15;
             }
-            uint8 oldPriorityLevel = GetPriorityLevel(threadId);
+            if (prioLevel < -15) {
+                prioLevel = -15;
+            }
+            int8 oldPriorityLevel = GetPriorityLevel(threadId);
             Threads::PriorityClassType oldPriorityClass = GetPriorityClass(threadId);
             threadInfo->SetPriorityLevel(prioLevel);
             threadInfo->SetPriorityClass(priorityClass);
@@ -158,13 +162,16 @@ void SetPriority(const ThreadIdentifier &threadId,
                 break;
             }
             uint32 priorityLevelToAssign = 28u * priorityClassNumber;
-            priorityLevelToAssign += (static_cast<uint32>(prioLevel));
+            priorityLevelToAssign += (static_cast<int32>(prioLevel));
 
             int32 policy = 0;
             sched_param param;
             ok = (pthread_getschedparam(threadId, &policy, &param) == 0);
             if (ok) {
                 policy = SCHED_FIFO;
+                printf("priorityLevelToAssign=%d\n", priorityLevelToAssign);
+                //REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "Error: pthread_setschedparam()");
+
                 param.sched_priority = static_cast<int32>(priorityLevelToAssign);
                 if (pthread_setschedparam(threadId, policy, &param) != 0) {
                     threadInfo->SetPriorityLevel(oldPriorityLevel);
@@ -272,7 +279,9 @@ ThreadIdentifier BeginThread(const ThreadFunctionType function,
                              const uint32 &stacksize,
                              const char8 * const name,
                              const uint32 exceptionHandlerBehaviour,
-                             ProcessorType runOnCPUs) {
+                             ProcessorType runOnCPUs,
+                             PriorityClassType priorityclass,
+                             int8 priorityvalue) {
 
     ThreadIdentifier threadId = InvalidThreadIdentifier;
     if (runOnCPUs == UndefinedCPUs) {
@@ -315,8 +324,15 @@ ThreadIdentifier BeginThread(const ThreadFunctionType function,
                     ThreadsDatabase::UnLock();
                 }
                 if(ok) {
-                    threadInfo->SetPriorityLevel(0u);
-                    SetPriority(threadId, Threads::NormalPriorityClass, 0u);
+                    //threadInfo->SetPriorityLevel(0u);
+                    //class MARTe::EmbeddedThreadI* pars = static_cast<class MARTe::EmbeddedThreadI*>(parameters);
+                    //printf("BeginThread: prio class is, prio level is %d\n", pars->GetPriorityClass(), pars->GetPriorityLevel());
+
+                    //SetPriority(threadId, Threads::NormalPriorityClass, 0u);
+                    SetPriority(threadId, priorityclass, priorityvalue);
+
+                    //SetPriority(threadId, threadInfo->GetPriorityClass(),threadInfo->GetPriorityLevel());
+
                 }
             }
         }

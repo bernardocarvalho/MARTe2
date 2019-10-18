@@ -197,7 +197,7 @@ ErrorManagement::ErrorType EmbeddedThreadI::Start() {
         SetCommands(EmbeddedThreadI::StartCommand);
         maxCommandCompletionHRT = HighResolutionTimer::Counter32() + static_cast<uint32>(timeoutHRT);
         const void * const parameters = static_cast<void *>(this);
-        threadId = Threads::BeginThread(&ServiceThreadLauncher, parameters, stackSize, GetName(), ExceptionHandler::NotHandled, cpuMask);
+        threadId = Threads::BeginThread(&ServiceThreadLauncher, parameters, stackSize, GetName(), ExceptionHandler::NotHandled, cpuMask, priorityClass, priorityLevel);
 
         err.fatalError = (GetThreadId() == 0u);
     }

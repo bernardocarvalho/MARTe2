@@ -133,7 +133,7 @@ enum PriorityClassType {
  */
 DLL_API void SetPriority(const ThreadIdentifier &threadId,
                          const PriorityClassType &priorityClass,
-                         const uint8 &priorityLevel);
+                         const int8 &priorityLevel);
 
 /**
  * @brief Start a new thread.
@@ -154,7 +154,10 @@ DLL_API ThreadIdentifier BeginThread(const ThreadFunctionType function,
 const uint32 &stacksize = static_cast<uint32>(THREADS_DEFAULT_STACKSIZE),
 const char8 * name = static_cast<char8*>(NULL),
 uint32 exceptionHandlerBehaviour = ExceptionHandler::NotHandled,
-ProcessorType runOnCPUs = UndefinedCPUs);
+ProcessorType runOnCPUs = UndefinedCPUs,
+PriorityClassType priorityclass = Threads::UnknownPriorityClass,
+int8 priorityvalue = 0u
+);
 
 /**
  * @brief Deallocated the thread resources.

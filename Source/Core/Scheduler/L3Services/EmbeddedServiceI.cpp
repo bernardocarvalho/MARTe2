@@ -118,11 +118,11 @@ void EmbeddedServiceI::SetPriorityClass(const Threads::PriorityClassType priorit
     priorityClass = priorityClassIn;
 }
 
-uint8 EmbeddedServiceI::GetPriorityLevel() const {
+int8 EmbeddedServiceI::GetPriorityLevel() const {
     return priorityLevel;
 }
 
-void EmbeddedServiceI::SetPriorityLevel(const uint8 priorityLevelIn) {
+void EmbeddedServiceI::SetPriorityLevel(const int8 priorityLevelIn) {
     priorityLevel = priorityLevelIn;
 }
 
