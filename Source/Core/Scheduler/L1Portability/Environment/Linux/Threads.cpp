@@ -169,7 +169,10 @@ void SetPriority(const ThreadIdentifier &threadId,
             ok = (pthread_getschedparam(threadId, &policy, &param) == 0);
             if (ok) {
                 policy = SCHED_FIFO;
-                printf("priorityLevelToAssign=%d\n", priorityLevelToAssign);
+                //char stemp[256];
+                //snprinf(stemp, 256, "Assigning priority %d to thread id 0x%x", priorityLevelToAssign, threadId);
+                //printf("priorityLevelToAssign=%d\n", priorityLevelToAssign);
+                //REPORT_ERROR_STATIC_2(ErrorManagement::Information, "Assigning priority %d to thread id 0x%x", priorityLevelToAssign, threadId);
                 //REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "Error: pthread_setschedparam()");
 
                 param.sched_priority = static_cast<int32>(priorityLevelToAssign);

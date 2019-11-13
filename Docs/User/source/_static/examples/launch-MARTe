@@ -6,5 +6,5 @@
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/demo-63495-reprocess.cfg   -m ShotManager:Start 
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/AFHBA404-expcode1005-RFM-tester-sm-reprocess.cfg   -m ShotManager:Start 
 #taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/Timer-RFM2g-master-tester.cfg   -s Run 
-#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1005-reprocess.cfg -m ShotManager:Start
-taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/Timer-ESDEtherCATMaster-tester.cfg 
+taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1005-reprocess.cfg -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/Timer-ESDEtherCATMaster-tester.cfg 
