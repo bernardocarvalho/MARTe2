@@ -10,4 +10,6 @@
 #taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/Timer-ESDEtherCATMaster-tester.cfg 
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1005.cfg -m ShotManager:Start
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010.cfg -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010.cfg 
 taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010-1thread.cfg  -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/SimulinkWrapperTester.cfg 
