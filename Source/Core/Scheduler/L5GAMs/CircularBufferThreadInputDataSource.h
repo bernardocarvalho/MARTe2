@@ -315,11 +315,16 @@ protected:
      */
     uint32 *interleavedPacketMemberByteSize;
 
+
+    uint32 *headerSize;
+
     /**
      * If true the signal definition is considered to be interleaved.
      */
     bool signalDefinitionInterleaved;
 
+
+    bool getFirst;
 private:
     /**
      * @brief Helper function to create the interleaved accelerators

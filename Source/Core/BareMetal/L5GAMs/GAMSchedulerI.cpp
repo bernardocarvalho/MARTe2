@@ -87,10 +87,10 @@ bool GAMSchedulerI::Initialise(StructuredDataI & data) {
 
 bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
     realTimeApp = realTimeAppIn;
-    ReferenceT<RealTimeApplication> rtApp = realTimeApp;
+    ReferenceT < RealTimeApplication > rtApp = realTimeApp;
     bool ret = rtApp.IsValid();
 
-    ReferenceT<ReferenceContainer> statesContainer;
+    ReferenceT < ReferenceContainer > statesContainer;
     if (ret) {
         statesContainer = rtApp->Find("States");
         ret = statesContainer.IsValid();
@@ -108,10 +108,10 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
         numberOfStates = statesContainer->Size();
         states = new ScheduledState[numberOfStates];
         for (uint32 i = 0u; (i < numberOfStates) && (ret); i++) {
-            ReferenceT<RealTimeState> stateElement = statesContainer->Get(i);
+            ReferenceT < RealTimeState > stateElement = statesContainer->Get(i);
             ret = stateElement.IsValid();
             if (ret) {
-                ReferenceT<ReferenceContainer> threadContainer = stateElement->Find("Threads");
+                ReferenceT < ReferenceContainer > threadContainer = stateElement->Find("Threads");
                 ret = threadContainer.IsValid();
                 if (ret) {
                     uint32 numberOfThreads = threadContainer->Size();
@@ -122,7 +122,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                     states[i].threads = new ScheduledThread[numberOfThreads];
 
                     for (uint32 j = 0u; (j < numberOfThreads) && (ret); j++) {
-                        ReferenceT<RealTimeThread> threadElement = threadContainer->Get(j);
+                        ReferenceT < RealTimeThread > threadElement = threadContainer->Get(j);
                         ret = threadElement.IsValid();
                         if (ret) {
 
@@ -132,7 +132,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                             uint32 numberOfExecutables = numberOfGams;
 
                             for (uint32 k = 0u; (k < numberOfGams) && (ret); k++) {
-                                ReferenceT<GAM> gam = gams.Get(k);
+                                ReferenceT < GAM > gam = gams.Get(k);
                                 ret = gam.IsValid();
                                 if (ret) {
                                     ReferenceContainer inputBrokers;
@@ -162,7 +162,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                             for (uint32 k = 0u; (k < numberOfGams) && (ret); k++) {
                                 //add input brokers
                                 StreamString gamFullName;
-                                ReferenceT<GAM> gam = gams.Get(k);
+                                ReferenceT < GAM > gam = gams.Get(k);
                                 ret = gam->GetQualifiedName(gamFullName);
                                 if (ret) {
                                     ret = InsertInputBrokers(gam, gamFullName.Buffer(), i, j, c);
@@ -210,7 +210,7 @@ bool GAMSchedulerI::InsertInputBrokers(ReferenceT<GAM> gam,
                                        const char8 * const gamFullName,
                                        const uint32 stateIdx,
                                        const uint32 threadIdx,
-                                       uint32 &executableIdx) const{
+                                       uint32 &executableIdx) const {
 
     //add input brokers
     StreamString timeSignalName = gamFullName;
@@ -236,7 +236,7 @@ bool GAMSchedulerI::InsertInputBrokers(ReferenceT<GAM> gam,
         numberOfInputBrokers = inputBrokers.Size();
     }
     for (uint32 n = 0u; (n < numberOfInputBrokers) && (ret); n++) {
-        ReferenceT<ExecutableI> input = inputBrokers.Get(n);
+        ReferenceT < ExecutableI > input = inputBrokers.Get(n);
         ret = input.IsValid();
         if (ret) {
             //lint -e{613} states != NULL checked before entering here.
@@ -320,7 +320,7 @@ bool GAMSchedulerI::InsertOutputBrokers(ReferenceT<GAM> gam,
         numberOfOutputBrokers = outputBrokers.Size();
     }
     for (uint32 n = 0u; (n < numberOfOutputBrokers) && (ret); n++) {
-        ReferenceT<ExecutableI> output = outputBrokers.Get(n);
+        ReferenceT < ExecutableI > output = outputBrokers.Get(n);
         ret = output.IsValid();
         if (ret) {
             //lint -e{613} states != NULL checked before entering here.
@@ -343,7 +343,7 @@ bool GAMSchedulerI::PrepareNextState(const char8 * const currentStateName,
 
     uint32 nextBuffer = 0u;
     if (ret) {
-        ReferenceT<RealTimeApplication> rtApp = realTimeApp;
+        ReferenceT < RealTimeApplication > rtApp = realTimeApp;
         if (rtApp.IsValid()) {
             nextBuffer = (rtApp->GetIndex() + 1u) % 2u;
         }
