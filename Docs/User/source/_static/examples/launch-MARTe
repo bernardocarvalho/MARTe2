@@ -11,5 +11,9 @@
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1005.cfg -m ShotManager:Start
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010.cfg -m ShotManager:Start
 #taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010.cfg 
-taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010-3threads.cfg  -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010-3threads.cfg  -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1010-3threads-alltimings.cfg  -m ShotManager:Start
 #taskset 0x01 ./marte/MARTeApp.sh -l RealTimeLoader -f ./marte/Configurations/SimulinkWrapperTester.cfg 
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1006-reprocess.cfg  -m ShotManager:Start
+#taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1006.cfg  -m ShotManager:Start
+taskset 0x01 ./marte/MARTeApp.sh -l SPCRealTimeLoader -f ./marte/Configurations/node02-1005-nodac.cfg  -m ShotManager:Start
