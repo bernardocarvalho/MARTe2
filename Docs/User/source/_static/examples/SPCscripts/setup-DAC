@@ -1,0 +1,33 @@
+#!/bin/bash
+
+UUT1=acq2106_076
+UUT2=acq2106_079
+# INBOX: acq2106_076
+# OUTBOX: acq2106_079 
+
+case "x$1" in
+xa)
+	# DAC system confugred to pull data stream from SFP A
+	echo "Configuring DAC to pull from link A"
+	cd ~/PROJECTS/AFHBA404/HAPI;
+	DOSITES="5,6" PWMSITES="6" XOCOMMS="A" python ./llc-set-dac-route.py $UUT2
+	cd -;
+	
+	;;
+xb)
+	# DAC system confugred to pull data stream from SFP B
+	echo "Configuring DAC to pull from link B"
+	cd ~/PROJECTS/AFHBA404/HAPI;
+        DOSITES="5,6" PWMSITES="6" XOCOMMS="B" python ./llc-set-dac-route.py $UUT2
+	cd -;
+
+	;;
+x)
+	$0 a
+	;;
+esac
+
+
+
+
+
