@@ -1,5 +1,7 @@
 #!/bin/bash
 
+/root/scd/commands/traceoff.sh
+
 # 7.5 secs at 10kHz
 POST=${POST:-75000}
 let TLEN="$POST*120/100"
@@ -7,4 +9,5 @@ let TLEN="$POST*120/100"
 (cd ~/PROJECTS/ACQ400/HAPI/acq400_hapi/user_apps/acq400;
   ./acq400_postshot.py acq2106_076
 )
+
 
