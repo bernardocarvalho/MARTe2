@@ -1,0 +1,1 @@
+echo -n "Class = Message Destination = ShotStarter Function = INIT" | nc 127.0.0.1 24681 &

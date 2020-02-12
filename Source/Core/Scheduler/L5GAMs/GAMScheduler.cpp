@@ -228,7 +228,7 @@ ErrorManagement::ErrorType GAMScheduler::Execute(ExecutionInfo & information) {
         if (rtThreadInfo[idx] != NULL_PTR(RTThreadParam *)) {
             bool ok = ExecuteSingleCycle(rtThreadInfo[idx][threadNumber].executables, rtThreadInfo[idx][threadNumber].numberOfExecutables);
             if (!ok) {
-                REPORT_ERROR(ErrorManagement::FatalError, "Failed to ExecuteSingleCycle().");
+                //REPORT_ERROR(ErrorManagement::FatalError, "Failed to ExecuteSingleCycle().");
                 //Do not set ret.fatalError = true because when ExecuteSingleCycle returns false it will trigger the MultiThreadService to restart the execution of ThreadLoop.
                 //If this was not handled then it would wait on eventSem.Wait(TTInfiniteWait) every time ExecuteSingleCycle returns false.
                 //ret.fatalError = true;

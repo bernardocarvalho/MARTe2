@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#top -H -d 0.2 -o %CPU
+#top -H -d 0.2 -o PID
+top -H -d 0.2 -o P
