@@ -110,7 +110,6 @@ ErrorManagement::ErrorType StateMachineEvent::ConsumeMessage(ReferenceT<Message>
     //Check if the destination of this message is this event
     if (err.ErrorsCleared()) {
         CCString function = messageToTest->GetFunction();
-        REPORT_ERROR(ErrorManagement::Information, "Consuming message with function %s", function.GetList());
         if (function.GetList() != NULL_PTR(const char8 *)) {
             found = (StringHelper::Compare(function, GetName()) == 0);
         }
@@ -118,7 +117,6 @@ ErrorManagement::ErrorType StateMachineEvent::ConsumeMessage(ReferenceT<Message>
     }
     //Found.
     if (found) {
-        REPORT_ERROR(ErrorManagement::Information, "Message matches event, triggering...");
         err = stateMachine->EventTriggered(this);
     }
     else {
