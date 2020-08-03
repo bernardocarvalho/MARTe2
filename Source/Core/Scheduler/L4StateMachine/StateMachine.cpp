@@ -242,9 +242,6 @@ ErrorManagement::ErrorType StateMachine::EventTriggered(ReferenceT<StateMachineE
                 }
             }
         }
-	else {
-            err = InstallMessageFilter(event);
-	}
     }
     else {
         REPORT_ERROR(ErrorManagement::FatalError, "In state (%s) the next state is not valid", currentState->GetName());
