@@ -43,7 +43,7 @@ namespace MARTe {
 
 StateMachineEvent::StateMachineEvent() :
         ReferenceContainer(),
-        MessageFilter(true) {
+        MessageFilter(false) {
     timeout = TTInfiniteWait;
 }
 
