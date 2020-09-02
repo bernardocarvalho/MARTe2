@@ -56,7 +56,7 @@ GAMDataSource::GAMDataSource() :
     signalOffsets = NULL_PTR(uint32 *);
     memoryHeap = NULL_PTR(HeapI *);
     allowNoProducers = false;
-    resetUnusedVariablesAtStateChange = true;
+    resetVariablesAtStateChange = 1u;
     forceResetUnusedVariablesAtStateChange = true;
 }
 
@@ -94,9 +94,9 @@ bool GAMDataSource::Initialise(StructuredDataI & data) {
         allowNoProducers = (allowNoProducersUInt32 == 1u);
     }
     if (ret) {
-        uint32 resetUnusedVariablesAtStateChangeUInt32 = 1u;
-        (void) (data.Read("ResetUnusedVariablesAtStateChange", resetUnusedVariablesAtStateChangeUInt32));
-        resetUnusedVariablesAtStateChange = (resetUnusedVariablesAtStateChangeUInt32 == 1u);
+        if (!data.Read("ResetUnusedVariablesAtStateChange", resetVariablesAtStateChange)) {
+            resetVariablesAtStateChange = 1u;
+        }
     }
     forceResetUnusedVariablesAtStateChange = true;
     return ret;
@@ -106,7 +106,9 @@ uint32 GAMDataSource::GetNumberOfMemoryBuffers() {
     return 1u;
 }
 
-bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx, const uint32 bufferIdx, void *&signalAddress) {
+bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx,
+                                          const uint32 bufferIdx,
+                                          void *&signalAddress) {
     bool ret = (bufferIdx < 1u);
     uint32 nOfSignals = GetNumberOfSignals();
     if (ret) {
@@ -166,7 +168,8 @@ bool GAMDataSource::AllocateMemory() {
     return ret;
 }
 
-const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data, const SignalDirection direction) {
+const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data,
+                                          const SignalDirection direction) {
     const char8* brokerName = NULL_PTR(const char8 *);
 
     float32 freq;
@@ -191,29 +194,21 @@ const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data, const SignalDir
 }
 
 /*lint -e{715} this implementation of the StatefulI interface does not need to know about the nextStateName*/
-bool GAMDataSource::PrepareNextState(const char8 * const currentStateName, const char8 * const nextStateName) {
+bool GAMDataSource::PrepareNextState(const char8 * const currentStateName,
+                                     const char8 * const nextStateName) {
 //Set the default value for all the input signals
-    uint32 numberOfFunctions = GetNumberOfFunctions();
     bool ret = true;
 
     //At least the first time, reset all the variables to the default value.
-    bool resetUnusedVariables = resetUnusedVariablesAtStateChange;
+    bool resetUnusedVariables = (resetVariablesAtStateChange > 0u);
     if (forceResetUnusedVariablesAtStateChange) {
         resetUnusedVariables = true;
         forceResetUnusedVariablesAtStateChange = false;
     }
 
-    for (uint32 n = 0u; (n < numberOfFunctions) && (ret) && (resetUnusedVariables); n++) {
-        uint32 numberOfFunctionInputSignals;
-        ret = GetFunctionNumberOfSignals(InputSignals, n, numberOfFunctionInputSignals);
-        for (uint32 i = 0u; (i < numberOfFunctionInputSignals) && (ret); i++) {
-            StreamString functionSignalAlias;
-            ret = GetFunctionSignalAlias(InputSignals, n, i, functionSignalAlias);
-            uint32 signalIdx = 0u;
-            if (ret) {
-                ret = GetSignalIndex(signalIdx, functionSignalAlias.Buffer());
-            }
-            bool update = false;
+    for (uint32 signalIdx = 0u; (signalIdx < numberOfSignals) && (ret) && (resetUnusedVariables); signalIdx++) {
+        bool update = (resetVariablesAtStateChange > 1u);
+        if (!update) {
             //Variable used in the current state?
             if (ret) {
                 uint32 numberOfProducersCurrentState;
@@ -223,97 +218,102 @@ bool GAMDataSource::PrepareNextState(const char8 * const currentStateName, const
                 //If the variable was not used update!
                 update = (numberOfProducersCurrentState == 0u);
             }
-            TypeDescriptor typeDesc;
-            if (update) {
+        }
+        TypeDescriptor typeDesc;
+        if (update) {
+            if (ret) {
+                typeDesc = GetSignalType(signalIdx);
+                ret = (typeDesc != InvalidType);
+            }
+        }
+        if (update) {
+            //if the default value is declared use it to initialise
+            //otherwise null the memory
+            AnyType defaultValueType = GetSignalDefaultValueType(signalIdx);
+            void *thisSignalMemory = NULL_PTR(void *);
+            if (ret) {
+                ret = GetSignalMemoryBuffer(signalIdx, 0u, thisSignalMemory);
+            }
+            if (defaultValueType.GetTypeDescriptor() == VoidType) {
+                uint32 size = 0u;
                 if (ret) {
-                    typeDesc = GetSignalType(signalIdx);
-                    ret = (typeDesc != InvalidType);
+                    ret = GetSignalByteSize(signalIdx, size);
+                }
+                if (ret) {
+                    ret = MemoryOperationsHelper::Set(thisSignalMemory, '\0', size);
                 }
             }
-            if (update) {
-                //if the default value is declared use it to initialise
-                //otherwise null the memory
-                AnyType defaultValueType = GetSignalDefaultValueType(signalIdx);
-                void *thisSignalMemory = NULL_PTR(void *);
+            else {
+                AnyType thisSignal(typeDesc, 0u, thisSignalMemory);
+                uint32 thisSignalNumberOfElements = 0u;
+                uint8 thisSignalNumberOfDimensions = 0u;
+                StreamString signalName;
                 if (ret) {
-                    ret = GetSignalMemoryBuffer(signalIdx, 0u, thisSignalMemory);
+                    ret = GetSignalName(signalIdx, signalName);
                 }
-                if (defaultValueType.GetTypeDescriptor() == VoidType) {
-                    uint32 size = 0u;
-                    if (ret) {
-                        ret = GetSignalByteSize(signalIdx, size);
-                    }
-                    if (ret) {
-                        ret = MemoryOperationsHelper::Set(thisSignalMemory, '\0', size);
-                    }
+                if (ret) {
+                    ret = signalName.Seek(0LLU);
                 }
-                else {
-                    AnyType thisSignal(typeDesc, 0u, thisSignalMemory);
-                    uint32 thisSignalNumberOfElements = 0u;
-                    uint8 thisSignalNumberOfDimensions = 0u;
-                    StreamString signalName;
-                    if (ret) {
-                        ret = GetSignalName(signalIdx, signalName);
-                    }
-                    if (ret) {
-                        ret = signalName.Seek(0LLU);
-                    }
-                    if (ret) {
-                        ret = GetSignalNumberOfElements(signalIdx, thisSignalNumberOfElements);
-                    }
-                    if (ret) {
-                        ret = GetSignalNumberOfDimensions(signalIdx, thisSignalNumberOfDimensions);
-                    }
-                    if (ret) {
-                        ret = (thisSignalNumberOfDimensions == defaultValueType.GetNumberOfDimensions());
-                        if (!ret) {
-                            if (thisSignalNumberOfDimensions == 1u) {
-                                if (defaultValueType.GetNumberOfDimensions() == 0u) {
-                                    ret = (defaultValueType.GetNumberOfElements(0u) == 1u);
-                                }
+                if (ret) {
+                    ret = GetSignalNumberOfElements(signalIdx, thisSignalNumberOfElements);
+                }
+                if (ret) {
+                    ret = GetSignalNumberOfDimensions(signalIdx, thisSignalNumberOfDimensions);
+                }
+                if (ret) {
+                    ret = (thisSignalNumberOfDimensions == defaultValueType.GetNumberOfDimensions());
+                    if (!ret) {
+                        if (thisSignalNumberOfDimensions == 1u) {
+                            if (defaultValueType.GetNumberOfDimensions() == 0u) {
+                                ret = (defaultValueType.GetNumberOfElements(0u) == 1u);
                             }
                         }
                     }
-                    if (ret) {
-                        thisSignal.SetNumberOfDimensions(defaultValueType.GetNumberOfDimensions());
-                    }
-                    else {
-                        REPORT_ERROR(ErrorManagement::FatalError, "Default value has different number of dimensions w.r.t. to the signal %s", signalName);
-                    }
-
-                    uint32 defaultValueNumberOfElements = 1u;
-                    uint32 d;
-                    for (d = 0u; (d < thisSignalNumberOfDimensions) && (ret); d++) {
-                        uint32 elementsInDimensionN = defaultValueType.GetNumberOfElements(d);
-                        defaultValueNumberOfElements *= elementsInDimensionN;
-                    }
-                    if (ret) {
-                        ret = (thisSignalNumberOfElements == defaultValueNumberOfElements);
-                    }
-                    else {
-                        REPORT_ERROR(ErrorManagement::FatalError, "Default value has different number of elements w.r.t. to the signal %s", signalName);
-                    }
-                    for (d = 0u; (d < thisSignalNumberOfDimensions) && (ret); d++) {
-                        uint32 elementsInDimensionN = defaultValueType.GetNumberOfElements(d);
-                        thisSignal.SetNumberOfElements(d, elementsInDimensionN);
-                    }
-                    if (!GetSignalDefaultValue(signalIdx, thisSignal)) {
-                        ret = false;
-                        REPORT_ERROR(ErrorManagement::FatalError, "Could not read existent Default value for signal %s", signalName);
-                    }
-
                 }
+                if (ret) {
+                    thisSignal.SetNumberOfDimensions(defaultValueType.GetNumberOfDimensions());
+                }
+                else {
+                    REPORT_ERROR(ErrorManagement::FatalError, "Default value has different number of dimensions w.r.t. to the signal %s", signalName);
+                }
+
+                uint32 defaultValueNumberOfElements = 1u;
+                uint32 d;
+                for (d = 0u; (d < thisSignalNumberOfDimensions) && (ret); d++) {
+                    uint32 elementsInDimensionN = defaultValueType.GetNumberOfElements(d);
+                    defaultValueNumberOfElements *= elementsInDimensionN;
+                }
+                if (ret) {
+                    ret = (thisSignalNumberOfElements == defaultValueNumberOfElements);
+                }
+                else {
+                    REPORT_ERROR(ErrorManagement::FatalError, "Default value has different number of elements w.r.t. to the signal %s", signalName);
+                }
+                for (d = 0u; (d < thisSignalNumberOfDimensions) && (ret); d++) {
+                    uint32 elementsInDimensionN = defaultValueType.GetNumberOfElements(d);
+                    thisSignal.SetNumberOfElements(d, elementsInDimensionN);
+                }
+                if (!GetSignalDefaultValue(signalIdx, thisSignal)) {
+                    ret = false;
+                    REPORT_ERROR(ErrorManagement::FatalError, "Could not read existent Default value for signal %s", signalName);
+                }
+
             }
         }
     }
     return ret;
 }
 
-bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers, const char8* const functionName, void * const gamMemPtr) {
+bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers,
+                                    const char8* const functionName,
+                                    void * const gamMemPtr) {
 //generally a loop for each supported broker
     ReferenceT<MemoryMapInputBroker> broker("MemoryMapInputBroker");
     bool ret = broker.IsValid();
     if (ret) {
+        StreamString brokerName = functionName;
+        brokerName += ".InputBroker.";
+        brokerName += "MemoryMapInputBroker";
         ret = broker->Init(InputSignals, *this, functionName, gamMemPtr);
     }
     if (ret) {
@@ -324,10 +324,16 @@ bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers, const char
     return ret;
 }
 
-bool GAMDataSource::GetOutputBrokers(ReferenceContainer &outputBrokers, const char8* const functionName, void * const gamMemPtr) {
+bool GAMDataSource::GetOutputBrokers(ReferenceContainer &outputBrokers,
+                                     const char8* const functionName,
+                                     void * const gamMemPtr) {
     ReferenceT<MemoryMapOutputBroker> broker("MemoryMapOutputBroker");
     bool ret = broker.IsValid();
     if (ret) {
+        StreamString brokerName = functionName;
+        brokerName += ".OutputBroker.";
+        brokerName += "MemoryMapOutputBroker";
+        broker->SetName(brokerName.Buffer());
         ret = broker->Init(OutputSignals, *this, functionName, gamMemPtr);
     }
     if (ret) {
@@ -351,8 +357,10 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
                 nStates = 0u;
             }
             if (nStates == 0u) {
-                REPORT_ERROR(ErrorManagement::Information, "In GAMDataSource %s, signal %s will never be produced nor consumed because there is no GAM with this signal being executed in any state.",
-                             GetName(), signalName.Buffer());
+                REPORT_ERROR(
+                        ErrorManagement::Information,
+                        "In GAMDataSource %s, signal %s will never be produced nor consumed because there is no GAM with this signal being executed in any state.",
+                        GetName(), signalName.Buffer());
             }
         }
         uint32 s;
@@ -372,8 +380,8 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
                     ret = true;
                     errLog = ErrorManagement::Warning;
                 }
-                REPORT_ERROR(errLog, "In GAMDataSource %s, state %s, signal %s has an invalid number of producers. Should be > 0 but is %d", GetName(), stateName.Buffer(), signalName.Buffer(),
-                             nProducers);
+                REPORT_ERROR(errLog, "In GAMDataSource %s, state %s, signal %s has an invalid number of producers. Should be > 0 but is %d", GetName(),
+                             stateName.Buffer(), signalName.Buffer(), nProducers);
             }
         }
     }

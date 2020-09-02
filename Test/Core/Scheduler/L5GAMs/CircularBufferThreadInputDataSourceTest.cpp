@@ -177,7 +177,7 @@ uint32 CircularBufferThreadInputDataSourceTestDS::GetTriggerAfterNSamples() {
 }
 
 uint32 *CircularBufferThreadInputDataSourceTestDS::NBrokerOpPerSignal() {
-    return nBrokerOpPerSignal;
+    return nBrokerOpPerSignal[0];
 }
 
 uint32 CircularBufferThreadInputDataSourceTestDS::GetNumberOfChannels() {

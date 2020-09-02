@@ -2362,6 +2362,17 @@ bool RealTimeApplicationLightConfigBuilder::AddTimingSignals() {
             }
         }
         if (ret) {
+            ConfigurationDatabase dataSourcesDatabaseBeforeCreate = dataSourcesDatabase;
+            ret = dataSourcesDatabase.CreateRelative("CurrentState");
+
+            if (ret) {
+                ret = WriteTimeSignalInfo("CurrentState");
+            }
+            if(ret){
+                dataSourcesDatabase = dataSourcesDatabaseBeforeCreate;
+            }
+        }
+        if (ret) {
             ret = dataSourcesDatabase.MoveToAncestor(1u);
         }
 

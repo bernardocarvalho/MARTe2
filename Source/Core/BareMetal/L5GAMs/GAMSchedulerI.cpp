@@ -57,7 +57,8 @@ GAMSchedulerI::GAMSchedulerI() :
     scheduledStates[0] = NULL_PTR(ScheduledState *);
     scheduledStates[1] = NULL_PTR(ScheduledState *);
     numberOfStates = 0u;
-
+    currentState = NULL_PTR(uint32 *);
+    nextCurrentState = 0u;
 }
 
 GAMSchedulerI::~GAMSchedulerI() {
@@ -87,10 +88,10 @@ bool GAMSchedulerI::Initialise(StructuredDataI & data) {
 
 bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
     realTimeApp = realTimeAppIn;
-    ReferenceT < RealTimeApplication > rtApp = realTimeApp;
+    ReferenceT<RealTimeApplication> rtApp = realTimeApp;
     bool ret = rtApp.IsValid();
 
-    ReferenceT < ReferenceContainer > statesContainer;
+    ReferenceT<ReferenceContainer> statesContainer;
     if (ret) {
         statesContainer = rtApp->Find("States");
         ret = statesContainer.IsValid();
@@ -108,10 +109,10 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
         numberOfStates = statesContainer->Size();
         states = new ScheduledState[numberOfStates];
         for (uint32 i = 0u; (i < numberOfStates) && (ret); i++) {
-            ReferenceT < RealTimeState > stateElement = statesContainer->Get(i);
+            ReferenceT<RealTimeState> stateElement = statesContainer->Get(i);
             ret = stateElement.IsValid();
             if (ret) {
-                ReferenceT < ReferenceContainer > threadContainer = stateElement->Find("Threads");
+                ReferenceT<ReferenceContainer> threadContainer = stateElement->Find("Threads");
                 ret = threadContainer.IsValid();
                 if (ret) {
                     uint32 numberOfThreads = threadContainer->Size();
@@ -122,7 +123,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                     states[i].threads = new ScheduledThread[numberOfThreads];
 
                     for (uint32 j = 0u; (j < numberOfThreads) && (ret); j++) {
-                        ReferenceT < RealTimeThread > threadElement = threadContainer->Get(j);
+                        ReferenceT<RealTimeThread> threadElement = threadContainer->Get(j);
                         ret = threadElement.IsValid();
                         if (ret) {
 
@@ -132,7 +133,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                             uint32 numberOfExecutables = numberOfGams;
 
                             for (uint32 k = 0u; (k < numberOfGams) && (ret); k++) {
-                                ReferenceT < GAM > gam = gams.Get(k);
+                                ReferenceT<GAM> gam = gams.Get(k);
                                 ret = gam.IsValid();
                                 if (ret) {
                                     ReferenceContainer inputBrokers;
@@ -162,7 +163,7 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                             for (uint32 k = 0u; (k < numberOfGams) && (ret); k++) {
                                 //add input brokers
                                 StreamString gamFullName;
-                                ReferenceT < GAM > gam = gams.Get(k);
+                                ReferenceT<GAM> gam = gams.Get(k);
                                 ret = gam->GetQualifiedName(gamFullName);
                                 if (ret) {
                                     ret = InsertInputBrokers(gam, gamFullName.Buffer(), i, j, c);
@@ -191,6 +192,15 @@ bool GAMSchedulerI::ConfigureScheduler(Reference realTimeAppIn) {
                                 ret = timingDataSource->GetSignalIndex(signalIdx, threadFullName.Buffer());
                                 if (ret) {
                                     ret = timingDataSource->GetSignalMemoryBuffer(signalIdx, 0u, reinterpret_cast<void*&>(states[i].threads[j].cycleTime));
+                                }
+                            }
+
+                            //Get the current state id
+                            if (ret) {
+                                uint32 signalIdx;
+                                ret = timingDataSource->GetSignalIndex(signalIdx, "CurrentState");
+                                if (ret) {
+                                    ret = timingDataSource->GetSignalMemoryBuffer(signalIdx, 0u, reinterpret_cast<void*&>(currentState));
                                 }
                             }
                         }
@@ -236,7 +246,7 @@ bool GAMSchedulerI::InsertInputBrokers(ReferenceT<GAM> gam,
         numberOfInputBrokers = inputBrokers.Size();
     }
     for (uint32 n = 0u; (n < numberOfInputBrokers) && (ret); n++) {
-        ReferenceT < ExecutableI > input = inputBrokers.Get(n);
+        ReferenceT<ExecutableI> input = inputBrokers.Get(n);
         ret = input.IsValid();
         if (ret) {
             //lint -e{613} states != NULL checked before entering here.
@@ -320,7 +330,7 @@ bool GAMSchedulerI::InsertOutputBrokers(ReferenceT<GAM> gam,
         numberOfOutputBrokers = outputBrokers.Size();
     }
     for (uint32 n = 0u; (n < numberOfOutputBrokers) && (ret); n++) {
-        ReferenceT < ExecutableI > output = outputBrokers.Get(n);
+        ReferenceT<ExecutableI> output = outputBrokers.Get(n);
         ret = output.IsValid();
         if (ret) {
             //lint -e{613} states != NULL checked before entering here.
@@ -343,20 +353,21 @@ bool GAMSchedulerI::PrepareNextState(const char8 * const currentStateName,
 
     uint32 nextBuffer = 0u;
     if (ret) {
-        ReferenceT < RealTimeApplication > rtApp = realTimeApp;
+        ReferenceT<RealTimeApplication> rtApp = realTimeApp;
         if (rtApp.IsValid()) {
             nextBuffer = (rtApp->GetIndex() + 1u) % 2u;
         }
     }
 
     bool found = false;
-
+    nextCurrentState = numberOfStates;
     for (uint32 i = 0u; (i < numberOfStates) && (ret) && (!found); i++) {
         //lint -e{613} states != NULL checked before entering here.
         found = (StringHelper::Compare(nextStateName, states[i].name) == 0);
         if (found) {
             //lint -e{613} states != NULL checked before entering here.
             scheduledStates[nextBuffer] = &states[i];
+            nextCurrentState = i;
         }
     }
     if (ret) {
@@ -386,6 +397,10 @@ bool GAMSchedulerI::ExecuteSingleCycle(ExecutableI * const * const executables,
         if (ret) {
             uint32 sizeToCopy = static_cast<uint32>(sizeof(uint32));
             ret = MemoryOperationsHelper::Copy(executables[i]->GetTimingSignalAddress(), &absTime, sizeToCopy);
+        }
+
+        if(!ret){
+            REPORT_ERROR(ErrorManagement::Information, "Failed executable[%d]=%s", i, (dynamic_cast<Object*>(executables[i]))->GetName());
         }
     }
 

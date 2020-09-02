@@ -62,7 +62,7 @@ RealTimeApplication::RealTimeApplication() :
         REPORT_ERROR(ErrorManagement::FatalError, "Failed to install message filters");
     }
     defaultDataSourceName = "";
-    index = 1u;
+    index = 1;
 
 }
 
@@ -75,7 +75,7 @@ RealTimeApplication::~RealTimeApplication() {
 
 }
 bool RealTimeApplication::Initialise(StructuredDataI & data) {
-    index = 1u;
+    index = 1;
 
     bool ret = ReferenceContainer::Initialise(data);
     if (data.MoveRelative("+Data")) {
@@ -483,7 +483,13 @@ ErrorManagement::ErrorType RealTimeApplication::PrepareNextState(StreamString ne
 }
 
 ErrorManagement::ErrorType RealTimeApplication::StartNextStateExecution() {
-    index = (index + 1u) % 2u;
+    if(index==1){
+        Atomic::Decrement(&index);
+    }
+    else{
+        Atomic::Increment(&index);
+    }
+    //index = (index + 1u) % 2u;
     ErrorManagement::ErrorType ret = scheduler.IsValid();
     if (ret.ErrorsCleared()) {
         ret = scheduler->StartNextStateExecution();
@@ -530,7 +536,7 @@ bool RealTimeApplication::GetStates(ReferenceContainer &states) const {
 }
 
 uint32 RealTimeApplication::GetIndex() const {
-    return index;
+    return static_cast<uint32>(index);
 }
 
 void RealTimeApplication::Purge(ReferenceContainer &purgeList) {

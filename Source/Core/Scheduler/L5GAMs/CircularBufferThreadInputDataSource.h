@@ -325,6 +325,9 @@ protected:
 
 
     bool getFirst;
+
+
+    volatile int32 stop;
 private:
     /**
      * @brief Helper function to create the interleaved accelerators

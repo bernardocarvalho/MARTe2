@@ -67,7 +67,7 @@ struct ScheduledThread {
     /**
      * The cpus where is possible to run the thread
      */
-    uint32 cpu;
+    uint64 cpu;
 
     /**
      * The thread stack size
@@ -208,7 +208,10 @@ protected:
      * The real-time application linked to this scheduler
      */
     Reference realTimeApp;
-private:
+
+    uint32 *currentState;
+
+    uint32 nextCurrentState;
 
     /**
      * Double buffer accelerator to the threads to be executed for the current

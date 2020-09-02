@@ -259,7 +259,7 @@ private:
     /**
      * The unique RealTimeApplication index which swaps between 0/1 at every state change.
      */
-    uint32 index;
+    volatile int32 index;
 
     /**
      * The +States container.

@@ -188,7 +188,7 @@ protected:
     /**
      * Reset unused variables to the default value?
      */
-    bool resetUnusedVariablesAtStateChange;
+    uint8 resetVariablesAtStateChange;
 
     /**
      * Force the reset of the unused variables the first time.

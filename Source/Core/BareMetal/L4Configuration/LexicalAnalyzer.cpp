@@ -26,7 +26,7 @@
 /*---------------------------------------------------------------------------*/
 /*                         Standard header includes                          */
 /*---------------------------------------------------------------------------*/
-
+#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
@@ -337,6 +337,7 @@ LexicalAnalyzer::LexicalAnalyzer(StreamI &stream,
     inputStream = &stream;
     lineNumber = 1u;
     terminals = terminalsIn;
+    //printf("terminals=%s\n", terminals.Buffer());
     separators = separatorsIn;
     oneLineCommentBegin=oneLineCommentBeginIn;
     multipleLineCommentBegin=multipleLineCommentBeginIn;
@@ -370,7 +371,7 @@ LexicalAnalyzer::~LexicalAnalyzer() {
 /*lint -e{429} . Justification: the allocated memory is freed by the class destructor. */
 void LexicalAnalyzer::AddToken(char8 * const tokenBuffer,
                                const bool isString) {
-
+    //printf("Adding token %s\n", tokenBuffer);
 
     if (StringHelper::Length(tokenBuffer) > 0u) {
 
@@ -432,6 +433,7 @@ void LexicalAnalyzer::AddToken(char8 * const tokenBuffer,
 /*lint -e{429} . Justification: the allocated memory is freed by the class destructor. */
 void LexicalAnalyzer::AddTerminal(const char8 terminal) {
 
+    //printf("Adding terminal %c\n", terminal);
     char8 terminalBuffer[2] = {terminal, '\0'};
     /*lint -e{423} .Justification: The pointer is added to a stack and the memory is freed by the class destructor */
     Token *toAdd = new Token(tokenInfo[TERMINAL_TOKEN], &terminalBuffer[0], lineNumber);
@@ -451,6 +453,7 @@ void LexicalAnalyzer::TokenizeInput(const uint32 level) {
     StreamString terminalsUsed = terminals.Buffer();
 
     while (tokenQueue.GetSize() < (level + 1u)) {
+
         char8 c = '\0';
         char8 terminal = '\0';
         char8 separator = '\0';
@@ -481,6 +484,7 @@ void LexicalAnalyzer::TokenizeInput(const uint32 level) {
         bool isString1 = false;
         // take the tokenString
         while (ok) {
+            //printf("Considering %c\n", c);
             if ((StringHelper::SearchChar(separatorsUsed.Buffer(), c) != NULL) && (!escape)) {
                 // this means that a string is found! Read everything until another " is found
                 if (isString1) {

@@ -278,11 +278,11 @@ ThreadIdentifier BeginThread(const ThreadFunctionType function,
 
     ThreadIdentifier threadId = InvalidThreadIdentifier;
     if (runOnCPUs == UndefinedCPUs) {
-        if (ProcessorType::GetDefaultCPUs() != 0u) {
+        if (ProcessorType::GetDefaultCPUs() != 0ull) {
             runOnCPUs = ProcessorType::GetDefaultCPUs();
         }
         else {
-            runOnCPUs = 0xffu;
+            runOnCPUs = 0xffull;
         }
     }
 
@@ -331,12 +331,12 @@ ThreadIdentifier BeginThread(const ThreadFunctionType function,
         }
         if (ok) {
             cpu_set_t processorCpuSet;
-            uint32 processorMask = runOnCPUs.GetProcessorMask();
+            uint64 processorMask = runOnCPUs.GetProcessorMask();
             CPU_ZERO(&processorCpuSet);
             uint32 j;
 
             for (j = 0u; (j < (sizeof(processorMask) * 8u)) && (j < static_cast<uint32>(CPU_SETSIZE)); j++) {
-                if (((processorMask >> j) & 0x1u) == 0x1u) {
+                if (((processorMask >> j) & 0x1ull) == 0x1ull) {
                     CPU_SET(static_cast<int32>(j), &processorCpuSet);
                 }
             }

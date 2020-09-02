@@ -32,7 +32,7 @@
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 #include "BufferedStreamGenerator.h"
-#include "DoubleBufferedStream.h"
+#include "SingleBufferedStream.h"
 #include "BasicFile.h"
 
 /*---------------------------------------------------------------------------*/
@@ -43,7 +43,7 @@ namespace MARTe {
 /**
  * @brief Buffered implementation of the BasicFile.
  */
-class File: public BufferedStreamGenerator<DoubleBufferedStream, BasicFile> {
+class File: public BufferedStreamGenerator<SingleBufferedStream, BasicFile> {
 
 public:
     /**

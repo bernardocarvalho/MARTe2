@@ -34,7 +34,8 @@ OBJSX=  AnyObjectGTest.x \
 		TokenInfoGTest.x \
 		TypeConversionGTest.x\
 		ValidateBasicTypeGTest.x\
-		XMLParserGTest.x
+		XMLParserGTest.x\
+		MathExpressionParserGTest.x
 		 
 
 PACKAGE=GTest/BareMetal

@@ -46,7 +46,8 @@ namespace MARTe {
 /*---------------------------------------------------------------------------*/
 
 GAMScheduler::GAMScheduler() :
-        GAMSchedulerI(), binder(*this, &GAMScheduler::Execute) {
+        GAMSchedulerI(),
+        binder(*this, &GAMScheduler::Execute) {
     multiThreadService[0] = NULL_PTR(MultiThreadService *);
     multiThreadService[1] = NULL_PTR(MultiThreadService *);
     rtThreadInfo[0] = NULL_PTR(RTThreadParam *);
@@ -134,6 +135,8 @@ ErrorManagement::ErrorType GAMScheduler::StartNextStateExecution() {
             uint32 newBuffer = realTimeApplicationT->GetIndex();
             ScheduledState *newState = GetSchedulableStates()[newBuffer];
             if (newState != NULL_PTR(ScheduledState *)) {
+                *currentState = nextCurrentState;
+
                 if (!eventSem.Post()) {
                     REPORT_ERROR(ErrorManagement::FatalError, "Failed Post(*) of the event semaphore");
                 }
@@ -228,13 +231,13 @@ ErrorManagement::ErrorType GAMScheduler::Execute(ExecutionInfo & information) {
         if (rtThreadInfo[idx] != NULL_PTR(RTThreadParam *)) {
             bool ok = ExecuteSingleCycle(rtThreadInfo[idx][threadNumber].executables, rtThreadInfo[idx][threadNumber].numberOfExecutables);
             if (!ok) {
-                REPORT_ERROR(ErrorManagement::FatalError, "Failed to ExecuteSingleCycle().");
+                //REPORT_ERROR(ErrorManagement::FatalError, "Failed to ExecuteSingleCycle().");
                 //Do not set ret.fatalError = true because when ExecuteSingleCycle returns false it will trigger the MultiThreadService to restart the execution of ThreadLoop.
                 //If this was not handled then it would wait on eventSem.Wait(TTInfiniteWait) every time ExecuteSingleCycle returns false.
                 //ret.fatalError = true;
                 if (errorMessage.IsValid()) {
                     if (MessageI::SendMessage(errorMessage, this) != ErrorManagement::NoError) {
-                        REPORT_ERROR(ErrorManagement::FatalError, "Failed to SendMessage.");
+                        //REPORT_ERROR(ErrorManagement::FatalError, "Failed to SendMessage.");
                     }
                 }
             }

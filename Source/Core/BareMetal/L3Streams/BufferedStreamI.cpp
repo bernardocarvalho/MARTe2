@@ -201,7 +201,6 @@ bool BufferedStreamI::Copy(BufferedStreamI &stream) {
     return ret;
 
 }
-
 bool BufferedStreamI::Flush() {
     IOBuffer* buff = GetWriteBuffer();
     bool ret = (buff != NULL_PTR(IOBuffer*));

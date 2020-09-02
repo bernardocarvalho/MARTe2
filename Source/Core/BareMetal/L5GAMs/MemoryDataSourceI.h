@@ -103,6 +103,7 @@ public:
      */
     virtual bool Initialise(StructuredDataI & data);
 
+
 protected:
     /**
      * The memory address.

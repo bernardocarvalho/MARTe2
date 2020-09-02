@@ -82,7 +82,7 @@ $(BUILD_DIR)/%.exe : createLibrary $(BUILD_DIR)/%.o
 
 $(BUILD_DIR)/%.ex : createLibrary $(BUILD_DIR)/%.o $(OBJS)
 	mkdir -p $(BUILD_DIR)
-	$(COMPILER) $(CPPFLAGS) $(LFLAGS) $(OBJS) $(LIBRARIES) $(LIBRARIES_STATIC) $(BUILD_DIR)/$*.o -o $(BUILD_DIR)/$*.ex
+	$(COMPILER) $(CPPFLAGS) $(LFLAGS) $(OBJS) $(BUILD_DIR)/$*.o $(LIBRARIES) $(LIBRARIES_STATIC) -o $(BUILD_DIR)/$*.ex
 	rm -f createLibrary
 	
 
