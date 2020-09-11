@@ -70,6 +70,7 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Componen
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/RealTimeThreadAsyncBridge/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/FileDataSource/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/AFHBA404/
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/AFHBA2G/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/RFM2g/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/ESDEtherCAT/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/IOGAM/
@@ -91,12 +92,12 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 MARTeAPP=$MARTe2_DIR/Build/x86-linux/App/MARTeApp.ex
 
 #Start with cgdb or with strace
-if [ "$DEBUG" = "cgdb" ]
+if [ "$DEBUG" = "gdb" ]
 then
     if [ -z ${STATE+x} ]; then
-        cgdb --args $MARTeAPP -l $LOADER -f $FILE -m $MESSAGE
+        gdb --args $MARTeAPP -l $LOADER -f $FILE -m $MESSAGE
     else
-        cgdb --args $MARTeAPP -l $LOADER -f $FILE -s $STATE
+        gdb --args $MARTeAPP -l $LOADER -f $FILE -s $STATE
     fi
 elif [ "$DEBUG" = "strace" ]
 then
