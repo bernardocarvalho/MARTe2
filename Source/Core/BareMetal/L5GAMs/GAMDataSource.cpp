@@ -51,7 +51,7 @@ namespace MARTe {
 /*---------------------------------------------------------------------------*/
 
 GAMDataSource::GAMDataSource() :
-        DataSourceI() {
+    DataSourceI() {
     signalMemory = NULL_PTR(void *);
     signalOffsets = NULL_PTR(uint32 *);
     memoryHeap = NULL_PTR(HeapI *);
@@ -116,14 +116,14 @@ bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx,
     }
 
     if (ret) {
-        char8 *signalAddressChar = reinterpret_cast<char8 *>(signalMemory);
+        char8 *signalAddressChar = reinterpret_cast<char8 *> (signalMemory);
         uint32 offset = 0u;
         if (signalOffsets != NULL_PTR(uint32 *)) {
             offset = signalOffsets[signalIdx];
         }
         if (signalAddressChar != NULL_PTR(char8 *)) {
             signalAddressChar = &signalAddressChar[offset];
-            signalAddress = reinterpret_cast<void *&>(signalAddressChar);
+            signalAddress = reinterpret_cast<void *&> (signalAddressChar);
         }
     }
 
@@ -171,23 +171,11 @@ bool GAMDataSource::AllocateMemory() {
 const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data,
                                           const SignalDirection direction) {
     const char8* brokerName = NULL_PTR(const char8 *);
-
-    float32 freq;
-    if (!data.Read("Frequency", freq)) {
-        freq = -1.0F;
+    if (direction == InputSignals) {
+        brokerName = "MemoryMapInputBroker";
     }
-    uint32 samples;
-    if (!data.Read("Samples", samples)) {
-        samples = 1u;
-    }
-
-    if ((freq < 0.) && (samples == 1u)) {
-        if (direction == InputSignals) {
-            brokerName = "MemoryMapInputBroker";
-        }
-        else {
-            brokerName = "MemoryMapOutputBroker";
-        }
+    else {
+        brokerName = "MemoryMapOutputBroker";
     }
     return brokerName;
 
@@ -196,7 +184,7 @@ const char8 *GAMDataSource::GetBrokerName(StructuredDataI &data,
 /*lint -e{715} this implementation of the StatefulI interface does not need to know about the nextStateName*/
 bool GAMDataSource::PrepareNextState(const char8 * const currentStateName,
                                      const char8 * const nextStateName) {
-//Set the default value for all the input signals
+    //Set the default value for all the input signals
     bool ret = true;
 
     //At least the first time, reset all the variables to the default value.
@@ -307,7 +295,7 @@ bool GAMDataSource::PrepareNextState(const char8 * const currentStateName,
 bool GAMDataSource::GetInputBrokers(ReferenceContainer &inputBrokers,
                                     const char8* const functionName,
                                     void * const gamMemPtr) {
-//generally a loop for each supported broker
+    //generally a loop for each supported broker
     ReferenceT<MemoryMapInputBroker> broker("MemoryMapInputBroker");
     bool ret = broker.IsValid();
     if (ret) {
@@ -381,7 +369,7 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
                     errLog = ErrorManagement::Warning;
                 }
                 REPORT_ERROR(errLog, "In GAMDataSource %s, state %s, signal %s has an invalid number of producers. Should be > 0 but is %d", GetName(),
-                             stateName.Buffer(), signalName.Buffer(), nProducers);
+                        stateName.Buffer(), signalName.Buffer(), nProducers);
             }
         }
     }
@@ -391,7 +379,6 @@ bool GAMDataSource::SetConfiguredDatabase(StructuredDataI & data) {
 bool GAMDataSource::Synchronise() {
     return false;
 }
-
 CLASS_REGISTER(GAMDataSource, "1.0")
 
 }

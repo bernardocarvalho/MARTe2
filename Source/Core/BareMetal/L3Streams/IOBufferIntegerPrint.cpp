@@ -53,12 +53,12 @@ namespace MARTe {
 /*lint -e{1573} [MISRA C++ Rule 14-5-1]. Justification: MARTe::HighResolutionTimerCalibrator is not a possible argument for this function template.*/
 template<typename T>
 static uint16 GetOrderOfMagnitude(const T positiveNumber) {
-    T tenToExponent = static_cast<T>(1);
+    T tenToExponent = static_cast<T> (1);
     uint8 nDigits = 0u;
     // check whether exponent greater than 10
     if (sizeof(T) >= 8u) { // max 19
         /*lint -e{734} */
-        T temp = tenToExponent * static_cast<T>(10000000000); // 10 zeros
+        T temp = tenToExponent * static_cast<T> (10000000000); // 10 zeros
         if (positiveNumber >= temp) {
             tenToExponent = temp;
             nDigits += 10u;
@@ -68,7 +68,7 @@ static uint16 GetOrderOfMagnitude(const T positiveNumber) {
     // check whether exponent greater than 5
     if (sizeof(T) >= 4u) { // max 9
         /*lint -e{734} */
-        T temp = tenToExponent * static_cast<T>(100000); // 5 zeros
+        T temp = tenToExponent * static_cast<T> (100000); // 5 zeros
         if (positiveNumber >= temp) {
             tenToExponent = temp;
             nDigits += 5u;
@@ -78,7 +78,7 @@ static uint16 GetOrderOfMagnitude(const T positiveNumber) {
     // check whether exponent greater than 2
     if (sizeof(T) >= 2u) { // max 4 zeros
         /*lint -e{734} */
-        T temp = tenToExponent * static_cast<T>(100); // 2 zeros
+        T temp = tenToExponent * static_cast<T> (100); // 2 zeros
         if (positiveNumber >= temp) {
             tenToExponent = temp;
             nDigits += 2u;
@@ -87,7 +87,7 @@ static uint16 GetOrderOfMagnitude(const T positiveNumber) {
 
     // check whether exponent greater than 1
     /*lint -e{734} */
-    T temp = tenToExponent * static_cast<T>(10); // 1
+    T temp = tenToExponent * static_cast<T> (10); // 1
     if (positiveNumber >= temp) {
         tenToExponent = temp;
         nDigits++;
@@ -95,7 +95,7 @@ static uint16 GetOrderOfMagnitude(const T positiveNumber) {
 
     // check whether exponent greater than 1
     /*lint -e{734} */
-    temp = tenToExponent * static_cast<T>(10);  // 1
+    temp = tenToExponent * static_cast<T> (10); // 1
     // avoid overflowing in case of signed number
     if (temp > tenToExponent) {
         if (positiveNumber >= temp) {
@@ -119,12 +119,12 @@ static uint16 GetNumberOfDigitsHexNotation(T number) {
     uint8 nDigits = 1u;
 
     // negative numbers are 2 complements and have therefore all bits
-    if (number >= static_cast<T>(0)) {
+    if (number >= static_cast<T> (0)) {
 
         uint8 shift = 0u;
         // check if larger than 2**32
         if (sizeof(T) == 8u) {
-            if (number >= static_cast<T>(0x100000000u)) {
+            if (number >= static_cast<T> (0x100000000u)) {
                 nDigits += 8u;
                 shift = 32u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -133,7 +133,7 @@ static uint16 GetNumberOfDigitsHexNotation(T number) {
 
         // check if larger than 2**16
         if (sizeof(T) >= 4u) {
-            if (number >= static_cast<T>(0x10000u)) {
+            if (number >= static_cast<T> (0x10000u)) {
                 nDigits += 4u;
                 shift = 16u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -142,7 +142,7 @@ static uint16 GetNumberOfDigitsHexNotation(T number) {
 
         // check if larger than 2**8
         if (sizeof(T) >= 2u) {
-            if (number >= static_cast<T>(0x100u)) {
+            if (number >= static_cast<T> (0x100u)) {
                 nDigits += 2u;
                 shift = 8u;
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -150,12 +150,12 @@ static uint16 GetNumberOfDigitsHexNotation(T number) {
         }
 
         // check if larger than 2**4
-        if (number >= static_cast<T>(0x10u)) {
+        if (number >= static_cast<T> (0x10u)) {
             nDigits += 1u;
         }
     }
     else {
-        nDigits = static_cast<uint8>(sizeof(T) * 2u);
+        nDigits = static_cast<uint8> (sizeof(T) * 2u);
     }
 
     return nDigits;
@@ -175,11 +175,11 @@ static uint16 GetNumberOfDigitsOctalNotation(T number) {
     // negative numbers are 2 complements and have therefore all bits
     uint8 nDigits = 1u;
 
-    if (number >= static_cast<T>(0)) {
+    if (number >= static_cast<T> (0)) {
 
         uint8 shift = 0u;
         if (sizeof(T) == 8u) {
-            if (number >= static_cast<T>(0x1000000000000u)) {
+            if (number >= static_cast<T> (0x1000000000000u)) {
                 nDigits += 16u;
                 shift = 48u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -187,7 +187,7 @@ static uint16 GetNumberOfDigitsOctalNotation(T number) {
         }
 
         if (sizeof(T) >= 4u) {
-            if (number >= static_cast<T>(0x1000000u)) {
+            if (number >= static_cast<T> (0x1000000u)) {
                 nDigits += 8u;
                 shift = 24u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -196,7 +196,7 @@ static uint16 GetNumberOfDigitsOctalNotation(T number) {
 
         // check if larger than 2**12
         if (sizeof(T) >= 2u) {
-            if (number >= static_cast<T>(0x1000)) {
+            if (number >= static_cast<T> (0x1000)) {
                 nDigits += 4u;
                 shift = 12u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -204,19 +204,19 @@ static uint16 GetNumberOfDigitsOctalNotation(T number) {
         }
 
         // check if larger than 2**6
-        if (number >= static_cast<T>(0x40u)) {
+        if (number >= static_cast<T> (0x40u)) {
             nDigits += 2u;
             shift = 6u;
             number = Shift::LogicalRightSafeShift(number, shift);
         }
 
         // check if larger than 2**2
-        if (number >= static_cast<T>(0x8u)) {
+        if (number >= static_cast<T> (0x8u)) {
             nDigits += 1u;
         }
     }
     else {
-        nDigits = static_cast<uint8>(((sizeof(T) * 8u) + 2u) / 3u);
+        nDigits = static_cast<uint8> (((sizeof(T) * 8u) + 2u) / 3u);
     }
 
     return nDigits;
@@ -236,13 +236,13 @@ static uint16 GetNumberOfDigitsBinaryNotation(T number) {
     uint8 nDigits = 1u;
 
     // negative numbers are 2 complements and have therefore all bits
-    if (number >= static_cast<T>(0)) {
+    if (number >= static_cast<T> (0)) {
 
         uint8 shift = 0u;
         // check if larger than 2**32
         // if so shift
         if (sizeof(T) == 8u) {
-            if (number >= static_cast<T>(0x100000000u)) {
+            if (number >= static_cast<T> (0x100000000u)) {
                 nDigits += 32u;
                 shift = 32u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -251,7 +251,7 @@ static uint16 GetNumberOfDigitsBinaryNotation(T number) {
 
         // check if larger than 2**16
         if (sizeof(T) >= 4u) {
-            if (number >= static_cast<T>(0x10000u)) {
+            if (number >= static_cast<T> (0x10000u)) {
                 nDigits += 16u;
                 shift = 16u; // used a variable to trick the compiler warning not to issue a warning of too long shift
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -260,7 +260,7 @@ static uint16 GetNumberOfDigitsBinaryNotation(T number) {
 
         // check if larger than 2**8
         if (sizeof(T) >= 2u) {
-            if (number >= static_cast<T>(0x100u)) {
+            if (number >= static_cast<T> (0x100u)) {
                 nDigits += 8u;
                 shift = 8u;
                 number = Shift::LogicalRightSafeShift(number, shift);
@@ -268,26 +268,26 @@ static uint16 GetNumberOfDigitsBinaryNotation(T number) {
         }
 
         // check if larger than 2**4
-        if (number >= static_cast<T>(0x10u)) {
+        if (number >= static_cast<T> (0x10u)) {
             nDigits += 4u;
             shift = 4u;
             number = Shift::LogicalRightSafeShift(number, shift);
         }
 
         // check if larger than 2**2
-        if (number >= static_cast<T>(0x4u)) {
+        if (number >= static_cast<T> (0x4u)) {
             nDigits += 2u;
             shift = 2u;
             number = Shift::LogicalRightSafeShift(number, shift);
         }
 
         // check if larger than 2**1
-        if (number >= static_cast<T>(0x2u)) {
+        if (number >= static_cast<T> (0x2u)) {
             nDigits += 1u;
         }
     }
     else {
-        nDigits = static_cast<uint8>(sizeof(T) * 8u);
+        nDigits = static_cast<uint8> (sizeof(T) * 8u);
     }
 
     return nDigits;
@@ -329,13 +329,13 @@ static inline void Number2StreamDecimalNotationPrivate(IOBuffer &s,
         int32 i;
         for (i = 0; i < 4; i++) {
             // enter if a big number or if zero padding required
-            if ((positiveNumber > static_cast<T>(tests[i])) || (numberFillLength > figures)) {
+            if ((positiveNumber > static_cast<T> (tests[i])) || (numberFillLength > figures)) {
                 // call this template with 16 bit number
                 // otherwise infinite recursion!
 
                 /*lint -e{9125} -e{9123} -e{571} [MISRA C++ Rule 5-0-9] [MISRA C++ Rule 5-0-8]. Justification: The result has always a size < 16 bit and the input number is always positive.*/
-                uint16 x = static_cast<uint16>(positiveNumber / static_cast<T>(tests[i]));
-                positiveNumber = positiveNumber % static_cast<T>(tests[i]);
+                uint16 x = static_cast<uint16> (positiveNumber / static_cast<T> (tests[i]));
+                positiveNumber = positiveNumber % static_cast<T> (tests[i]);
 
                 // process the upper part as uint16
                 // recurse into this function
@@ -350,7 +350,7 @@ static inline void Number2StreamDecimalNotationPrivate(IOBuffer &s,
         // call this template with 16 bit number
         // otherwise infinite recursion!
         /*lint -e{9125} -e{571} [MISRA C++ Rule 5-0-9]. Justification: The result has always a size < 16 bit and the input number is always positive.*/
-        uint16 x = static_cast<uint16>(positiveNumber);
+        uint16 x = static_cast<uint16> (positiveNumber);
         // recurse into this function
         Number2StreamDecimalNotationPrivate(s, x, numberFillLength);
     }
@@ -364,12 +364,12 @@ static inline void Number2StreamDecimalNotationPrivate(IOBuffer &s,
         int32 i;
         for (i = 0; i < 2; i++) {
             /*lint -e{571} . Removed Warning: Suspicious Cast.*/
-            if ((positiveNumber > static_cast<T>(tests[i])) || (numberFillLength > figures)) {
+            if ((positiveNumber > static_cast<T> (tests[i])) || (numberFillLength > figures)) {
                 // call this template with 16 bit number
                 // otherwise infinite recursion!
                 /*lint -e{9125} -e{9123} -e{571} [MISRA C++ Rule 5-0-9] [MISRA C++ Rule 5-0-8]. Justification: The result has always a size < 16 bit and the input number is always positive.*/
-                uint16 x = static_cast<uint16>(positiveNumber / static_cast<T>(tests[i]));
-                positiveNumber = positiveNumber % static_cast<T>(tests[i]);
+                uint16 x = static_cast<uint16> (positiveNumber / static_cast<T> (tests[i]));
+                positiveNumber = positiveNumber % static_cast<T> (tests[i]);
 
                 // process the upper part as uint16
                 // recurse into this function
@@ -383,7 +383,7 @@ static inline void Number2StreamDecimalNotationPrivate(IOBuffer &s,
         // call this template with 16 bit number
         // otherwise infinite recursion!
         /*lint -e{9125} -e{571} [MISRA C++ Rule 5-0-9]. Justification: The result has always a size < 16 bit and the input number is always positive.*/
-        uint16 x = static_cast<uint16>(positiveNumber);
+        uint16 x = static_cast<uint16> (positiveNumber);
         // recurse into this function
         Number2StreamDecimalNotationPrivate(s, x, numberFillLength);
     }
@@ -393,19 +393,19 @@ static inline void Number2StreamDecimalNotationPrivate(IOBuffer &s,
         // sufficient for  a 16 - 8 bit number NO terminator needed
         char8 buffer[5];
 
-        int16 index = static_cast<int16>(sizeof(buffer)) - 1;
+        int16 index = static_cast<int16> (sizeof(buffer)) - 1;
 
         // if not zero extract digits backwards
         do {
             /*lint -e{9125} [MISRA C++ Rule 5-0-9]. Justification: the result is always in [0-9] */
-            int8 digit = static_cast<int8>((positiveNumber) % static_cast<T>(10));
-            int8 zero = static_cast<int8>('0');
-            positiveNumber = positiveNumber / static_cast<T>(10);
+            int8 digit = static_cast<int8> ((positiveNumber) % static_cast<T> (10));
+            int8 zero = static_cast<int8> ('0');
+            positiveNumber = positiveNumber / static_cast<T> (10);
 
-            buffer[index] = static_cast<char8>(zero + digit);
+            buffer[index] = static_cast<char8> (zero + digit);
             index--;
         }
-        while (positiveNumber > static_cast<T>(0));
+        while (positiveNumber > static_cast<T> (0));
 
         // first fill in all necessary zeros
         int16 i = 0;
@@ -469,27 +469,27 @@ template<typename T>
 static bool IntegerToStreamPrivate(IOBuffer &ioBuffer,
                                    const T number,
                                    const FormatDescriptor &format,
-                                   uint16 actualBitSize = static_cast<uint16>(sizeof(T) * 8u)) {
+                                   uint16 actualBitSize = static_cast<uint16> (sizeof(T) * 8u)) {
 
     bool ret = false;
-// do not use actual Bit Size if binaryPadded is not set
+    // do not use actual Bit Size if binaryPadded is not set
     if (!format.binaryPadded) {
         actualBitSize = 0u;
     }
 
     if (format.binaryNotation == DecimalNotation) {
-        ret = IntegerToStreamDecimalNotation(ioBuffer, number, static_cast<uint16>(format.size), format.padded, format.leftAligned);
+        ret = IntegerToStreamDecimalNotation(ioBuffer, number, static_cast<uint16> (format.size), format.padded, format.leftAligned, format.binaryPadded);
     }
     if (format.binaryNotation == HexNotation) {
-        ret = IntegerToStreamExadecimalNotation(ioBuffer, number, static_cast<uint16>(format.size), format.padded, format.leftAligned, actualBitSize,
+        ret = IntegerToStreamExadecimalNotation(ioBuffer, number, static_cast<uint16> (format.size), format.padded, format.leftAligned, actualBitSize,
                                                 format.fullNotation);
     }
     if (format.binaryNotation == OctalNotation) {
-        ret = IntegerToStreamOctalNotation(ioBuffer, number, static_cast<uint16>(format.size), format.padded, format.leftAligned, actualBitSize,
+        ret = IntegerToStreamOctalNotation(ioBuffer, number, static_cast<uint16> (format.size), format.padded, format.leftAligned, actualBitSize,
                                            format.fullNotation);
     }
     if (format.binaryNotation == BitNotation) {
-        ret = IntegerToStreamBinaryNotation(ioBuffer, number, static_cast<uint16>(format.size), format.padded, format.leftAligned, actualBitSize,
+        ret = IntegerToStreamBinaryNotation(ioBuffer, number, static_cast<uint16> (format.size), format.padded, format.leftAligned, actualBitSize,
                                             format.fullNotation);
     }
 
@@ -634,9 +634,14 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
                                     const T number,
                                     uint16 maximumSize = 0u,
                                     bool padded = false,
-                                    const bool leftAligned = false) {
+                                    const bool leftAligned = false,
+                                    const bool binaryPadded = false) {
 
     bool ret = false;
+    char8 padding = (binaryPadded) ? ('0') : (' ');
+    if (binaryPadded) {
+        padded = true;
+    }
 
     // if no limits set the numberSize as big enough for the largest integer
     if (maximumSize == 0u) {
@@ -651,7 +656,7 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
     uint16 numberSize = 1u;
 
     // if negative invert it and account for the '-' in the size
-    if (number < static_cast<T>(0)) {
+    if (number < static_cast<T> (0)) {
 
         /*lint -e{9134} -e{501} -e{732} the number is signed */
         positiveNumber = -number;
@@ -665,7 +670,7 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
     bool ok = true;
 
     // 0x800000....
-    if ((number == Shift::LogicalLeftSafeShift(static_cast<T>(1), static_cast<uint8>((sizeof(T) * 8u) - 1u))) && (number < static_cast<T>(0))) {
+    if ((number == Shift::LogicalLeftSafeShift(static_cast<T> (1), static_cast<uint8> ((sizeof(T) * 8u) - 1u))) && (number < static_cast<T> (0))) {
         if ((sizeof(T) == 8u) && (maximumSize >= 20u)) {
             if (!PutS(ioBuffer, "-9223372036854775808")) {
                 REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
@@ -715,7 +720,7 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
             // fill up to from 1 maximumSize with ' '
             if ((padded) && (!leftAligned)) {
                 for (uint32 i = 1u; ok && (i < maximumSize); i++) {
-                    if (!ioBuffer.PutC(' ')) {
+                    if (!ioBuffer.PutC(padding)) {
                         REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                         ok = false;
                     }
@@ -734,7 +739,7 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
             // fill up from numberSize to maximumSize with ' '
             if ((padded) && (!leftAligned)) {
                 for (uint32 i = numberSize; ok && (i < maximumSize); i++) {
-                    if (!ioBuffer.PutC(' ')) {
+                    if (!ioBuffer.PutC(padding)) {
                         REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                         ok = false;
                     }
@@ -742,7 +747,7 @@ bool IntegerToStreamDecimalNotation(IOBuffer &ioBuffer,
             }
 
             // add sign
-            if (number < static_cast<T>(0)) {
+            if (number < static_cast<T> (0)) {
                 if (!ioBuffer.PutC('-')) {
                     REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                     ok = false;
@@ -893,29 +898,29 @@ bool IntegerToStreamExadecimalNotation(IOBuffer &ioBuffer,
 
         // work out how much to shift number to extract most significative hex
         // we use the above calculate number size
-        uint8 bits = static_cast<uint8>((numberOfDigits - 1u) * 4u);
+        uint8 bits = static_cast<uint8> ((numberOfDigits - 1u) * 4u);
 
         // loop backwards stepping each nibble
-        for (uint8 i = bits; ok && (static_cast<int8>(i) >= 0); i -= 4u) {
+        for (uint8 i = bits; ok && (static_cast<int8> (i) >= 0); i -= 4u) {
             //to get the digit, shift the number and by masking select only the 4 LSB bits
-            uint8 digit = (static_cast<uint8>(Shift::LogicalRightSafeShift(number, i)) & (0xFu));
+            uint8 digit = (static_cast<uint8> (Shift::LogicalRightSafeShift(number, i)) & (0xFu));
 
             // skips trailing zeros until we encounter the first non zero, or if putTrailingZeros was already set
             //if ((digit != 0) || (putTrailingZeros)){
             //putTrailingZeros = true;
-            uint8 zero = static_cast<uint8>('0');
-            uint8 ten = static_cast<uint8>('A');
+            uint8 zero = static_cast<uint8> ('0');
+            uint8 ten = static_cast<uint8> ('A');
 
             if (digit < 10u) {
                 /*lint -e(9125) -e(9117) */
-                if (!ioBuffer.PutC(static_cast<char8>(zero + digit))) {
+                if (!ioBuffer.PutC(static_cast<char8> (zero + digit))) {
                     REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                     ok = false;
                 }
             }
             else {
                 /*lint -e(9125) -e(9117) */
-                if (!ioBuffer.PutC(static_cast<char8>((ten + digit) - 10u))) {
+                if (!ioBuffer.PutC(static_cast<char8> ((ten + digit) - 10u))) {
                     REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                     ok = false;
                 }
@@ -1064,23 +1069,23 @@ bool IntegerToStreamOctalNotation(IOBuffer &ioBuffer,
 
         // work out how much to shift number to extract most significative hex
         // we use the above calculate number size
-        uint8 bits = static_cast<uint8>((numberOfDigits - 1u) * 3u);
+        uint8 bits = static_cast<uint8> ((numberOfDigits - 1u) * 3u);
 
         // loop backwards stepping each nibble
-        for (uint8 i = bits; ok && (static_cast<int8>(i) >= 0); i -= 3u) {
+        for (uint8 i = bits; ok && (static_cast<int8> (i) >= 0); i -= 3u) {
 
             //right shift of the number
-            uint8 digit = static_cast<uint8>(static_cast<uint8>(Shift::LogicalRightSafeShift(number, i)) & 0x7u);
-            uint8 zero = static_cast<uint8>('0');
+            uint8 digit = static_cast<uint8> (static_cast<uint8> (Shift::LogicalRightSafeShift(number, i)) & 0x7u);
+            uint8 zero = static_cast<uint8> ('0');
             /*lint -e(9125) -e(9117) */
-            if (!ioBuffer.PutC(static_cast<char8>(zero + digit))) {
+            if (!ioBuffer.PutC(static_cast<char8> (zero + digit))) {
                 REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                 ok = false;
             }
         }
     }
 
-// in case of right alignment
+    // in case of right alignment
     if ((padded) && (leftAligned)) {
         for (uint16 i = numberSize; ok && (i < maximumSize); i++) {
             if (!ioBuffer.PutC(' ')) {
@@ -1127,7 +1132,7 @@ bool IntegerToStreamBinaryNotation(IOBuffer &ioBuffer,
                                    const uint16 zeroPaddedBitSize = 0u,
                                    const bool addHeader = false) {
 
-// 1000 = no limits
+    // 1000 = no limits
     if (maximumSize == 0u) {
         maximumSize = 1000u;
         padded = false;
@@ -1217,18 +1222,18 @@ bool IntegerToStreamBinaryNotation(IOBuffer &ioBuffer,
 
         // work out how much to shift number to extract most significative hex
         // we use the above calculate number size
-        uint8 bits = static_cast<uint8>(numberOfDigits - 1u);
+        uint8 bits = static_cast<uint8> (numberOfDigits - 1u);
 
         // loop backwards stepping each nibble
-        for (uint8 i = bits; ok && (static_cast<int8>(i) >= 0); i--) {
+        for (uint8 i = bits; ok && (static_cast<int8> (i) >= 0); i--) {
             //to get the digit, shift the number and by masking select only the 4 LSB bits
-            uint8 digit = (static_cast<uint8>(Shift::LogicalRightSafeShift(number, i)) & 0x1u);
+            uint8 digit = (static_cast<uint8> (Shift::LogicalRightSafeShift(number, i)) & 0x1u);
 
-            uint8 zero = static_cast<uint8>('0');
+            uint8 zero = static_cast<uint8> ('0');
 
             // skips trailing zeros until we encounter the first non zero, or if putTrailingZeros was already set
             /*lint -e(9125) -e(9117) */
-            if (!ioBuffer.PutC(static_cast<char8>(zero + digit))) {
+            if (!ioBuffer.PutC(static_cast<char8> (zero + digit))) {
                 REPORT_ERROR_STATIC_0(ErrorManagement::FatalError, "IOBufferIntegerPrint: Failed IOBuffer::PutC()");
                 ok = false;
             }

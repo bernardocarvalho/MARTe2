@@ -54,7 +54,10 @@ HttpChunkedStreamTest::~HttpChunkedStreamTest() {
 
 bool HttpChunkedStreamTest::TestConstructor() {
     HttpChunkedStream test;
-    return !test.IsChunkMode();
+    bool ret=test.GetReadBufferSize()==4096;
+    ret&=test.GetWriteBufferSize()==4096;
+    ret&= !test.IsChunkMode();
+    return ret;
 }
 
 static void clientWriter(HttpChunkedStreamTest &tt) {

@@ -98,13 +98,13 @@ AnyType AnyType::operator[](const uint32 position) const {
                         void* posPointer = &reinterpret_cast<char8*>(dataPointer)[index];
                         ret = AnyType(dataDescriptor, bitAddress, posPointer);
                         ret.SetNumberOfDimensions(1u);
-                        ret.SetNumberOfElements(0u, numberOfElements[1]);
+                        ret.SetNumberOfElements(0u, numberOfElements[0]);
                     }
                     else {
                         void* posPointer = reinterpret_cast<char8**>(dataPointer)[position];
                         ret = AnyType(dataDescriptor, bitAddress, posPointer);
                         ret.SetNumberOfDimensions(1u);
-                        ret.SetNumberOfElements(0u, numberOfElements[1]);
+                        ret.SetNumberOfElements(0u, numberOfElements[0]);
                     }
                 }
             }
