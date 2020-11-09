@@ -132,38 +132,39 @@ bool GAMDataSource::GetSignalMemoryBuffer(const uint32 signalIdx,
 
 bool GAMDataSource::AllocateMemory() {
     uint32 nOfSignals = GetNumberOfSignals();
-    bool ret = (nOfSignals > 0u);
-    if (ret) {
+    bool ret = true;
+    if (nOfSignals > 0u) {
         ret = (signalMemory == NULL_PTR(void *));
-    }
-    else {
-        REPORT_ERROR(ErrorManagement::FatalError, "No signals defined for DataSource with name %s", GetName());
-    }
-    if (ret) {
-        signalOffsets = new uint32[nOfSignals];
-    }
 
-    uint32 memorySize = 0u;
-    for (uint32 s = 0u; (s < nOfSignals) && (ret); s++) {
-        uint32 thisSignalMemorySize;
-        ret = GetSignalByteSize(s, thisSignalMemorySize);
         if (ret) {
-            if (signalOffsets != NULL_PTR(uint32 *)) {
-                signalOffsets[s] = memorySize;
+            signalOffsets = new uint32[nOfSignals];
+        }
+
+        uint32 memorySize = 0u;
+        for (uint32 s = 0u; (s < nOfSignals) && (ret); s++) {
+            uint32 thisSignalMemorySize;
+            ret = GetSignalByteSize(s, thisSignalMemorySize);
+            if (ret) {
+                if (signalOffsets != NULL_PTR(uint32 *)) {
+                    signalOffsets[s] = memorySize;
+                }
+            }
+            if (ret) {
+                ret = (thisSignalMemorySize > 0u);
+            }
+            if (ret) {
+                memorySize += thisSignalMemorySize;
             }
         }
         if (ret) {
-            ret = (thisSignalMemorySize > 0u);
-        }
-        if (ret) {
-            memorySize += thisSignalMemorySize;
+            if (memoryHeap != NULL_PTR(HeapI *)) {
+                signalMemory = memoryHeap->Malloc(memorySize);
+            }
+            ret = MemoryOperationsHelper::Set(signalMemory, '\0', memorySize);
         }
     }
-    if (ret) {
-        if (memoryHeap != NULL_PTR(HeapI *)) {
-            signalMemory = memoryHeap->Malloc(memorySize);
-        }
-        ret = MemoryOperationsHelper::Set(signalMemory, '\0', memorySize);
+    else {
+        REPORT_ERROR(ErrorManagement::Warning, "No signals defined for DataSource with name %s", GetName());
     }
     return ret;
 }

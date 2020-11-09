@@ -136,7 +136,7 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
     bool ret = MemoryDataSourceI::Initialise(data);
     if (ret) {
         // Read cpu mask
-        uint32 cpuMask = 0u;
+        uint64 cpuMask = 0u;
         if (!data.Read("CpuMask", cpuMask)) {
             cpuMask = 0xFFFFu;
             REPORT_ERROR_PARAMETERS(ErrorManagement::Warning, "CpuMask was not specified. Using default: %d", cpuMask);
