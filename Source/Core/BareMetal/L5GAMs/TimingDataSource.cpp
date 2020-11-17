@@ -77,6 +77,8 @@ bool TimingDataSource::SetConfiguredDatabase(StructuredDataI & data) {
             }
         }
     }
+    //never reset the variables
+    resetVariablesAtStateChange = 0u;
     return ret;
 }
 

@@ -43,9 +43,7 @@
 namespace MARTe {
 
 CircularBufferThreadInputDataSource::CircularBufferThreadInputDataSource() :
-        MemoryDataSourceI(),
-        EmbeddedServiceMethodBinderI(),
-        executor(*this) {
+    MemoryDataSourceI(), EmbeddedServiceMethodBinderI(), executor(*this) {
     mutex.Create();
     currentBuffer = NULL_PTR(uint32 *);
     sleepInMutexSec = 1e-6F;
@@ -74,6 +72,8 @@ CircularBufferThreadInputDataSource::CircularBufferThreadInputDataSource() :
     signalDefinitionInterleaved = false;
     getFirst = false;
     stop = 0;
+
+    sleepTime = 0.F;
 }
 
 CircularBufferThreadInputDataSource::~CircularBufferThreadInputDataSource() {
@@ -151,6 +151,11 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
             receiverThreadStackSize = THREADS_DEFAULT_STACKSIZE;
             REPORT_ERROR_PARAMETERS(ErrorManagement::Warning, "ReceiverThreadStackSize was not specified. Using default: %d", receiverThreadStackSize);
         }
+
+        if (!data.Read("SleepTime", sleepTime)) {
+            sleepTime = 0.F;
+        }
+
         receiverThreadPriority %= 32u;
         executor.SetCPUMask(cpuMask);
         executor.SetStackSize(receiverThreadStackSize);
@@ -161,7 +166,7 @@ bool CircularBufferThreadInputDataSource::Initialise(StructuredDataI &data) {
         if (!data.Read("SignalDefinitionInterleaved", signalDefinitionInterleavedUInt32)) {
             signalDefinitionInterleavedUInt32 = 0u;
             REPORT_ERROR_PARAMETERS(ErrorManagement::Warning, "SignalDefinitionInterleaved was not specified. Using default: %d",
-                                    signalDefinitionInterleavedUInt32);
+                    signalDefinitionInterleavedUInt32);
         }
         signalDefinitionInterleaved = (signalDefinitionInterleavedUInt32 == 1u);
 
@@ -194,7 +199,7 @@ void CircularBufferThreadInputDataSource::PrepareInputOffsets() {
             uint32 nStepsForward = 0u;
             //always go to the end
 
-//roll on consuming the circular buffer until the last written
+            //roll on consuming the circular buffer until the last written
             while (nStepsForward < numberOfBuffers) {
                 uint32 lastReadBufTemp = (lastReadBuffer[i] + 1u);
                 if (lastReadBufTemp >= numberOfBuffers) {
@@ -242,7 +247,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
     }
 
     bool ret = (nStepsForward < numberOfBuffers);
-    if (ret && (stop==0)) {
+    if (ret && (stop == 0)) {
         uint32 stepsBack = nStepsForward % triggerAfterNSamples;
         //if asynchronous return back to the last arrived samples, otherwise it will wait for new ones
         //at least double buffer (stepsBack+triggerAfterNSamples)<numberOfBuffers
@@ -269,6 +274,9 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
                 (void) mutex.FastLock(TTInfiniteWait, sleepInMutexSec);
                 uint32 index = (lastReadBuffer[syncSignal] * numberOfSignals) + syncSignal;
                 isArrived = (isRefreshed[index] == 1u);
+                if(!IsEqual(sleepTime, 0.F)){
+                    Sleep::Sec(sleepTime);
+                }
                 mutex.FastUnLock();
             }
 
@@ -343,7 +351,7 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                 if (ret) {
                     if (signalName == "ErrorCheck") {
                         errorCheckSignalIndex = i;
-//check the type of the time stamp signal
+                        //check the type of the time stamp signal
                         TypeDescriptor td = GetSignalType(errorCheckSignalIndex);
                         ret = (td == UnsignedInteger32Bit);
                         if (!ret) {
@@ -395,14 +403,14 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                 uint32 signalByteSize;
                 ret = GetSignalByteSize(timeStampSignalIndex, signalByteSize);
                 if (ret) {
-                    uint32 sizeCheck = static_cast<uint32>(sizeof(uint64));
+                    uint32 sizeCheck = static_cast<uint32> (sizeof(uint64));
                     if (!signalDefinitionInterleaved) {
                         sizeCheck *= (numberOfChannels);
                     }
                     ret = (signalByteSize == sizeCheck);
                     if (!ret) {
                         REPORT_ERROR_PARAMETERS(ErrorManagement::FatalError, "The size of the InternalTimeStamp signal must be %d != %d %d", sizeCheck,
-                                                signalByteSize, numberOfChannels);
+                                signalByteSize, numberOfChannels);
                     }
                 }
 
@@ -414,7 +422,7 @@ bool CircularBufferThreadInputDataSource::SetConfiguredDatabase(StructuredDataI 
                 uint32 signalByteSize;
                 ret = GetSignalByteSize(errorCheckSignalIndex, signalByteSize);
                 if (ret) {
-                    uint32 sizeCheck = static_cast<uint32>(sizeof(uint32));
+                    uint32 sizeCheck = static_cast<uint32> (sizeof(uint32));
                     if (!signalDefinitionInterleaved) {
                         sizeCheck *= (numberOfChannels);
                     }
@@ -531,23 +539,23 @@ bool CircularBufferThreadInputDataSource::GenererateInterleavedAccelerators() {
                 if (ret) {
                     ret = ((interleavedSignalByteSize[i] % packetSize) == 0u);
                     if (ret) {
-//How many times is the PacketMemberSizes repeated inside the memory
+                        //How many times is the PacketMemberSizes repeated inside the memory
                         numberOfInterleavedSamples[i] = fakeSamples;
-//What is the size of the PacketMemberSizes, i.e. the size of each packet?
+                        //What is the size of the PacketMemberSizes, i.e. the size of each packet?
                         interleavedSignalByteSize[i] /= fakeSamples;
                     }
                     else {
                         uint32 ii = i;
                         REPORT_ERROR(ErrorManagement::InitialisationError,
-                                     "The signal %d byte size %d must be divided exactly by the sum of the packet member sizes %d", ii,
-                                     interleavedSignalByteSize[ii], packetSize);
+                                "The signal %d byte size %d must be divided exactly by the sum of the packet member sizes %d", ii,
+                                interleavedSignalByteSize[ii], packetSize);
                     }
                 }
                 else {
                     uint32 ii = i;
                     REPORT_ERROR(ErrorManagement::InitialisationError,
-                                 "The sum of the packet member sizes %d cannot be greater than the signal %d byte size %d", packetSize, ii,
-                                 interleavedSignalByteSize[ii]);
+                            "The sum of the packet member sizes %d cannot be greater than the signal %d byte size %d", packetSize, ii,
+                            interleavedSignalByteSize[ii]);
                 }
             }
         }
@@ -620,8 +628,8 @@ bool CircularBufferThreadInputDataSource::GenererateInterleavedAcceleratorsSigna
                         ret = (nOfSamples == nOfSamplesRead);
                         if (!ret) {
                             REPORT_ERROR(ErrorManagement::InitialisationError,
-                                         "With SignalDefinitionInterleaved the number of samples shall be the same for all signals (%d != %d)", nOfSamples,
-                                         nOfSamplesRead);
+                                    "With SignalDefinitionInterleaved the number of samples shall be the same for all signals (%d != %d)", nOfSamples,
+                                    nOfSamplesRead);
                         }
                     }
                 }
@@ -769,14 +777,14 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
             if ((i != timeStampSignalIndex) && (i != errorCheckSignalIndex)) {
                 uint32 readBytes = signalSize[i];
                 uint32 memoryIndex = signalOffsets[i] + (currentBuffer[i] * signalSize[i]);
-                if (DriverRead(reinterpret_cast<char8*>(&(memory[memoryIndex])), readBytes, i)) {
+                if (DriverRead(reinterpret_cast<char8*> (&(memory[memoryIndex])), readBytes, i)) {
                     if (readBytes == signalSize[i]) {
-//save the timestamp
+                        //save the timestamp
                         if (timeStampSignalIndex != 0xFFFFFFFFu) {
                             uint32 index1 = (currentBuffer[timeStampSignalIndex] * (numberOfChannels));
-                            uint32 timeMemIndex = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                            uint32 timeMemIndex = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32> (sizeof(uint64))));
                             void *timerPtr = &memory[timeMemIndex];
-                            *(reinterpret_cast<uint64 *>(timerPtr)) = HighResolutionTimer::Counter();
+                            *(reinterpret_cast<uint64 *> (timerPtr)) = HighResolutionTimer::Counter();
                         }
 
                     }
@@ -789,11 +797,11 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                             }
                             uint32 index1 = (previousBuf * (numberOfChannels));
                             uint32 index2 = (currentBuffer[timeStampSignalIndex] * (numberOfChannels));
-                            uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint64))));
-                            uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                            uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32> (sizeof(uint64))));
+                            uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32> (sizeof(uint64))));
                             void *timerPtr2 = &(memory[timeMemIndex2]);
                             void *timerPtr1 = &(memory[timeMemIndex1]);
-                            *reinterpret_cast<uint64*>(timerPtr2) = *reinterpret_cast<uint64*>(timerPtr1);
+                            *reinterpret_cast<uint64*> (timerPtr2) = *reinterpret_cast<uint64*> (timerPtr1);
                         }
                     }
 
@@ -802,9 +810,12 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                     //driver read error
                     if (errorCheckSignalIndex != 0xFFFFFFFFu) {
                         uint32 index = (currentBuffer[errorCheckSignalIndex] * (numberOfChannels));
-                        errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index + cnt) * static_cast<uint32>(sizeof(uint32))));
+                        errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index + cnt) * static_cast<uint32> (sizeof(uint32))));
                         void *errorPtr = &memory[errorMemIndex];
-                        *reinterpret_cast<uint32*>(errorPtr) |= 1u;
+
+                        uint32 *errorP = reinterpret_cast<uint32*> (errorPtr);
+                        //if timeout give it a chance
+                        *errorP |= 1u;
                     }
                     //copy the timestamp of the previous buffer
                     if (timeStampSignalIndex != 0xFFFFFFFFu) {
@@ -814,11 +825,11 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
                         }
                         uint32 index1 = (previousBuf * (numberOfChannels));
                         uint32 index2 = (currentBuffer[timeStampSignalIndex] * (numberOfChannels));
-                        uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint64))));
-                        uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32>(sizeof(uint64))));
+                        uint32 timeMemIndex1 = (signalOffsets[timeStampSignalIndex] + ((index1 + cnt) * static_cast<uint32> (sizeof(uint64))));
+                        uint32 timeMemIndex2 = (signalOffsets[timeStampSignalIndex] + ((index2 + cnt) * static_cast<uint32> (sizeof(uint64))));
                         void *timePtr2 = &memory[timeMemIndex2];
                         void *timePtr1 = &memory[timeMemIndex1];
-                        *reinterpret_cast<uint64*>(timePtr2) = *reinterpret_cast<uint64*>(timePtr1);
+                        *reinterpret_cast<uint64*> (timePtr2) = *reinterpret_cast<uint64*> (timePtr1);
                     }
                 }
 
@@ -829,13 +840,13 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
 
                     if (errorCheckSignalIndex != 0xFFFFFFFFu) {
                         uint32 index1 = (currentBuffer[errorCheckSignalIndex] * (numberOfChannels));
-                        errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index1 + cnt) * static_cast<uint32>(sizeof(uint32))));
+                        errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index1 + cnt) * static_cast<uint32> (sizeof(uint32))));
 
                         //overlap error
                         (void) mutex.FastLock(TTInfiniteWait, sleepInMutexSec);
                         if (isRefreshed[index] == 1u) {
                             void *errorPtr = &memory[errorMemIndex];
-                            *reinterpret_cast<uint32*>(errorPtr) |= 2u;
+                            *reinterpret_cast<uint32*> (errorPtr) |= 2u;
                         }
                         mutex.FastUnLock();
 
@@ -877,9 +888,9 @@ ErrorManagement::ErrorType CircularBufferThreadInputDataSource::Execute(Executio
             index = (currentBuffer[errorCheckSignalIndex] * (numberOfChannels));
 
             for (uint32 i = 0u; i < numberOfChannels; i++) {
-                errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index + i) * static_cast<uint32>(sizeof(uint32))));
+                errorMemIndex = (signalOffsets[errorCheckSignalIndex] + ((index + i) * static_cast<uint32> (sizeof(uint32))));
                 void *errorPtr = &memory[errorMemIndex];
-                *reinterpret_cast<uint32*>(errorPtr) = 0u;
+                *reinterpret_cast<uint32*> (errorPtr) = 0u;
             }
         }
 

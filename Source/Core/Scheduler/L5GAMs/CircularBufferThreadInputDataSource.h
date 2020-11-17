@@ -328,6 +328,8 @@ protected:
 
 
     volatile int32 stop;
+
+    float32 sleepTime;
 private:
     /**
      * @brief Helper function to create the interleaved accelerators
