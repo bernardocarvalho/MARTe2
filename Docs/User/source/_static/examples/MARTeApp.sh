@@ -102,6 +102,13 @@ then
     else
         gdb --args $MARTeAPP -l $LOADER -f $FILE -s $STATE
     fi
+elif [ "$DEBUG" = "cgdb" ]
+then
+    if [ -z ${STATE+x} ]; then
+        cgdb --args $MARTeAPP -l $LOADER -f $FILE -m $MESSAGE
+    else
+        cgdb --args $MARTeAPP -l $LOADER -f $FILE -s $STATE
+    fi
 elif [ "$DEBUG" = "strace" ]
 then
     if [ -z ${STATE+x} ]; then
