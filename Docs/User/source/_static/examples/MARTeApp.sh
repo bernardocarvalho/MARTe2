@@ -70,6 +70,7 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Componen
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/RealTimeThreadAsyncBridge/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/FileDataSource/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/AFHBA404/
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/AFHBA2G/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/RFM2g/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/DataSources/ESDEtherCAT/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/IOGAM/
@@ -79,11 +80,14 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Componen
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/StatisticsGAM/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/WaveformGAM/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/SimulinkWrapperGAM/
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/SPCTimeGAM/
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/GAMs/ConstantGAM/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/BaseLib2Wrapper/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/SysLogger/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/EPICS/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/MDSObjLoader/
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/SPCShotManager/
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib64/
 
 echo $LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
@@ -91,7 +95,14 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 MARTeAPP=$MARTe2_DIR/Build/x86-linux/App/MARTeApp.ex
 
 #Start with cgdb or with strace
-if [ "$DEBUG" = "cgdb" ]
+if [ "$DEBUG" = "gdb" ]
+then
+    if [ -z ${STATE+x} ]; then
+        gdb --args $MARTeAPP -l $LOADER -f $FILE -m $MESSAGE
+    else
+        gdb --args $MARTeAPP -l $LOADER -f $FILE -s $STATE
+    fi
+elif [ "$DEBUG" = "cgdb" ]
 then
     if [ -z ${STATE+x} ]; then
         cgdb --args $MARTeAPP -l $LOADER -f $FILE -m $MESSAGE

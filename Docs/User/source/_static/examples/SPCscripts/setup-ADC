@@ -71,6 +71,7 @@ xexternal)
 	# 10kHz, external clock, Si5326 bypassed
 	# export EXTCLKDIV=${EXTCLKDIV:-1}
 
+
 	# 10kHz, external 1MHz clock, Si5326 not bypassed (normal operation)
 	export EXTCLKDIV=${EXTCLKDIV:-100}
 
