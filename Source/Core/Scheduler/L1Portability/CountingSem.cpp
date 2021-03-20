@@ -91,4 +91,22 @@ bool CountingSem::Reset() {
     return EventSem::Reset();
 }
 
+
+bool CountingSem::ForceReset() {
+    if (sem.FastLock()) {
+        counter = 0;
+        sem.FastUnLock();
+    }
+    return EventSem::Reset();
+}
+
+bool CountingSem::ForcePass(){
+    if (sem.FastLock()) {
+        counter = numberOfActors;
+        sem.FastUnLock();
+    }
+    return EventSem::Post();
+}
+
+
 }

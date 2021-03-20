@@ -53,6 +53,10 @@ public:
 
     bool Reset();
 
+    bool ForceReset();
+
+    bool ForcePass();
+
 private:
     uint32 numberOfActors;
 
