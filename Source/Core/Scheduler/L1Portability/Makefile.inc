@@ -29,7 +29,7 @@ MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 SPB=Environment/$(ENVIRONMENT).x
 
-OBJSX=  CountingSemaphore.x
+OBJSX=  CountingSem.x
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 

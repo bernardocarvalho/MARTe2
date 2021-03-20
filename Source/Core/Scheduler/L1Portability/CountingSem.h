@@ -1,6 +1,6 @@
 /**
- * @file CountingSemaphore.h
- * @brief Header file for class CountingSemaphore
+ * @file CountingSem.h
+ * @brief Header file for class CountingSem
  * @date May 23, 2020
  * @author Giuseppe
  *
@@ -16,13 +16,13 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
 
- * @details This header file contains the declaration of the class CountingSemaphore
+ * @details This header file contains the declaration of the class CountingSem
  * with all of its public, protected and private members. It may also include
  * definitions for inline methods which need to be visible to the compiler.
  */
 
-#ifndef COUNTINGSEMAPHORE_H_
-#define COUNTINGSEMAPHORE_H_
+#ifndef COUNTINGSEM_H_
+#define COUNTINGSEM_H_
 
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
@@ -39,11 +39,11 @@
 
 namespace MARTe{
 
-class CountingSemaphore: public EventSem {
+class CountingSem: public EventSem {
 public:
-    CountingSemaphore();
+    CountingSem();
 
-    virtual ~CountingSemaphore();
+    virtual ~CountingSem();
 
     bool Create(uint32 numberOfActorsIn);
 

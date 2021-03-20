@@ -1,6 +1,6 @@
 /**
- * @file CountingSemaphore.cpp
- * @brief Source file for class CountingSemaphore
+ * @file CountingSem.cpp
+ * @brief Source file for class CountingSem
  * @date May 23, 2020
  * @author Giuseppe
  *
@@ -17,7 +17,7 @@
  * or implied. See the Licence permissions and limitations under the Licence.
 
  * @details This source file contains the definition of all the methods for
- * the class CountingSemaphore (public, protected, and private). Be aware that some 
+ * the class CountingSem (public, protected, and private). Be aware that some
  * methods, such as those inline could be defined on the header file, instead.
  */
 
@@ -29,7 +29,7 @@
 /*                         Project header includes                           */
 /*---------------------------------------------------------------------------*/
 
-#include "CountingSemaphore.h"
+#include "CountingSem.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -40,19 +40,19 @@
 
 namespace MARTe {
 
-CountingSemaphore::CountingSemaphore() {
-    // Auto-generated constructor stub for CountingSemaphore
+CountingSem::CountingSem() {
+    // Auto-generated constructor stub for CountingSem
     // TODO Verify if manual additions are needed
     numberOfActors = 0u;
     counter = 0;
 }
 
-CountingSemaphore::~CountingSemaphore() {
-    // Auto-generated destructor stub for CountingSemaphore
+CountingSem::~CountingSem() {
+    // Auto-generated destructor stub for CountingSem
     // TODO Verify if manual additions are needed
 }
 
-bool CountingSemaphore::Create(uint32 numberOfActorsIn) {
+bool CountingSem::Create(uint32 numberOfActorsIn) {
     bool ret = EventSem::Create();
     if (ret) {
         numberOfActors = numberOfActorsIn;
@@ -60,7 +60,7 @@ bool CountingSemaphore::Create(uint32 numberOfActorsIn) {
     return ret;
 }
 
-ErrorManagement::ErrorType CountingSemaphore::WaitForAll(const TimeoutType &timeout) {
+ErrorManagement::ErrorType CountingSem::WaitForAll(const TimeoutType &timeout) {
     ErrorManagement::ErrorType err;
     bool condition = false;
     if (sem.FastLock()) {
@@ -81,7 +81,7 @@ ErrorManagement::ErrorType CountingSemaphore::WaitForAll(const TimeoutType &time
     return err;
 }
 
-bool CountingSemaphore::Reset() {
+bool CountingSem::Reset() {
     if (sem.FastLock()) {
         if (counter >= numberOfActors) {
             counter = 0;
