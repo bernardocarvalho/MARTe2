@@ -26,9 +26,10 @@ PACKAGE=Core/Scheduler
 ROOT_DIR=../../../..
 MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
+
 SPB=Environment/$(ENVIRONMENT).x
 
-OBJSX =
+OBJSX=  CountingSemaphore.x
 
 include $(MAKEDEFAULTDIR)/MakeStdLibDefs.$(TARGET)
 
