@@ -155,7 +155,7 @@ public:
      * associated to the variables that have to be checked.
      * @return true if all the signals required by the EventTrigger exist and have the expected types.
      */
-    bool SetPacketConfig(const SignalMetadata * const metadataConf,
+    bool SetMetadataConfig(const SignalMetadata * const metadataConf,
                          const uint32 numberOfFields);
 
     /**

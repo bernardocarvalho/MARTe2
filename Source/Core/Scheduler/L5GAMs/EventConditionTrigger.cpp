@@ -121,7 +121,7 @@ bool EventConditionTrigger::Initialise(StructuredDataI &data) {
     return ret;
 }
 
-bool EventConditionTrigger::SetPacketConfig(const SignalMetadata * const metadataConf,
+bool EventConditionTrigger::SetMetadataConfig(const SignalMetadata * const metadataConf,
                                             const uint32 numberOfFields) {
     /*lint -e{613} NULL pointer checked.*/
     eventConditions = new EventConditionField[numberOfConditions];

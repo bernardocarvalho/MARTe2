@@ -134,7 +134,7 @@ bool EventConditionMessageGAMTest::Setup() {
         }
     }
 
-    uint32 packetSize = 0u;
+    uint32 metadataSize = 0u;
     if (ret) {
         /*lint -e{613} NULL pointer checked.*/
         signalMetadata = new SignalMetadata[numberOfFields];
@@ -163,8 +163,8 @@ bool EventConditionMessageGAMTest::Setup() {
                 /*lint -e{613} NULL pointer checked.*/
                 uint32 typeSize = (static_cast<uint32>(signalMetadata[i].type.numberOfBits) / 8u);
                 /*lint -e{613} NULL pointer checked.*/
-                signalMetadata[n].offset = packetSize;
-                packetSize += typeSize;
+                signalMetadata[n].offset = metadataSize;
+                metadataSize += typeSize;
 
                 uint32 numberOfElements = 0u;
                 ret = GetSignalNumberOfElements(InputSignals, i, numberOfElements);
@@ -186,8 +186,8 @@ bool EventConditionMessageGAMTest::Setup() {
                                         numberOfCommands++;
                                     }
                                     /*lint -e{613} NULL pointer checked.*/
-                                    signalMetadata[n].offset = packetSize;
-                                    packetSize += typeSize;
+                                    signalMetadata[n].offset = metadataSize;
+                                    metadataSize += typeSize;
                                 }
                             }
                             n++;
@@ -209,8 +209,8 @@ bool EventConditionMessageGAMTest::Setup() {
     }
 
     if (ret) {
-        previousValue = new uint8[packetSize];
-        (void) MemoryOperationsHelper::Set(previousValue, '\0', packetSize);
+        previousValue = new uint8[metadataSize];
+        (void) MemoryOperationsHelper::Set(previousValue, '\0', metadataSize);
         commandIndex = new uint32[numberOfCommands];
 
         uint32 c = 0u;
@@ -231,7 +231,7 @@ bool EventConditionMessageGAMTest::Setup() {
                 ReferenceT<EventConditionTrigger> eventCondition = events->Get(i);
                 ret = eventCondition.IsValid();
                 if (ret) {
-                    ret = eventCondition->SetPacketConfig(signalMetadata, numberOfFields);
+                    ret = eventCondition->SetMetadataConfig(signalMetadata, numberOfFields);
                 }
             }
         }
@@ -379,7 +379,7 @@ EventConditionTriggerTestGAM    ();
     ~EventConditionTriggerTestGAM();
 
     uint8 *GetPreviousValue();
-    SignalMetadata *GetPacketConfig();
+    SignalMetadata *GetMetadataConfig();
     uint32 GetNumberOfFields();
     ReferenceT<ReferenceContainer> GetEvents();
     uint32 GetNumberOfEvents();
@@ -416,7 +416,7 @@ uint8 *EventConditionTriggerTestGAM::GetPreviousValue() {
 }
 
 
-SignalMetadata *EventConditionTriggerTestGAM::GetPacketConfig() {
+SignalMetadata *EventConditionTriggerTestGAM::GetMetadataConfig() {
     return signalMetadata;
 }
 
@@ -846,7 +846,7 @@ bool EventConditionTriggerTest::TestInitialise_FalseNotOnlyMessages() {
 
 }
 
-bool EventConditionTriggerTest::TestSetPacketConfig() {
+bool EventConditionTriggerTest::TestSetMetadataConfig() {
 
     const char8 *config = ""
             "                    Class = EventConditionTrigger"
@@ -907,7 +907,7 @@ bool EventConditionTriggerTest::TestSetPacketConfig() {
     }
 
     if (ret) {
-        ret = comp.SetPacketConfig(signalMetadata, 5);
+        ret = comp.SetMetadataConfig(signalMetadata, 5);
     }
 
     if (ret) {
@@ -974,7 +974,7 @@ bool EventConditionTriggerTest::TestSetPacketConfig() {
 
 }
 
-bool EventConditionTriggerTest::TestSetPacketConfig_FalseNoPacketFieldMatch() {
+bool EventConditionTriggerTest::TestSetMetadataConfig_FalseNoMetadataFieldMatch() {
     const char8 *config = ""
             "                    Class = EventConditionTrigger"
             "                    EventTrigger = {"
@@ -1033,14 +1033,14 @@ bool EventConditionTriggerTest::TestSetPacketConfig_FalseNoPacketFieldMatch() {
     }
 
     if (ret) {
-        ret = !comp.SetPacketConfig(signalMetadata, 5);
+        ret = !comp.SetMetadataConfig(signalMetadata, 5);
     }
 
     return ret;
 
 }
 
-bool EventConditionTriggerTest::TestSetPacketConfig_FalseReadFailedTypeMismatch() {
+bool EventConditionTriggerTest::TestSetMetadataConfig_FalseReadFailedTypeMismatch() {
     const char8 *config = ""
             "                    Class = EventConditionTrigger"
             "                    EventTrigger = {"
@@ -1099,7 +1099,7 @@ bool EventConditionTriggerTest::TestSetPacketConfig_FalseReadFailedTypeMismatch(
     }
 
     if (ret) {
-        ret = !comp.SetPacketConfig(signalMetadata, 5);
+        ret = !comp.SetMetadataConfig(signalMetadata, 5);
     }
 
     return ret;
@@ -1165,7 +1165,7 @@ bool EventConditionTriggerTest::TestCheck() {
     }
 
     if (ret) {
-        ret = comp.SetPacketConfig(signalMetadata, 5);
+        ret = comp.SetMetadataConfig(signalMetadata, 5);
     }
 
     if (ret) {
@@ -1329,7 +1329,7 @@ bool EventConditionTriggerTest::TestExecute_ImmediateReply() {
     if (ret) {
         mem[0] = 1;
         mem[1] = 2;
-        SignalMetadata *signalMetadata = gam->GetPacketConfig();
+        SignalMetadata *signalMetadata = gam->GetMetadataConfig();
         ret = event1->Check((uint8*) mem, &signalMetadata[0]);
         if (ret) {
             uint8 flag = 0u;
@@ -1481,7 +1481,7 @@ bool EventConditionTriggerTest::TestExecute_IndirectReply() {
     if (ret) {
         mem[0] = 1;
         mem[1] = 2;
-        SignalMetadata *signalMetadata = gam->GetPacketConfig();
+        SignalMetadata *signalMetadata = gam->GetMetadataConfig();
         ret = event1->Check((uint8*) mem, &signalMetadata[0]);
         if (ret) {
             uint8 flag = 0u;
@@ -1629,7 +1629,7 @@ bool EventConditionTriggerTest::TestExecute_Mixed() {
     if (ret) {
         mem[0] = 1;
         mem[1] = 2;
-        SignalMetadata *signalMetadata = gam->GetPacketConfig();
+        SignalMetadata *signalMetadata = gam->GetMetadataConfig();
         ret = event1->Check((uint8*) mem, &signalMetadata[0]);
         if (ret) {
             uint8 flag = 0u;
