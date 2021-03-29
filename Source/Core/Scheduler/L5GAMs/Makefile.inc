@@ -28,6 +28,7 @@ MAKEDEFAULTDIR=$(ROOT_DIR)/MakeDefaults
 
 
 OBJSX = CircularBufferThreadInputDataSource.x \
+    EventConditionTrigger.x\
 	GAMScheduler.x \
 	MemoryMapAsyncOutputBroker.x \
 	MemoryMapAsyncTriggerOutputBroker.x 
@@ -43,6 +44,7 @@ INCLUDES += -I../../BareMetal/L4Messages
 INCLUDES += -I../../BareMetal/L5GAMs
 INCLUDES += -I../../Scheduler/L1Portability
 INCLUDES += -I../../Scheduler/L3Services
+INCLUDES += -I../../Scheduler/L4Messages
 
 
 all: $(OBJS) $(SUBPROJ)   \
