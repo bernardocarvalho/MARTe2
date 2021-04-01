@@ -17,4 +17,4 @@ dependsRaw.*
 *.a
 GTestDirectoryTest/*
 __pycache__
-VSCodeLcov.sh
+/VSCodeLcov.sh

@@ -1,6 +1,6 @@
 /**
  * @file CircularBufferThreadInputDataSource.h
- * @brief Header file for class CircularBufferThreadInputDataSource
+ * @brief Header file for class CircularBufferThreadInputDataSource.
  * @date 12/02/2021
  * @author Giuseppe Ferro
  * @author Pedro Lourenco
@@ -17,9 +17,10 @@
  * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the Licence permissions and limitations under the Licence.
  *
- * @details This header file contains the declaration of the class CircularBufferThreadInputDataSource
- * with all of its public, protected and private members. It may also include
- * definitions for inline methods which need to be visible to the compiler.
+ * @details This header file contains the declaration of the class
+ * CircularBufferThreadInputDataSource with all of its public, protected and
+ * private members. It may also include definitions for inline methods which
+ * need to be visible to the compiler.
  */
 
 #ifndef CIRCULARBUFFERTHREADINPUTDATASOURCE_H_
@@ -72,6 +73,9 @@ namespace MARTe {
  *     *CpuMask = 0x1 (the cpus where the internal thread is allowed to run: default is 0xFFFF)
  *     *ReceiverThreadPriority = 0-31 (the priority of the internal thread, default is 31)
  *     *ReceiverThreadStackSize = 0-31 (the stack size of the internal thread, default is THREADS_DEFAULT_STACKSIZE)
+ *     *SleepTime = 0 (the sleep time in mutex in seconds, default is 0.F)
+ *     *SignalDefinitionInterleaved = 0/1 (if 0, default, it is assumed that the signal is not defined as interleaved)
+ *     *sleepInMutexSec = 1e-6F (the sleep time in mutex in seconds, default is 1e-6F)
  *     *GetFirst = 0/1 (if 0, default, do not wait for the first valid buffer to arrive)
  *     Signals = {
  *         *InternalTimeStamp = {
