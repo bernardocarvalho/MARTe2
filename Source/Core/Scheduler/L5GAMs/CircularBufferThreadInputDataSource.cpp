@@ -277,7 +277,7 @@ bool CircularBufferThreadInputDataSource::Synchronise() {
             }
             bool isArrived = false;
             /*lint -e{9131} -e{9007} known dependences and side effects.*/
-             while (!(isArrived) && (stop == 0)) {
+            while (!(isArrived) && (stop == 0)) {
                 (void) mutex.FastLock(TTInfiniteWait, sleepInMutexSec);
                 uint32 index = (lastReadBuffer[syncSignal] * numberOfSignals) + syncSignal;
                 isArrived = (isRefreshed[index] == 1u);
