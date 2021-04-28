@@ -8,4 +8,4 @@ let TLEN="$POST*120/100"
  STATUSMONITOR_TRACE=0 ./acq400_prepshot.py --transient="PRE=0 POST=$TLEN" acq2106_076
 )
 
-/root/scd/commands/traceon.sh
+#/root/scd/commands/traceon.sh

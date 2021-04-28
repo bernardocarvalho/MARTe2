@@ -59,8 +59,8 @@ setup_pwm_output() {
 
 case "x$1" in
 xinternal)
-	# 50kHz, internal clock
-	export EXTCLKDIV=${EXTCLKDIV:-20}
+	# 10kHz, internal clock
+	export EXTCLKDIV=${EXTCLKDIV:-100}
 
 	set_clocks_internal
 	setup_2106_system
@@ -71,8 +71,9 @@ xexternal)
 	# 10kHz, external clock, Si5326 bypassed
 	# export EXTCLKDIV=${EXTCLKDIV:-1}
 
-	# 50kHz, external 1MHz clock, Si5326 not bypassed (normal operation)
-	export EXTCLKDIV=${EXTCLKDIV:-20}
+
+	# 10kHz, external 1MHz clock, Si5326 not bypassed (normal operation)
+	export EXTCLKDIV=${EXTCLKDIV:-100}
 
 	set_clocks_external
 	setup_2106_system
