@@ -777,10 +777,21 @@ bool ConfigurationDatabaseTest::TestSetCurrentNodeAsRootNode() {
 
 bool ConfigurationDatabaseTest::TestPurgeWithoutExternalRefs() {
     ConfigurationDatabase cdb;
-    bool ok = cdb.CreateAbsolute("A");
-    //ConfigurationDatabase cdb2 = cdb;
+    bool ok = cdb.Write("A", 1);
+    ok &= cdb.Write("B", 2);
     cdb.Purge();
     ok &= cdb.MoveToRoot();
     ok &= cdb.GetNumberOfChildren() == 0;
+    return ok;
+}
+
+bool ConfigurationDatabaseTest::TestPurgeWithExternalRefs() {
+    ConfigurationDatabase cdb;
+    bool ok = cdb.Write("A", 1);
+    ok &= cdb.Write("B", 2);
+    ConfigurationDatabase cdb2 = cdb;
+    cdb.Purge();
+    ok &= cdb.MoveToRoot();
+    ok &= cdb.GetNumberOfChildren() == 1;
     return ok;
 }

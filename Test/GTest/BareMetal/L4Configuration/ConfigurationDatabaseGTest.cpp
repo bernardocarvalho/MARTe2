@@ -372,3 +372,8 @@ TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestPurgeWithoutExtern
     ConfigurationDatabaseTest cdbTest;
     ASSERT_TRUE(cdbTest.TestPurgeWithoutExternalRefs());
 }
+
+TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestPurgeWithExternalRefs) {
+    ConfigurationDatabaseTest cdbTest;
+    ASSERT_TRUE(cdbTest.TestPurgeWithExternalRefs());
+}

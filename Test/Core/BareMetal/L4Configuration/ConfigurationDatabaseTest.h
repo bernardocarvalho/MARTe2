@@ -239,9 +239,14 @@ public:
     bool TestSetCurrentNodeAsRootNode();
 
     /**
-     * @brief Tests the Purge method
+     * @brief Tests the Purge method without external references using the database
      */
     bool TestPurgeWithoutExternalRefs();
+
+    /**
+     * @brief Tests the Purge method with external references using the database
+     */
+    bool TestPurgeWithExternalRefs();
 };
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
