@@ -247,6 +247,16 @@ public:
      * @brief Tests the Purge method with external references using the database
      */
     bool TestPurgeWithExternalRefs();
+
+    /**
+     * @brief Tests the destructor
+     */
+    bool TestDestructorWithoutWrite();
+
+    /**
+     * @brief Tests the destructor
+     */
+    bool TestDestructorWithWrite();
 };
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */

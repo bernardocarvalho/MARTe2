@@ -36,6 +36,7 @@
 #include "ConfigurationDatabase.h"
 #include "StreamString.h"
 #include "TypeConversion.h"
+#include "stdio.h"
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
 /*---------------------------------------------------------------------------*/
@@ -81,7 +82,9 @@ ConfigurationDatabase &ConfigurationDatabase::operator =(const ConfigurationData
 void ConfigurationDatabase::Purge() const {
     //If the only references pointing at the rootNode are itself and eventually all its child nodes then it can be purged
     //Note that for every direct child of the rootNode a link to it (the parent) is created
+    printf("Start of ConfigurationDatabase::Purge()\n");
     if((rootNode.NumberOfReferences() - 1u) == rootNode->Size()) {
+        printf("rootNode Purge called from ConfigurationDatabase\n");
         rootNode->Purge();
     }
 }

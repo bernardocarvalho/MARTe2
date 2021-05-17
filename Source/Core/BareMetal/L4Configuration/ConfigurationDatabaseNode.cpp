@@ -31,6 +31,7 @@
 #include "AdvancedErrorManagement.h"
 #include "ConfigurationDatabaseNode.h"
 #include "StreamString.h"
+#include "stdio.h"
 
 /*---------------------------------------------------------------------------*/
 /*                           Static definitions                              */
@@ -60,6 +61,8 @@ ConfigurationDatabaseNode::~ConfigurationDatabaseNode() {
 void ConfigurationDatabaseNode::Purge() {
     bool ok = true;
     //Remove self recursions due to links to the ancestors
+    printf("ConfigurationDatabaseNode::Purge called for node %s\n", GetName());
+
     parent = Reference();
 
     if (container != NULL_PTR(Reference *)) {

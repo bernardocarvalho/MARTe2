@@ -377,3 +377,13 @@ TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestPurgeWithExternalR
     ConfigurationDatabaseTest cdbTest;
     ASSERT_TRUE(cdbTest.TestPurgeWithExternalRefs());
 }
+
+TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestDestructorWithoutWrite) {
+    ConfigurationDatabaseTest cdbTest;
+    ASSERT_TRUE(cdbTest.TestDestructorWithoutWrite());
+}
+
+TEST(BareMetal_L4Configuration_ConfigurationDatabaseGTest,TestDestructorWithWrite) {
+    ConfigurationDatabaseTest cdbTest;
+    ASSERT_TRUE(cdbTest.TestDestructorWithWrite());
+}

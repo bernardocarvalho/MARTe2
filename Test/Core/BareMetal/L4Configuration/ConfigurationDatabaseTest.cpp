@@ -795,3 +795,23 @@ bool ConfigurationDatabaseTest::TestPurgeWithExternalRefs() {
     ok &= cdb.GetNumberOfChildren() == 1;
     return ok;
 }
+
+bool ConfigurationDatabaseTest::TestDestructorWithoutWrite() {
+
+    ConfigurationDatabase cdb;
+    bool ok = cdb.CreateAbsolute("C");
+    ok &= cdb.Write("cLeaf", 3);
+
+    return ok;
+}
+
+bool ConfigurationDatabaseTest::TestDestructorWithWrite() {
+
+    ConfigurationDatabase cdb;
+    bool ok = cdb.Write("A", 1);
+    ok &= cdb.Write("B", 2);
+    ok = cdb.CreateAbsolute("C");
+    ok &= cdb.Write("cLeaf", 3);
+
+    return ok;
+}
