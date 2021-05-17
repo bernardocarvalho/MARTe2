@@ -774,3 +774,13 @@ bool ConfigurationDatabaseTest::TestSetCurrentNodeAsRootNode() {
     ok &= cdb.MoveRelative("C");
     return ok;
 }
+
+bool ConfigurationDatabaseTest::TestPurgeWithoutExternalRefs() {
+    ConfigurationDatabase cdb;
+    bool ok = cdb.CreateAbsolute("A");
+    //ConfigurationDatabase cdb2 = cdb;
+    cdb.Purge();
+    ok &= cdb.MoveToRoot();
+    ok &= cdb.GetNumberOfChildren() == 0;
+    return ok;
+}

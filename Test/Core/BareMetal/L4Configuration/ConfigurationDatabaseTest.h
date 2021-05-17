@@ -237,6 +237,11 @@ public:
      * @brief Tests the SetCurrentNodeAsRootNode method
      */
     bool TestSetCurrentNodeAsRootNode();
+
+    /**
+     * @brief Tests the Purge method
+     */
+    bool TestPurgeWithoutExternalRefs();
 };
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */
