@@ -31,20 +31,46 @@ Summary:	%{rpm_name} devel package
 %description -n %{rpm_id}-devel
 %{rpm_name} package - devel
 
+#SUBPACKAGE_DECL
+
 %prep
 %setup -q
 
 %build
+%if %{?rpm_project_build:1}%{!?rpm_project_build:0}
+. {rpm_project_build}
+%else
 make -f Makefile.%{rpm_compile_target} %{rpm_build_options} %{rpm_build_extra_args}
+%endif
 
 %install
-#Look for all the .ex and install them in the Bin folder
 mkdir -p %{buildroot}%{rpm_top_dir}/%{rpm_id}/Bin
-find %{_builddir} -iname "*.ex" | xargs -I found_file install -m 0755 found_file %{buildroot}/%{rpm_top_dir}/%{rpm_id}/Bin/
-#Look for all the .a and .so and install them in the Lib folder
+%if %{?rpm_bin_list:1}%{!?rpm_bin_list:0}
+if [[ "%{rpm_bin_list}" != "none" ]]; then 
+for exec_file in %{rpm_bin_list}
+do
+find %{build_dir} -name $exec_file | xargs -I found_file install -m 0755 found_file %{buildroot}/%{rpm_top_dir}/%{rpm_id}/Bin/
+done
+fi
+%else
+#Look for all the .ex and install them in the Bin folder
+#do not consider only .ex
+find %{build_dir} -executable -type f | grep -v '\.so' | grep -v '\.a' | xargs -I found_file install -m 0755 found_file %{buildroot}/%{rpm_top_dir}/%{rpm_id}/Bin/
+%endif
+
 mkdir -p %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib
-find %{_builddir} -iname "*.a" | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib/
-find %{_builddir} -iname "*.so" | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib/
+%if %{?rpm_lib_list:1}%{!?rpm_lib_list:0}
+if [[ "%{rpm_lib_list}" != "none" ]]; then 
+for lib_file in %{rpm_lib_list}
+do
+find %{build_dir} -name $lib_file | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib/
+done
+fi
+%else
+#Look for all the .a and .so and install them in the Lib folder
+find %{build_dir} -iname "*.a" | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib/
+find %{build_dir} -iname "*.so" | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Lib/
+%endif 
 
 #Try to copy other user defined folders (e.g. Resources, Configurations, ...)
 for other_folder in %{rpm_other_folders}
@@ -61,11 +87,15 @@ cp %{buildroot}/etc/profile.d/%{rpm_id}.sh %{buildroot}/etc/profile.d/%{rpm_id}.
 
 #Copy all .h files to an include folder
 mkdir -p %{buildroot}%{rpm_top_dir}/%{rpm_id}/Include
-cd %{rpm_src_dir}
+for src_dir in %{rpm_src_dir}
+do
+cd $src_dir
 find . -iname "*.h" | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/Include
-cd ..
+cd -
 #Copy the Source so to allow includes where all the path are relative to the original folder (e.g. Source/BareMetal/L0Types)
-find %{rpm_src_dir} -iname "*.h" | xargs -I found_file cp --parent found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}
+find $src_dir -iname "*.h" | xargs -I found_file cp --parent found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}
+done
+
 
 #Allow to run a project specific install script
 %if %{?rpm_project_install:1}%{!?rpm_project_install:0}
@@ -75,14 +105,27 @@ find %{rpm_src_dir} -iname "*.h" | xargs -I found_file cp --parent found_file %{
 #List all the files to be added to the file-list section
 current_path=`pwd`
 cd %{buildroot}
-find . -type f -printf "\"/%%P\"\n" | grep -v %{rpm_src_dir} | grep -v Include > $current_path/file-lists
+expattern="Include"
+for src_dir in %{rpm_src_dir}
+do
+expattern=$expattern\\\|$src_dir
+done
+
+find . -type f -printf "\"/%%P\"\n" | grep -v $expattern > $current_path/file-lists
+for src_dir in %{rpm_src_dir}
+do
+echo %{rpm_top_dir}/%{rpm_id}/$src_dir >> $current_path/file-lists-devel
+done
+echo %{rpm_top_dir}/%{rpm_id}/Include >> $current_path/file-lists-devel
 cd -
+
+#SUBPACKAGE_INSTALL
 
 %files -f file-lists
 
-%files -n %{rpm_id}-devel
-%{rpm_top_dir}/%{rpm_id}/%{rpm_src_dir}
-%{rpm_top_dir}/%{rpm_id}/Include
+%files -n %{rpm_id}-devel -f file-lists-devel
+
+#SUBPACKAGE_FILES
 
 %changelog
 

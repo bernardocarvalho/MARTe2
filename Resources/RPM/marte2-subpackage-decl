@@ -1,0 +1,6 @@
+
+%package -n %{rpm_id}-NAME
+Summary:	%{rpm_name} NAME package
+
+%description -n %{rpm_id}-NAME
+%{rpm_name} package - NAME

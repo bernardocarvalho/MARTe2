@@ -1,0 +1,7 @@
+mkdir -p %{buildroot}%{rpm_top_dir}/%{rpm_id}/TARGET_DIR
+cd ROOT_DIR
+find . -iname PATTERN | xargs -I found_file cp found_file %{buildroot}%{rpm_top_dir}/%{rpm_id}/TARGET_DIR
+cd -
+echo %{rpm_top_dir}/%{rpm_id}/TARGET_DIR/PATTERN >> $current_path/file-lists-NAME
+
+

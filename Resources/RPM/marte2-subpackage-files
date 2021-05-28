@@ -1,0 +1,1 @@
+%files -n %{rpm_id}-NAME -f file-lists-NAME
