@@ -28,7 +28,9 @@ subpackage:
 	echo $(TARGET_DIRS)
 	i=0
 	sed -i -e '/SUBPACKAGE_DECL/r ${M2_RPM_SPEC_FILE_PATH}/marte2-subpackage-decl' $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE) 
-	sed -i -e '/SUBPACKAGE_FILES/r ${M2_RPM_SPEC_FILE_PATH}/marte2-subpackage-files' $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE) 
+	sed -i -e '/SUBPACKAGE_FILES/r ${M2_RPM_SPEC_FILE_PATH}/marte2-subpackage-files' $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE)
+	sed -i s/BUILD_REQUIRES/$(BUILD_REQUIRES)/g $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE)
+	sed -i s/REQUIRES/$(REQUIRES)/g $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE)
 	for target in $(TARGET_DIRS); do \
 	sed -i -e '/SUBPACKAGE_INSTALL/r ${M2_RPM_SPEC_FILE_PATH}/marte2-subpackage-inst' $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE); \
 	sed -i s/TARGET_DIR/$$target/g $(BUILD_DIR)/SPECS/$(M2_RPM_SPEC_FILE); \

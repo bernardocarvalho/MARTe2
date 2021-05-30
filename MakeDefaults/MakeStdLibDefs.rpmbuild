@@ -55,8 +55,11 @@ M2_RPM_TOP_DIR?=\/opt
 M2_RPM_ARCH?=x86_64
 #Standard spec file Requires
 M2_RPM_REQUIRES?=glibc
+#Subpackage Requires
+REQUIRES?=$(M2_RPM_ID)
 #Standard spec file BuildRequires
 M2_RPM_BUILD_REQUIRES?=gcc
+BUILD_REQUIRES?=glibc
 #Main options (core, test, ...)
 M2_RPM_BUILD_OPTIONS?=all
 #Allow to compile a subset of the project folders by setting e.g. SBPM and SPBMT

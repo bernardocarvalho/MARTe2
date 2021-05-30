@@ -1,6 +1,7 @@
 
 %package -n %{rpm_id}-NAME
 Summary:	%{rpm_name} NAME package
-
+Requires: REQUIRES
+BuildRequires: BUILD_REQUIRES
 %description -n %{rpm_id}-NAME
 %{rpm_name} package - NAME
