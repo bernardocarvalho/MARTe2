@@ -207,16 +207,6 @@ TEST(FileSystem_L1Portability_InternetHostGTest,TestSetLocalAddress) {
     ASSERT_TRUE(internetHostTest.TestSetLocalAddress());
 }
 
-TEST(FileSystem_L1Portability_InternetHostGTest,TestSetMulticastGroup) {
-    InternetHostTest internetHostTest;
-    ASSERT_TRUE(internetHostTest.TestSetMulticastGroup());
-}
-
-TEST(FileSystem_L1Portability_InternetHostGTest,TestGetMulticastGroup) {
-    InternetHostTest internetHostTest;
-    ASSERT_TRUE(internetHostTest.TestGetMulticastGroup());
-}
-
 TEST(FileSystem_L1Portability_InternetHostGTest,TestGetInternetHost) {
     InternetHostTest internetHostTest;
     const InternetHostTestTable table[]={
@@ -230,19 +220,9 @@ TEST(FileSystem_L1Portability_InternetHostGTest,TestGetInternetHost) {
     ASSERT_TRUE(internetHostTest.TestGetInternetHost(table));
 }
 
-TEST(FileSystem_L1Portability_InternetHostGTest,TestGetInternetMulticastHost) {
-    InternetHostTest internetHostTest;
-    ASSERT_TRUE(internetHostTest.TestGetInternetMulticastHost());
-}
-
 TEST(FileSystem_L1Portability_InternetHostGTest,TestSize) {
     InternetHostTest internetHostTest;
     ASSERT_TRUE(internetHostTest.TestSize());
-}
-
-TEST(FileSystem_L1Portability_InternetHostGTest,TestMulticastSize) {
-    InternetHostTest internetHostTest;
-    ASSERT_TRUE(internetHostTest.TestMulticastSize());
 }
 
 TEST(FileSystem_L1Portability_InternetHostGTest,TestGetLocalHostName) {
