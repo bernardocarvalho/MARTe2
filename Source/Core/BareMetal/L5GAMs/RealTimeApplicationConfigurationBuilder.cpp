@@ -1056,8 +1056,8 @@ bool RealTimeApplicationConfigurationBuilder::AddSignalToDataSource(StreamString
         //check if the ds is locked
         dataSourcesDatabase = cachedDatabase;
         uint32 locked;
-        printf("\nfunctionname: %s, datasourcename %s\n",functionName.Buffer(),dataSourceName.Buffer()); 
-        for(unsigned int i=0; i<dataSourcesDatabase.GetNumberOfChildren(); i++) printf("dsdb content: %s\n", dataSourcesDatabase.GetChildName(i)); 
+        //printf("\nfunctionname: %s, datasourcename %s\n",functionName.Buffer(),dataSourceName.Buffer()); 
+        //for(unsigned int i=0; i<dataSourcesDatabase.GetNumberOfChildren(); i++) printf("dsdb content: %s\n", dataSourcesDatabase.GetChildName(i)); 
         if (dataSourcesDatabase.Read("Locked", locked)) {
             isDsLocked = (locked != 0u);
         }
