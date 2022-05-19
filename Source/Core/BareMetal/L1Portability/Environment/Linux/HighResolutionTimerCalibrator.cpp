@@ -55,18 +55,33 @@ namespace MARTe {
 HighResolutionTimerCalibrator calibratedHighResolutionTimer;
 
 HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
-    const uint64 LINUX_CPUINFO_BUFFER_SIZE = 1023u*32u;
+    const uint64 LINUX_CPUINFO_BUFFER_SIZE = 1048575u; //8191u; //2047u; //1023u;
     initialTicks = HighResolutionTimer::Counter();
     frequency = 0u;
     period = 0.;
 
-    float64 frequancyFset[32];
+    float64 frequencyFset[32];
+   
+    char *cpufreqnovar = getenv("MARTe2_CPUFREQNO");
+    int cpufreqno; 
+    if(cpufreqnovar!=NULL) cpufreqno=atoi(cpufreqnovar); else cpufreqno=0;
+    
+
+    printf("selected CPU for frequency: %d\n",cpufreqno);
+
+ 
+    REPORT_ERROR_STATIC_0(ErrorManagement::Information, "HighResolutionTimerCalibrator called");
+    //printf("HighResolutionTimerCalibrator constructor entered!\n");
+    //exit(-1);
 
     struct timeval initTime;
     int32 ret = gettimeofday(&initTime, static_cast<struct timezone *>(NULL));
 
     initialSecs = initTime.tv_sec;
     initialUSecs = initTime.tv_usec;
+    int feofhit;
+    uint8 cpunr;
+
 
     if (ret == 0) {
         char8 buffer[LINUX_CPUINFO_BUFFER_SIZE + 1u];
@@ -76,26 +91,35 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
         size_t size = LINUX_CPUINFO_BUFFER_SIZE;
         if (f != NULL) {
             size = fread(&buffer[0], size, static_cast<size_t>(1u), f);
+            //if(ferror(f)) printf("error in fread, %d\n",ferror(f));
+            feofhit=feof(f);
+            //if((feofhit=feof(f))) printf("eof during fread\n");
             fclose(f);
         }
         else {
             REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "HighResolutionTimerCalibrator: fopen()");
         }
 
-        if (size > 0u) {
-            for(uint8 cpunr=0; cpunr<32; cpunr++)
+        //printf("size = %ld\n", size);
+
+
+        const char8 *p=&buffer[0];
+        if (size > 0u || feofhit) {
+            for(cpunr=0; cpunr<32; cpunr++)
             {
                 const char8 *pattern = "MHz";
-                const char8 *p = StringHelper::SearchString(&buffer[0], pattern);
+                //const char8 *p = StringHelper::SearchString(&buffer[0], pattern);
+                p = StringHelper::SearchString(p, pattern);
                 if (p != NULL) {
                     p = StringHelper::SearchString(p, ":");
                     p++;
                     float64 freqMHz = strtof(p, static_cast<char8 **>(0));
                     if (freqMHz > 0.) {
                         float64 frequencyF = freqMHz *= 1.0e6;
-                        printf("CPU %d, f %f\n", cpunr, frequencyF);
-                        period = 1.0 / frequencyF;
-                        frequency = static_cast<uint64>(frequencyF);
+                        frequencyFset[cpunr] = frequencyF;
+                        //printf("CPU %d, f %f\n", cpunr, frequencyF);
+                        //period = 1.0 / frequencyF;
+                        //frequency = static_cast<uint64>(frequencyF);
                     }
                 }
                 else
@@ -112,6 +136,13 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
         REPORT_ERROR_STATIC_0(ErrorManagement::OSError, "HighResolutionTimerCalibrator: gettimeofday()");
     }
 
+    if(cpufreqno<0) cpufreqno=0;
+    if(cpufreqno>=cpunr) cpufreqno=cpunr-1;
+    period = 1.0 / frequencyFset[cpufreqno];
+    frequency = static_cast<uint64>(frequencyFset[cpufreqno]);
+
+    printf("HighResolutionTimerCalibrator constructor exited, cpu=%d, perid=%f ns, frequency=%lld Hz\n", cpufreqno, period*1e9, frequency);
+    //exit(-1);
 }
 
 bool HighResolutionTimerCalibrator::GetTimeStamp(TimeStamp &timeStamp) const {
