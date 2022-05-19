@@ -55,10 +55,12 @@ namespace MARTe {
 HighResolutionTimerCalibrator calibratedHighResolutionTimer;
 
 HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
-    const uint64 LINUX_CPUINFO_BUFFER_SIZE = 1023u;
+    const uint64 LINUX_CPUINFO_BUFFER_SIZE = 1023u*32u;
     initialTicks = HighResolutionTimer::Counter();
     frequency = 0u;
     period = 0.;
+
+    float64 frequancyFset[32];
 
     struct timeval initTime;
     int32 ret = gettimeofday(&initTime, static_cast<struct timezone *>(NULL));
@@ -81,16 +83,24 @@ HighResolutionTimerCalibrator::HighResolutionTimerCalibrator() {
         }
 
         if (size > 0u) {
-            const char8 *pattern = "MHz";
-            const char8 *p = StringHelper::SearchString(&buffer[0], pattern);
-            if (p != NULL) {
-                p = StringHelper::SearchString(p, ":");
-                p++;
-                float64 freqMHz = strtof(p, static_cast<char8 **>(0));
-                if (freqMHz > 0.) {
-                    float64 frequencyF = freqMHz *= 1.0e6;
-                    period = 1.0 / frequencyF;
-                    frequency = static_cast<uint64>(frequencyF);
+            for(uint8 cpunr=0; cpunr<32; cpunr++)
+            {
+                const char8 *pattern = "MHz";
+                const char8 *p = StringHelper::SearchString(&buffer[0], pattern);
+                if (p != NULL) {
+                    p = StringHelper::SearchString(p, ":");
+                    p++;
+                    float64 freqMHz = strtof(p, static_cast<char8 **>(0));
+                    if (freqMHz > 0.) {
+                        float64 frequencyF = freqMHz *= 1.0e6;
+                        printf("CPU %d, f %f\n", cpunr, frequencyF);
+                        period = 1.0 / frequencyF;
+                        frequency = static_cast<uint64>(frequencyF);
+                    }
+                }
+                else
+                {
+                    break;
                 }
             }
         }
