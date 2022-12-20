@@ -4,6 +4,7 @@
    contain the root `toctree` directive.
    date: 23/03/2018
    author: Andre' Neto
+   edited on 20/12/2022 by José M Gomez
    copyright: Copyright 2017 F4E | European Joint Undertaking for ITER and
    the Development of Fusion Energy ('Fusion for Energy').
    Licensed under the EUPL, Version 1.1 or - as soon they will be approved
@@ -31,7 +32,7 @@ Welcome to MARTe2's documentation!
    faq
    publications
    licence
-
+   tutorial/tutorial
 
 Indices and tables
 ==================
