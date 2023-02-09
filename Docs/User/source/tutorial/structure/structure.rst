@@ -1,4 +1,4 @@
-Common structure
+General Common Structure
 ---------------------------------
 ---------------------------------
 
