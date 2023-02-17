@@ -14,9 +14,9 @@
 Tutorial
 ===============================
 
-In this tutorial you will be able to use some of the main features of MARTe2.
-The first step will be to set up the environment using the repository containing 
-all the demos for MARTe2 Training Session
+In this tutorial you will get introduced to some of the main features of MARTe2.
+
+The first step will be to set up the environment to allow for the use of all the demos for MARTe2 Training Session. After that, we will discuss about the general structure of a Control Systems in general terms and then we will move to actual examples of MARTe2 applications.
 
 .. toctree::
    :maxdepth: 3
@@ -24,7 +24,8 @@ all the demos for MARTe2 Training Session
 
    environment/environment
    structure/structure
-   epics/epics
+   example1/example1
+   epics1/epics1
    
 
 
