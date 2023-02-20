@@ -24,7 +24,8 @@ The first step will be to set up the environment to allow for the use of all the
 
    environment/environment
    structure/structure
-   example1/example1
+   previous/example1
+   previous/example2
    epics1/epics1
    
 
