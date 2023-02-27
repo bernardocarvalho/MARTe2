@@ -26,7 +26,7 @@ The first step will be to set up the environment to allow for the use of all the
    generalStructure/main_schematic
    previous/example1
    previous/example2
-   epics/epics1/epics1
+   epics/epics
    
 
 
