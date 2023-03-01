@@ -234,6 +234,7 @@ ln -s /etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf /etc/ld.so.conf.d/
 %if %{?rpm_codac:1}%{!?rpm_codac:0}
 codac_prefix=codac-core-$(codac-version -v)-
 codac_file=%{rpm_id}
+no_codac_file=${codac_file#"${codac_prefix}"}
 unlink /etc/ld.so.conf.d/codac-${no_codac_file}.conf
 %endif
 
