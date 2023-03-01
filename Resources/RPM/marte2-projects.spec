@@ -235,6 +235,6 @@ endif
 codac_prefix=codac-core-$(codac-version -v)-
 codac_file=%{rpm_id}
 unlink /etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf
-endif
+%endif
 
 
