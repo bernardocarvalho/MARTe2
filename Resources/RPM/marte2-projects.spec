@@ -130,7 +130,7 @@ cp %{buildroot}/etc/profile.d/%{rpm_id}.sh %{buildroot}/etc/profile.d/%{rpm_id}.
 
 %if %{?rpm_codac:1}%{!?rpm_codac:0}
 mkdir -p %{buildroot}/etc/opt/codac/env.d/
-echo '$%{rpm_name}_DIR=%{rpm_top_dir}' > %{buildroot}/etc/opt/codac/env.d/%{rpm_id}-env
+echo '%{rpm_name}_DIR=%{rpm_top_dir}' > %{buildroot}/etc/opt/codac/env.d/%{rpm_id}-env
 mkdir -p %{buildroot}/etc/opt/codac/ld.so.conf.d/
 echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/%{rpm_id}.conf
 %endif
