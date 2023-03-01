@@ -46,6 +46,8 @@ M2_RPM_LICENSE?=EUPL
 M2_RPM_NAME?=
 #Update the system profile.d information
 M2_RPM_PROFILE_D?=1
+#Update the codac system information
+M2_RPM_CODAC?=0
 #Allow to create RPM with dependencies only (no files)
 M2_RPM_WITH_FILES?=1
 #The name of the rpm file that will be generated
