@@ -135,7 +135,7 @@ no_codac_file=${codac_file#"${codac_prefix}"}
 mkdir -p %{buildroot}/etc/opt/codac/env.d/
 echo '%{rpm_name}_DIR=%{rpm_top_dir}' > %{buildroot}/etc/opt/codac/env.d/${no_codac_file}-env
 mkdir -p %{buildroot}/etc/opt/codac/ld.so.conf.d/
-echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/${no_codac_file}.conf
+echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf
 %endif
 
 #Copy all .h files to an include folder
