@@ -218,8 +218,23 @@ cd -
 echo 'To update the system environment variables please login again or execute "source /etc/profile.d/%{rpm_id}.sh"'
 %endif
 
+%if %{?rpm_codac:1}%{!?rpm_codac:0}
+codac_prefix=codac-core-$(codac-version -v)-
+codac_file=%{rpm_id}
+no_codac_file=${codac_file#"${codac_prefix}"}
+ln -s /etc/ld.so.conf.d/codac-${no_codac_file}.conf /etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf
+endif
+
 #Allow to run a project specific post install script
 %if %{?rpm_project_post:1}%{!?rpm_project_post:0}
 . %{rpm_project_post}
 %endif
+
+%postun
+%if %{?rpm_codac:1}%{!?rpm_codac:0}
+codac_prefix=codac-core-$(codac-version -v)-
+codac_file=%{rpm_id}
+unlink /etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf
+endif
+
 
