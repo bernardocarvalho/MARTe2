@@ -132,7 +132,8 @@ cp %{buildroot}/etc/profile.d/%{rpm_id}.sh %{buildroot}/etc/profile.d/%{rpm_id}.
 mkdir -p %{buildroot}/etc/opt/codac/env.d/
 echo '%{rpm_name}_DIR=%{rpm_top_dir}' > %{buildroot}/etc/opt/codac/env.d/%{rpm_id}-env
 mkdir -p %{buildroot}/etc/opt/codac/ld.so.conf.d/
-echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/%{rpm_id}.conf
+codac_prefix=codac-core-$(codac-version)
+echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/${%{rpm_id}#$prefix}.conf
 %endif
 
 #Copy all .h files to an include folder
