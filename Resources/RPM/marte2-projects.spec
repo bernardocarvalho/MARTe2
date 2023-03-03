@@ -129,6 +129,16 @@ echo 'export PATH=$PATH:$%{rpm_name}_DIR/Bin' >> %{buildroot}/etc/profile.d/%{rp
 cp %{buildroot}/etc/profile.d/%{rpm_id}.sh %{buildroot}/etc/profile.d/%{rpm_id}.csh
 %endif
 
+%if %{?rpm_codac:1}%{!?rpm_codac:0}
+codac_prefix=codac-core-$(codac-version -v)-
+codac_file=%{rpm_id}
+no_codac_file=${codac_file#"${codac_prefix}"}
+mkdir -p %{buildroot}/etc/opt/codac/env.d/
+echo '%{rpm_name}_DIR=%{rpm_top_dir}' > %{buildroot}/etc/opt/codac/env.d/${no_codac_file}-env
+mkdir -p %{buildroot}/etc/opt/codac/ld.so.conf.d/
+echo '%{rpm_top_dir}/Lib' > %{buildroot}/etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf
+%endif
+
 #Copy all .h files to an include folder
 %if %{?rpm_devel_list:1}%{!?rpm_devel_list:0}
 if [[ "%{rpm_devel_list}" != "none" ]]; then 
@@ -214,6 +224,20 @@ echo 'To update the system environment variables please login again or execute "
 . %{rpm_project_post}
 %endif
 
+%posttrans
+%if %{?rpm_codac:1}%{!?rpm_codac:0}
+codac_prefix=codac-core-$(codac-version -v)-
+codac_file=%{rpm_id}
+no_codac_file=${codac_file#"${codac_prefix}"}
+ln -s /etc/opt/codac/ld.so.conf.d/codac-${no_codac_file}.conf /etc/ld.so.conf.d/codac-${no_codac_file}.conf
+%endif
 
+%postun
+%if %{?rpm_codac:1}%{!?rpm_codac:0}
+codac_prefix=codac-core-$(codac-version -v)-
+codac_file=%{rpm_id}
+no_codac_file=${codac_file#"${codac_prefix}"}
+unlink /etc/ld.so.conf.d/codac-${no_codac_file}.conf
+%endif
 
 
