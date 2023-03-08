@@ -11,7 +11,6 @@ Let's go through the example for a GAM wich has a fixed number of signals:
 and this is its configuration file:
 
 .. literalinclude:: ../../_static/examples/Configurations/GAMs-1.cfg
-   :language: c++
    :caption: Fixed GAM Configuration File
 
 You can compile the code following the intructions :doc:`here <../../core/examples>`.
