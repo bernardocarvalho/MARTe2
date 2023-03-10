@@ -10,7 +10,7 @@ Install git: ::
 
     yum -y install git;
 
-Install all the standard development tools, the cmake3 compiler and octave: ::
+Install all the standard development tools, cmake3 compiler and octave: ::
 
     yum -y groups install "Development Tools";
     yum -y install wget cmake3 octave libxml2 libxml2-devel bc;

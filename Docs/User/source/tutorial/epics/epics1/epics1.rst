@@ -9,14 +9,14 @@ This is the detail about the way the Real Time components work for this examples
   :width: 800
   :alt: RT components 1
 
-* Depending on the state, store data in a file
+Depending on the state, store data in a file
 
 .. image:: ./epics1_RT2.png
   :width: 800
   :alt: RT components 2
 
-We can better understand the behavior of the app by analyzing the configuration file 
-:download:`RTApp-EPICSv3-1.cfg <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv3-1.cfg>`:
+We can better understand the behavior of the application by analyzing the configuration file 
+:download:`RTApp-EPICSv3-1.cfg <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv3-1.cfg>`.
 
 The first definition we see is for the EPICSCAInterface - see the section :doc:`MARTe configuration language <../../../core/configuration/parser>` and :doc:`Data-driven applications <../../../core/configuration/objectregistrydatabase>` for a reminder on how to interpret configuration files: ::
 

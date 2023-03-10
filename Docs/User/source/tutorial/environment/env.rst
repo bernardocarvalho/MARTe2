@@ -1,7 +1,7 @@
 Setting the environment
 -----------------------
 
-Make sure that all the environment variables are correctly exported. ::
+To properly set-up the environment to run the examples, first make sure that all the environment variables are correctly exported. ::
     
     export MARTe2_DIR=~/Projects/MARTe2-dev
     export MARTe2_Components_DIR=~/Projects/MARTe2-components
@@ -22,11 +22,11 @@ Make sure that all the environment variables are correctly exported. ::
     cd ~/Projects/MARTe2-demos-padova
     make -f Makefile.x86-linux
 
-Disable firewall rules (otherwise the communication with EPICS may not work): ::
+Next, disable firewall rules (otherwise the communication with EPICS may not work): ::
 
     iptable -F
 
-Export all variables permanently (assumes that the relative paths above were used!). ::
+And finally export all variables permanently (assumes that the relative paths above were used!). ::
 
     cp marte2-exports.sh /etc/profile.d/
 

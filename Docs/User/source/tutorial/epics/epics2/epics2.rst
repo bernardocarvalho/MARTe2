@@ -1,19 +1,20 @@
 EPICS example 2
 ---------------
 
-The objective in this case is to monitor some outputs of the system using EPICSv3. This are the Real Time components for this example:
+After having seen the previous example, next we will see an application which monitors some outputs of the system using EPICSv3. Depending on the state, the application will store data in a file.
+
+This are the Real Time components for this example:
 
 .. image:: ./epics2_RT1.png
   :width: 800
   :alt: RT components 1
 
-* Depending on the state, store data in a file
-* Always monitoring
-
-
 .. image:: ./epics2_RT2.png
   :width: 800
   :alt: RT components 2
+
+
+  
 
 To execute this example, follow the following instructions:
 

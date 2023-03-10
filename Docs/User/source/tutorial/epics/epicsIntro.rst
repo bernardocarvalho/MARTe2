@@ -1,7 +1,7 @@
 EPICS Introduction
 ------------------
 
-Now we move into a more complex application. To show an example about how a control system is implemented with the GAMs mentioned in the :doc:`General Common Structure <../generalStructure/main_schematic>`  section, let's analyze an example of an interface with an EPICS database (EPICSCAInterface).
+Now we move into a more complex application. To show an example about how a Control System is implemented with the GAMs mentioned in the :doc:`General Common Structure <../generalStructure/main_schematic>`  section, let's analyze an example of an interface with an EPICS database (EPICSCAInterface).
 
 As mentioned in section :doc:`Building <../environment/building>`, EPICS is a set of software tools used in distributed control systems allowing communication between the different components and providing control and feedback of the various parts of the devices from a central control room, or even remotely over the internet.
 

@@ -1,17 +1,17 @@
 Docker (optional) 
 -----------------
 
-Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers. It is a tool that is used to automate the deployment of applications in lightweight containers so that applications can work efficiently in different environments.
+Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, facilitating the development and testing of applications in different environments, and allowing for automatization of its deployment.
 
-In the root folder of this project there is a Dockerfile which includes all the demo dependencies. ::
+In case you choose to use docker for the execution of the examples, you may find in the root folder of the project a Dockerfile including all the demo dependencies which will facilitate the setting-up of the environment.
+
+To use it, run the following in a terminal: ::
 
     cd ~/Projects/MARTe2-demos-padova;
     docker build -t <DOCKER_IMAGE> .;
 
-For instance, you could use "*docker build -t marte2-demos-padova/centos:7 .*"
-
-Note that you need to map your local Projects directory with the /root/Projects directory in the container.
-Also, the docker daemon needs to be running.
+where <DOCKER_IMAGE> is the name of the image to be used, for instance, "*docker build -t marte2-demos-padova/centos:7 .*"
+(Note that you need to map your local *Projects* directory with the */root/Projects* directory in the container. Also, the docker daemon needs to be running).
 
 To execute the image with your host folder mapped into the container, run: ::
     

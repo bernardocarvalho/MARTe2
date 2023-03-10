@@ -1,13 +1,16 @@
 Building 
 --------
 
+These are the necessary steps to build all the needed libraries:
+
+
 **Open623541**
 
-The Open Platform Communications (OPC) standard, which is a series of standards and specifications for industrial telecommunication. They are based on Object Linking and Embedding (OLE) for process control. OPC specifies the communication of real-time plant data between control devices from different manufacturers.
+The Open Platform Communications (OPC) is a series of standards and specifications for industrial telecommunication. They are based on Object Linking and Embedding (OLE) for process control. OPC specifies the communication of real-time plant data between control devices from different manufacturers.
 
-The OPC Unified Architecture (UA), released in 2008, is a platform independent service-oriented architecture that integrates all the functionality of the individual OPC Classic specifications into one extensible framework. In our case, the OPCUA DataSource relies on the open62541 library.
+The OPC Unified Architecture (UA), is a platform independent service-oriented architecture that integrates all the functionality of the individual OPC Classic specifications into one extensible framework. In our case, the OPCUA DataSource relies on the open62541 library.
 
-These are the steps to follow to get it ready to work. In a terminal, write: ::
+These are the steps to get it ready to work. In a terminal, write: ::
 
     cd ~/Projects/open62541;
 
@@ -32,15 +35,22 @@ Start building the open62541 library: ::
 
 **EPICS:**
 
-The Experimental Physics and Industrial Control System (EPICS) is a set of open source software tools and applications used to develop and implement distributed control systems to operate devices such as particle accelerators, telescopes and other large scientific facilities. The tools are designed to help develop systems which often feature large numbers of networked computers delivering control and feedback. They also provide SCADA capabilities. ::
+The Experimental Physics and Industrial Control System (EPICS) is a set of open source software tools and applications used to develop and implement distributed control systems to operate devices such as particle accelerators, telescopes and other large scientific facilities. The tools are designed to help develop systems which often feature large numbers of networked computers delivering control and feedback. They also provide SCADA capabilities. 
+
+EPICS acts like a database - although it is not - which has the information of the system to be controlled, allowing its different parts to read and write variables as necessary, and react to their values accordingly. 
+
+These are the instructions to build it: ::
 
     cd ~/Projects/epics-base-7.0.2;
     echo "OP_SYS_CXXFLAGS += -std=c++11" >> configure/os/CONFIG_SITE.linux-x86_64.Common;
     make;
 
+
 **SDN**
 
-Software-defined networking (SDN) technology is an approach to network management that enables dynamic, programmatically efficient network configuration in order to improve network performance and monitoring, making it more like cloud computing than traditional network management. ::
+Software-Defined Networking (SDN) technology is an approach to network management that enables dynamic, programmatically efficient network configuration in order to improve network performance and monitoring, making it more like cloud computing than traditional network management.
+
+Run the following to build SDN: ::
 
     cd ~/Projects/SDN_1.0.12_nonCCS;
     make;

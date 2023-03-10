@@ -2,7 +2,7 @@ Introductory step
 -----------------
 -----------------
 
-With the aim of introducing  first analyze this simple hello-world-type application. The idea is just to show the message "Say something..." in the logger.
+Prior to start analyzing a more complex example, let's first go through this simple hello-world-type application. The idea is just to show the message "Say something..." in the logger.
 
 .. literalinclude:: ../../_static/examples/Makefiles/ExFile1.cpp
    :language: c++
@@ -15,10 +15,9 @@ The initial part of the code is the usual include section, followed by the stati
 
 The function uses the *ErrorCodeToStream* function (ErrorManagement.h), that converts ErrorType to stream and defines a way to prompt the information in the screen.
 
-Next we find the main function. First it sets *ErrorProcessFunction* as the function that will manage errors for the application by passing a reference to it to *SetErrorProcessFunction()*. Then, we see an example of how to send an error message of type warning using the *REPORT_ERROR_STATIC* inline method (ErrorManagement.h), with the description "Say something...". 
+Next we find the main function. First it sets *ErrorProcessFunction* as the function that will manage errors for the application by passing a reference to it to *SetErrorProcessFunction()*. Then, we see an example of how to report an error message of type warning using the *REPORT_ERROR_STATIC* inline method (ErrorManagement.h), with the description "Say something...". 
 
-After that, an instance object of type ExFile2 is created, which simply sends the information message "Something!" when its method 
-exFile2.SaySomething() is called. This is ExFile2.cpp code:
+After that, an instance object of type ExFile2 is created, which simply sends the information message - not warning as in the previous case - "Something!" when its method exFile2.SaySomething() is called. This is the ExFile2.cpp code:
 
 .. literalinclude:: ../../_static/examples/Makefiles/ExFile2.cpp
    :language: c++
@@ -30,4 +29,5 @@ The ouput of the execution is the following: ::
    [Warning - ExFile1.cpp:65]: Say something...
    [Information - ExFile2.cpp:52]: Something!
 
-Before moving to more complex applications, next we will analyze in depth on of the examples previously seen in the :doc:`GAMs <../../core/app/gams/gam>` setion. In case you have not yet checked it, this is probably a good moment to do so.
+
+Before moving to more complex applications, next we will analyze in depth one of the examples previously seen in the :doc:`GAMs <../../core/app/gams/gam>` section. In case you have not yet checked it, this is probably a good moment to do so.
