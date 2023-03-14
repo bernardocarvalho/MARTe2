@@ -87,9 +87,9 @@ for lib_file in %{rpm_lib_list}
 do
 if [[ $lib_file == *.a ]]
 then
-find . -name "$lib_file" | xargs -I found_file cp found_file %{buildroot}/%{rpm_top_dir}/Include/Lib/
+find . -name "$lib_file" | xargs -I found_file cp -a found_file %{buildroot}/%{rpm_top_dir}/Include/Lib/
 else
-find . -name "$lib_file" | xargs -I found_file cp found_file %{buildroot}/%{rpm_top_dir}/Lib/
+find . -name "$lib_file" | xargs -I found_file cp -a found_file %{buildroot}/%{rpm_top_dir}/Lib/
 fi
 done
 fi
