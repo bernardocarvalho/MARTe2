@@ -98,8 +98,8 @@ fi
 %if %{?rpm_lib_dir:1}%{!?rpm_lib_dir:0}
 for lib_dir in %{rpm_lib_dir}
 do
-find $lib_dir -name "*.so" | xargs -I found_file cp found_file %{buildroot}/%{rpm_top_dir}/Lib/
-find $lib_dir -name "*.a" | xargs -I found_file cp found_file %{buildroot}/%{rpm_top_dir}/Include/Lib/
+find $lib_dir -name "*.so" | xargs -I found_file cp -a found_file %{buildroot}/%{rpm_top_dir}/Lib/
+find $lib_dir -name "*.a" | xargs -I found_file cp -a found_file %{buildroot}/%{rpm_top_dir}/Include/Lib/
 done
 %endif 
 %endif 
@@ -170,7 +170,7 @@ expattern=$expattern\\\|$other_folder\/
 done
 %endif
 
-find . -type f -printf "\"/%%P\"\n" | grep -v $expattern > $current_path/file-lists | echo ""
+find -L . -type f -printf "\"/%%P\"\n" | grep -v $expattern > $current_path/file-lists | echo ""
 for src_dir in %{rpm_src_dir}
 do
 echo %{rpm_top_dir}/$src_dir >> $current_path/file-lists-devel
