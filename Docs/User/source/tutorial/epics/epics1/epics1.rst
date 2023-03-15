@@ -269,7 +269,7 @@ Further down in the configuration file, we reach the *+Data =* definition were t
         }
     }
 
-As we can see, DDB1 is defined as *GAMDataSource* (see :doc:`GAMDataSource (DDB) <../../../core/app/gams/datasource>` for more information), and also *SignalsWriter* and *PerformanceWriter* are defined, including the files where the activity of the application is going to be stored.
+As we can see, DDB1 is defined as *GAMDataSource* (see :doc:`GAMDataSource (DDB) <../../../core/app/gams/datasource>` for more information). *SignalsWriter* and *PerformanceWriter* are also defined, including the location where the files with the activity of the application is going to be stored.
 
 To execute this example, follow these instructions:
 

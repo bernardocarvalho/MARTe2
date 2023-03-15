@@ -7,12 +7,37 @@ In this case, the objective is to monitor the outputs of the system using EPICSv
   :width: 800
   :alt: RT components 1
 
-Note in the configuration file that the types are now structured
-
 .. image:: ./epics3_RT2.png
   :width: 800
   :alt: RT components 2
 
+Note in the :download:`configuration file <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv7-1.cfg>` that the types are now structured: ::
+ 
+  +EPICSPVADB = {
+    Class = EPICSPVA::EPICSPVADatabase
+    StackSize = 1048576
+    CPUs = 0x2
+    AutoStart = 0
+    +DemoAppStatistics = {
+        Class = EPICSPVA::EPICSPVARecord
+        Alias = "MARTe2-Demo-App:Statistics"
+        Structure = {
+            value = {//Ugly name which allows to use pvget directly
+                Type = StatesStatsStruct
+            }
+        } 
+    }
+    +DemoAppSignals = {
+        Class = EPICSPVA::EPICSPVARecord
+        Alias = "MARTe2-Demo-App:Signals"
+        Structure = {
+            value = {//Ugly name which allows to use pvget directly
+                Type = SignalsStruct
+            }
+        } 
+    }
+  }
+  
 To execute this example, follow the following instructions:
 
 We will need 3 different terminals. In console1 execute the following commands: ::
