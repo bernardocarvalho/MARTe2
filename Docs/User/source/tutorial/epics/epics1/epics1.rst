@@ -117,12 +117,12 @@ There we set the class variables *PV_STATUS*, *PV_COMMAND* and *PV_ERROR_RST* to
 
 The +StateMachine definition includes the 4 states we saw in the :doc:`previous section <../epics>`: INITIAL, IDLE, RUN and ERROR and how the state machine will behave in each of them. 
 
-For instance, let's analyze the RUN state. :doc:`Previously <../epics>` we saw that the when we enter in the RUN state, we set the *PV_STATUS* variable and then, once the execution is finished, we we go back to the IDLE status. We can see this in the configuration file.
+For instance, let's analyze the RUN state. :doc:`Previously <../epics>` we saw that the when we enter in the RUN state, we set the *PV_STATUS* variable and then, once the execution is finished, we go back to the IDLE status. Let's see how this translates in the configuration file:
 
 First we find the *+ENTER* definition, were we basically set the variable *EPICSCAInterface.PV_STATUS* to 1 using the function *CAPut*. 
 After that, we find the definition of *+GOTOIDLE* case, were we find the 4 actions described in the :doc:`previous section <../epics>`: *ChangeToIdleMsg*, *StopCurrentStateExecutionMSg*, *StartNextStateExecutionMsg* and *SetStatusPV*. In each of them, we call the appropriate functions with the corresponding arguments.
 
-A similar analysis can be done for the other states in order to understand in detail the different parts of the state machine involved in the example.
+A similar analysis can be done for the other states in order to understand in more detail the different parts of the state machine involved in the example.
 
 In the TestApp definition, we can find the GAMs used for this example, such as GAMTimer or GAMMeasurements. In this two, we can see that they inherit from IOGAM, and both define InputSignals and OutputSignals, giving details about the variables' names and types. We can also find the GAMSSM including the definition of the state machine matrixes together with other GAMs. 
 

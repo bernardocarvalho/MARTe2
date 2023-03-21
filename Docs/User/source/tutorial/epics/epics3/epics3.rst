@@ -11,7 +11,7 @@ In this case, the objective is to monitor the outputs of the system using EPICSv
   :width: 800
   :alt: RT components 2
 
-Note in the :download:`configuration file <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv7-1.cfg>` that the types are now structured: ::
+Note in the :download:`configuration file <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv7-1.cfg>` that the types are now better structured: ::
  
   +EPICSPVADB = {
     Class = EPICSPVA::EPICSPVADatabase
