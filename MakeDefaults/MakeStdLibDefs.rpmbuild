@@ -32,6 +32,7 @@ M2_RPM_COMPILE_TARGET?=x86-linux
 M2_RPM_FLAGS=-v -ba
 M2_RPM_SPEC_FILE_PATH?=$(ROOT_DIR)/Resources/RPM/
 M2_RPM_SPEC_FILE?=marte2-projects.spec
+M2_SVC_URL?=undefined
 
 #Should be set by the source Makefile
 M2_RPM_VERSION?=0.0
@@ -99,6 +100,7 @@ ifdef M2_RPM_NAME
 M2_RPM_DEFINES+=--define "rpm_name $(M2_RPM_NAME)"
 endif
 M2_RPM_DEFINES+=--define "rpm_version $(M2_RPM_VERSION)"
+M2_RPM_DEFINES+=--define "rpm_vcs_url $(M2_SVC_URL)"
 M2_RPM_DEFINES+=--define "rpm_license $(M2_RPM_LICENSE)"
 M2_RPM_DEFINES+=--define "rpm_arch $(M2_RPM_ARCH)"
 M2_RPM_DEFINES+=--define "rpm_requires $(M2_RPM_REQUIRES)"

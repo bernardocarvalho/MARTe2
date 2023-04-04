@@ -2,6 +2,7 @@ Name: 		%{rpm_id}
 Version:    %{rpm_version}
 Release:    %{?rpm_release:%{rpm_release}}%{!?rpm_release:1}%{?rpm_custom_dist:.%{rpm_custom_dist}}%{!?rpm_custom_dist:%{dist}}
 Summary:	%{rpm_name} package
+URL:        %{?rpm_vcs_url:%{rpm_vcs_url}}%{!?rpm_vcs_url:undefined}
 Source0:	%{rpm_id}-%{rpm_version}.tar.gz
 License:	%{rpm_license}
 
