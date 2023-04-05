@@ -11,6 +11,10 @@ AutoReq:      no
 
 Requires:   %{rpm_requires}
 
+%if %{?rpm_provides:1}%{!?rpm_provides:0}
+Provides:   %{rpm_provides}
+%endif
+
 # Turn off the brp-python-bytecompile automagic otherwise it will clash with QA helper python scripts!
 %define _python_bytecompile_errors_terminate_build 0
 # Again the rpmbuild will compile any python files it finds and later complain that the .pyc and .pyo are not packaged
