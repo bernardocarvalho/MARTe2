@@ -12,7 +12,7 @@ AutoReq:      no
 Requires:   %{rpm_requires}
 
 %if %{?rpm_provides:1}%{!?rpm_provides:0}
-Provides:   %{rpm_provides}
+Provides:   %{rpm_id} = %{rpm_provides}
 %endif
 
 # Turn off the brp-python-bytecompile automagic otherwise it will clash with QA helper python scripts!
@@ -37,6 +37,10 @@ Summary:	%{rpm_name} devel package
 
 %if %{?rpm_devel_requires:1}%{!?rpm_devel_requires:0}
 Requires: %{rpm_devel_requires}
+%endif
+
+%if %{?rpm_provides:1}%{!?rpm_provides:0}
+Provides:   %{rpm_id}-devel = %{rpm_provides}
 %endif
 
 %description -n %{rpm_devel_id}
