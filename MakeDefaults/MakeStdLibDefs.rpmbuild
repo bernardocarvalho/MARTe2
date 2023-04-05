@@ -153,7 +153,7 @@ ifdef M2_RPM_WITH_FILES
 M2_RPM_DEFINES+=--define "rpm_with_files $(M2_RPM_WITH_FILES)"
 endif
 ifdef M2_RPM_PROVIDES
-M2_RPM_PROVIDES+=--define "rpm_provides $(M2_RPM_PROVIDES)"
+M2_RPM_DEFINES+=--define "rpm_provides $(M2_RPM_PROVIDES)"
 endif
 
 
