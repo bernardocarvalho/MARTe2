@@ -44,7 +44,3 @@ Clone open62541 v1.0 library: ::
 
     git clone -b 1.0 https://github.com/open62541/open62541.git;
 
-Download SDN: ::
-
-    wget https://vcis-gitlab.f4e.europa.eu/aneto/MARTe2-demos-padova/raw/develop/Other/SDN_1.0.12_nonCCS.tar.gz;
-    tar zxvf SDN_1.0.12_nonCCS.tar.gz;

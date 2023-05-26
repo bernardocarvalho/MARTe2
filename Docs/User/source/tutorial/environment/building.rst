@@ -1,7 +1,10 @@
+
 Building 
 --------
 
-These are the necessary steps to build all the needed libraries:
+In previous steps we have download and install some applications necessary to run the demos. For instance, we installed `MDSplus <https://www.mdsplus.org/index.php/Introduction>`_, which is a set of software tools for data acquisition and storage and a methodology for management of complex scientific data.MDSplus allows all data from an experiment or simulation code to be stored into a single, self-descriptive, hierarchical structure, that was designed to enable users to easily construct complete and coherent data sets. 
+
+Next we also need to build some additional ones. These are the necessary steps to build all the needed libraries:
 
 
 **Open623541**
@@ -43,14 +46,4 @@ These are the instructions to build it: ::
 
     cd ~/Projects/epics-base-7.0.2;
     echo "OP_SYS_CXXFLAGS += -std=c++11" >> configure/os/CONFIG_SITE.linux-x86_64.Common;
-    make;
-
-
-**SDN**
-
-Software-Defined Networking (SDN) technology is an approach to network management that enables dynamic, programmatically efficient network configuration in order to improve network performance and monitoring, making it more like cloud computing than traditional network management.
-
-Run the following to build SDN: ::
-
-    cd ~/Projects/SDN_1.0.12_nonCCS;
     make;
