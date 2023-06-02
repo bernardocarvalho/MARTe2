@@ -1,17 +1,15 @@
-Linux Timer 1
--------------
--------------
+Example 1: Linux Timer
+----------------------
 
 Let's now create our first MARTe2 real-time applications, starting from very simple ones and progresively complicating the examples, following all the steps from coding to execution - this is probably a good moment to review the :doc:`GAMs <../../core/app/gams/gam>` section.
 
-Read from a LinuxTimer and print the Counter and the Time to a LoggerDataSource at a fixed frequency of 2 Hz
--------------------------------------------------------------------------------------------------------------
+This first example will read from a LinuxTimer and print the Counter and the Time to a LoggerDataSource at a fixed frequency of 2 Hz
 
 First, we will do a MARTe application that reads from a LinuxTimer and prints the Counter and the Time to a LoggerDataSource at a fixed frequency of 2 Hz. 
 
 In this example, we are going to use only GAMs which are already implemented in the MARTe2 components so we will not need to create any new ones, therefore no .cpp or .h files need to be coded. We will only need to create the appropriate configuration file.
 
-This is the configuration file needed for the execution of the real-time application (for a reminder on how configuration files are related to real-time applications refer to :doc:`RealTimeApplication <../../../core/app/gams/rtappdetails.rst>`): ::
+This is the configuration file needed for the execution of the real-time application (for a reminder on how configuration files are related to real-time applications refer to :doc:`RealTimeApplication <../../core/app/gams/rtappdetails>`): ::
 
     $TestApp = {
         Class = RealTimeApplication

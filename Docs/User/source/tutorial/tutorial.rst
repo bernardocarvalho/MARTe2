@@ -24,8 +24,12 @@ The first step will be to set up the environment to allow for the use of all the
 
    environment/environment
    generalStructure/main_schematic
-   previous/example1
-   previous/example2
+   Example1/Example1
+   Example2/Example2
+   Example3/Example3
+   Example4/Example4
+   previous/previous1
+   previous/previous2
    epics/epics
    
 

@@ -1,117 +1,116 @@
-Read from a LinuxTimer, executes a WaveformSin and print the value of the sine to a LoggerDataSource at a fixed frequency of 10 Hz
-----------------------------------------------------------------------------------------------------------------------------------
+Example 2: WaveformSin
+----------------------
  
-In this case we will use the WaveformSin GAM to create a sine waveform and print it in the logger in a similar way as in the previous example.
+In this case we will read from a LinuxTimer, execute a WaveformSin and print the value of the sine to a LoggerDataSource at a fixed frequency of 10 Hz
 As in the previous one, no .h and .cpp files are necessary in this example.
 
-Lets see the configuration file:
+Lets see the configuration file: ::
     
-$TestApp = {
-    Class = RealTimeApplication
-    +Functions = {
-        Class = ReferenceContainer
-        +GAMLinuxTimer = {
-            Class = IOGAM
-            InputSignals = {
-                Time = {
-                    Frequency = 10
-                    DataSource = Timer
-                    Type = uint32
+    $TestApp = {
+        Class = RealTimeApplication
+        +Functions = {
+            Class = ReferenceContainer
+            +GAMLinuxTimer = {
+                Class = IOGAM
+                InputSignals = {
+                    Time = {
+                        Frequency = 10
+                        DataSource = Timer
+                        Type = uint32
+                    }
+                }
+            OutputSignals = {             
+                    Time = {
+                        DataSource = "DDB1"
+                        Type = uint32
+                }            
                 }
             }
-           OutputSignals = {             
-                Time = {
-                    DataSource = "DDB1"
-                    Type = uint32
-               }            
+            +GAMWaveformSin = {
+                Class=WaveformGAM::WaveformSin // Since the name of the library WaveformGAM.so do not correspond to the name of the class WaveformSin, we need to specify it here
+                Amplitude = 10.0
+                Frequency = 0.5
+                Phase = 0.0
+                Offset = 0.0
+                InputSignals = {
+                    Time = {
+                        DataSource = "DDB1"
+                        Type = uint32 
+                    }
+                }
+                OutputSignals = {
+                    SineWave = {
+                        DataSource = "DDB1"
+                        Type = float32
+                    }
+                }
+            }
+            +GAMScreenWriter = {
+                Class = IOGAM            
+                InputSignals = {
+                    Time = {
+                        Type = uint32
+                    }
+                    SineWave = {
+                        Type = uint32
+                    }
+                } 
+                OutputSignals = {
+                    Time_microseconds = {
+                        DataSource = LoggerDataSource
+                        Type = uint32
+                    }  
+                    SineWave_values = {
+                        DataSource = LoggerDataSource
+                        Type = float32
+                    }             
+                }
             }
         }
-        +GAMWaveformSin = {
-            Class=WaveformGAM::WaveformSin // Since the name of the library WaveformGAM.so do not correspond to the name of the class WaveformSin, we need to specify it here
-            Amplitude = 10.0
-            Frequency = 0.5
-            Phase = 0.0
-            Offset = 0.0
-            InputSignals = {
-                Time = {
-                    DataSource = "DDB1"
-                    Type = uint32 
-                }
+        +Data = {
+            Class = ReferenceContainer
+            DefaultDataSource = DDB1
+            +DDB1 = {
+                Class = GAMDataSource
             }
-            OutputSignals = {
-                SineWave = {
-                    DataSource = "DDB1"
-                    Type = float32
-                }
+            +LoggerDataSource = {
+                Class = LoggerDataSource
             }
+            +Timings = {
+                Class = TimingDataSource
+            }
+            +Timer = {
+                Class = LinuxTimer
+                SleepNature = "Default"
+                Signals = {
+                    Counter = {
+                        Type = uint32
+                    }
+                    Time = {
+                        Type = uint32
+                    }
+                }
+            }        
         }
-        +GAMScreenWriter = {
-            Class = IOGAM            
-            InputSignals = {
-                Time = {
-                    Type = uint32
+        +States = {
+            Class = ReferenceContainer
+            +State1 = {
+                Class = RealTimeState
+                +Threads = {
+                    Class = ReferenceContainer
+                    +Thread1 = {
+                        Class = RealTimeThread
+                        CPUs = 0x1
+                        Functions = {GAMLinuxTimer GAMWaveformSin GAMScreenWriter}
+                    }
                 }
-                SineWave = {
-                    Type = uint32
-                }
-            } 
-            OutputSignals = {
-                Time_microseconds = {
-                    DataSource = LoggerDataSource
-                    Type = uint32
-                }  
-                SineWave_values = {
-                    DataSource = LoggerDataSource
-                    Type = float32
-                }             
-            }
+            }        
+        }
+        +Scheduler = {
+            Class = GAMScheduler
+            TimingDataSource = Timings
         }
     }
-    +Data = {
-        Class = ReferenceContainer
-        DefaultDataSource = DDB1
-        +DDB1 = {
-            Class = GAMDataSource
-        }
-        +LoggerDataSource = {
-            Class = LoggerDataSource
-        }
-        +Timings = {
-            Class = TimingDataSource
-        }
-        +Timer = {
-            Class = LinuxTimer
-            SleepNature = "Default"
-            Signals = {
-                Counter = {
-                    Type = uint32
-                }
-                Time = {
-                    Type = uint32
-                }
-            }
-        }        
-    }
-    +States = {
-        Class = ReferenceContainer
-        +State1 = {
-            Class = RealTimeState
-            +Threads = {
-                Class = ReferenceContainer
-                +Thread1 = {
-                    Class = RealTimeThread
-                    CPUs = 0x1
-                    Functions = {GAMLinuxTimer GAMWaveformSin GAMScreenWriter}
-                }
-            }
-        }        
-    }
-    +Scheduler = {
-        Class = GAMScheduler
-        TimingDataSource = Timings
-    }
-}
-
 
 
 Lets deepen a bit on the detail of the GAMs involved on it.
@@ -123,6 +122,7 @@ Then we have +GAMWaveformSin. The first line is Class=WaveformGAM::WaveformSin w
 Then we also have a third GAM, the GAMScreenWriter, meant to be getting information from the DDB1 DataSource and putting it into the Screen by means of the LoggerDataSource.
 
 The output would be something like: ::
+    
     [Information - MARTeApp.cpp:131]: Application starting
     [Information - LoggerBroker.cpp:152]: Time_microseconds [0:0]:0
     [Information - LoggerBroker.cpp:152]: SineWave_values [0:0]:0
