@@ -1,0 +1,94 @@
++StateMachine = {
+    Class = StateMachine
+    +INITIAL = {
+        Class = ReferenceContainer      
+        +START = {
+            Class = StateMachineEvent
+            NextState = "IDLE"
+            NextStateError = "ERROR"
+            Timeout = 0
+        }
+    }
+    +IDLE = {
+        Class = ReferenceContainer
+        +GOTORUN = {
+            Class = StateMachineEvent
+            NextState = "RUN"
+            NextStateError = "ERROR"
+            Timeout = 0 
+            +ChangeToRunMsg = {
+                Class = Message
+                Destination = TestApp
+                Mode = ExpectsReply
+                Function = PrepareNextState
+                +Parameters = {
+                    Class = ConfigurationDatabase
+                    param1 = Run
+                }
+            }
+            
+        }
+    }
+    +RUN = {
+        Class = ReferenceContainer
+        +ENTER = {
+            Class = ReferenceContainer
+            +SetStatusPV = {
+                Class = Message
+                Destination = "EPICSCAInterface.PV_STATUS"
+                Function = CAPut
+                Mode = ExpectsReply
+            }
+        }
+    }
+}
+
+        +GAMFileReader = {
+            Class = IOGAM            
+            InputSignals = {
+                Time = {
+                    DataSource = "DDB1"
+                    Type = uint32
+                }
+            } 
+            OutputSignals = {
+                Time = {
+                    DataSource = FileWriter_0
+                    Type = uint32
+                }  
+          
+            }
+        }
+        +GAMDataModifier = {
+            Class = MathExpressionGAM            
+            InputSignals = {
+                Time = {
+                    DataSource = "DDB1"
+                    Type = uint32
+                }
+            } 
+            OutputSignals = {
+                Time_microseconds = {
+                    DataSource = FileWriter_0
+                    Type = uint32
+                }  
+          
+            }
+        }
+
+
++FileReader_0 = {
+    Class = FileDataSource::FileReader
+    Filename = "input_file.csv" 
+    FileFormat = "csv" //Possible values are: binary and csv.
+    CSVSeparator = ";" //Sets the file separator type.
+    Interpolate = "no" //If set to "no" the data will be provided as is.
+    EOF = "Last" //If "Last", when reaching EOF the last read values are sent.
+
+    //All the signals are automatically added against the information stored in the header of the input file (format described above).
+
+    +Messages = { //If set a message will be fired every time one of the events below occur
+        Class = ReferenceContainer
+        //FileOpenedOK does not exist since the file is opened in the Initialise method and, as a consequence, the targeted object would not necessarily exist.
+    }
+} 
