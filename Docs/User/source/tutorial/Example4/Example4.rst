@@ -4,9 +4,10 @@ Example 4: Read and Write files
 Now we are going to create an example in which we read from a LinuxTimer to get the time syncrhonization, read some values from a file (using the FileDataSource), use the MathExpressionGAM to modify these values (e.g. by multiplying them by 2) and then store the values to another FileDataSource.
 
 
-The configuration file would be the following: ::
+The configuration file would be the following: 
     
-    
+.. literalinclude:: Example4_infinite.cfg 
+   :linenos:
 
 In this case, in addition to the already well known GAMLinuxTimer, we have the GAMFileReader for reading data from the DataSource FileReader_0 and write these data into DDB1, the MathsGAM that operates - multiplies by 2 - with the values previously read by the GAMFileReader, and the GAMFileWriter that reads from DDB1 the modified data and writes it in FileWriter_0.
 
@@ -52,26 +53,37 @@ The output in this case would be like this: ::
 
 As we know, MARTe2 applications are supposed to be running non-stop. In this case, whe will have an infinite process but probably it makes more sense to stop when reaching the end of the input file.
 
-Up to this point, we have just changed the configuration file to create different applications using the components already included in MARTe2. But at this point we need a GAM that helps us stopping the execution when reaching a specific situation, so we are going to implement a new GAM named *ApplicationKiller*. Simply, it is a GAM that when receiving the function *Kill*, stops the execution of the application sending a kill command (for more details, you can take a look to the files :doc:`ApplicationKiller.h <../../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.h>` and :doc:`ApplicationKiller.cpp <../../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.h>`).
+Up to this point, we have just changed the configuration file to create different applications using the components already included in MARTe2. But at this point we need some code that helps us stopping the execution when reaching a specific situation, so we are going to implement a new application named *ApplicationKiller*. Simply, it is a small program that when receiving the function *Kill*, stops the execution of the application sending a kill command (for more details, you can take a look to the files :download:`ApplicationKiller.h <../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.h>` and :download:`ApplicationKiller.cpp <../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.cpp>`).
 
-NOTE: When creating a new GAM, we first need to compile. We should add the folder containing the files of the GAM (namely the .h, .cpp and the makefile.gcc and makefile.inc) to our MARTe2-components path. Also, you need to add to the Makefile.inc in the MARTe2-components the following line: ::
+Note that when creating a new application or GAM, we first need to compile it to create the corresponding library to link to our MARTe2 application. So first we should add the folder containing the files of the GAM (namely the .h, .cpp and the makefile.gcc and makefile.inc) to our MARTe2-components path, so it is included as part of the components package. Also, we need to add to the Makefile.inc in the MARTe2-components the following line: ::
+
     SPB=... \
         ApplicationKiller.x
 
-Once done this, we can run the command ::
+Once this is done, we can run the command ::
     
     make -f Makefile.x86-linux
 
-to recompile MARTe2. 
+to recompile MARTe2-components. 
 
-Finally, it will be needed to link the path to the .so to the *$LD_LIBRARY_PATH* variable, adding to the already existing lines ::
+Finally, it will be needed to link the path to the library to the *$LD_LIBRARY_PATH* variable, adding to the already existing lines ::
 
     :$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/ApplicationKiller
 
+Once this is done, we can now update our config file as follows: 
 
+.. literalinclude:: Example4.cfg 
+   :linenos:
+   :emphasize-lines: 1-3, 118, 122-130
 
+Note the highlighted lines. At the beginning, we reffer to another application that will be our process killer, called *ApplicationKiller*. Then, in the FileReader_0 section, we set the EOF to "Error", meaning that an error will be triggered when reaching the end of file. At that point, the +Messages section defines the *+FileRuntimeError* message, that will be sent to the ApplicationKiller app with the Function "Kill". When the ApplicationKiller receives the message, sends a kill command to the application *TestApp* and stops it. 
 
-    
+Now the output is: :: 
 
-Withouth StateMachine (may work): Set EOF = "Error". Then launch a message to ApplicationKiller with Kill as function. 
-with StateMachine: Use the TERMINATE to launch the message to ApplicationKiller..
+    #Time_write (uint32)[1];Output (float32)[1]
+    0;0
+    200000;2.000000E-1
+    300000;4.000000E-1
+    400000;6.000000E-1
+    500000;8.000000E-1
+    600000;1.000000
