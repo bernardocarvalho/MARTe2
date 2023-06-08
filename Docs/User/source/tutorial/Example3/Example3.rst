@@ -12,7 +12,7 @@ The configuration file would be the following:
 
 In the +Data section, we see we added *+FileWriter_0*, that is from class FileWriter - we also need the extended path here for the same reason as in the previous example.
 
-in the documentation page for `WaFileWriter Class <https://vcis-jenkins.f4e.europa.eu/job/MARTe2-Components-docs-master/doxygen/classMARTe_1_1FileWriter.html#a0486728fd959e4767c8317be7610acbd>`_ we have all the possible parameters of the DataSource. In the example we used some compulsory, such as the *NumberOfBuffers* or the *CPUMask*, together with the output file name mentioned in *Filename*, specified as a .csv file sepparated by ";".
+in the documentation page for the `FileWriter <https://vcis-jenkins.f4e.europa.eu/job/MARTe2-Components-docs-master/doxygen/classMARTe_1_1FileWriter.html#a0486728fd959e4767c8317be7610acbd>`_ class we have all the possible parameters of the DataSource. In the example we used some compulsory, such as the *NumberOfBuffers* or the *CPUMask*, together with the output file name mentioned in *Filename*, specified as a .csv file sepparated by ";".
 
 The output in this case would be a file named *test_file.csv* including the pair "time;sine_value" in each row - the first one being the heading that includes the name and the type of data stored in that column, like this: ::
 

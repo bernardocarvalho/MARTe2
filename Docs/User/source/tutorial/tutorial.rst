@@ -28,6 +28,7 @@ The first step will be to set up the environment to allow for the use of all the
    Example2/Example2
    Example3/Example3
    Example4/Example4
+   Example5/Example5
    previous/previous1
    previous/previous2
    epics/epics

@@ -1,7 +1,7 @@
 Example 1: Linux Timer
 ----------------------
 
-Let's now create our first MARTe2 real-time applications, starting from very simple ones and progresively complicating the examples, following all the steps from coding to execution - this is probably a good moment to review the :doc:`GAMs <../../core/app/gams/gam>` section.
+Let's now create our first MARTe2 real-time applications, starting from very simple ones and progresively complicating the examples, following all the steps from coding to execution - this is probably a good moment to review the :doc:`GAMs <../../core/app/gams/gam>` section. Also, take a look to the :doc:`Kick-starting <../../core/app/kickstart/kickstart>` section.
 
 This first example will read from a LinuxTimer and print the Counter and the Time to a LoggerDataSource at a fixed frequency of 2 Hz
 
