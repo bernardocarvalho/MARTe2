@@ -23,15 +23,13 @@ The first step will be to set up the environment to allow for the use of all the
    :caption: Contents:
 
    environment/environment
-   generalStructure/main_schematic
    Example1/Example1
    Example2/Example2
    Example3/Example3
    Example4/Example4
    Example5/Example5
    Example6/Example6
-   previous/previous1
-   previous/previous2
+   generalStructure/main_schematic
    epics/epics
    
 
