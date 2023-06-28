@@ -1,7 +1,7 @@
 EPICS example 3
 ---------------
 
-In this case, the objective is to monitor the outputs of the system using EPICSv7. Note how information can be better organized with structured types:
+Finally, the objective of this example is to monitor the outputs of the system using EPICSv7. 
 
 .. image:: ./epics3_RT1.png
   :width: 800
@@ -11,7 +11,7 @@ In this case, the objective is to monitor the outputs of the system using EPICSv
   :width: 800
   :alt: RT components 2
 
-Note in the :download:`configuration file <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv7-1.cfg>` that the types are now better structured: ::
+Note in the :download:`configuration file <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv7-1.cfg>` how information can be better organized now with structured types: ::
  
   +EPICSPVADB = {
     Class = EPICSPVA::EPICSPVADatabase

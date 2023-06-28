@@ -28,4 +28,5 @@ As can be seen in the .cfg file, in the Functions section we refer to our GAM *G
     [Information - LoggerBroker.cpp:152]: Time [0:0]:2000000
     ...
 
-NOTE: MARTe2 applications are meant to run in an infinite loop. To stop execution, press CTRL+c
+.. note:: 
+    MARTe2 applications are meant to run in an infinite loop. To stop execution, press CTRL+c

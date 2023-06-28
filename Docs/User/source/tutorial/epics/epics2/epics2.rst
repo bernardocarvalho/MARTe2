@@ -1,7 +1,7 @@
 EPICS example 2
 ---------------
 
-After having seen the previous example where information was stored in a file, next we will see an application which monitors some outputs of the system using EPICSv3, also storing data in a file in some cases.
+After having seen the previous example where information was stored in a file, next we will see an application which monitors some outputs of the system using EPICSv3, also storing data in a file.
 
 This are the Real Time components for this example:
 
@@ -33,7 +33,7 @@ You can take a look to the configuration file for this example :download:`here <
               }
           }
 
-As we can see, it refers to the class EPICSCS::EPICSCAOutput and configures two signals: *MARTE2-DEMO-APP:HIST-IDLE-CT* and *MARTE2-DEMO-APP:HIST-RUN-CT*, that will be the ones now driving the state machine.
+As we can see, it refers to the class EPICSCS::EPICSCAOutput and configures two signals: *MARTE2-DEMO-APP:HIST-IDLE-CT* and *MARTE2-DEMO-APP:HIST-RUN-CT*, that will be the ones now driving the State Machine.
 
 To execute this example, follow the following instructions:
 

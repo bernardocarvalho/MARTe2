@@ -55,22 +55,24 @@ As we know, MARTe2 applications are supposed to be running non-stop. In this cas
 
 Up to this point, we have just changed the configuration file to create different applications using the components already included in MARTe2. But at this point we need some code that helps us stopping the execution when reaching a specific situation, so we are going to implement a new application named *ApplicationKiller*. Simply, it is a small program that when receiving the function *Kill*, stops the execution of the application sending a kill command (for more details, you can take a look to the files :download:`ApplicationKiller.h <../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.h>` and :download:`ApplicationKiller.cpp <../../../../../../Projects/MARTe2-components/Source/Components/Interfaces/ApplicationKiller/ApplicationKiller.cpp>`).
 
-Note that when creating a new application or GAM, we first need to compile it to create the corresponding library to link to our MARTe2 application. So first we should add the folder containing the files of the GAM (namely the .h, .cpp and the makefile.gcc and makefile.inc) to our MARTe2-components path, so it is included as part of the components package. Also, we need to add to the Makefile.inc in the MARTe2-components the following line: ::
-
-    SPB=... \
-        ApplicationKiller.x
-
-Once this is done, we can run the command ::
+.. note:: 
     
-    make -f Makefile.x86-linux
+    When creating a new application or GAM, we first need to compile it to create the corresponding library to link to our MARTe2 application. So first we should add the folder containing the files of the GAM (namely the .h, .cpp and the makefile.gcc and makefile.inc) to our MARTe2-components path, so it is included as part of the components package. Also, we need to add to the Makefile.inc in the MARTe2-components the following line: ::
 
-to recompile MARTe2-components. 
+        SPB=... \
+            ApplicationKiller.x
 
-Finally, it will be needed to link the path to the library to the *$LD_LIBRARY_PATH* variable, adding to the already existing lines ::
+        Once this is done, we can run the command ::
+            
+            make -f Makefile.x86-linux
 
-    :$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/ApplicationKiller
+        to recompile MARTe2-components. 
 
-Once this is done, we can now update our config file as follows: 
+        Finally, it will be needed to link the path to the library to the *$LD_LIBRARY_PATH* variable, adding to the already existing lines ::
+
+            :$MARTe2_Components_DIR/Build/x86-linux/Components/Interfaces/ApplicationKiller
+
+We can now update our config file as follows: 
 
 .. literalinclude:: Example4.cfg 
    :linenos:

@@ -1,24 +1,23 @@
 EPICS example 1
 ---------------
 
-In this example, our app will read from EPICS and the SSGAM will react depending on the value of certain variables.
+In this example, our app will read from EPICS and the State Machine will react depending on the value of certain variables.
 
-This is the detail about the way the Real Time components work for this examples. As you can see, they make use of the GAMS mentioned in the :doc:`General Common Structure <../../generalStructure/main_schematic>`  section.
+This is the detail about the way the Real Time components work for this examples. 
 
 .. image:: ./epics1_RT1.png
   :width: 800
   :alt: RT components 1
 
-In this example, depending on the state, the system will store data in a file
+In this example, we are adding some additiona complexity as depending on the state, the system will store data in a file:
 
 .. image:: ./epics1_RT2.png
   :width: 800
   :alt: RT components 2
 
-We can better understand the behavior of the application by analyzing the configuration file 
-:download:`RTApp-EPICSv3-1.cfg <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv3-1.cfg>`.
+The configuration file can be downloaded :download:`here <../../../../../../../Projects/MARTe2-demos-padova/Configurations/RTApp-EPICSv3-1.cfg>`.
 
-The first definition we see is for the EPICSCAInterface - see the section :doc:`MARTe configuration language <../../../core/configuration/parser>` and :doc:`Data-driven applications <../../../core/configuration/objectregistrydatabase>` for a reminder on how to interpret configuration files: ::
+The first definition we see is for the EPICSCAInterface. It uses the EPICS package classes as defined in the MARTe2-components: ::
 
   +EPICSCAInterface= {
       Class = EPICS::EPICSCAClient
@@ -53,7 +52,7 @@ The first definition we see is for the EPICSCAInterface - see the section :doc:`
   }
 
 
-There we set the class variables *PV_STATUS*, *PV_COMMAND* and *PV_ERROR_RST* to point to the EPICS variables *MARTE2-DEMO-APP:STATUS*, *MARTE2-DEMO-APP:COMMAND* and *MARTE2-DEMO-APP:RESET*. When there is a change in any of those variables in EPICS, the corresponding class variables will be updated and a response from the State Machine would be triggered as we can see in the definition of the StateMachine class: ::
+Mainly, we set the class variables *PV_STATUS*, *PV_COMMAND* and *PV_ERROR_RST* to point to the EPICS variables *MARTE2-DEMO-APP:STATUS*, *MARTE2-DEMO-APP:COMMAND* and *MARTE2-DEMO-APP:RESET*. When there is a change in any of those variables in EPICS, a response from the State Machine will be triggered as we can see in the definition of the StateMachine class: ::
 
     +StateMachine = {
       Class = StateMachine
@@ -115,161 +114,15 @@ There we set the class variables *PV_STATUS*, *PV_COMMAND* and *PV_ERROR_RST* to
       ...
     }
 
-The +StateMachine definition includes the 4 states we saw in the :doc:`previous section <../epics>`: INITIAL, IDLE, RUN and ERROR and how the state machine will behave in each of them. 
 
-For instance, let's analyze the RUN state. :doc:`Previously <../epics>` we saw that the when we enter in the RUN state, we set the *PV_STATUS* variable and then, once the execution is finished, we go back to the IDLE status. Let's see how this translates in the configuration file:
+The +StateMachine definition includes the 4 states we saw in the :doc:`previous section <../epics1/epics1>`: INITIAL, IDLE, RUN and ERROR and how the state machine will behave in each of them. 
+
+For instance, let's analyze the RUN state. Previously we saw that the when we enter in the RUN state, we set the *PV_STATUS* variable and then, once the execution is finished, we go back to the IDLE status. Let's see how this translates in the configuration file:
 
 First we find the *+ENTER* definition, were we basically set the variable *EPICSCAInterface.PV_STATUS* to 1 using the function *CAPut*. 
-After that, we find the definition of *+GOTOIDLE* case, were we find the 4 actions described in the :doc:`previous section <../epics>`: *ChangeToIdleMsg*, *StopCurrentStateExecutionMSg*, *StartNextStateExecutionMsg* and *SetStatusPV*. In each of them, we call the appropriate functions with the corresponding arguments.
+After that, we find the definition of the state machine event *+GOTOIDLE*, were we find the 4 actions needed to change status as described in the :doc:`previous section <../epics1/epics1>`: *ChangeToIdleMsg*, *StopCurrentStateExecutionMSg*, *StartNextStateExecutionMsg* and *SetStatusPV*. In each of them, we call the appropriate functions with the corresponding arguments.
 
-A similar analysis can be done for the other states in order to understand in more detail the different parts of the state machine involved in the example.
-
-In the TestApp definition, we can find the GAMs used for this example, such as GAMTimer or GAMMeasurements. In this two, we can see that they inherit from IOGAM, and both define InputSignals and OutputSignals, giving details about the variables' names and types. We can also find the GAMSSM including the definition of the state machine matrixes together with other GAMs. 
-
-At this point, we should notice that the variables included in those GAMs have a line defining the DataSource to be used, such as ::
-    
-    DataSource = DDB1
-
-Further down in the configuration file, we reach the *+Data =* definition were the type of MARTe2 objects that are going to deal with the transfer of information are defined: ::
-
-    +Data = {
-        Class = ReferenceContainer
-        DefaultDataSource = DDB1
-        +DDB1 = {
-            Class = GAMDataSource
-        }        
-        +LoggerDataSource = {
-            Class = LoggerDataSource
-        }
-        +Timings = {
-            Class = TimingDataSource
-        }
-        +Timer = {
-            Class = LinuxTimer
-            SleepNature = "Default"
-            ExecutionMode = RealTimeThread
-            Signals = {
-                Counter = {
-                    Type = uint32
-                }
-                Time = {
-                    Type = uint32
-                }
-            }
-        }        
-        +SignalsWriter = {
-            Class = FileDataSource::FileWriter
-            NumberOfBuffers = 10000
-            CPUMask = 1 
-            StackSize = 10000000
-            Filename = "/tmp/RTApp-EPICSv3-1.csv" 
-            Overwrite = "yes" 
-            FileFormat = "csv"
-            CSVSeparator = "," 
-            StoreOnTrigger = 0 
-            Signals = {
-                Time = { 
-                    Type = uint32
-                }
-                Reference0 = {
-                    Type = float64
-                }
-                Reference1 = {
-                    Type = float64
-                }
-                Reference2 = {
-                    Type = float64
-                }
-                Reference3 = {
-                    Type = float64
-                }
-                Measurement0 = {
-                    Type = float64
-                }
-                Measurement1 = {
-                    Type = float64
-                }
-                Measurement2 = {
-                    Type = float64
-                }
-                Measurement3 = {
-                    Type = float64
-                }
-                Error0 = {
-                    Type = float64
-                }
-                Error1 = {
-                    Type = float64
-                }
-                Error2 = {
-                    Type = float64
-                }
-                Error3 = {
-                    Type = float64
-                }
-                Control0 = {
-                    Type = float64
-                }
-                Control1 = {
-                    Type = float64
-                }
-                Control2 = {
-                    Type = float64
-                }
-                Control3 = {
-                    Type = float64
-                }
-                State0 = {
-                    Type = float64
-                }
-                State1 = {
-                    Type = float64
-                }
-                State2 = {
-                    Type = float64
-                }
-                State3 = {
-                    Type = float64
-                }
-            }
-        }
-        +PerformanceWriter = {
-            Class = FileDataSource::FileWriter
-            NumberOfBuffers = 10000
-            CPUMask = 1 
-            StackSize = 10000000
-            Filename = "/tmp/RTApp-EPICSv3-1-performance.csv" 
-            Overwrite = "yes" 
-            FileFormat = "csv"
-            CSVSeparator = "," 
-            StoreOnTrigger = 0 
-            Signals = {
-                Time = { 
-                    Type = uint32
-                }
-                Idle_Thread1_CycleTime = {
-                    Type = uint32
-                } 
-                Run_Thread1_CycleTime = {
-                    Type = uint32
-                }
-                GAMTimer_ReadTime = {
-                    Type = uint32
-                }
-                GAMTimer_ExecTime = {
-                    Type = uint32
-                }
-                GAMTimer_WriteTime = {
-                    Type = uint32
-                }
-                GAMPerformanceWriter_WriteTime = {
-                    Type = uint32
-                }
-            }
-        }
-    }
-
-As we can see, DDB1 is defined as *GAMDataSource* (see :doc:`GAMDataSource (DDB) <../../../core/app/gams/datasource>` for more information). *SignalsWriter* and *PerformanceWriter* are also defined, including the location where the files with the activity of the application is going to be stored.
+In the TestApp definition, we can see several already known GAMs but also the GAMSSM. This GAM class allows for the definition of the state machine matrixes. For more details please check the `SSMGAM Class Reference <https://vcis-jenkins.f4e.europa.eu/job/MARTe2-Components-docs-master/doxygen/classMARTe_1_1SSMGAM.html>`_ page. 
 
 To execute this example, follow these instructions:
 
@@ -296,9 +149,11 @@ When the prompt is ready again, open the file /tmp/RTApp-EPICSv3-1.csv and remov
   >plot(RTApp_EPICSv3_1(:,1), RTApp_EPICSv3_1(:,2), RTApp_EPICSv3_1(:,1), RTApp_EPICSv3_1(:,6))     
   >legend('Reference0', 'Measurement0')
 
-* Note: In case octave throws an error when running the plot, it may be necessary to state the graphics_toolkit. You can do it by running a command such as ::
+.. note::
+    
+    In case octave throws an error when running the plot, it may be necessary to state the graphics_toolkit. You can do it by running a command such as ::
 
-    graphics_toolkit('gnuplot')
+        graphics_toolkit('gnuplot')
 
 before the plot.
 

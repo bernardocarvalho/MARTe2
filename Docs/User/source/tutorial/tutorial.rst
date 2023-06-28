@@ -29,7 +29,8 @@ The first step will be to set up the environment to allow for the use of all the
    Example4/Example4
    Example5/Example5
    Example6/Example6
-   generalStructure/main_schematic
+   generalStructure/intro_control_systems
+   Example7/Example7
    epics/epics
    
 
