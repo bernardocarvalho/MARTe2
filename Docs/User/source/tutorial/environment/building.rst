@@ -2,9 +2,9 @@
 Building 
 --------
 
-In previous steps we have download and install some applications necessary to run the demos. For instance, we installed `MDSplus <https://www.mdsplus.org/index.php/Introduction>`_, which is a set of software tools for data acquisition and storage and a methodology for management of complex scientific data.MDSplus allows all data from an experiment or simulation code to be stored into a single, self-descriptive, hierarchical structure, that was designed to enable users to easily construct complete and coherent data sets. 
+In previous steps we have download and installed some applications necessary to run the demos. For instance, we installed `MDSplus <https://www.mdsplus.org/index.php/Introduction>`_, which is a set of software tools for data acquisition and storage and a methodology for management of complex scientific data. MDSplus allows all data from an experiment or simulation code to be stored into a single, self-descriptive, hierarchical structure, that was designed to enable users to easily construct complete and coherent data sets. 
 
-Next we also need to build some additional ones. These are the necessary steps to build all the needed libraries:
+These are the necessary steps to build all the needed libraries:
 
 
 **Open623541**

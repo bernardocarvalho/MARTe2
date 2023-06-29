@@ -16,7 +16,7 @@ Tutorial
 
 In this tutorial you will get introduced to some of the main features of MARTe2.
 
-The first step will be to set up the environment to allow for the use of all the demos for MARTe2 Training Session. After that, we will discuss about the structure of a Control Systems in general terms and then we will move to actual examples of MARTe2 applications.
+The first step will be to set up the environment to be able to run the examples. After that, we will start with some simple exercises before discussing about the structure of a Control Systems in general terms and see how this can be implemented in MARTe2.
 
 .. toctree::
    :maxdepth: 4

@@ -1,7 +1,7 @@
 Setting the environment
 -----------------------
 
-To properly set-up the environment to run the examples, first make sure that all the environment variables are correctly exported. ::
+Some environmental variables need to be properly defined: ::
     
     export MARTe2_DIR=~/Projects/MARTe2-dev
     export MARTe2_Components_DIR=~/Projects/MARTe2-components

@@ -1,17 +1,16 @@
 Example 4: Read and Write files
 -------------------------------
 
-Now we are going to create an example in which we read from a LinuxTimer to get the time syncrhonization, read some values from a file (using the FileDataSource), use the MathExpressionGAM to modify these values (e.g. by multiplying them by 2) and then store the values to another FileDataSource.
-
+Now we are going to create an example in which we read from a LinuxTimer to get the time syncrhonization, read some values from a file (using the FileDataSource), use the *MathExpressionGAM* to modify these values (e.g. by multiplying them by 2) and then store the values to another FileDataSource.
 
 The configuration file would be the following: 
     
 .. literalinclude:: Example4_infinite.cfg 
    :linenos:
 
-In this case, in addition to the already well known GAMLinuxTimer, we have the GAMFileReader for reading data from the DataSource FileReader_0 and write these data into DDB1, the MathsGAM that operates - multiplies by 2 - with the values previously read by the GAMFileReader, and the GAMFileWriter that reads from DDB1 the modified data and writes it in FileWriter_0.
+In this case, in addition to the already well known *GAMLinuxTimer**, we have the *GAMFileReader* for reading data from the DataSource *FileReader_0* and write these data into DDB1, the *MathsGAM* that operates - multiplies by 2 - with the values previously read by the *GAMFileReader*, and the *GAMFileWriter* that reads from DDB1 the modified data and writes it in *FileWriter_0*.
 
-As can be seen in the +Data section, the FileReader_0 points to a file called *test_reader.csv* where a sets of two input data are stored, while FileWriter_0 is directed to a file called *test_writer.csv* where we will store the modified values.
+As can be seen in the **+Data** section, the *FileReader_0* points to a file called *test_reader.csv* where a sets of two input data are stored, while *FileWriter_0* is directed to a file called *test_writer.csv* where we will store the modified values.
 
 The format of the *test_reader.csv* file is the following: ::
 
@@ -23,15 +22,19 @@ The format of the *test_reader.csv* file is the following: ::
     500000;0.4
     600000;0.5
 
-The header is a very important part of the file as it has to be alligned with the defined signals in the GAMFileReader for the later one to be able to manage them properly. If the names do not match, we will receive an error stating that the DataSource is locked and the signals could not be added. The same happens with the types. And it is worth to notice that there should not be any blank line at the end that will confuse the GAM.
+The header is a very important part of the file as it has to be alligned with the defined signals in the *GAMFileReader* for the later one to be able to manage them properly. If the names do not match, we will receive an error stating that the DataSource is locked and the signals could not be added. The same happens with the types. 
 
-The GAMFileWriter takes the input signals from DDB1 and writes them in the output file *test_writer.csv*. We need to be careful to align the output signals from the GAMFileWriter with the signals defined in the FileWriter_0 DataSource, as if they are not included in the DataSource there will be an initialization error.
+.. note:: 
+    
+    There should not be any blank lines at the end of the file.
+
+The *GAMFileWriter* takes the input signals from DDB1 and writes them in the output file *test_writer.csv*. We need to be careful to align the output signals from the *GAMFileWriter* with the signals defined in the *FileWriter_0* DataSource, as if they are not included in the DataSource there will be an initialization error.
 
 In this example we also used the *MathExpressionGAM*, which evaluates mathematical expressions at runtime. The Expression leaf is where we define the operation to be done (you can check `this <../../../../../../MARTe2-components/Source/Components/GAMs/MathExpressionGAM>` link for more details). In this example we use ::
 
     Expression = "Output = (float32)2 * Values_read;"
     
-Notice that the expression should end with a comma, a semicolon or a \n. Also, it is important to explicitly set types as otherwise we may have initialization errors. In this case, the literal *2* is assumed to be a float64, so we need to do an explicit conversion to float32, which is the type of Values_read.
+Notice that the expression should end with a comma, a semicolon or a \n. Also, it is important to explicitly set types as otherwise we may have initialization errors. In this case, the literal *2* is assumed to be a float64, so we need to do an explicit conversion to float32, which is the type of *Values_read*.
 
 The output in this case would be like this: ::
 
@@ -78,7 +81,7 @@ We can now update our config file as follows:
    :linenos:
    :emphasize-lines: 1-3, 118, 122-130
 
-Note the highlighted lines. At the beginning, we reffer to another application that will be our process killer, called *ApplicationKiller*. Then, in the FileReader_0 section, we set the EOF to "Error", meaning that an error will be triggered when reaching the end of file. At that point, the +Messages section defines the *+FileRuntimeError* message, that will be sent to the ApplicationKiller app with the Function "Kill". When the ApplicationKiller receives the message, sends a kill command to the application *TestApp* and stops it. 
+Note the highlighted lines. At the beginning, we reffer to another application that will be our process killer, called *ApplicationKiller*. Then, in the *FileReader_0* section, we set the EOF to "Error", meaning that an error will be triggered when reaching the end of file. At that point, the **+Messages** section defines the *+FileRuntimeError* message, that will be sent to the ApplicationKiller app with the Function "Kill". When the ApplicationKiller receives the message, sends a kill command to the application *TestApp* and stops it. 
 
 Now the output is: :: 
 

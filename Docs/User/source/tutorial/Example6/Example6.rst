@@ -10,7 +10,7 @@ The configuration file would be the following:
    :emphasize-lines: 36-54
 
 
-The output will draw a histogram in line with the defined parameters in the .cfg file. What the application does is to take the counter from the *GAMLinuxTimer* and write in the DDB1 DataSource, that will serve as input for the *HistogramGAM1*. The main parameters we need to consider to define the histogram are *Minlim = 10* and *Maxlim = 100* from the input signal and the *NumberOfElements = 11* of the output signal. The *GAMPrintToLog* GAM is only used to print the Count number in the Logger.
+The output will draw a histogram in line with the defined parameters in the .cfg file. What the application does is to take the counter from the *GAMLinuxTimer* and write in the DDB1 DataSource, that will serve as input for the *HistogramGAM1*. The main parameters we need to consider to define the histogram are **Minlim = 10** and **Maxlim = 100** from the input signal and the **NumberOfElements = 11** of the output signal. The *GAMPrintToLog* GAM is only used to print the Count number in the Logger.
 
 *NumberOfElements* gives the number of bins that we will use for drawing the histogram, while *Minlim* and *Maxlim* define the range between the first and the last values taken into account to define the bins. In this example, the minimum value is 10, which means that counts happening less (strict) than 10 times will be shown in the first bin. The maximum number is 100, meaning that counts happening 100 times or more will appear in the last bin. In the middle, we will have bins splited equaly, with a width given by the formula: ::
    
