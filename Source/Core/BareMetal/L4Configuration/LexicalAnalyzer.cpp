@@ -405,8 +405,6 @@ void LexicalAnalyzer::AddToken(char8 *const tokenBuffer,
         int8 zero = static_cast<int8>('0');
         bool isString2 = (((static_cast<int8>(tokenBuffer[firstDigit]) - zero) > 9) || ((static_cast<int8>(tokenBuffer[firstDigit]) - zero) < 0));
 
-        bool converted = false;
-
         if ((!isString) && (!isString2)) {
 
             // not an integer! Try a float (number)
@@ -417,42 +415,28 @@ void LexicalAnalyzer::AddToken(char8 *const tokenBuffer,
                 if (!tokenQueue.Add(toAdd)) {
                     REPORT_ERROR_STATIC(ErrorManagement::FatalError, "StaticList<Token *>: Failed Add() of the token to the token stack");
                 }
-                converted = true;
             }
-
-            // error!
-            if (!converted) {
-                /*lint -e{423} .Justification: The pointer is added to a stack and the memory is freed by the class destructor */
-                Token *toAdd = new Token(tokenInfo[ERROR_TOKEN], "", lineNumber);
-                if (!tokenQueue.Add(toAdd)) {
-                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "StaticList<Token *>: Failed Add() of the token to the token stack");
-                }
-            }
-
-            //treat it as a string
-            if (!converted) {
+            else{
                 isString2 = true;
             }
         }
 
         if ((isString) || (isString2)) {
             // a string for sure!
-            if ((isString) || (isString2)) {
-                uint32 begin = 0u;
-                uint32 end = StringHelper::Length(tokenBuffer) - 1u;
-                if (tokenBuffer[begin] == '"') {
-                    begin++;
+            uint32 begin = 0u;
+            uint32 end = StringHelper::Length(tokenBuffer) - 1u;
+            if (tokenBuffer[begin] == '"') {
+                begin++;
+            }
+            if (isString) {
+                if (tokenBuffer[end] == '"') {
+                    tokenBuffer[end] = '\0';
                 }
-                if (isString) {
-                    if (tokenBuffer[end] == '"') {
-                        tokenBuffer[end] = '\0';
-                    }
-                }
-                /*lint -e{423} .Justification: The pointer is added to a stack and the memory is freed by the class destructor */
-                Token *toAdd = new Token(tokenInfo[STRING_TOKEN], &tokenBuffer[begin], lineNumber);
-                if (!tokenQueue.Add(toAdd)) {
-                    REPORT_ERROR_STATIC(ErrorManagement::FatalError, "StaticList<Token *>: Failed Add() of the token to the token stack");
-                }
+            }
+            /*lint -e{423} .Justification: The pointer is added to a stack and the memory is freed by the class destructor */
+            Token *toAdd = new Token(tokenInfo[STRING_TOKEN], &tokenBuffer[begin], lineNumber);
+            if (!tokenQueue.Add(toAdd)) {
+                REPORT_ERROR_STATIC(ErrorManagement::FatalError, "StaticList<Token *>: Failed Add() of the token to the token stack");
             }
         }
     }
