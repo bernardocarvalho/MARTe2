@@ -27,21 +27,14 @@
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <string>
 
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
-#include "Object.h"
 #include "MessageI.h"
 #include "RegisteredMethodsMessageFilter.h"
 #include "CLASSMETHODREGISTER.h"
-#include "AdvancedErrorManagement.h"
 #include "ncurses.h"
-
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */
@@ -52,17 +45,16 @@ class NcursesInterface: public MARTe::Object, public MARTe::MessageI {
         CLASS_REGISTER_DECLARATION()    
         
         NcursesInterface ();
-        virtual ~NcursesInterface ();
-        MARTe::ErrorManagement::ErrorType readKey(int &keyCode); // Needs to be defined like this to allow replying to the messages
+        virtual ~NcursesInterface ();       
         WINDOW* getWin();
         int getPosx();
         int getPosy();
         void setPosx(int x);
         void setPosy(int y);
-        bool getFirstExec();
-        MARTe::ErrorManagement::ErrorType moveCursor(int keyCode);
         MARTe::ErrorManagement::ErrorType prepareNcurses(int, int, int, int);
         MARTe::ErrorManagement::ErrorType closeNcurses();
+        MARTe::ErrorManagement::ErrorType readKey(int &keyCode); // Needs to be defined like this to allow replying to the messages
+        MARTe::ErrorManagement::ErrorType moveCursor(int keyCode);
         
     private:
         MARTe::ReferenceT<MARTe::RegisteredMethodsMessageFilter> filter;
@@ -70,11 +62,9 @@ class NcursesInterface: public MARTe::Object, public MARTe::MessageI {
         int posx;
         int posy;
         bool firstExec;
-
        
         void writeCoords(int y, int x, const char* ch);
 };
-
 
 /*---------------------------------------------------------------------------*/
 /*                        Inline method definitions                          */

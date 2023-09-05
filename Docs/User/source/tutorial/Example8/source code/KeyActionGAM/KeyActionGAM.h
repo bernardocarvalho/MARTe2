@@ -32,10 +32,6 @@
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 #include "AdvancedErrorManagement.h"
-#include "RegisteredMethodsMessageFilter.h"
-#include "ConfigurationDatabase.h"
-#include "Message.h"
-#include "MessageI.h"
 #include "GAM.h"
 #include "NcursesInterface.h"
 

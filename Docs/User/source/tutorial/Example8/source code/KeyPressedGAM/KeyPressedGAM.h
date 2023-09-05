@@ -27,17 +27,14 @@
 /*---------------------------------------------------------------------------*/
 /*                        Standard header includes                           */
 /*---------------------------------------------------------------------------*/
+#include <unistd.h> // Needed to call usleep()
 
 /*---------------------------------------------------------------------------*/
 /*                        Project header includes                            */
 /*---------------------------------------------------------------------------*/
 #include "AdvancedErrorManagement.h"
-#include "ConfigurationDatabase.h"
-#include "MessageI.h"
-#include "Message.h"
 #include "GAM.h"
 #include "NcursesInterface.h"
-#include <unistd.h> // Needed to call usleep()
 
 /*---------------------------------------------------------------------------*/
 /*                           Class declaration                               */

@@ -31,6 +31,7 @@ The first step will be to set up the environment to be able to run the examples.
    Example6/Example6
    generalStructure/intro_control_systems
    Example7/Example7
+   Example8/Example8
    epics/epics
    
 

@@ -42,27 +42,22 @@ using namespace MARTe;
 
 KeyActionGAM::KeyActionGAM() :
         GAM(),
-        MessageI() {
+        MessageI() 
+{
 
     filter = ReferenceT<RegisteredMethodsMessageFilter>(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     filter->SetDestination(this);
     InstallMessageFilter(filter);
 }
 
-KeyActionGAM::~KeyActionGAM() {
+KeyActionGAM::~KeyActionGAM() 
+    {}
 
-}
+bool KeyActionGAM::Setup() 
+    {return true;}
 
-bool KeyActionGAM::Setup() {
-
-
-    return true;
-}
-
-bool KeyActionGAM::Execute() {
-
-    REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>Executing KeyActionGAM()");
-
+bool KeyActionGAM::Execute() 
+{
     ReferenceT<Message> msg1(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     ConfigurationDatabase cdbMsg;
 
@@ -76,7 +71,7 @@ bool KeyActionGAM::Execute() {
     cdbMsg.MoveToAncestor(1u); 
     msg1->Initialise(cdbMsg);
     MessageI::SendMessage(msg1);            // Send a message to NcursesInt with the key to move the cursor
-    REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>KeyActionGAM moveCursor call message sent correctly with key=%d", actionKey);
+    REPORT_ERROR(ErrorManagement::Debug, "KeyActionGAM moveCursor call message sent correctly with key=%d", actionKey);
 
     //Change the state of the statemachine to "GOTOIDLE"
     cdbMsg.Purge();
@@ -85,11 +80,10 @@ bool KeyActionGAM::Execute() {
     ReferenceT<Message> msg2(GlobalObjectsDatabase::Instance()->GetStandardHeap());
     msg2->Initialise(cdbMsg);
     MessageI::SendMessage(msg2, this); 
-    REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>KeyActionGAM message for change of state sent correctly");
+    REPORT_ERROR(ErrorManagement::Debug, "Sent message for change of state (go back to IDLE)");
 
     return true;
 }
-
 
 ErrorManagement::ErrorType KeyActionGAM::Action(int32 keyCode) {
     actionKey = keyCode;

@@ -39,12 +39,13 @@
 /*                           Method definitions                              */
 /*---------------------------------------------------------------------------*/
 
-static const int ROWS = 30;
-static const int COLUMNS = 100;
+static const int ROWS = 20;
+static const int COLUMNS = 70;
 
 NcursesInterface::NcursesInterface() :
         Object(),
-        MessageI() {
+        MessageI() 
+{
     win = NULL;
     posx = 0;
     posy = 0;
@@ -54,22 +55,38 @@ NcursesInterface::NcursesInterface() :
     MARTe::MessageI::InstallMessageFilter(filter);
 }
 
-NcursesInterface::~NcursesInterface () {
-}
+NcursesInterface::~NcursesInterface () 
+{}
 
-MARTe::ErrorManagement::ErrorType NcursesInterface::prepareNcurses(int rows=ROWS, int cols=COLUMNS, int win_begin_y=1, int win_begin_x=1){
+WINDOW* NcursesInterface::getWin()
+    {return win;}
+
+int NcursesInterface::getPosx()
+    {return posx;}
+
+int NcursesInterface::getPosy()
+    {return posy;}
+
+void NcursesInterface::setPosx(int x) 
+    {posx = x;}
+
+void NcursesInterface::setPosy(int y) 
+    {posy = y;}
+
+void NcursesInterface::writeCoords(int y, int x, const char* ch) 
+    {mvwprintw(win, y, x, ch);}
+
+MARTe::ErrorManagement::ErrorType NcursesInterface::prepareNcurses(int rows=ROWS, int cols=COLUMNS, int win_begin_y=1, int win_begin_x=1)
+{
     if (firstExec) {
         initscr();
         noecho();   // no echo when pressing a key
         cbreak();   // get input without need of pressing Enter   
         timeout(0);  // no waiting for key press
-        
-        // Create a window with borders
-        win = newwin(rows, cols, win_begin_y, win_begin_x);
-    
+
+        win = newwin(rows, cols, win_begin_y, win_begin_x);     // Create a window with borders
         printw("Move the cursor! Pres 'w' to move up, 's' to move down, 'a' to move left or 'd' to move right.");
         wrefresh(win);  // refresh the window
-
         firstExec = false;
     } else {                             
         wrefresh(win);  //refresh the window         
@@ -78,15 +95,15 @@ MARTe::ErrorManagement::ErrorType NcursesInterface::prepareNcurses(int rows=ROWS
     return MARTe::ErrorManagement::NoError;
 }
 
-MARTe::ErrorManagement::ErrorType NcursesInterface::closeNcurses() {
+MARTe::ErrorManagement::ErrorType NcursesInterface::closeNcurses() 
+{
     endwin();
-
+    
     return MARTe::ErrorManagement::NoError;
 }
 
-/// @brief Reads a key with ncurses
-/// @return returns its int value - it may return ERR
-MARTe::ErrorManagement::ErrorType NcursesInterface::readKey(MARTe::int32 &keyCode) { 
+MARTe::ErrorManagement::ErrorType NcursesInterface::readKey(MARTe::int32 &keyCode) 
+{ 
     prepareNcurses();
     keyCode = getch();
     closeNcurses();
@@ -94,48 +111,11 @@ MARTe::ErrorManagement::ErrorType NcursesInterface::readKey(MARTe::int32 &keyCod
     return MARTe::ErrorManagement::NoError;
 }
 
-WINDOW* NcursesInterface::getWin(){
-    return win;
-}
-
-int NcursesInterface::getPosx(){
-    return posx;
-}
-
-int NcursesInterface::getPosy(){
-    return posy;
-}
-
-void NcursesInterface::setPosx(int x) {
-    posx = x;
-}
-
-void NcursesInterface::setPosy(int y) {
-    posy = y;
-}
-
-bool NcursesInterface::getFirstExec() {
-    return firstExec;
-}
-
-void NcursesInterface::writeCoords(int y, int x, const char* ch) {
-    mvwprintw(win, y, x, ch);
-}
-
-MARTe::ErrorManagement::ErrorType NcursesInterface::moveCursor(int keyCode) {
+MARTe::ErrorManagement::ErrorType NcursesInterface::moveCursor(int keyCode) 
+{
     const char* cursor = "C";
     prepareNcurses();
     
-    int yy, xx;
-    yy = getPosy();
-    xx = getPosx(); 
-
-    mvwprintw(win, 0, 1, "y=%d", getPosy());
-    mvwprintw(win, 0, 5, "x=%d", getPosx());
-
-    setPosx(xx);
-    setPosy(yy);
-
     switch(keyCode) {
         case (int)'a':
             if (getPosx()-1 < 0) {
@@ -178,9 +158,11 @@ MARTe::ErrorManagement::ErrorType NcursesInterface::moveCursor(int keyCode) {
             break;
     }
     wrefresh(win);
+
     return MARTe::ErrorManagement::NoError;
 }
 
+// We need to register the methods to allow them to be used by other MARTe objects
 CLASS_REGISTER(NcursesInterface, "")
 CLASS_METHOD_REGISTER(NcursesInterface, readKey)
 CLASS_METHOD_REGISTER(NcursesInterface, moveCursor)

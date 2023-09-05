@@ -41,114 +41,19 @@
 using namespace MARTe;
 
 KeyPressedGAM::KeyPressedGAM() :
-        GAM() {
+        GAM() 
+{
         //key = NULL_PTR(MARTe::int32 *);
         key = 0; 
         previous_key=(int)'d';
 }
 
-KeyPressedGAM::~KeyPressedGAM() {
+KeyPressedGAM::~KeyPressedGAM() 
+    {}
 
-}
-
-bool KeyPressedGAM::Setup() {
-    using namespace MARTe;
-
-/*
-    uint32 numberOfInputSignals = GetNumberOfInputSignals();
-    uint32 numberOfOutputSignals = GetNumberOfOutputSignals();
-    bool ok = (numberOfInputSignals == numberOfOutputSignals);
-    if (ok) {
-        ok = (numberOfOutputSignals == 1u);
-        if (!ok) {
-            REPORT_ERROR(ErrorManagement::ParametersError,
-                         "The number of input and output signals shall be equal to 1. numberOfInputSignals = %d numberOfOutputSignals = %d",
-                         numberOfInputSignals, numberOfOutputSignals);
-        }
-    }
-    
-    if (ok) {
-        TypeDescriptor inputSignalType = GetSignalType(InputSignals, 0u);
-        TypeDescriptor outputSignalType = GetSignalType(OutputSignals, 0u);
-        ok = (inputSignalType == outputSignalType);
-        if (ok) {
-            ok = (inputSignalType == UnsignedInteger32Bit);
-        }
-        if (!ok) {
-            const char8 * const inputSignalTypeStr = TypeDescriptor::GetTypeNameFromTypeDescriptor(inputSignalType);
-            const char8 * const outputSignalTypeStr = TypeDescriptor::GetTypeNameFromTypeDescriptor(outputSignalType);
-            REPORT_ERROR(ErrorManagement::ParametersError,
-                         "The type of the input and output signal shall be uint32. inputSignalType = %s outputSignalType = %s", inputSignalTypeStr,
-                         outputSignalTypeStr);
-        }
-    }
-    
-    if (ok) {
-        uint32 numberOfInputSamples = 0u;
-        uint32 numberOfOutputSamples = 0u;
-        ok = GetSignalNumberOfSamples(InputSignals, 0u, numberOfInputSamples);
-        if (ok) {
-            ok = GetSignalNumberOfSamples(OutputSignals, 0u, numberOfOutputSamples);
-        }
-        if (ok) {
-            ok = (numberOfInputSamples == numberOfOutputSamples);
-        }
-        if (ok) {
-            ok = (numberOfInputSamples == 1u);
-        }
-        if (!ok) {
-            REPORT_ERROR(ErrorManagement::ParametersError,
-                         "The number of input and output signals samples shall be equal to 1. numberOfInputSamples = %d numberOfOutputSamples = %d",
-                         numberOfInputSamples, numberOfOutputSamples);
-        }
-    }
-    if (ok) {
-        uint32 numberOfInputDimensions = 0u;
-        uint32 numberOfOutputDimensions = 0u;
-        ok = GetSignalNumberOfDimensions(InputSignals, 0u, numberOfInputDimensions);
-        if (ok) {
-            ok = GetSignalNumberOfDimensions(OutputSignals, 0u, numberOfOutputDimensions);
-        }
-        if (ok) {
-            ok = (numberOfInputDimensions == numberOfOutputDimensions);
-        }
-        if (ok) {
-            ok = (numberOfInputDimensions == 0u);
-        }
-        if (!ok) {
-            REPORT_ERROR(ErrorManagement::ParametersError,
-                         "The number of input and output signals dimensions shall be equal to 0. numberOfInputDimensions = %d numberOfOutputDimensions = %d",
-                         numberOfInputDimensions, numberOfOutputDimensions);
-        }
-    }
-    if (ok) {
-        uint32 numberOfInputElements = 0u;
-        uint32 numberOfOutputElements = 0u;
-        ok = GetSignalNumberOfElements(InputSignals, 0u, numberOfInputElements);
-        if (ok) {
-            ok = GetSignalNumberOfElements(OutputSignals, 0u, numberOfOutputElements);
-        }
-        if (ok) {
-            ok = (numberOfInputElements == numberOfOutputElements);
-        }
-        if (ok) {
-            ok = (numberOfInputElements == 1u);
-        }
-        if (!ok) {
-            REPORT_ERROR(ErrorManagement::ParametersError,
-                         "The number of input and output signals elements shall be equal to 1. numberOfInputElements = %d numberOfOutputElements = %d",
-                         numberOfInputElements, numberOfOutputElements);
-        }
-    }
-    if (ok) {
-        key = reinterpret_cast<int32 *>(GetOutputSignalMemory(0u));
-    }
-
-    return ok;
-*/
-
-//key = reinterpret_cast<int32 *>(GetOutputSignalMemory(0u)); this reserves the memory for a signal. If we do it like this, it will reserve by index. That is, in the conf file the first signal will be this address - order is important. If we want to reserve it with a specific name, we should do it in the initialize()
-
+bool KeyPressedGAM::Setup() 
+{
+    //key = reinterpret_cast<int32 *>(GetOutputSignalMemory(0u)); this reserves the memory for a signal. If we do it like this, it will reserve by index. That is, in the conf file the first signal will be this address - order is important. If we want to reserve it with a specific name, we should do it in the initialize()
 
     return true;
 }
@@ -156,18 +61,16 @@ bool KeyPressedGAM::Setup() {
 bool KeyPressedGAM::Execute() {
     using namespace MARTe;
  
-    REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>Executing KeyPressedGAM()");
     // We are now going to initialize the message we want to send to the ncurses interface
     // The idea is to call the function "readKey" of the NcursesInterface object defined in the .cfg file passing "key" as parameter
-    REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>Calling readKey()", key);
     
+    // Since our functions expects a parameter, we need to define the structure properly, 
+    // even if the value we sent in this message is not relevant (the parameter will only be used for the function 
+    // to be able to reply with the key value)
     ConfigurationDatabase cdbMsg;
     cdbMsg.Purge();
     cdbMsg.Write("Destination", "NcursesInt");
     cdbMsg.Write("Function", "readKey");
-    // Since our functions expects a parameter, we need to define the structure properly, 
-    // even if the value we sent in this message is not relevant (the parameter will only be used for the function 
-    // to be able to reply with the key value)
     cdbMsg.CreateAbsolute("+Parameters");
     cdbMsg.Write("Class", "ConfigurationDatabase");
     cdbMsg.Write("param1", 0);  // we can use any value here. The idea is that key returns the answer to the message
@@ -180,17 +83,14 @@ bool KeyPressedGAM::Execute() {
     ErrorManagement::ErrorType err = MessageI::SendMessageAndWaitReply(msg0, this);
     if (!err.ErrorsCleared()) {
         REPORT_ERROR(ErrorManagement::FatalError, "Failed to send message");   
-    } else {
-        REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>KeyPressedGAM Message sent correctly");
-    }
+    } 
      
     //If the message was properly sent, the same message will include the reply in the parameter of the call, in this case 'key'
     ReferenceT<ConfigurationDatabase> params = msg0->Get(0);
     if (params.IsValid()) {
-        if (params->Read("param1", key)) { 
-            REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>key=%d", key);  
+        if (params->Read("param1", key)) {  
             if (key == ERR) {           //ERR = -1 
-                REPORT_ERROR(ErrorManagement::Debug, "------------------------------------>No key has been pressed. Calling moveCursor with same direction");               
+                REPORT_ERROR(ErrorManagement::Debug, "No key has been pressed. Calling moveCursor with same direction");               
                 // Send a message to NcursesInt with the previous key code to keep moving in the same direction
                 cdbMsg.Purge();
                 cdbMsg.Write("Destination", "NcursesInt");
@@ -251,4 +151,5 @@ bool KeyPressedGAM::Execute() {
     
     return err;
 }
+
 CLASS_REGISTER(KeyPressedGAM, "1.0")
